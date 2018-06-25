@@ -801,7 +801,9 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
                 	if (str.contains(oldFullyQualifiedClassName)) {
                     	String[] classToCheckeSplit = TacoConfigurator.getInstance().getClassToCheck().split("_");
                     	String classUnderAnalysis = classToCheckeSplit[classToCheckeSplit.length - 1];
-                    	str = str.replace(oldFullyQualifiedClassName, packageToWrite + "." + classUnderAnalysis);
+                    	if (!str.matches(".*" + oldFullyQualifiedClassName + "[^\\n]*Node.*")) {
+                    	    str = str.replace(oldFullyQualifiedClassName, packageToWrite + "." + classUnderAnalysis);
+                    	}
                     	fos.write((str+ "\n").getBytes(Charset.forName("UTF-8")));
                     } else {
                     	fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));

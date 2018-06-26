@@ -288,8 +288,10 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                     log.warn("Null Pointer Mutation: " + input.getFilename() + " for method: " + nullPointerMethods.iterator().next());
                                 } else if (!candidateMethods.isEmpty()) {
                                     log.warn("Candidate Mutation: " + input.getFilename() + " for method: " + candidateMethods.iterator().next());
-                                } else {
+                                } else if (!failedMethods.isEmpty()){
                                     log.warn("Postcondition Failed Mutation: " + input.getFilename() + " for method: " + failedMethods.keySet().iterator().next());
+                                } else {
+                                    log.warn("Unidentified Mutation: " + input.getFilename() + " for method: unidentified");
                                 }
 
                                 if (!input.getFeedback().isStop()) {

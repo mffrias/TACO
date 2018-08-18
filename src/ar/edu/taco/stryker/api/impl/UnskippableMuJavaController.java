@@ -3,6 +3,7 @@ package ar.edu.taco.stryker.api.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
 
     private static int baseI = 0;
 
-    private static final int batchSize = 1000;
+    private static final int batchSize = 100;
 
     private String classToMutate;
 
@@ -339,7 +340,6 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
             muJavaInput.setJml4cPackage(wrapper.getJml4cPackage());
             muJavaInput.setPresentIndexes(Sets.newHashSet(wrapper.getIndexesToMethod().keySet()));
             muJavaInput.setDuplicateMethodIndexes(wrapper.getDuplicateMethodIndexes());
-
             while ((baseSibling = queueNextRelevantSibling(baseSibling)) != null);
 
         } catch (ClassNotFoundException | OpenJavaException e) {
@@ -713,7 +713,6 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
         Mutation[][] mutatorsList = father.getMuJavaFeedback().getLineMutatorsList();
 
         Integer[] lineMutationIndexes = input.getMuJavaFeedback().getLineMutationIndexes();
-
         classToMutate = MuJavaController.obtainClassNameFromFileName(father.getFilename());
 
         //Encolo el hijo
@@ -758,7 +757,6 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
             identifiers += " ]";
             log.warn("UNSKIPPABLE: And it's mutant identifiers are: " + identifiers);
 
-            Map<String, OpenJMLInput> indexesToMethod = father.getIndexesToMethod();
             Set<String> presentIndexes = father.getPresentIndexes();
             if (father.getDuplicateMethodIndexes().contains(indexes)) {
                 continue;
@@ -784,7 +782,6 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
                 father.setJml4cPackage(wrapper.getJml4cPackage());
                 father.setPresentIndexes(Sets.newHashSet(wrapper.getIndexesToMethod().keySet()));
                 father.setDuplicateMethodIndexes(wrapper.getDuplicateMethodIndexes());
-
                 nextRelevantSiblingMutationsLists = wrapper.getNextRelevantSiblingsMutationsLists();
                 lineMutationIndexes = nextRelevantSiblingMutationsLists.getRight();
                 indexes = "[ ";
@@ -793,7 +790,7 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
                 }
                 indexes += "]";
             }
-            
+            Map<String, OpenJMLInput> indexesToMethod = father.getIndexesToMethod();
             if (father.getUncompilableChildrenMethodNames().contains(indexes)) {
                 log.warn("UNSKIPPABLE: Omitted mutation for non compiling");
                 OpenJMLInput jmlInput = indexesToMethod.get(indexes);
@@ -834,7 +831,6 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
             OpenJMLInput output = indexesToMethod.get(indexes);
             output.setFullyQualifiedClassName(input.getFullyQualifiedFileName());;
             output.setMethodUnderAnalysis(input.getMethodUnderAnalysis());
-
             if (output != null) {
                 HashSet<MutationOperator> mutOpsForBase = Sets.newHashSet();
                 mutOpsForBase.add(MutationOperator.PRVOL_SMART);

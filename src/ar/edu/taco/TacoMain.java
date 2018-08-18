@@ -859,8 +859,8 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "             	String dataCall = co.getName() + Arrays.toString(paramValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "             	System.out.println(dataCall);";
-                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
+//                    str = "             	System.out.println(dataCall);";
+//                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	    instance = co.newInstance(paramValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	} catch (InstantiationException e) {";
@@ -892,8 +892,8 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "             	String dataCall = co.getName() + Arrays.toString(paramValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "             	System.out.println(dataCall);";
-                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
+//                    str = "             	System.out.println(dataCall);";
+//                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	   " + objectName + " = co.newInstance(paramValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	} catch (InstantiationException e) {";

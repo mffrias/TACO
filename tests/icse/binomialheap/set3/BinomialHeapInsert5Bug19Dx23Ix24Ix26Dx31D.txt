@@ -1,0 +1,5 @@
+method insert | affected line: 31 | (PRVOR_REFINED, temp2.sibling, insertTemp.sibling)
+method insert | affected line: 23 | (PRVOL_SMART, temp1.sibling, temp1.parent)
+method insert | affected line: 19 | (ROR, temp1.sibling.degree > temp2.degree, temp1.sibling.degree <= temp2.degree)
+method insert | affected line: 26 | (PRVOR_REFINED, temp1.sibling, temp1.child.sibling)
+method insert | affected line: 24 | (PRVOL_SMART, temp1, temp1.sibling)

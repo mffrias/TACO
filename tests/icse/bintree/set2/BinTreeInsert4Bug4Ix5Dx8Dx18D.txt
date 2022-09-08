@@ -1,0 +1,4 @@
+method insert | affected line: 18 | (PRVOR_REFINED, x, x.right)
+method insert | affected line: 5 | (PRVOU_REFINED, x.key, y.key)
+method insert | affected line: 8 | (PRVOU_REFINED, k, 1)
+method insert | affected line: 4 | (PRVOL_SMART, y, y.parent)

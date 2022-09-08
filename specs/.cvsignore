@@ -1,0 +1,8 @@
+checkallspecs.out-ckd
+classes.stamp
+*.class
+*~
+debug.out
+.emacs.desktop
+javadocs
+.DS_Store

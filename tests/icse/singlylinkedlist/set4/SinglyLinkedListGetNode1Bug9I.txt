@@ -1,0 +1,1 @@
+method getNode | affected line: 9 | (PRVOL_SMART, current, current.next)

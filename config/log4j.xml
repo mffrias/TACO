@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd" >
+<log4j:configuration>
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+   		<layout class="org.apache.log4j.PatternLayout">
+     		<param name="ConversionPattern" value="%d{ABSOLUTE} %5p %c{1}:%L - %m%n"/>
+		</layout>
+ 	</appender>
+ 	
+ 	<appender name="file" class="org.apache.log4j.RollingFileAppender">
+ 		<param name="file" value="stryker.log" />
+        <param name="append" value="true" />
+        <param name="encoding" value="UTF-8" />
+ 		<layout class="org.apache.log4j.PatternLayout">
+     		<param name="ConversionPattern" value="%d{ABSOLUTE} %5p %c{1}:%L - %m%n"/>
+		</layout>
+ 	</appender>
+ 	
+	<!-- Added because there are some debug info under this package, and we don't care about them -->
+	<logger name="org.apache.commons">
+  		<level value="info"/>
+	</logger>
+	
+	<logger name="ar.edu.taco.pipeline.javatodynalloyjml2.DynJAlloyASTVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.javatodynalloyjml2.BlockStatementsVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.javatodynalloyjml2.ExpressionVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.javatodynalloyjml2.JmlExpressionVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.utils.jml.JmlAstTransverseStatementVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.dynjalloytodynalloyjml2.binding.BindingManager">
+  		<level value="info"/>
+	</logger>
+					
+	<logger name="ar.edu.taco.pipeline.dynjalloytodynalloy.predicateresolver.PredicateResolverManager">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.dynjalloytodynalloy.predicateresolver.ReplaceSpecPredicateCallModuleVisitor">
+  		<level value="info"/>
+	</logger>
+	<logger name="ar.edu.taco.pipeline.dynjalloytodynalloy.predicateresolver.ReplaceSpecPredicateCallFormulaVisitor">
+  		<level value="info"/>
+	</logger>
+	
+	<logger name="ar.edu.taco.pipeline.dynjalloytodynalloy.modifiessolver.ModifiesSolverManager">
+		<level value="info"/>
+	</logger>
+	
+		
+	<logger name="ar.edu.taco.pipeline.javacodesimplifier.callspec">
+  		<level value="info"/>
+	</logger>					
+	<logger name="ar.edu.taco.pipeline.javacodesimplifier.ASTSimplifierManager">
+  		<level value="info"/>
+	</logger>						
+
+	<logger name="ar.edu.taco.pipeline.DynJAlloyToDynAlloy">
+  		<level value="debug"/>
+	</logger>						
+
+	<logger name="ar.edu.taco.stryker.api.impl.MuJavaController">
+  		<level value="warn"/>
+  		<appender-ref ref="file"/>
+	</logger>		
+	
+	<logger name="ar.edu.taco.stryker.api.impl.OpenJMLController">
+  		<level value="warn"/>
+		<appender-ref ref="file"/>
+	</logger>
+	
+	<logger name="ar.edu.taco.stryker.api.impl.DarwinistController">
+  		<level value="warn"/>
+  		<appender-ref ref="file"/>
+	</logger>
+				
+		
+    <root>
+		<priority value="warn"></priority>
+	  	<appender-ref ref="stdout"/>
+	</root>
+	
+</log4j:configuration>

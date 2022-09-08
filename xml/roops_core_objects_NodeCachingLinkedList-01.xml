@@ -1,0 +1,42 @@
+<upperbound>
+<field label="broops_core_objects_LinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+</field>
+<field label="froops_core_objects_LinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_LinkedListNode_previous_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+</field>
+<field label="froops_core_objects_LinkedListNode_previous_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="oops_core_objects_NodeCachingLinkedList_firstCachedNode_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="roops_core_objects_NodeCachingLinkedList_header_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+</field>
+</upperbound>

@@ -1,0 +1,2 @@
+method getNode | affected line: 4 | (PRVOU_REFINED, null, result)
+method getNode | affected line: 5 | (AOIS, index, index--)

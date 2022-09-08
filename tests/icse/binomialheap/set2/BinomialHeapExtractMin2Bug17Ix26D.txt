@@ -1,0 +1,2 @@
+method extractMin | affected line: 26 | (PRVOU_REFINED, null, this.extractMin())
+method extractMin | affected line: 17 | (PRVOL_SMART, temp, prevTemp)

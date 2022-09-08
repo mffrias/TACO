@@ -1,0 +1,9 @@
+#!/bin/sh
+# usage: run FLAGS
+
+echo ----- loop 1.5 -----
+${ESCJ} $* mwhalen.java
+echo ----- loop 3 -----
+${ESCJ} $* -loop 3 mwhalen.java
+echo ----- loop 10 -----
+${ESCJ} $* -loop 10 mwhalen.java

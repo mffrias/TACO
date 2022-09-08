@@ -1,0 +1,214 @@
+<upperbound>
+<field label="froops_core_objects_BinTreeNode_left_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="roops_core_objects_BinTreeNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_6" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="roops_core_objects_BinTreeNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_0" />
+    <atom label="roops_core_objects_BinTreeNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+</field>
+<field label="broops_core_objects_BinTreeNode_left_0" arity="2" >
+</field>
+<field label="broops_core_objects_BinTreeNode_right_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinTreeNode_right_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_6" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="roops_core_objects_BinTreeNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="roops_core_objects_BinTreeNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_0" />
+    <atom label="roops_core_objects_BinTreeNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_1" />
+    <atom label="roops_core_objects_BinTreeNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_3" />
+    <atom label="roops_core_objects_BinTreeNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_0" />
+    <atom label="roops_core_objects_BinTreeNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_2" />
+    <atom label="roops_core_objects_BinTreeNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinTreeNode_5" />
+    <atom label="null" />
+  </tuple>
+</field>
+</upperbound>

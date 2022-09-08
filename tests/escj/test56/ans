@@ -1,0 +1,41 @@
+
+**** Source code with types:
+class FormalModifiers
+{
+   void foo(String x /*@ non_null */, Object[] z /*@ non_null */, int[] q /*@ non_null */ /*@ non_null */)
+    /*@ pure */
+    /*@ requires (/*boolean*/ (/*boolean*/ (/*boolean*/ (/*boolean*/ (\lblneg Pre:0.9.18 (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers))) && (/*boolean*/ (\lblneg NonNull:0.7.26 (/*boolean*/ (/*java.lang.String*/ x:7.21) != (/*null*/ null))))) && (/*boolean*/ (\lblneg NonNull:0.8.21 (/*boolean*/ (/*java.lang.Object[]*/ z:8.14) != (/*null*/ null))))) && (/*boolean*/ (\lblneg NonNull:0.9.18 (/*boolean*/ (/*int[]*/ q:9.13) != (/*null*/ null))))); */
+    /*@ signals_only (java.lang.Exception) (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ x:7.21) != (/*null*/ null))) && (/*boolean*/ (/*java.lang.Object[]*/ z:8.14) != (/*null*/ null))) && (/*boolean*/ (/*int[]*/ q:9.13) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ diverges (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ x:7.21) != (/*null*/ null))) && (/*boolean*/ (/*java.lang.Object[]*/ z:8.14) != (/*null*/ null))) && (/*boolean*/ (/*int[]*/ q:9.13) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ modifies (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ x:7.21) != (/*null*/ null))) && (/*boolean*/ (/*java.lang.Object[]*/ z:8.14) != (/*null*/ null))) && (/*boolean*/ (/*int[]*/ q:9.13) != (/*null*/ null))))) ==> ((/*UNAVAILABLE*/ \nothing)); @*/ 
+   {
+   }
+
+   void bar(String a /*@ non_null */ /*@ non_null */)
+    /*@ pure */
+    /*@ requires (/*boolean*/ (/*boolean*/ (\lblneg Pre:0.11.17 (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers))) && (/*boolean*/ (\lblneg NonNull:0.11.17 (/*boolean*/ (/*java.lang.String*/ a:11.35) != (/*null*/ null))))); */
+    /*@ signals_only (java.lang.Exception) (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ a:11.35) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ diverges (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ a:11.35) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ modifies (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ a:11.35) != (/*null*/ null))))) ==> ((/*UNAVAILABLE*/ \nothing)); @*/ 
+   {
+   }
+
+   void b1(int b)
+    /*@ requires (/*boolean*/ true); */
+    /*@ modifies (/*boolean*/ true) ==> ((/*UNAVAILABLE*/ \nothing)); @*/
+    /*@ signals_only (java.lang.Exception) (/*boolean*/ false); */
+    /*@ pure */ 
+   {
+   }
+
+   void b2(String b /*@ non_null */)
+    /*@ pure */
+    /*@ requires (/*boolean*/ (/*boolean*/ (\lblneg Pre:0.15.16 (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers))) && (/*boolean*/ (\lblneg NonNull:0.15.16 (/*boolean*/ (/*java.lang.String*/ b:15.34) != (/*null*/ null))))); */
+    /*@ signals_only (java.lang.Exception) (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ b:15.34) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ diverges (/*boolean*/ (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ b:15.34) != (/*null*/ null))))) ==> (/*boolean*/ false)); */
+    /*@ modifies (/*boolean*/ \old((/*boolean*/ (/*boolean*/ (/*FormalModifiers*/ this) instanceof FormalModifiers) && (/*boolean*/ (/*java.lang.String*/ b:15.34) != (/*null*/ null))))) ==> ((/*UNAVAILABLE*/ \nothing)); @*/ 
+   {
+   }
+
+   // <default constructor>
+}

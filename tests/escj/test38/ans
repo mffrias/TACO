@@ -1,0 +1,127 @@
+FinalFields.java:71: Warning: Possible assertion failure (Assert)
+    /*@ assert av10[1] == 2; */  // this must fail, since the initial  ...
+        ^
+FinalFields.java:72: Warning: Possible assertion failure (Assert)
+    /*@ assert avmA[0].length == 2; */  // this must fail, for the sam ...
+        ^
+FinalFields.java:144: Warning: Possible assertion failure (Assert)
+    /*@ assert iav10[1] == 2; */  // this must fail, since the initial ...
+        ^
+FinalFields.java:145: Warning: Possible assertion failure (Assert)
+    /*@ assert iavmA[0].length == 2; */  // this must fail, for the sa ...
+        ^
+FinalFields.java:95: Warning: Possible type cast error (Cast)
+  final Object ifinalcast = (FinalClass)getObject();
+                            ^
+FinalFields.java:150: Warning: Possible assertion failure (Assert)
+    /*@ assert innx != null; */  // this will fail, by design (since i ...
+        ^
+FinalFields.java:155: Warning: Possible assertion failure (Assert)
+    //@ assert localA < localB;  // warns if checker gets here, which  ...
+        ^
+LargeMagnitude.java:23: Warning: Possible assertion failure (Assert)
+    //@ assert x - 1 == -8000000000L;  // escjava doesn't know this on ...
+        ^
+LargeMagnitude.java:25: Warning: Possible assertion failure (Assert)
+    //@ assert -2147483647 == 0x80000001;  // escjava doesn't know thi ...
+        ^
+LargeMagnitude.java:26: Warning: Possible assertion failure (Assert)
+    //@ assert -2000000 == 0xffe17b80;  // escjava doesn't know this o ...
+        ^
+LargeMagnitude.java:55: Warning: Postcondition possibly not established (Post)
+  }  // error:  return value may be negative
+  ^
+Associated declaration is "LargeMagnitude.java", line 52, col 6:
+  //@ ensures 0 <= \result;
+      ^
+NegByte.java:10: Warning: Postcondition possibly not established (Post)
+  }  // escjava does not know that dynamically casting 0xFF to byte yi ...
+  ^
+Associated declaration is "NegByte.java", line 4, col 6:
+  //@ ensures \result == -1;
+      ^
+NegByte.java:15: Warning: Possible attempt to allocate array of negative length (NegSize)
+  Object[] a1 = new Object[(byte)0xF3];  // neg array size!
+                          ^
+NonFinalClasses.java:13: Warning: Possible assertion failure (Assert)
+    //@ assert x0 == null || \typeof(x0) == \type(NotFinalClass); // f ...
+        ^
+NonFinalClasses.java:15: Warning: Possible assertion failure (Assert)
+    //@ assert x1 == null || \typeof(x1) == \type(NotFinalClass); // f ...
+        ^
+NonFinalClasses.java:17: Warning: Possible assertion failure (Assert)
+    //@ assert x0 instanceof NotFinalClass;        // fail
+        ^
+NonFinalClasses.java:20: Warning: Possible assertion failure (Assert)
+    //@ assert \typeof(x3) == \type(NotFinalClass);  // fail
+        ^
+NonFinalClasses.java:28: Warning: Possible assertion failure (Assert)
+    //@ assert a2 == null || \typeof(a2) == \type(NotFinalClass[]);    ...
+        ^
+NonFinalClasses.java:29: Warning: Possible assertion failure (Assert)
+    //@ assert a3 == null || \typeof(a3) == \type(NotFinalClass[][]);  ...
+        ^
+NonFinalClasses.java:34: Warning: Possible assignment of null to variable declared non_null (NonNull)
+  final /*@ non_null */ Object ix2 = getNotAFinalClassObject(); // non ...
+                                   ^
+Associated declaration is "NonFinalClasses.java", line 34, col 12:
+  final /*@ non_null */ Object ix2 = getNotAFinalClassObject(); // non ...
+            ^
+NonFinalClasses.java:35: Warning: Possible assignment of null to variable declared non_null (NonNull)
+  final /*@ non_null */ NotFinalClass ix3 = getNotAFinalClassObject(); ...
+                                          ^
+Associated declaration is "NonFinalClasses.java", line 35, col 12:
+  final /*@ non_null */ NotFinalClass ix3 = getNotAFinalClassObject(); ...
+            ^
+NonFinalClasses.java:46: Warning: Possible assertion failure (Assert)
+    //@ assert ix0 == null || \typeof(ix0) == \type(NotFinalClass); // ...
+        ^
+NonFinalClasses.java:48: Warning: Possible assertion failure (Assert)
+    //@ assert ix1 == null || \typeof(ix1) == \type(NotFinalClass); // ...
+        ^
+NonFinalClasses.java:50: Warning: Possible assertion failure (Assert)
+    //@ assert ix0 instanceof NotFinalClass;        // fail
+        ^
+NonFinalClasses.java:53: Warning: Possible assertion failure (Assert)
+    //@ assert \typeof(ix3) == \type(NotFinalClass);  // fail
+        ^
+NonFinalClasses.java:61: Warning: Possible assertion failure (Assert)
+    //@ assert ia2 == null || \typeof(ia2) == \type(NotFinalClass[]);  ...
+        ^
+NonFinalClasses.java:62: Warning: Possible assertion failure (Assert)
+    //@ assert ia3 == null || \typeof(ia3) == \type(NotFinalClass[][]) ...
+        ^
+NonFinalClasses.java:68: Warning: Possible assignment of null to variable declared non_null (NonNull)
+    /*@ non_null */ Object lx2 = getNotAFinalClassObject();  // non_nu ...
+                               ^
+Associated declaration is "NonFinalClasses.java", line 68, col 8:
+    /*@ non_null */ Object lx2 = getNotAFinalClassObject();  // non_nu ...
+        ^
+NonFinalClasses.java:69: Warning: Possible assignment of null to variable declared non_null (NonNull)
+    /*@ non_null */ NotFinalClass lx3 = getNotAFinalClassObject(); //  ...
+                                      ^
+Associated declaration is "NonFinalClasses.java", line 69, col 8:
+    /*@ non_null */ NotFinalClass lx3 = getNotAFinalClassObject(); //  ...
+        ^
+NonFinalClasses.java:72: Warning: Possible assertion failure (Assert)
+    //@ assert lx0 == null || \typeof(lx0) == \type(NotFinalClass); // ...
+        ^
+NonFinalClasses.java:74: Warning: Possible assertion failure (Assert)
+    //@ assert lx1 == null || \typeof(lx1) == \type(NotFinalClass); // ...
+        ^
+NonFinalClasses.java:79: Warning: Possible assertion failure (Assert)
+    //@ assert \typeof(lx3) == \type(NotFinalClass);  // fail
+        ^
+NonFinalClasses.java:93: Warning: Possible assertion failure (Assert)
+    //@ assert \typeof(la2) == \type(NotFinalClass[]);    // fail
+        ^
+NonFinalClasses.java:94: Warning: Possible assertion failure (Assert)
+    //@ assert \typeof(la3) == \type(NotFinalClass[][]);  // fail
+        ^
+TestConstants.java:40: Warning: Possible null dereference (Null)
+    sr.equals("hello");         // error
+      ^
+TestConstants.java:44: Warning: Array index possibly too large (IndexTooBig)
+    ss.equals(arg[3]);          // error
+                 ^
+36 warnings

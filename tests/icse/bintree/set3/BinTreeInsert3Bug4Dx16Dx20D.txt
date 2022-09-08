@@ -1,0 +1,3 @@
+method insert | affected line: 4 | (PRVOR_REFINED, x, null)
+method insert | affected line: 20 | (PRVOU_REFINED, y.key, y.left.key)
+method insert | affected line: 16 | (AOIU, k, -k)

@@ -1,0 +1,4 @@
+#!/bin/sh
+# usage: run FLAGS
+
+${ESCJ} $* -nocheck -pjt FormalModifiers.java

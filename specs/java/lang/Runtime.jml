@@ -1,0 +1,65 @@
+// @(#)$Id: Runtime.jml,v 1.1 2009/05/13 20:13:54 ddobniewski Exp $
+
+package java.lang;
+
+//x@ refine "Runtime.java";
+
+import java.io.*;
+import java.util.StringTokenizer;
+
+
+public class Runtime {
+
+    public static /*@pure*//*@non_null*/ Runtime getRuntime();
+
+    public void exit(int status);
+
+    public void addShutdownHook(/*@non_null*//*?*/ Thread hook);
+
+    public boolean removeShutdownHook(/*@non_null*//*?*/ Thread hook);
+
+    public void halt(int status);
+
+    /** @deprecated */
+    public static void runFinalizersOnExit(boolean value);
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String command) throws IOException;
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String command, /*@non_null*//*?*/ String[] envp) throws IOException;
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String command, /*@non_null*//*?*/ String[] envp, /*@non_null*//*?*/ File dir) throws IOException;
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String[] cmdarray) throws IOException;
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String[] cmdarray, /*@non_null*//*?*/ String[] envp) throws IOException;
+
+    public /*@non_null*//*?*/ Process exec(/*@non_null*//*?*/ String[] cmdarray, /*@non_null*//*?*/ String[] envp, /*@non_null*//*?*/ File dir) throws IOException;
+
+    public int availableProcessors();
+
+    public /*@pure*/ long freeMemory();
+
+    public /*@pure*/ long totalMemory();
+
+    public /*@pure*/ long maxMemory();
+
+    public void gc();
+
+    public void runFinalization();
+
+    public void traceInstructions(boolean on);
+
+    public void traceMethodCalls(boolean on);
+
+    public void load(/*@non_null*//*?*/ String filename);
+
+    public void loadLibrary(/*@non_null*//*?*/ String libname);
+
+    /** @deprecated */
+    public /*@non_null*//*?*/ InputStream getLocalizedInputStream(/*@non_null*//*?*/ InputStream in);
+
+    /** @deprecated */
+    public /*@non_null*//*?*/ OutputStream getLocalizedOutputStream(/*@non_null*//*?*/ OutputStream out);
+
+}
+

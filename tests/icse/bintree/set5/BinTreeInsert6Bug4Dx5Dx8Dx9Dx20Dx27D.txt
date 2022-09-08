@@ -1,0 +1,6 @@
+method insert | affected line: 4 | (PRVOR_REFINED, x, x.parent)
+method insert | affected line: 5 | (PRVOU_REFINED, x.key, root.key)
+method insert | affected line: 8 | (PRVOU_REFINED, x.key, root.key)
+method insert | affected line: 9 | (PRVOR_REFINED, x.right, x.left.right)
+method insert | affected line: 20 | (PRVOU_REFINED, y.key, x.key)
+method insert | affected line: 27 | (ASRS, size += 1, size %= 1)

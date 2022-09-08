@@ -1,0 +1,486 @@
+<upperbound>
+<field label="broops_core_objects_LinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+</field>
+<field label="froops_core_objects_LinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_LinkedListNode_previous_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+</field>
+<field label="froops_core_objects_LinkedListNode_previous_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_6" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_8" />
+    <atom label="roops_core_objects_LinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_4" />
+    <atom label="roops_core_objects_LinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_1" />
+    <atom label="roops_core_objects_LinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_5" />
+    <atom label="roops_core_objects_LinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_9" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_LinkedListNode_7" />
+    <atom label="roops_core_objects_LinkedListNode_8" />
+  </tuple>
+</field>
+<field label="oops_core_objects_NodeCachingLinkedList_firstCachedNode_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+</field>
+<field label="roops_core_objects_NodeCachingLinkedList_header_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="roops_core_objects_LinkedListNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_NodeCachingLinkedList_0" />
+    <atom label="roops_core_objects_LinkedListNode_1" />
+  </tuple>
+</field>
+</upperbound>

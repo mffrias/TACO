@@ -1,0 +1,6 @@
+method insert | affected line: 59 | (PRVOR_REFINED, temp.degree, temp1.degree)
+method insert | affected line: 16 | (PRVOR_REFINED, tmp.sibling, tmp.sibling.child)
+method insert | affected line: 68 | (PRVOL_SMART, nextTemp.child, nextTemp)
+method insert | affected line: 69 | (PRVOR_REFINED, nextTemp.degree, this.extractMin().degree)
+method insert | affected line: 22 | (PRVOL_SMART, tmp.sibling, tmp.child)
+method insert | affected line: 50 | (PRVOU_REFINED, temp.degree, temp2.degree)

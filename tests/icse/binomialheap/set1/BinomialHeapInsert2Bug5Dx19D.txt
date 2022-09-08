@@ -1,0 +1,2 @@
+method insert | affected line: 5 | (PRVOR_REFINED, insertTemp, this.extractMin())
+method insert | affected line: 19 | (PRVOU_REFINED, temp1.sibling, insertTemp.sibling)

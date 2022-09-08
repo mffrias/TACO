@@ -1,0 +1,164 @@
+<upperbound>
+<field label="roops_core_objects_SinglyLinkedList_header_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+    <tuple>
+    <atom label="roops_core_objects_SinglyLinkedList_0" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+  </tuple>
+</field>
+<field label="froops_core_objects_SinglyLinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_17" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_18" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_16" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_17" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_8" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_11" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_12" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_12" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_13" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_15" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_16" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_7" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_15" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_14" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_15" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_9" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_10" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_13" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_6" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_17" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_18" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_12" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_10" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_14" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_13" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_14" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_9" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_8" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_16" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_11" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_SinglyLinkedListNode_next_0" arity="2" >
+</field>
+</upperbound>

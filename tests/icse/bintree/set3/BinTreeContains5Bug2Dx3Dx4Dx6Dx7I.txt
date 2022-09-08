@@ -1,0 +1,5 @@
+method contains | affected line: 2 | (ROR, current != null, current == null)
+method contains | affected line: 3 | (ROR, k < current.key, k != current.key)
+method contains | affected line: 7 | (PRVOL_SMART, current, current.parent)
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, current.left.right)
+method contains | affected line: 6 | (ROR, k > current.key, k < current.key)

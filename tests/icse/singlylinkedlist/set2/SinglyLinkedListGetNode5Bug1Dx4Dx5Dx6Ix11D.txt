@@ -1,0 +1,5 @@
+method getNode | affected line: 11 | (PRVOU_REFINED, result, result.next)
+method getNode | affected line: 5 | (AOIS, current_index, ++current_index)
+method getNode | affected line: 6 | (PRVOL_SMART, result, this.header)
+method getNode | affected line: 4 | (PRVOU_REFINED, null, current)
+method getNode | affected line: 1 | (PRVOU_REFINED, this.header, header)

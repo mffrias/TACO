@@ -1,0 +1,90 @@
+//
+// TACO: Translation of Annotated COde
+// Copyright (c) 2010 Universidad de Buenos Aires
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA,
+// 02110-1301, USA
+
+//-------------- java_util_Iterator --------------//
+module java_util_Iterator
+sig java_util_Iterator extends java_lang_Object {} {}
+
+field Iterator_contains:(java_util_Iterator) -> univ {}
+
+program java_util_Iterator::hasNext[
+  var thiz:java_util_Iterator+null,
+  var throw:java_lang_Throwable+null,
+  var return:boolean]
+  
+Specification 
+{
+    SpecCase #0 {
+        ensures {
+            equ[throw',null]
+            and equ[return, fun_not_empty_set[thiz'.Iterator_contains']]
+        }
+    }
+}
+     
+Implementation 
+
+   {
+      throw:=null;
+      return := fun_not_empty_set[thiz.Iterator_contains];
+    
+   }
+  
+
+program java_util_Iterator::next[
+  var thiz:java_util_Iterator+null,
+  var throw:java_lang_Throwable+null,
+  var return:java_lang_Object+null]
+Specification 
+{
+    SpecCase #0 {
+        requires {
+            some return_hasNext:boolean | { callSpec hasNext[thiz,throw,return] and equ[return_hasNext,true]}
+        }
+        ensures {
+        	equ[throw',null] 
+            and pred_in[return',thiz.Iterator_contains]
+            and equ[thiz'.Iterator_contains',fun_set_difference[thiz.Iterator_contains,return']] 
+        }
+    }
+    
+    SpecCase #1 {
+        requires {
+            some return_hasNext:boolean | { callSpec hasNext[thiz,throw,return] and equ[return_hasNext,false]}
+        }    
+        ensures {
+            equ[throw',java_util_NoSuchElementExceptionLit]
+		}
+	}    
+}
+Implementation 
+
+{
+      throw:=null;
+      if (equ[fun_not_empty_set[thiz.Iterator_contains],true]) {
+          havoc return;
+          assume pred_in[return,thiz.Iterator_contains];
+          thiz.Iterator_contains:=fun_set_difference[thiz.Iterator_contains,return];
+      } else {
+          throw:=java_util_NoSuchElementExceptionLit;
+      };
+}
+ 
+
+

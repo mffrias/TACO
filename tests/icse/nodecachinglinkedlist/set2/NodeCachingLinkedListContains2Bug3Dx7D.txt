@@ -1,0 +1,2 @@
+method contains | affected line: 7 | (PRVOU_REFINED, arg, new java.lang.Integer( this.cacheSize ))
+method contains | affected line: 3 | (COI, node != header, !(node != header))

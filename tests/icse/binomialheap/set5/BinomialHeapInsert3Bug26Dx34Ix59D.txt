@@ -1,0 +1,3 @@
+method insert | affected line: 59 | (PRVOR_REFINED, temp.degree, temp.child.degree)
+method insert | affected line: 34 | (PRVOL_SMART, Nodes, tmp)
+method insert | affected line: 26 | (PRVOR_REFINED, temp1.sibling, temp1.sibling.parent)

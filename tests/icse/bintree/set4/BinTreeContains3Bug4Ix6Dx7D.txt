@@ -1,0 +1,3 @@
+method contains | affected line: 4 | (PRVOL_SMART, current, this.root)
+method contains | affected line: 7 | (PRVOR_REFINED, current.right, this.root.right)
+method contains | affected line: 6 | (PRVOU_REFINED, k, this.size)

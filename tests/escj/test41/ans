@@ -1,0 +1,4 @@
+TexasSubstitution.java:32: Warning: Possible assertion failure (Assert)
+    //@ assert nx == x.n;
+        ^
+1 warning

@@ -1,0 +1,182 @@
+<upperbound>
+<field label="broops_core_objects_AvlNode_left_0" arity="2" >
+</field>
+<field label="froops_core_objects_AvlNode_left_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_0" />
+    <atom label="roops_core_objects_AvlNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_6" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_1" />
+    <atom label="roops_core_objects_AvlNode_3" />
+  </tuple>
+</field>
+<field label="broops_core_objects_AvlNode_right_0" arity="2" >
+</field>
+<field label="froops_core_objects_AvlNode_right_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_0" />
+    <atom label="roops_core_objects_AvlNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_1" />
+    <atom label="roops_core_objects_AvlNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_0" />
+    <atom label="roops_core_objects_AvlNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_6" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_1" />
+    <atom label="roops_core_objects_AvlNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="roops_core_objects_AvlNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_5" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_4" />
+    <atom label="roops_core_objects_AvlNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_AvlNode_2" />
+    <atom label="roops_core_objects_AvlNode_4" />
+  </tuple>
+</field>
+</upperbound>

@@ -1,0 +1,5 @@
+method insert | affected line: 6 | (PRVOL_SMART, x, x.parent)
+method insert | affected line: 23 | (PRVOL_SMART, y.right, y)
+method insert | affected line: 5 | (AOIS, k, k++)
+method insert | affected line: 3 | (COI, x != null, !(x != null))
+method insert | affected line: 18 | (PRVOL_SMART, root, x)

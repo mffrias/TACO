@@ -1,0 +1,5 @@
+method insert | affected line: 19 | (PRVOU_REFINED, temp1.sibling.degree, temp1.sibling.key)
+method insert | affected line: 50 | (PRVOU_REFINED, nextTemp.sibling, nextTemp.parent.sibling)
+method insert | affected line: 34 | (PRVOR_REFINED, temp1, temp1.child)
+method insert | affected line: 54 | (PRVOU_REFINED, temp.key, this.Nodes.key)
+method insert | affected line: 73 | (PRVOR_REFINED, temp.sibling, temp.sibling.parent)

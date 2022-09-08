@@ -1,0 +1,3 @@
+method contains | affected line: 3 | (PRVOU_REFINED, arg, this.firstCachedNode)
+method contains | affected line: 4 | (PRVOU_REFINED, node.next, node.previous)
+method contains | affected line: 1 | (PRVOU_REFINED, header.next, this.header.next)

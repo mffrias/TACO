@@ -1,0 +1,5 @@
+method remove | affected line: 38 | (PRVOR_REFINED, node, node.next)
+method remove | affected line: 32 | (PRVOU_REFINED, this.cacheSize, this.size)
+method remove | affected line: 11 | (PRVOU_REFINED, 2, 0)
+method remove | affected line: 29 | (PRVOL_SMART, node.next.previous, node.previous.next.previous)
+method remove | affected line: 13 | (PRVOU_REFINED, 0, 2)

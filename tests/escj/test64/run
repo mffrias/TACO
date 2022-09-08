@@ -1,0 +1,11 @@
+#!/bin/sh
+# usage: run FLAGS
+
+sort ans.raw > ans
+
+( ${ESCJ} $* T.java ; \
+${ESCJ} $* -inlineFromConstructors T.java ;\
+${ESCJ} $* U.java ;\
+${ESCJ} $* -inlineFromConstructors U.java ;\
+) > out.raw
+sort out.raw 

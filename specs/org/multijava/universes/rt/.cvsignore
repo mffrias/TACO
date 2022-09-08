@@ -1,0 +1,8 @@
+raccompile.stamp
+classes.stamp
+*.class
+*.sym
+*.*-ckd
+*~
+.DS_Store
+compare-ckd

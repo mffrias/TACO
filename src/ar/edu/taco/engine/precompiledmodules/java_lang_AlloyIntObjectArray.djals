@@ -1,0 +1,76 @@
+module java_lang_ObjectArray
+
+sig java_lang_ObjectArray extends java_lang_Object {} {}
+
+field java_lang_ObjectArray_length:(java_lang_ObjectArray)->one (Int) {}
+field java_lang_ObjectArray_contents:java_lang_ObjectArray->(Int set -> lone  (java_lang_Object + null)) {}
+
+
+object_invariant all oa : java_lang_ObjectArray | {gte[oa.java_lang_ObjectArray_length,0]}
+
+
+program java_lang_ObjectArray::Constructor[
+  var thiz:       java_lang_ObjectArray,
+  var throw:      java_lang_Throwable+null,
+  var new_length: Int]
+Implementation 
+{
+  throw:=null;
+  if lt[new_length,0] {
+    throw:=java_lang_NegativeArraySizeExceptionLit;
+  } else {
+    assume thiz.java_lang_ObjectArray_length=new_length;
+    assume thiz.java_lang_ObjectArray_contents=(none->none);
+  };
+  skip;
+}
+
+
+program java_lang_ObjectArray::object_array_read[
+  var thiz:   java_lang_ObjectArray,
+  var throw:  java_lang_Throwable+null,
+  var return: java_lang_Object+null,  
+  var index:  Int]
+Implementation 
+{
+  throw:=null;
+  if (lt[index,0] or gte[index,thiz.java_lang_ObjectArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index , (thiz.java_lang_ObjectArray_contents).univ] {
+      return := index.(thiz.java_lang_ObjectArray_contents);
+    } else {
+      return := null;
+    };
+  };
+  skip;
+}
+
+program java_lang_ObjectArray::object_array_write[
+  var thiz:      java_lang_ObjectArray,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_Object+null,  
+  var index:     Int]
+Implementation 
+{
+  throw:=null;
+  if (lt[index,0] or gte[index,thiz.java_lang_ObjectArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    thiz.java_lang_ObjectArray_contents := (thiz.java_lang_ObjectArray_contents) ++ (index->new_value);
+  };
+  skip;
+}
+
+program java_lang_ObjectArray::object_array_clone[
+  var thiz:      java_lang_ObjectArray,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_ObjectArray]
+Implementation 
+{
+  throw:=null;
+  new_value.java_lang_ObjectArray_contents := thiz.java_lang_ObjectArray_contents;
+  new_value.java_lang_objectArray_length := thiz.java_lang_ObjectArray_length;
+  skip;
+}
+

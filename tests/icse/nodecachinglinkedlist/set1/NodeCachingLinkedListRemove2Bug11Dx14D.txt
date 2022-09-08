@@ -1,0 +1,2 @@
+method remove | affected line: 14 | (PRVOU_REFINED, currentIndex, this.size)
+method remove | affected line: 11 | (AORB, this.size / 2, this.size * 2)

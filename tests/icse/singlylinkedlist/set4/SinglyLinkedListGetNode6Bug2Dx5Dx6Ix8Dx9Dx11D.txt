@@ -1,0 +1,6 @@
+method getNode | affected line: 5 | (AOIS, index == current_index, index != current_index)
+method getNode | affected line: 11 | (PRVOU_REFINED, result, result.next)
+method getNode | affected line: 6 | (PRVOL_SMART, result, result.value)
+method getNode | affected line: 8 | (PRVOR_REFINED, 1, index)
+method getNode | affected line: 9 | (PRVOR_REFINED, current.next, current.next.next)
+method getNode | affected line: 3 | (PRVOU_REFINED, 0, 1)

@@ -1,0 +1,28 @@
+// $Id: FilterOutputStream.jml,v 1.2 2009/11/05 23:13:14 ddobniewski Exp $
+
+package java.io;
+
+public class FilterOutputStream extends java.io.OutputStream {
+
+    protected /*@ non_null */ OutputStream out;
+    //@ public model OutputStream underlyingStream;
+    //@ protected represents underlyingStream <- out;
+
+    //@ ensures underlyingStream == out;
+    public FilterOutputStream(OutputStream out);
+
+    public void close()
+        throws IOException;
+
+    public void flush()
+        throws IOException;
+
+    public void write(int Param0)
+        throws IOException;
+
+    public void write(byte[] Param0)
+        throws IOException;
+
+    public void write(byte[] Param0, int Param1, int Param2)
+        throws IOException;
+}

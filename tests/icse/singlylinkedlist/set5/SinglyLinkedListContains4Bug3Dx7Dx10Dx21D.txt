@@ -1,0 +1,4 @@
+method contains | affected line: 3 | (PRVOR_REFINED, this.header, header)
+method contains | affected line: 21 | (PRVOR_REFINED, true, false)
+method contains | affected line: 10 | (PRVOU_REFINED, null, 1)
+method contains | affected line: 7 | (PRVOU_REFINED, null, 0)

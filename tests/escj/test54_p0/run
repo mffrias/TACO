@@ -1,0 +1,22 @@
+#!/bin/sh
+# usage: run FLAGS
+
+ARGS="-useOldStringHandling `echo $* | sed -e 's/-notrace//g'`"
+
+${ESCJ} ${ARGS} final.java
+${ESCJ} ${ARGS} notRecursive.java
+${ESCJ} ${ARGS} overload.java
+${ESCJ} ${ARGS} override.java
+${ESCJ} ${ARGS} postconditions.java
+${ESCJ} ${ARGS} recursive.java
+${ESCJ} ${ARGS} restrictions.java
+${ESCJ} ${ARGS} restrictions2.java
+${ESCJ} ${ARGS} simple.java
+${ESCJ} ${ARGS} Simple0.java
+${ESCJ} ${ARGS} Simple1.java
+${ESCJ} ${ARGS} Simple2.java
+${ESCJ} ${ARGS} Constructor.java
+${ESCJ} ${ARGS} chain0.java
+${ESCJ} ${ARGS} chain1.java
+${ESCJ} ${ARGS} chain2.java
+${ESCJ} ${ARGS} abstract.java

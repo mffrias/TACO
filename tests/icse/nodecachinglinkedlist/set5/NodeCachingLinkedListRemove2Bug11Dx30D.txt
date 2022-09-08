@@ -1,0 +1,2 @@
+method remove | affected line: 11 | (PRVOU_REFINED, this.size, this.DEFAULT_MAXIMUM_CACHE_SIZE)
+method remove | affected line: 30 | (PRVOR_REFINED, this.size - 1, this.size + 1)

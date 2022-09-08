@@ -1,0 +1,1 @@
+method remove | affected line: 27 | (PRVOR_REFINED, node.right, node.right.parent)

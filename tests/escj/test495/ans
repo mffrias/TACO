@@ -1,0 +1,91 @@
+StackCheck.java:29: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:31: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:32: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:45: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:47: Warning: Possible assertion failure (Assert)
+    //@ assert !s.isEmpty();
+        ^
+StackCheck.java:49: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:62: Warning: Possible assertion failure (Assert)
+    //@ assert !s.isFull();
+        ^
+StackCheck.java:66: Warning: Possible assertion failure (Assert)
+    //@ assert !s.isFull();
+        ^
+StackCheck.java:70: Warning: Possible assertion failure (Assert)
+    //@ assert s.isFull();
+        ^
+StackCheck.java:80: Warning: Possible assertion failure (Assert)
+    //@ assert s.top() == null;
+        ^
+StackCheck.java:82: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:84: Warning: Possible assertion failure (Assert)
+    //@ assert s.top() != null;
+        ^
+StackCheck.java:95: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:96: Warning: Precondition possibly not established (Pre)
+    s.pop();
+         ^
+Associated declaration is "Stack.java", line 67, col 8:
+      @ requires !isEmpty();
+        ^
+StackCheck.java:98: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:99: Warning: Precondition possibly not established (Pre)
+    s.push(element());
+          ^
+Associated declaration is "Stack.java", line 82, col 8:
+      @ requires !isFull();
+        ^
+StackCheck.java:100: Warning: Precondition possibly not established (Pre)
+    s.pop();
+         ^
+Associated declaration is "Stack.java", line 67, col 8:
+      @ requires !isEmpty();
+        ^
+StackCheck.java:101: Warning: Precondition possibly not established (Pre)
+    s.pop();
+         ^
+Associated declaration is "Stack.java", line 67, col 8:
+      @ requires !isEmpty();
+        ^
+18 warnings

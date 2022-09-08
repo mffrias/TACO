@@ -1,0 +1,3 @@
+icse.bintree.set4.StrykerBinTreeContains4Bug2Dx4Dx6Dx13DTest
+icse.bintree.set4.StrykerBinTreeInsert4Bug4Dx8Dx20Dx26ITest
+icse.bintree.set4.StrykerBinTreeRemove4Bug15Dx18Dx40Dx43ITest

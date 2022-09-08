@@ -1,0 +1,1 @@
+method contains | affected line: 3 | (COI, node != header && node.value != arg, !(node != header && node.value != arg))

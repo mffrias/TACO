@@ -1,0 +1,6 @@
+method extractMin | affected line: 27 | (PRVOR_REFINED, fakeNode.reverse( null ), fakeNode.sibling)
+method extractMin | affected line: 8 | (AOIS, temp.key, temp.key--)
+method extractMin | affected line: 23 | (COI, Nodes == null, !(Nodes == null))
+method extractMin | affected line: 15 | (PRVOR_REFINED, temp.sibling, temp.child)
+method extractMin | affected line: 12 | (PRVOU_REFINED, null, this.Nodes)
+method extractMin | affected line: 38 | (PRVOU_REFINED, minNode, minNode.parent)

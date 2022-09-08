@@ -1,0 +1,68 @@
+/*
+ * This file is part the Universe Runtime Classes.
+ *
+ * Copyright (C) 2003-2007 Swiss Federal Institute of Technology Zurich
+ *
+ * Part of mjc, the MultiJava Compiler.
+ *
+ * Copyright (C) 2000-2005 Iowa State University
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id: UrtImplementation.jml,v 1.1 2009/05/13 20:13:58 ddobniewski Exp $
+ */
+
+package org.multijava.universes.rt;
+
+public interface UrtImplementation {
+    void setOwnerRep( /*@ non_null @*/ Object obj,
+		      /*@ non_null @*/ Object owner );
+
+    void setOwnerPeer( /*@ non_null @*/ Object obj,
+                       /*@ non_null @*/ Object current );
+
+    void setConstructorData( /*@ non_null @*/ Object currentObject, 
+			     /*@ non_null @*/ Object objectClass, 
+			     int modifier );
+
+    void setOwner( /*@ non_null @*/ Object o );
+
+    void setArrayOwnerRep( /*@ non_null @*/ Object obj,
+                           /*@ non_null @*/ Object owner,
+			   int arrayElementType );
+
+    void setArrayOwnerPeer( /*@ non_null @*/ Object obj,
+                            /*@ non_null @*/ Object current,
+			    int arrayElementType );
+
+    boolean checkArrayType( /*@ nullable @*/ Object o, 
+			    int elementType );
+
+    /*@ pure @*/ boolean isPeer( /*@ nullable @*/ Object o1, 
+		    /*@ nullable @*/ Object o2 );
+
+    /*@ pure @*/ boolean isOwner( /*@ nullable @*/ Object owner, 
+		     /*@ nullable @*/ Object obj );
+	
+    /*@ pure nullable @*/ Object getOwner( /*@ non_null @*/ Object obj );
+	
+    /*@ pure nullable @*/ Object getRootSetMember();
+	
+    void setContext( /*@ non_null @*/ Object currentObject );
+	
+    void resetContext();
+	
+    /*@ nullable @*/ Object getContext();
+}

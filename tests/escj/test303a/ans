@@ -1,0 +1,61 @@
+E1.java:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+E1.java:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+E1.java:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+E1.java:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+E1.java:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+E2.java:7: Warning: Possible null dereference (Null)
+    @  requires aa.length>0; //null(aa) warning
+                  ^
+E2.java:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a) warning
+                 ^
+E2.java:15: Warning: Possible null dereference (Null)
+    @  requires aa.length>0; //null(aa) warning
+                  ^
+E2.java:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a) warning
+                 ^
+E2.java:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a) warning
+                 ^
+F1.jml:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+F1.jml:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+F1.jml:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+F1.jml:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+F1.jml:4: Warning: Possible division by zero (ZeroDiv)
+  //@ invariant f/f == f/f; // divZero warning
+                 ^
+F2.jml:7: Warning: Possible null dereference (Null)
+    @  requires aa.length>0; //null(aa) warning
+                  ^
+F2.jml:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a), spurious null(this) warnings i ...
+                 ^
+F2.jml:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a), spurious null(this) warnings i ...
+                 ^
+F2.jml:19: Warning: Possible null dereference (Null)
+    @  requires aa.length>0; //null(aa) warning
+                  ^
+F2.jml:3: Warning: Possible null dereference (Null)
+  //@ invariant a.length>0; // null(a), spurious null(this) warnings i ...
+                 ^
+20 warnings

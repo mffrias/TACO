@@ -1,0 +1,6 @@
+method insert | affected line: 3 | (PRVOU_REFINED, x != null, x == null)
+method insert | affected line: 4 | (PRVOR_REFINED, x, this.root)
+method insert | affected line: 8 | (COI, k > x.key, !(k > x.key))
+method insert | affected line: 21 | (PRVOL_SMART, y.left, this.root.left)
+method insert | affected line: 26 | (PRVOL_SMART, x.parent, x.left.parent)
+method insert | affected line: 27 | (PRVOR_REFINED, size, k)

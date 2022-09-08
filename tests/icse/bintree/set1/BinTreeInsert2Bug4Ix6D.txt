@@ -1,0 +1,2 @@
+method insert | affected line: 4 | (PRVOL_SMART, y, y.parent)
+method insert | affected line: 6 | (PRVOR_REFINED, x.left, x.parent)

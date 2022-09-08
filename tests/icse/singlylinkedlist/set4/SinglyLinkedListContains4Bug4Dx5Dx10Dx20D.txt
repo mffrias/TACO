@@ -1,0 +1,4 @@
+method contains | affected line: 4 | (COI, false, !false)
+method contains | affected line: 10 | (PRVOU_REFINED, null, 1)
+method contains | affected line: 5 | (COI, result == false, !(result == false))
+method contains | affected line: 20 | (PRVOU_REFINED, true, result)

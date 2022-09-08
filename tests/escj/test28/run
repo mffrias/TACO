@@ -1,0 +1,4 @@
+#!/bin/sh
+# usage: run FLAGS
+
+${ESCJ} -pgc -start 29 -O1 -O2 -O4 -quiet $* O124.java

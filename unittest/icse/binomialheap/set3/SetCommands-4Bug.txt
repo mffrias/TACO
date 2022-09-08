@@ -1,0 +1,3 @@
+icse.binomialheap.set3.StrykerBinomialHeapExtractMin4Bug10Dx17Dx27Ix38DTest
+icse.binomialheap.set3.StrykerBinomialHeapFindMinimum4Bug2Dx3Dx6Dx11DTest
+icse.binomialheap.set3.StrykerBinomialHeapInsert4Bug5Dx8Dx26Ix50DTest

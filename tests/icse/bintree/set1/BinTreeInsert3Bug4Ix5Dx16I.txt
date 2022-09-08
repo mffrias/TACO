@@ -1,0 +1,3 @@
+method insert | affected line: 4 | (PRVOL_SMART, y, x)
+method insert | affected line: 5 | (ROR, k < x.key, k <= x.key)
+method insert | affected line: 16 | (PRVOL_SMART, x.key, x.left.key)

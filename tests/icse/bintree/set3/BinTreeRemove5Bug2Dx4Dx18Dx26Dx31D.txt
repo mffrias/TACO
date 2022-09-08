@@ -1,0 +1,5 @@
+method remove | affected line: 2 | (AOIS, node.key, --node.key)
+method remove | affected line: 4 | (PRVOR_REFINED, node.left, node.right)
+method remove | affected line: 26 | (COI, node.left == null, !(node.left == null))
+method remove | affected line: 18 | (PRVOR_REFINED, predecessor.right, predecessor.parent)
+method remove | affected line: 31 | (PRVOU_REFINED, node, null)

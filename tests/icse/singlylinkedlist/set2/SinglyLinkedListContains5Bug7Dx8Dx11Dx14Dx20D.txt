@@ -1,0 +1,5 @@
+method contains | affected line: 7 | (COI, valueParam == null && current.value == null, !(valueParam == null && current.value == null))
+method contains | affected line: 8 | (PRVOR_REFINED, true, result)
+method contains | affected line: 11 | (PRVOU_REFINED, valueParam == current.value, valueParam != current.value)
+method contains | affected line: 14 | (COI, false, !false)
+method contains | affected line: 20 | (COI, true, !true)

@@ -1,0 +1,126 @@
+----- loop 1.5 -----
+mwhalen.java:17: Warning: Array index possibly too large (IndexTooBig)
+      a[i] = 5;
+       ^
+mwhalen.java:53: Warning: Array index possibly too large (IndexTooBig)
+    bingArray[5] = new bing();
+             ^
+mwhalen.java:61: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:69: Warning: Possible assertion failure (Assert)
+      //@ assert n != i;
+          ^
+mwhalen.java:211: Warning: Possible assertion failure (Assert)
+    //@ assert false;
+        ^
+5 warnings
+----- loop 3 -----
+mwhalen.java:17: Warning: Array index possibly too large (IndexTooBig)
+      a[i] = 5;
+       ^
+mwhalen.java:25: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:53: Warning: Array index possibly too large (IndexTooBig)
+    bingArray[5] = new bing();
+             ^
+mwhalen.java:61: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:69: Warning: Possible assertion failure (Assert)
+      //@ assert n != i;
+          ^
+mwhalen.java:79: Warning: Possible assertion failure (Assert)
+      //@ assert i < 2;
+          ^
+mwhalen.java:89: Warning: Possible assertion failure (Assert)
+      //@ assert i < 1;
+          ^
+mwhalen.java:99: Warning: Possible assertion failure (Assert)
+      //@ assert i < 2;
+          ^
+mwhalen.java:126: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:134: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:142: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:151: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:189: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:211: Warning: Possible assertion failure (Assert)
+    //@ assert false;
+        ^
+14 warnings
+----- loop 10 -----
+mwhalen.java:17: Warning: Array index possibly too large (IndexTooBig)
+      a[i] = 5;
+       ^
+mwhalen.java:25: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:33: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:41: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = oo;
+               ^
+mwhalen.java:53: Warning: Array index possibly too large (IndexTooBig)
+    bingArray[5] = new bing();
+             ^
+mwhalen.java:61: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:69: Warning: Possible assertion failure (Assert)
+      //@ assert n != i;
+          ^
+mwhalen.java:70: Warning: Array index possibly too large (IndexTooBig)
+      bingArray[i] = new bing();
+               ^
+mwhalen.java:79: Warning: Possible assertion failure (Assert)
+      //@ assert i < 2;
+          ^
+mwhalen.java:89: Warning: Possible assertion failure (Assert)
+      //@ assert i < 1;
+          ^
+mwhalen.java:99: Warning: Possible assertion failure (Assert)
+      //@ assert i < 2;
+          ^
+mwhalen.java:118: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:126: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:134: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:142: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:151: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:165: Warning: Array index possibly too large (IndexTooBig)
+        intArray[i][j] = -1;
+                   ^
+mwhalen.java:178: Warning: Array index possibly too large (IndexTooBig)
+        intArray[i][j] = -1;
+                   ^
+mwhalen.java:189: Warning: Code marked as unreachable may possibly be reached (Reachable)
+    //@ unreachable;
+        ^
+mwhalen.java:199: Warning: Possible assertion failure (Assert)
+    //@ assert false;
+        ^
+mwhalen.java:211: Warning: Possible assertion failure (Assert)
+    //@ assert false;
+        ^
+21 warnings

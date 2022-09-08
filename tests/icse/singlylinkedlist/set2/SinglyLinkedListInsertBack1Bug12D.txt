@@ -1,0 +1,1 @@
+method insertBack | affected line: 12 | (PRVOR_REFINED, freshNode, freshNode.next)

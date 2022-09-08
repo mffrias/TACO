@@ -1,0 +1,164 @@
+<upperbound>
+<field label="broops_core_objects_FibHeapNode_child_0" arity="2" >
+</field>
+<field label="broops_core_objects_FibHeapNode_left_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+</field>
+<field label="broops_core_objects_FibHeapNode_parent_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+</field>
+<field label="broops_core_objects_FibHeapNode_right_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+</field>
+<field label="froops_core_objects_FibHeapNode_child_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+</field>
+<field label="froops_core_objects_FibHeapNode_left_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+</field>
+<field label="froops_core_objects_FibHeapNode_parent_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="froops_core_objects_FibHeapNode_right_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_0" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_1" />
+    <atom label="roops_core_objects_FibHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="roops_core_objects_FibHeap_min_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_FibHeap_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_FibHeap_0" />
+    <atom label="roops_core_objects_FibHeapNode_0" />
+  </tuple>
+</field>
+</upperbound>

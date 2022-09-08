@@ -1,0 +1,2 @@
+Comparing BigInteger in BigInteger.refines-spec and BigInteger.class
+BigInteger.refines-spec: Constructor BigInteger(class java.math.MutableBigInteger,int) is not in BigInteger.refines-spec, but is in BigInteger.class

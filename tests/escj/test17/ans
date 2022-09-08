@@ -1,0 +1,13 @@
+MethodCall.java:21: Warning: Possible null dereference (Null)
+    (mc = null).m1_fail(mc);      // null dereference
+               ^
+MethodCall.java:60: Warning: Possible null dereference (Null)
+    (mc.f).m5_ok();
+       ^
+MethodCall.java:77: Warning: Postcondition possibly not established (Post)
+  }
+  ^
+Associated declaration is "MethodCall.java", line 73, col 6:
+  //@ ensures \result == null;
+      ^
+3 warnings

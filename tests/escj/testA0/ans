@@ -1,0 +1,13 @@
+NullArr.java:23: Warning: Possible assignment of null to variable declared non_null (NonNull)
+            a[0] = null; // error
+                 ^
+Associated declaration is "NullArr.java", line 21, col 23:
+    public void m0b(/*@non_null*/ Object /*!non_null*/ [] a) {
+                       ^
+NullArr.java:45: Warning: Method declared non_null may return null (NonNullResult)
+    }
+    ^
+Associated declaration is "NullArr.java", line 40, col 14:
+    public /*@non_null*/ Object[] m1b(/*@non_null*/ Object /*!non_null ...
+              ^
+2 warnings

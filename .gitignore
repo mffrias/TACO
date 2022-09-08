@@ -1,0 +1,15 @@
+StrykerLastReports.txt
+.DS_Store
+output
+generated
+*.class
+*.log
+*.log.*
+*_temp*
+*~
+bin
+.project
+.classpath
+mutation_log
+org.eclipse.jdt.core.prefs
+StrykerLastFixFound.java

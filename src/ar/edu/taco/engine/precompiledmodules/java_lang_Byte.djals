@@ -1,0 +1,163 @@
+//
+// TACO: Translation of Annotated COde
+// Copyright (c) 2010 Universidad de Buenos Aires
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA,
+// 02110-1301, USA
+
+//-------------- java_lang_Byte --------------//
+module java_lang_Byte
+sig java_lang_Byte extends java_lang_Object {} {}
+
+field byteHashCode:(java_lang_Byte)->one(Int) {}
+
+program java_lang_Byte::Constructor[
+  var thiz:java_lang_Byte,
+  var throw:java_lang_Throwable+null,
+  var value:Int] 
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[thiz'.byteHashCode',i])
+		}
+	}
+}
+Implementation 
+   {
+		throw:=null;
+		havoc thiz;
+		assume thiz.byteHashCode = i;     
+   }
+
+program java_lang_Byte::equals[
+  var thiz:java_lang_Byte,
+  var throw:java_lang_Throwable+null,
+  var return:boolean,
+  var obj:java_lang_Object]
+Specification 
+{  
+	SpecCase #0 {
+		requires {
+			neq[thiz, null]
+		}
+		ensures {
+      		(throw'=null) and (equ[thiz.byteHashCode',obj.byteHashCode'] implies equ[return', true]) and (neq[thiz.byteHashCode',obj.byteHashCode'] implies equ[return', false])
+		}
+	}
+}
+Implementation 
+   {
+      throw:=null;
+      if equ[obj,null]{
+         return:=false;
+      } else {
+         if not ( instanceOf[obj,java_lang_Byte] ) {
+            return:=false;
+         } else {
+            if equ[thiz.byteHashCode, obj.byteHashCode] {
+               return:=true;
+            } else {
+               return:=false;
+            };
+         };
+      };
+   
+   }
+
+program java_lang_Byte::hashCode[var thiz:java_lang_Byte, var throw:java_lang_Throwable+null, var return:Int]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[return', thiz'.byteHashCode']) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+	   return:=thiz.byteHashCode;     
+}
+   
+   
+program java_lang_Byte::toString[var throw:java_lang_Throwable+null, var return:java_lang_String, var i:Int]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[return'.stringHashCode',i]) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc return;
+	   assume return.stringHashCode = i;     
+}
+
+
+program java_lang_Byte::valueOf[var throw:java_lang_Throwable+null, var return:java_lang_Byte, var s:java_lang_String+null]
+Specification 
+{
+	SpecCase #0 {
+		requires {
+			neq[s,null]
+		}
+		ensures {
+      		(throw'=null) and (equ[return'.byteHashCode',s.stringHashCode]) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc return;
+	   assume return.byteHashCode = s.stringHashCode;     
+}
+
+
+program java_lang_Byte::valueOf[var throw:java_lang_Throwable+null, var return:java_lang_Byte, var i:Int]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[return'.byteHashCode',i]) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc return;
+	   assume return.byteHashCode = i;     
+}
+
+program java_lang_Byte::parseByte[var throw:java_lang_Throwable+null, var return:Int, var s:java_lang_String]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[return', s'.stringHashCode']) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc return;
+	   assume return = s.stringHashCode;     
+}

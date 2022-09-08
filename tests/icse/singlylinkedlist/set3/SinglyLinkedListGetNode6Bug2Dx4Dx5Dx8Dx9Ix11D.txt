@@ -1,0 +1,6 @@
+method getNode | affected line: 8 | (AORB, current_index + 1, current_index * 1)
+method getNode | affected line: 4 | (PRVOU_REFINED, current != null, current == null)
+method getNode | affected line: 11 | (PRVOU_REFINED, result, current)
+method getNode | affected line: 5 | (PRVOU_REFINED, index, 0)
+method getNode | affected line: 9 | (PRVOL_SMART, current, current.value)
+method getNode | affected line: 2 | (PRVOU_REFINED, 0, 1)

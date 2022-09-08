@@ -1,0 +1,3 @@
+method getNode | affected line: 8 | (AOIS, current_index, ++current_index)
+method getNode | affected line: 5 | (AOIS, current_index, current_index--)
+method getNode | affected line: 2 | (PRVOU_REFINED, null, current)

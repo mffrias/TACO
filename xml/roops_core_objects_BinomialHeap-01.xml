@@ -1,0 +1,36 @@
+<upperbound>
+<field label="broops_core_objects_BinomialHeapNode_child_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinomialHeapNode_child_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_BinomialHeapNode_sibling_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinomialHeapNode_sibling_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_BinomialHeapNode_parent_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinomialHeapNode_parent_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="roops_core_objects_BinomialHeap_head_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeap_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeap_0" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+</field>
+</upperbound>

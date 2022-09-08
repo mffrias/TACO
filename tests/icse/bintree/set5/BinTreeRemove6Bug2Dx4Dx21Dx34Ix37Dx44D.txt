@@ -1,0 +1,6 @@
+method remove | affected line: 2 | (AOIS, node.key != element, node.key == element)
+method remove | affected line: 4 | (PRVOR_REFINED, node.left, node)
+method remove | affected line: 21 | (PRVOR_REFINED, predecessor.key, predecessor.right.key)
+method remove | affected line: 34 | (PRVOL_SMART, pullUp.parent, pullUp.left.parent)
+method remove | affected line: 37 | (PRVOU_REFINED, node.parent.left, pullUp.parent.left)
+method remove | affected line: 44 | (PRVOU_REFINED, pullUp, root)

@@ -1,0 +1,18 @@
+<upperbound>
+<field label="broops_core_objects_TreeSetEntry_left_0" arity="2" >
+</field>
+<field label="froops_core_objects_TreeSetEntry_left_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_TreeSetEntry_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_TreeSetEntry_right_0" arity="2" >
+</field>
+<field label="froops_core_objects_TreeSetEntry_right_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_TreeSetEntry_0" />
+    <atom label="null" />
+  </tuple>
+</field>
+</upperbound>

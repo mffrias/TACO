@@ -1,0 +1,109 @@
+// @(#)$Id: Cipher.jml,v 1.1 2009/05/13 20:13:58 ddobniewski Exp $
+
+package javax.crypto;
+
+import java.security.*;
+import java.security.cert.*;
+import java.security.spec.*;
+
+public class Cipher {
+
+    // CLASS SPECIFICATIONS
+
+    // FIELDS
+    public static final int PRIVATE_KEY;
+    public static final int PUBLIC_KEY;
+    public static final int SECRET_KEY;
+    public static final int ENCRYPT_MODE;
+    public static final int WRAP_MODE;
+    public static final int UNWRAP_MODE;
+    public static final int DECRYPT_MODE;
+
+    // METHODS AND CONSTRUCTORS
+
+    protected Cipher(/*@non_null*/ CipherSpi Param0, /*@non_null*/ Provider Param1, /*@non_null*/ String Param2);
+
+    public static final /*@non_null*/ Cipher getInstance(/*@non_null*/String transformation)
+        throws NoSuchAlgorithmException, NoSuchPaddingException;
+    public static final /*@non_null*/ Cipher getInstance(/*@non_null*/String transformation,
+							 /*@non_null*/String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException;
+
+    public static final /*@non_null*/ Cipher getInstance(/*@non_null*/ String Param0, /*@non_null*/ Provider Param1)
+        throws NoSuchAlgorithmException, NoSuchPaddingException;
+
+    public final /*@non_null*/ Provider getProvider();
+
+    public final /*@non_null*/ String getAlgorithm();
+
+    public final int getBlockSize();
+
+    public final int getOutputSize(int Param0)
+        throws IllegalStateException;
+
+    public final /*@non_null*//*?*/ byte[] getIV();
+
+    public final /*@non_null*//*?*/ AlgorithmParameters getParameters();
+
+    public final /*@non_null*//*?*/ ExemptionMechanism getExemptionMechanism();
+
+    public final void init(int Param0, /*@non_null*/ Key Param1)
+        throws InvalidKeyException;
+
+    public final void init(int Param0, /*@non_null*/ Key Param1, /*@non_null*/ SecureRandom Param2)
+        throws InvalidKeyException;
+
+    public final void init(int Param0, /*@non_null*/ Key Param1, /*@non_null*/ AlgorithmParameterSpec Param2)
+        throws InvalidKeyException, InvalidAlgorithmParameterException;
+
+    public final void init(int Param0, /*@non_null*//*?*/ Key Param1, /*@non_null*//*?*/ AlgorithmParameterSpec Param2, SecureRandom Param3)
+        throws InvalidKeyException, InvalidAlgorithmParameterException;
+
+    public final void init(int Param0, /*@non_null*//*?*/ Key Param1, /*@non_null*//*?*/ AlgorithmParameters Param2)
+        throws InvalidKeyException, InvalidAlgorithmParameterException;
+
+    public final void init(int Param0, /*@non_null*//*?*/ Key Param1, /*@non_null*//*?*/ AlgorithmParameters Param2, /*@non_null*//*?*/ SecureRandom Param3)
+        throws InvalidKeyException, InvalidAlgorithmParameterException;
+
+    public final void init(int Param0, java.security.cert.Certificate Param1)
+        throws InvalidKeyException;
+
+    public final void init(int Param0, java.security.cert.Certificate Param1, SecureRandom Param2)
+        throws InvalidKeyException;
+
+    public final /*@non_null*//*?*/ byte[] update(/*@non_null*//*?*/ byte[] Param0)
+        throws IllegalStateException;
+
+    public final /*@non_null*//*?*/ byte[] update(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2)
+        throws IllegalStateException;
+
+    public final int update(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2, /*@non_null*//*?*/ byte[] Param3)
+        throws IllegalStateException, ShortBufferException;
+
+    public final int update(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2, /*@non_null*//*?*/ byte[] Param3, int Param4)
+        throws IllegalStateException, ShortBufferException;
+
+    public final /*@non_null*/ byte[] doFinal()
+        throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+
+    public final int doFinal(/*@non_null*//*?*/ byte[] Param0, int Param1)
+        throws IllegalStateException, IllegalBlockSizeException, ShortBufferException, BadPaddingException;
+
+    public final /*@non_null*/ byte[] doFinal(/*@non_null*/ byte[] input)
+        throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+
+    public final /*@non_null*//*?*/ byte[] doFinal(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2)
+        throws IllegalStateException, IllegalBlockSizeException, BadPaddingException;
+
+    public final int doFinal(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2, /*@non_null*//*?*/ byte[] Param3)
+        throws IllegalStateException, ShortBufferException, IllegalBlockSizeException, BadPaddingException;
+
+    public final int doFinal(/*@non_null*//*?*/ byte[] Param0, int Param1, int Param2, /*@non_null*//*?*/ byte[] Param3, int Param4)
+        throws IllegalStateException, ShortBufferException, IllegalBlockSizeException, BadPaddingException;
+
+    public final /*@non_null*//*?*/ byte[] wrap(/*@non_null*//*?*/ Key Param0)
+        throws IllegalStateException, IllegalBlockSizeException, InvalidKeyException;
+
+    public final /*@non_null*//*?*/ Key unwrap(/*@non_null*//*?*/ byte[] Param0, /*@non_null*//*?*/ String Param1, int Param2)
+        throws IllegalStateException, InvalidKeyException, NoSuchAlgorithmException;
+}

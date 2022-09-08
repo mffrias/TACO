@@ -1,0 +1,4 @@
+method insert | affected line: 49 | (COI, nextTemp != null, !(nextTemp != null))
+method insert | affected line: 41 | (PRVOU_REFINED, temp1.sibling, temp1.parent)
+method insert | affected line: 57 | (PRVOR_REFINED, temp.child, temp.child.child)
+method insert | affected line: 14 | (PRVOR_REFINED, temp1.sibling, this.Nodes.sibling)

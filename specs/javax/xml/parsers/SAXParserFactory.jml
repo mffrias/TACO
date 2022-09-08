@@ -1,0 +1,41 @@
+// $Id: SAXParserFactory.jml,v 1.1 2009/05/13 20:13:58 ddobniewski Exp $
+
+package javax.xml.parsers;
+
+// import javax.xml.validation.Schema;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+
+public abstract class SAXParserFactory {
+
+    protected SAXParserFactory();
+
+    public static /*@non_null*/ SAXParserFactory newInstance()
+	throws FactoryConfigurationError;
+
+    public abstract /*@non_null*/ SAXParser newSAXParser() 
+	throws ParserConfigurationException, SAXException;
+
+    public void setNamespaceAware(boolean awareness);
+
+    public void setValidating(boolean validating);
+
+    public boolean isNamespaceAware();
+
+    public boolean isValidating();
+
+    public abstract void setFeature(/*@non_null*/ String name, boolean value) 
+	throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException;
+
+    public abstract boolean getFeature(/*@non_null*/ String name) 
+	throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException;
+
+    // public Schema getSchema();
+    // public void setSchema(Schema schema);
+
+    // public void setXIncludeAware(boolean state);
+    // public boolean isXIncludeAware();
+
+}
+

@@ -1,0 +1,2 @@
+method insert | affected line: 11 | (PRVOU_REFINED, temp1.degree, temp2.degree)
+method insert | affected line: 19 | (PRVOU_REFINED, temp1.sibling.degree, temp1.sibling.sibling.degree)

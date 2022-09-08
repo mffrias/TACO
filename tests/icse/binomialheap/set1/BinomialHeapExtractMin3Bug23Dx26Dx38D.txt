@@ -1,0 +1,3 @@
+method extractMin | affected line: 38 | (PRVOU_REFINED, minNode, this.extractMin())
+method extractMin | affected line: 23 | (PRVOU_REFINED, null, prevTemp)
+method extractMin | affected line: 26 | (PRVOU_REFINED, fakeNode, null)

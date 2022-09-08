@@ -1,0 +1,4 @@
+method remove | affected line: 41 | (PRVOU_REFINED, oldValue, new java.lang.Integer( this.modCount ))
+method remove | affected line: 8 | (AOIS, this.size, this.size--)
+method remove | affected line: 15 | (PRVOL_SMART, node, node.value)
+method remove | affected line: 22 | (PRVOR_REFINED, node.previous, this.firstCachedNode.previous)

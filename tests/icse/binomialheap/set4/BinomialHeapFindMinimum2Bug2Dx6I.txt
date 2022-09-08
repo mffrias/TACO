@@ -1,0 +1,2 @@
+method findMinimum | affected line: 2 | (PRVOU_REFINED, Nodes, this.Nodes.sibling)
+method findMinimum | affected line: 6 | (PRVOL_SMART, y, y.parent)

@@ -1,0 +1,68 @@
+<upperbound>
+<field label="roops_core_objects_SinglyLinkedList_header_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedList_0" />
+    <atom label="null" />
+  </tuple>
+    <tuple>
+    <atom label="roops_core_objects_SinglyLinkedList_0" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+  </tuple>
+</field>
+<field label="froops_core_objects_SinglyLinkedListNode_next_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_4" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_2" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_0" />
+    <atom label="roops_core_objects_SinglyLinkedListNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_SinglyLinkedListNode_5" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_SinglyLinkedListNode_next_0" arity="2" >
+</field>
+</upperbound>

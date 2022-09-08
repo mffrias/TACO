@@ -1,0 +1,4 @@
+method getNode | affected line: 5 | (AOIS, index, index++)
+method getNode | affected line: 6 | (PRVOR_REFINED, current, this.header)
+method getNode | affected line: 1 | (PRVOU_REFINED, this.header, header)
+method getNode | affected line: 8 | (PRVOR_REFINED, 1, current_index)

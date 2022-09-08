@@ -1,0 +1,2 @@
+method contains | affected line: 6 | (PRVOU_REFINED, current.key, current.left.key)
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, current.left.parent)

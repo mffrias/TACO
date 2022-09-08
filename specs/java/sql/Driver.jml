@@ -1,0 +1,40 @@
+// @(#)$Id: Driver.jml,v 1.1 2009/05/13 20:13:55 ddobniewski Exp $
+//
+// Copyright (C) 2007 Dependable Software Research Group, Concordia University.
+//
+// This file is part of the runtime library of the Java Modeling Language.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2.1,
+// of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with JML; see the file LesserGPL.txt.  If not, write to the Free
+// Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+// 02110-1301  USA.
+
+package java.sql;
+
+import java.util.Properties;
+
+public interface Driver {
+
+    public int getMajorVersion();
+    public int getMinorVersion();
+    public boolean jdbcCompliant();
+
+    public boolean acceptsURL(/*@non_null*/ String url) throws SQLException;
+
+    public /*@nullable*/ Connection connect(/*@non_null*/ String url, 
+					    /*@non_null*/ Properties info)  throws SQLException;
+
+    public /*@non_null*/ DriverPropertyInfo[] 
+	getPropertyInfo(/*@non_null*/ String url, 
+			/*@non_null*/ Properties info) throws SQLException;
+}

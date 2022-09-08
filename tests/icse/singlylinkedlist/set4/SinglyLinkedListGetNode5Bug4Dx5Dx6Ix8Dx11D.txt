@@ -1,0 +1,5 @@
+method getNode | affected line: 4 | (COI, result == null, !(result == null))
+method getNode | affected line: 11 | (PRVOU_REFINED, result, result.next)
+method getNode | affected line: 6 | (PRVOL_SMART, result, result.next)
+method getNode | affected line: 5 | (COI, index == current_index, index != current_index)
+method getNode | affected line: 8 | (AORB, current_index + 1, current_index / 1)

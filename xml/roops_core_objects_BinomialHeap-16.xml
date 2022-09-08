@@ -1,0 +1,600 @@
+<upperbound>
+<field label="broops_core_objects_BinomialHeapNode_child_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinomialHeapNode_child_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_15" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_15" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="broops_core_objects_BinomialHeapNode_sibling_0" arity="2" >
+</field>
+<field label="froops_core_objects_BinomialHeapNode_sibling_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_15" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+  </tuple>
+</field>
+<field label="broops_core_objects_BinomialHeapNode_parent_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_15" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+  </tuple>
+</field>
+<field label="froops_core_objects_BinomialHeapNode_parent_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_12" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_9" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_2" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_5" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_1" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_10" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_14" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_8" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_7" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_6" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_4" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_15" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_3" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_13" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeapNode_11" />
+    <atom label="null" />
+  </tuple>
+</field>
+<field label="roops_core_objects_BinomialHeap_head_0" arity="2" >
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeap_0" />
+    <atom label="null" />
+  </tuple>
+  <tuple>
+    <atom label="roops_core_objects_BinomialHeap_0" />
+    <atom label="roops_core_objects_BinomialHeapNode_0" />
+  </tuple>
+</field>
+</upperbound>

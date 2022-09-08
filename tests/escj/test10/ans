@@ -1,0 +1,7 @@
+C.java:16: Warning: Array index possibly too large (IndexTooBig)
+        a[0] = a[2];
+                ^
+C.java:33: Warning: Possible assertion failure (Assert)
+      //@ assert a[0] <= a[1];       // fails because a[2] should be a ...
+          ^
+2 warnings

@@ -1,0 +1,4 @@
+method addFirst | affected line: 7 | (PRVOR_REFINED, newNode, null)
+method addFirst | affected line: 4 | (PRVOR_REFINED, insertBeforeNode, this.header)
+method addFirst | affected line: 2 | (PRVOR_REFINED, o, this.header)
+method addFirst | affected line: 5 | (PRVOR_REFINED, insertBeforeNode.previous, insertBeforeNode.next.previous)

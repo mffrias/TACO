@@ -1,0 +1,2 @@
+method getNode | affected line: 8 | (PRVOL_SMART, current_index, index)
+method getNode | affected line: 9 | (PRVOL_SMART, current, current.value)

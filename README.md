@@ -11,17 +11,19 @@ TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++]
 
 ## Installation
 
-Download this repository and execute `./setupTACO.sh [full]`. This script will download the following repositories:
+Download this repository and execute `./setupTACO.sh [full]`^. This script will download the following repositories:
 
  * This one if this script was downloaded elsewhere or it can't find TACO's `build.xml` file.
  * JDynAlloy.
  * [dynalloy4](https://github.com/mffrias/dynalloy4) (a dependency for JDynAlloy).
- * muJava++* (only if the script is run with the `full` argument).
+ * muJava++^^ (only if the script is run with the `full` argument).
  * [OJ](https://github.com/saiema/OJ-with-Java-1.6) (a dependency of muJava++, only if the script is run with the `full` argument).
  
 After downloading all repositories, the script will compile **dynalloy4**, use the compiled jar file to compile **JDynAlloy**, and it will copy both compiled jars into **TACO**'s `lib` folder.
 
-_(*) TACO already has a `mujava++.jar` included, unless needed there is no need to download muJava++ and OJ._
+_(^) You may need to give the script execution permissions via executing `chmod +x setupTACO.sh`._
+
+_(^^) TACO already has a `mujava++.jar` included, unless needed there is no need to download muJava++ and OJ._
 
 ## Importing TACO into Eclipse
 

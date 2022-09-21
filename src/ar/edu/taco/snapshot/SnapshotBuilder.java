@@ -882,7 +882,7 @@ public class SnapshotBuilder {
 
 	private static HashMap<Class, Object> createdDefaultObjects = new HashMap<Class, Object>();
 
-	private Object createNewInstance(@SuppressWarnings("rawtypes") Class clazz) {
+	public Object createNewInstance(@SuppressWarnings("rawtypes") Class clazz) {
 		Object instance = null;
 		try {
 			Class<?> loadedClass = Class.forName(clazz.getName(), true, loader);

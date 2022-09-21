@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 import ar.edu.taco.junit.RecoveredInformation.StaticFieldInformation;
+import ar.edu.taco.snapshot.SnapshotBuilder;
 
 
 public class UnitTestBuilder {
@@ -115,9 +116,11 @@ public class UnitTestBuilder {
 				Object thizInstance = null;
 				Class<?>[] parTypes = null;
 				Object[] concretePars = null;
-				try {
-					thizInstance = clazz.newInstance();
-				} catch (InstantiationException e) {
+//				try {
+//					thizInstance = clazz.newInstance();
+					SnapshotBuilder s = new SnapshotBuilder(recoveredInformation, null);
+					thizInstance = s.createNewInstance(clazz);
+//				} catch (InstantiationException e) {
 
 					//          In this case the class under analysis did not export a parameterless constructor. Therefore,
 					//          there should be a constructor with parameters. We will get the first such constructor (since no
@@ -156,37 +159,37 @@ public class UnitTestBuilder {
 						}
 						index++;
 					}
-					try {
-						if (c.isAccessible())
-							thizInstance = c.newInstance(concretePars);
-						else {
-							c.setAccessible(true);
-							thizInstance = c.newInstance(concretePars);
-						}
-					} catch (InstantiationException ex){
-						e.printStackTrace();
-					} catch (Exception ex) {
-						throw new RuntimeException("DYNJALLOY ERROR! Possibly the class does not provide a constructor than can run on its parameters default values.");
-					}
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException("DYNJALLOY ERROR! " + e.getMessage());
-				}
+//					try {
+//						if (c.isAccessible())
+//							thizInstance = c.newInstance(concretePars);
+//						else {
+//							c.setAccessible(true);
+//							thizInstance = c.newInstance(concretePars);
+//						}
+//					} catch (InstantiationException ex){
+//						e.printStackTrace();
+//					} catch (Exception ex) {
+//						throw new RuntimeException("DYNJALLOY ERROR! Possibly the class does not provide a constructor than can run on its parameters default values.");
+//					}
+//				} catch (IllegalAccessException e) {
+//					throw new RuntimeException("DYNJALLOY ERROR! " + e.getMessage());
+//				}
 				if (recoveredInformation.getSnapshot().get(THIZ_0) != null) //It may be null even if the method is not static in case the method does not use any
 					//attribute from this (Alloy will prune variable "thiz").
 					thizInstance = recoveredInformation.getSnapshot().get(THIZ_0);
 
 				String instanceCreation = recoveredInformation.getClassToCheck() + " instance = new " + recoveredInformation.getClassToCheck() + "(";
 				if (concretePars != null){
-					for (int index = 0; index < concretePars.length; index++){
-						if (parTypes[index].isPrimitive() || this.isAutoboxingClass(parTypes[index])){
-							instanceCreation += concretePars[index].toString();
-							if (parTypes[index].getSimpleName().equals("float"))
+					for (int parindex = 0; parindex < concretePars.length; parindex++){
+						if (parTypes[parindex].isPrimitive() || this.isAutoboxingClass(parTypes[parindex])){
+							instanceCreation += concretePars[parindex].toString();
+							if (parTypes[parindex].getSimpleName().equals("float"))
 								instanceCreation += "f";
-							if (parTypes[index].getSimpleName().equals("double"))
+							if (parTypes[parindex].getSimpleName().equals("double"))
 								instanceCreation += "d";    
 						} else
 							instanceCreation += "null";
-						if (index < concretePars.length - 1)
+						if (parindex < concretePars.length - 1)
 							instanceCreation += ",";
 					}
 				}

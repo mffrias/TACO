@@ -1,23 +1,23 @@
-package ar.edu.itba.forArielGodio;
+package ar.edu.itba.forArielGodio.inverse;
 
 
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class ForArielGodioInverseTest extends CollectionTestBase {
+public class ForArielGodioInverseBug01Test extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
-		return "forArielGodio.Inverse";
+		return "forArielGodio.inverse.bug01.Inverse";
 	}
 
 	//Con aritmética java tarda infinito en traducir. Con 4 bits, encuentra el bug al toque.
 	
 	public void test_genericMethod1Test() throws VizException {
-		setConfigKeyRelevantClasses("forArielGodio.Inverse");
+		setConfigKeyRelevantClasses("forArielGodio.inverse.bug01.Inverse");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeyUseJavaArithmetic(true);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
@@ -30,7 +30,7 @@ public class ForArielGodioInverseTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("forArielGodio.Inverse:1");
+		setConfigKeyTypeScopes("forArielGodio.inverse.bug01.Inverse:1");
 		check(GENERIC_PROPERTIES,"inverse(int[], int[])",true);
 	}
 

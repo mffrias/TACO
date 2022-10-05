@@ -7,8 +7,8 @@
 	<property name="junit.output.dir" value="junit" />
 	<property name="debuglevel" value="source,lines,vars" />
 	
-	<property name="target" value="1.6" />
-	<property name="source" value="1.6" />
+	<property name="target" value="1.7" />
+	<property name="source" value="1.7" />
 	
 	<!-- TACO properties definition -->
 	<property name="app.id" value="taco" />
@@ -17,33 +17,36 @@
 
 	<!-- Build path -->
 	<path id="build.classpath">
-		<pathelement location="bin" />
-		<pathelement location="lib/alloy4.jar" />
-		<pathelement location="lib/dynalloy4.jar" />
-		<pathelement location="lib/jdynalloy.jar" />
-		<pathelement location="lib/commons-cli-1.2.jar" />
-		<pathelement location="lib/commons-collections-3.2.1.jar" />
-		<pathelement location="lib/commons-configuration-1.6.jar" />
-		<pathelement location="lib/commons-lang-2.4.jar" />
-		<pathelement location="lib/commons-logging-1.1.1.jar" />
-		<pathelement location="lib/log4j-1.2.15.jar" />
-		<pathelement location="lib/antlr.jar" />
-		<pathelement location="lib/antlr-3.2.jar" />
-		<pathelement location="lib/jml-release.jar" />
-		<pathelement location="lib/org.jmlspecs.annotation.jar" />
-		<pathelement location="lib/koa/avalon-framework-4.2.0.jar" />
-		<pathelement location="lib/koa/bcprov-jdk14-129.jar" />
-		<pathelement location="lib/koa/fop.jar" />
-		<pathelement location="lib/guava.jar" />
-		<pathelement location="lib/java-cup-11a.jar" />
-		<pathelement location="lib/edu.mit.csail.sdg.annotations_0.2.5.jar" />
-		<pathelement location="lib/junit-4.8.2.jar" />
-		<pathelement location="lib/stryker/jml4c.jar" />
-		<pathelement location="lib/stryker/jmlruntime.jar" />
-		<pathelement location="lib/stryker/MuJavaPlus.jar" />
-		<pathelement location="lib/stryker/openjava2005.jar" />
-		<pathelement location="lib/stryker/openjml.jar" />
-		<pathelement location="lib/stryker/stryker.jar" />
+	        <pathelement location="./lib/antlr-4.3-complete.jar" />
+	        <pathelement location="./lib/commons-collections-3.2.1.jar" />
+	        <pathelement location="./lib/commons-configuration-1.6.jar" />
+	        <pathelement location="./lib/commons-lang-2.4.jar" />
+	        <pathelement location="./lib/commons-lang3-3.3.2.jar" />
+	        <pathelement location="./lib/commons-logging-1.1.1.jar" />
+	        <pathelement location="./lib/dynalloy4.jar" />
+	        <pathelement location="./lib/edu.mit.csail.sdg.annotations_0.2.5.jar" />
+	        <pathelement location="./lib/guava-16.0.1.jar" />
+	        <pathelement location="./lib/javassist.jar" />
+	        <pathelement location="./lib/jdynalloy.jar" />
+	        <pathelement location="./lib/jml-release.jar" />
+	        <pathelement location="./lib/junit-4.8.2.jar" />
+	        <pathelement location="./lib/junit.jar" />
+	        <pathelement location="./lib/log4j-1.2.15.jar" />
+	        <pathelement location="./lib/mujava++.jar" />
+	        <pathelement location="./lib/objenesis-2.6.jar" />
+	        <pathelement location="./lib/org.eclipse.core.contenttype_3.4.200.v20120523-2004.jar" />
+	        <pathelement location="./lib/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar" />
+	        <pathelement location="./lib/org.eclipse.core.resources_3.8.0.v20120522-2034.jar" />
+	        <pathelement location="./lib/org.eclipse.core.runtime_3.8.0.v20120521-2346.jar" />
+	        <pathelement location="./lib/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar" />
+	        <pathelement location="./lib/org.eclipse.equinox.preferences_3.5.0.v20120522-1841.jar" />
+	        <pathelement location="./lib/org.eclipse.jdt.core_3.8.1.v20120531-0637.jar" />
+	        <pathelement location="./lib/org.eclipse.osgi_3.8.0.v20120529-1548.jar" />
+	        <pathelement location="./lib/org.eclipse.text_3.5.200.v20120523-1310.jar" />
+	        <pathelement location="./lib/org.hamcrest.core_1.3.0.v201303031735.jar" />
+	        <pathelement location="./lib/recoder.jar" />
+	        <pathelement location="./lib/reflections-0.9.9-RC1.jar" />
+	        <!-- <pathelement location="./lib/stryker/jml4c.jar" /> -->
 	</path>
 
 	<!-- TASK DEFINITION -->

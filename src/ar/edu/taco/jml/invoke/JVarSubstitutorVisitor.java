@@ -741,7 +741,15 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	 */
 	@Override
 	public void visitFieldExpression(JClassFieldExpression self) {
-		this.getStack().push(self);
+		JExpression thePrefix = self.prefix();
+		thePrefix.accept(this);
+		JExpression theNewPrefix = (JExpression) this.getStack().pop();
+		
+		JClassFieldExpression newSelf = 
+				new JClassFieldExpression(self.getTokenReference(), theNewPrefix, self.ident(), self.sourceName());
+		newSelf.setField(self.getField());
+		newSelf.setType(self.getApparentType());
+		this.getStack().push(newSelf);
 
 	}
 
@@ -795,12 +803,15 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 		JExpression newCond = (JExpression) this.getStack().pop();
 
 		JStatement thenClause = self.thenClause();
-		thenClause.accept(this);
-		JStatement newThenClause = (JStatement) this.getStack().pop();
+		JStatement newThenClause = null;
+		if (thenClause != null) {
+			thenClause.accept(this);
+			newThenClause = (JStatement) this.getStack().pop();
+		}
 
 		JStatement elseClause = self.elseClause();
 		JStatement newElseClause = null;
-		if (elseClause != null){
+		if (elseClause != null) {
 			elseClause.accept(this);
 			newElseClause = (JStatement) this.getStack().pop();
 		}

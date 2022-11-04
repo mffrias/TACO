@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 /* @nullable_by_default@ */
 public class AvlTree {
 
-	public/* @nullable@ */AvlNode root;
+	public /*@nullable@*/ AvlNode root;
 
 	public int size;
 
@@ -59,7 +59,7 @@ public class AvlTree {
 		AvlNode n = root;
 		while (n != null) {
 			if (x < n.element) {
-				n = n.left.left;
+				n = n.left;
 			} else {
 				if (x > n.element) {
 					n = n.right;
@@ -83,7 +83,7 @@ public class AvlTree {
 	@ signals (Exception e) false;
 	@*/
 	public int findMin() {
-		AvlNode n = root.right; //MutGenLimit 1
+		AvlNode n = root; 
 		if (n == null) {
 			return -1;
 		}
@@ -112,6 +112,7 @@ public class AvlTree {
 		if (n == null) {
 			return -1;
 		}
+		//@ decreasing n.height;
 		while (n.right != null) {
 			n = n.right;
 		}
@@ -125,8 +126,8 @@ public class AvlTree {
 	@ requires (\forall AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element != x);
 	@ ensures (\exists AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element == x);
 	@ ensures \reach(this.root, AvlNode, left+right).int_size() == \old(\reach(this.root, AvlNode, left+right)).int_size() + 1;
-	@ signals (Exception e) false;
-	@*/
+ 	@ signals (NullPointerException e) false; 
+ 	@*/
 	public void insert(int x) {
 		AvlNode n = new AvlNode();
 		n.element = x;
@@ -139,8 +140,9 @@ public class AvlTree {
 	}
 
 
+	
+	
 	private AvlNode privateInsert(/*@nullable@*/AvlNode n, AvlNode aux) {
-
 		if (n == null) {
 			n = aux;
 		} else {
@@ -170,28 +172,28 @@ public class AvlTree {
 		return n;
 	}
 
-	private static AvlNode doubleWithLeftChild(final AvlNode k3) {
+	private static AvlNode doubleWithLeftChild( AvlNode k3) {
 		k3.left = AvlTree.rotateWithRightChild(k3.left);
 		return AvlTree.rotateWithLeftChild(k3);
 	}
 
-	private static AvlNode doubleWithRightChild(final AvlNode k1) {
+	private static AvlNode doubleWithRightChild( AvlNode k1) {
 		k1.right = AvlTree.rotateWithLeftChild(k1.right);
 		return AvlTree.rotateWithRightChild(k1);
 	}
 
 	//@ assignable \nothing;
-	private static int height(final AvlNode t) {
+	private static int height( AvlNode t) {
 		return t == null ? -1 : t.height;
 	}
 
 	//@ assignable \nothing;
-	private static int max(final int lhs, final int rhs) {
+	private static int max( int lhs,  int rhs) {
 		return lhs > rhs ? lhs : rhs;
 	}
 
-	private static AvlNode rotateWithLeftChild(final AvlNode k2) {
-		final AvlNode k1 = k2.left;
+	private static AvlNode rotateWithLeftChild( AvlNode k2) {
+		AvlNode k1 = k2.left;
 		k2.left = k1.right;
 		k1.right = k2;
 		k2.height = AvlTree.max(AvlTree.height(k2.left),
@@ -200,8 +202,8 @@ public class AvlTree {
 		return k1;
 	}
 
-	private static AvlNode rotateWithRightChild(final AvlNode k1) {
-		final AvlNode k2 = k1.right;
+	private static AvlNode rotateWithRightChild( AvlNode k1) {
+		AvlNode k2 = k1.right;
 		k1.right = k2.left;
 		k2.left = k1;
 		k1.height = AvlTree.max(AvlTree.height(k1.left),
@@ -210,23 +212,17 @@ public class AvlTree {
 		return k2;
 	}
 
+	
+	/*@
+	 @ requires true;
+	 @ ensures \result == false; 
+	 @*/
+	public boolean generateTreeInstance() {
+		if (size == 8)
+			return true;
+		else
+			return false;
+	}
 
-
-//	public static void main(String[] args) {
-//		roops.core.objects.AvlTree instance = new roops.core.objects.AvlTree();
-//		roops.core.objects.AvlNode _AvlNode_1 = new roops.core.objects.AvlNode();
-//		int x = -5;
-//		// Fields Initialization for 'instance'
-//		// Fields Initialization for '_AvlNode_1'
-//		_AvlNode_1.element = -6;
-//		_AvlNode_1.left = null;
-//		_AvlNode_1.right = null;
-//		_AvlNode_1.height = 0;
-//		instance.root = _AvlNode_1;
-//		instance.size = 1;
-//
-//		instance.insert(x);
-//
-//	}
 
 }

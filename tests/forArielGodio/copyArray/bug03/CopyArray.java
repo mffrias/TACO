@@ -6,6 +6,7 @@ public class CopyArray {
 	//@ ensures (\forall int i; iBegin <= i && i < iEnd; a[i] == b[i]);
 	//@ ensures (\forall int i; 0 <= i && i < iBegin; a[i] == \old(a[i]));
 	//@ ensures (\forall int i; iEnd <= i && i < a.length; a[i] == \old(a[i]));
+	//@ signals (Exception e) false;
 	public static void copyArray(int[] b, int iBegin, int iEnd, int[] a) {
 		int k = iBegin;
 		//@ decreasing iEnd  - k;

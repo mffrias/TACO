@@ -407,9 +407,12 @@ public class JDynAlloyClassHierarchy {
 		private void processModule(JDynAlloyModule module) {
 			for (JProgramDeclaration program : module.getPrograms()) {
 				String sigId = program.getSignatureId();
+				
+				String typedMethodToCheck = TacoConfigurator.getInstance().getMethodToCheck();
+				int posOpeningParenthesis = typedMethodToCheck.indexOf("(");
+				String untypedMethodToCheck = typedMethodToCheck.substring(0, posOpeningParenthesis);
 				if (!(sigId.equals(TacoConfigurator.getInstance().getClassToCheck()) && 
-						(sigId + "_" + program.getProgramId() + "_0").equals(
-								TacoConfigurator.getInstance().getMethodToCheck()))) {
+						(sigId + "_" + program.getProgramId()).equals(untypedMethodToCheck))) {
 					continue;
 				}
 				for (JVariableDeclaration var : program.getParameters()) {

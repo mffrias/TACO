@@ -11,60 +11,26 @@ public class FindFirstInSorted {
         int hi = arr.length;
         //@ decreasing hi-lo;
         while (lo < hi) {
-            int mid = (lo + hi) / 2; // check if this is floor division
+            int mid = (lo + hi) / 2; 
             if (x == arr[mid] && (mid == 0 || x != arr[mid-1])) {
                 return mid;
             } else if (x <= arr[mid]) {
                 hi = mid;
             } else { 
-                lo = mid - 1; //lo = mid + 1;
+                lo = mid + 1; //lo = mid + 1;
             }
         }
         return -1;
     }
-//  public static int findfirstinsorted(int[] arr, int x) {
-//  int lo = 0;
-//  int hi = arr.length;
-//  //@ decreasing hi-lo;
-//  while (lo < hi) {
-//      int mid = (lo + hi) / 2; // check if this is floor division
-//      if (x == arr[mid]) {
-//    	  if (mid == 0)
-//    		  return mid;
-//    	  else
-//    		  if (x != arr[mid-1])
-//    			  return mid;
-//      } else if (x <= arr[mid]) {
-//          hi = mid;
-//      } else { 
-//          lo = mid - 1; //lo = mid + 1;
-//      }
-//  }
-//  return -1;
-//}
 
     
-    
 //    public static void main(String[] args) {
-//        forArielGodio.FindFirstInSorted instance = null;
-//        int[] arr = new int[12];
-//        int x = 4;
+//        int[] arr = new int[2];
+//        int x = -593886814;
 //        // Parameter Initialization
-//        arr[0] = -16;
-//        arr[1] = -16;
-//        arr[2] = -14;
-//        arr[3] = -14;
-//        arr[4] = -14;
-//        arr[5] = -14;
-//        arr[6] = -14;
-//        arr[7] = 0;
-//        arr[8] = 3;
-//        arr[9] = 4;
-//        arr[10] = 9;
-//        arr[11] = 9;
-//        int i = findfirstinsorted(arr, x);
-//        System.out.println(i);
-//        
-//
+//        arr[0] = -1006108413;
+//        arr[1] = -728104542;
+//        findfirstinsorted(arr, x);
 //	}
+
 }

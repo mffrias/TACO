@@ -3,7 +3,7 @@ package roops.core.objects;
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class StrykerTreeSetTest extends CollectionTestBase {
+public class TreeSetTest extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
@@ -20,7 +20,7 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(5);
+        setConfigKeyLoopUnroll(4);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);
@@ -29,8 +29,8 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:10");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:8");
+		check(GENERIC_PROPERTIES,"contains(int)",false);
 	}
 
 	
@@ -52,8 +52,8 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:4");
-		check(GENERIC_PROPERTIES,"add_0",false);
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:5");
+		check(GENERIC_PROPERTIES,"add(int)",false);
 	}
 	
 	
@@ -74,8 +74,8 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:6");
+		check(GENERIC_PROPERTIES,"remove(int)",false);
 	}
 
 

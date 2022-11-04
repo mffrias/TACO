@@ -33,7 +33,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
         setConfigKeyRelevancyAnalysis(true);
         setConfigKeyCheckNullDereference(true);
-        setConfigKeyUseJavaArithmetic(true);
+        setConfigKeyUseJavaArithmetic(false);
         setConfigKeyInferScope(true);
         setConfigKeyObjectScope(0);
         setConfigKeyIntBithwidth(4);
@@ -44,10 +44,10 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyAttemptToCorrectBug(false);
         setConfigKeyMaxStrykerMethodsPerFile(1);
         setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(true);
-        setConfigKeyUseTightUpperBounds(true);
+        setConfigKeyUseJavaSBP(false);
+        setConfigKeyUseTightUpperBounds(false);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES,"insert_0", false);
+        check(GENERIC_PROPERTIES,"insert(int)", false);
     }
 
 
@@ -66,10 +66,10 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyAttemptToCorrectBug(true);
         setConfigKeyMaxStrykerMethodsPerFile(1);
         setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(true);
-        setConfigKeyUseTightUpperBounds(true);
+        setConfigKeyUseJavaSBP(false);
+        setConfigKeyUseTightUpperBounds(false);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:4");
-        check(GENERIC_PROPERTIES,"findMinimum_0", false);
+        check(GENERIC_PROPERTIES,"findMinimum()", false);
     }
 
 
@@ -90,8 +90,8 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
-        check(GENERIC_PROPERTIES,"extractMin_0", false);
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:5");
+        check(GENERIC_PROPERTIES,"extractMin()", false);
     }
 
 

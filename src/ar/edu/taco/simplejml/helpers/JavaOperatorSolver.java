@@ -1313,9 +1313,10 @@ public class JavaOperatorSolver {
 		switch (operator) {
 		case Constants.OPE_MINUS:
 			// represents "-"
-			if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true)
+			if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
 				return JExpressionFactory
 						.fun_java_primitive_integer_value_negate(alloyExpression);
+			}
 			else
 				return JExpressionFactory.alloy_int_negate(alloyExpression);
 		case Constants.OPE_LNOT:

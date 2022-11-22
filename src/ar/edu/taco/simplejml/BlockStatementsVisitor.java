@@ -665,6 +665,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 			if (this.isTryCatchBlock) {
 				programBuffer.closeIf();
 			}
+		} else {
+			if (this.isTryCatchBlock) {
+				programBuffer.openIf(BlockStatementSolver.getTryCatchSurrounderCondition());
+			}
+
+			programBuffer.assign(JExpressionFactory.EXIT_REACHED_VARIABLE, JExpressionFactory.TRUE_EXPRESSION);
+
+			if (this.isTryCatchBlock) {
+				programBuffer.closeIf();
+			}
+
 		}
 
 		// this.isReturnPresent.push(true);

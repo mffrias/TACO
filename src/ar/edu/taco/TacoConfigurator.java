@@ -55,6 +55,8 @@ import ar.edu.taco.simplejml.helpers.JavaClassNameNormalizer;
 public class TacoConfigurator extends PropertiesConfiguration implements
 		IJDynAlloyConfig {
 
+	private String externalMethodNameWithParameters = "";
+	
 	private static final String ABSTRACT_SIGNATURE_OBJECT_FIELD = "abstractSignatureObject";
 
 	private static final boolean DEFAULT_ABSTRACT_SIGNATURE_OBJECT = true;
@@ -231,6 +233,8 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 				if (((String) entry.getKey()).equals("methodToCheck")){
 					value = ((String)entry.getValue()).replace(',', '.');
 					value = ((String)value).replaceAll(" ", "");
+					externalMethodNameWithParameters = ((String)entry.getValue());
+					externalMethodNameWithParameters = ((String)externalMethodNameWithParameters).replaceAll(" ", "");
 				} else {
 					value = entry.getValue();
 				}
@@ -382,8 +386,8 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 
 	@Override
 	public String getMethodToCheck() {
-		String methodToCheck = this.getString(METHOD_TO_CHECK_FIELD);
-		methodToCheck = methodToCheck.replace('.', ',');
+		String methodToCheck = this.externalMethodNameWithParameters;
+		methodToCheck = methodToCheck.replace('.', '_');
 		return getClassToCheck() + "_" + methodToCheck;
 
 	}

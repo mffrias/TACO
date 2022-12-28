@@ -119,7 +119,7 @@ public class InformationRecoveryVisitor extends JmlAstTransverseStatementVisitor
 			int index = 0;
 			for (JFormalParameter aJFormalParameter : jMethodDeclaration.parameters()){
 				String s1 = aJFormalParameter.typeToString();
-				String s2 = theTypes[index];
+				String s2 = theTypes[index].replaceAll("_", ".");
 				if (!s1.equals(s2))
 					inputEqualsConsructorToCheck = false;
 				index++;

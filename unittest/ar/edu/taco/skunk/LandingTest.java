@@ -39,6 +39,52 @@ public class LandingTest extends CollectionTestBase {
 		check(GENERIC_PROPERTIES,"initLandingOK(float)", false);
 	}
 
+	
+	public void test_sqrtOfMinus7() throws VizException {
+		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckArithmeticException(false);
+		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeySkolemizeInstanceInvariant(false);
+		setConfigKeySkolemizeInstanceAbstraction(false);
+		setConfigKeyRemoveQuantifiers(true);
+		// Infer-Scope
+		setConfigKeyInferScope(true);
+		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:1");
+		setConfigKeyLoopUnroll(1);
+		// SBP+BOUND
+		setConfigKeyUseJavaSBP(false);
+		setConfigKeyUseTightUpperBounds(false);
+		// JUNIT
+		setConfigKeyGenerateUnitTestCase(true);
+
+		check(GENERIC_PROPERTIES,"sqrtOfMinus7(int)", false);
+	}
+	
+	
+	public void test_getFactor() throws VizException {
+		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckArithmeticException(false);
+		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeySkolemizeInstanceInvariant(false);
+		setConfigKeySkolemizeInstanceAbstraction(false);
+		setConfigKeyRemoveQuantifiers(true);
+		// Infer-Scope
+		setConfigKeyInferScope(true);
+		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:1");
+		setConfigKeyLoopUnroll(1);
+		// SBP+BOUND
+		setConfigKeyUseJavaSBP(false);
+		setConfigKeyUseTightUpperBounds(false);
+		// JUNIT
+		setConfigKeyGenerateUnitTestCase(true);
+
+		check(GENERIC_PROPERTIES,"getFactor(int,int,int)", false);
+	}
+
 
 	public void test_LandingTest2() throws VizException {
 		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
@@ -63,72 +109,7 @@ public class LandingTest extends CollectionTestBase {
 	}
 
 	
-	public void test_LandingTest3() throws VizException {
-		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
-		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
-		setConfigKeyCheckArithmeticException(true);
-		setConfigKeyUseJavaArithmetic(true);
-		setConfigKeySkolemizeInstanceInvariant(false);
-		setConfigKeySkolemizeInstanceAbstraction(false);
-		setConfigKeyRemoveQuantifiers(true);
-		// Infer-Scope
-		setConfigKeyInferScope(true);
-		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:1");
-		setConfigKeyLoopUnroll(1);
-		// SBP+BOUND
-		setConfigKeyUseJavaSBP(false);
-		setConfigKeyUseTightUpperBounds(false);
-		// JUNIT
-		setConfigKeyGenerateUnitTestCase(true);
 
-		check(GENERIC_PROPERTIES,"testDivZero(int, int, int)", false);
-	}
-
-	public void test_LandingTest4() throws VizException {
-		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
-		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
-		setConfigKeyCheckArithmeticException(true);
-		setConfigKeyUseJavaArithmetic(true);
-		setConfigKeySkolemizeInstanceInvariant(false);
-		setConfigKeySkolemizeInstanceAbstraction(false);
-		setConfigKeyRemoveQuantifiers(true);
-		// Infer-Scope
-		setConfigKeyInferScope(true);
-		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:7");
-		setConfigKeyLoopUnroll(1);
-		// SBP+BOUND
-		setConfigKeyUseJavaSBP(false);
-		setConfigKeyUseTightUpperBounds(false);
-		// JUNIT
-		setConfigKeyGenerateUnitTestCase(true);
-
-		check(GENERIC_PROPERTIES,"testArrayObject_0", false);
-	}
-
-
-	public void test_factorial() throws VizException {
-		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
-		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
-		setConfigKeyCheckArithmeticException(true);
-		setConfigKeyUseJavaArithmetic(true);
-		setConfigKeySkolemizeInstanceInvariant(false);
-		setConfigKeySkolemizeInstanceAbstraction(false);
-		setConfigKeyRemoveQuantifiers(true);
-		// Infer-Scope
-		setConfigKeyInferScope(true);
-		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:1");
-		setConfigKeyLoopUnroll(1);
-		// SBP+BOUND
-		setConfigKeyUseJavaSBP(false);
-		setConfigKeyUseTightUpperBounds(false);
-		// JUNIT
-		setConfigKeyGenerateUnitTestCase(true);
-
-		check(GENERIC_PROPERTIES,"factorial_0", false);
-	}
 
 
 }

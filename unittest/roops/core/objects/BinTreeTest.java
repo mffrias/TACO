@@ -47,28 +47,27 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
-		check(GENERIC_PROPERTIES,"contains_0", true);
+		check(GENERIC_PROPERTIES,"contains(int)", true);
 	}
 	
 	
-//	public void test_insertTest() throws VizException {
-//		setConfigKeyRelevantClasses("roops.core.objects.BinTree,roops.core.objects.BinTreeNode");
-//		setConfigKeyRelevancyAnalysis(true);
-//		setConfigKeyCheckNullDereference(true);
-//		setConfigKeyUseJavaArithmetic(false);
-//		setConfigKeySkolemizeInstanceInvariant(true);
-//		setConfigKeySkolemizeInstanceAbstraction(true);
-//		setConfigKeyUseJavaSBP(true);
-//		setConfigKeyNestedLoopUnroll(false);
-//		setConfigKeyLoopUnroll(5);
-//		setConfigKeyRemoveQuantifiers(true);
-//		setConfigKeyGenerateUnitTestCase(true);
-//		setConfigKeyUseTightUpperBounds(true);
-//		setConfigKeyInferScope(false);
-//		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
-//		check(GENERIC_PROPERTIES,"insert_0", true);
-//	}
-//
+	public void test_insertTest() throws VizException {
+		setConfigKeyRelevantClasses("roops.core.objects.BinTree,roops.core.objects.BinTreeNode");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeySkolemizeInstanceInvariant(true);
+		setConfigKeySkolemizeInstanceAbstraction(true);
+		setConfigKeyUseJavaSBP(true);
+		setConfigKeyNestedLoopUnroll(false);
+		setConfigKeyLoopUnroll(5);
+		setConfigKeyRemoveQuantifiers(true);
+		setConfigKeyGenerateUnitTestCase(true);
+		setConfigKeyUseTightUpperBounds(true);
+		setConfigKeyInferScope(false);
+		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
+		check(GENERIC_PROPERTIES,"insert(int)", true);
+	}
 	
 
 }

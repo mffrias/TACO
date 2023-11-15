@@ -136,12 +136,8 @@ public class TreeSet {
 		@ requires true;
 		@ ensures (\exists TreeSetEntry e; \old(\reach(this.root, TreeSetEntry, left+right)).has(e) == true; e.key == aKey) ==>
 		@ 			(\forall TreeSetEntry tse; \reach(this.root, TreeSetEntry, left+right).has(tse) == true; \old(\reach(this.root, TreeSetEntry, left+right)).has(tse) == true);
-		@ ensures (\exists TreeSetEntry e; \old(\reach(this.root, TreeSetEntry, left+right)).has(e) == true; e.key == aKey) ==>
-		@ 			(\forall TreeSetEntry tse; \old(\reach(this.root, TreeSetEntry, left+right)).has(tse) == true; \reach(this.root, TreeSetEntry, left+right).has(tse) == true);
-		@ ensures (\forall TreeSetEntry e; \old(\reach(this.root, TreeSetEntry, left+right)).has(e) == true; e.key != aKey) ==> 
-		@ 			(\forall TreeSetEntry tse; \old(\reach(this.root, TreeSetEntry, left+right)).has(tse) == true; \reach(this.root, TreeSetEntry, left+right).has(tse) == true);
-		@ ensures (\forall TreeSetEntry e; \old(\reach(this.root, TreeSetEntry, left+right)).has(e) == true; e.key != aKey) ==> 
-		@ 			(\forall TreeSetEntry tse; \reach(this.root, TreeSetEntry, left+right).has(tse) == true; \reach(this.root, TreeSetEntry, left+right).has(tse) == true || (\exists TreeSetEntry newEntry; \reach(this.root, TreeSetEntry, left+right).has(newEntry) == true; newEntry.key == aKey));
+		@ ensures (\forall TreeSetEntry tse; \old(\reach(this.root, TreeSetEntry, left+right)).has(tse) == true; \reach(this.root, TreeSetEntry, left+right).has(tse) == true);
+ 		@ ensures (\exists TreeSetEntry newEntry; \reach(this.root, TreeSetEntry, left+right).has(newEntry) == true; newEntry.key == aKey);
 		@ signals (Exception e) false;
 		@*/	
 	public void add(int aKey) {
@@ -327,20 +323,28 @@ public class TreeSet {
 //public static void main(String[] args) {
 //    roops.core.objects.TreeSet instance = new roops.core.objects.TreeSet();
 //    roops.core.objects.TreeSetEntry _TreeSetEntry_1 = new roops.core.objects.TreeSetEntry();
-//    int aKey = 6;
+//    roops.core.objects.TreeSetEntry _TreeSetEntry_2 = new roops.core.objects.TreeSetEntry();
+//    int aKey = 4;
 //    // Fields Initialization for 'instance'
 //    // Fields Initialization for '_TreeSetEntry_1'
 //    _TreeSetEntry_1.key = 7;
 //    _TreeSetEntry_1.parent = null;
 //    _TreeSetEntry_1.color = true;
-//    _TreeSetEntry_1.left = null;
+//    // Fields Initialization for '_TreeSetEntry_2'
+//    _TreeSetEntry_2.key = -6;
+//    _TreeSetEntry_2.parent = _TreeSetEntry_1;
+//    _TreeSetEntry_2.color = false;
+//    _TreeSetEntry_2.left = null;
+//    _TreeSetEntry_2.right = null;
+//    _TreeSetEntry_2.blackHeight = 1;
+//    _TreeSetEntry_1.left = _TreeSetEntry_2;
 //    _TreeSetEntry_1.right = null;
 //    _TreeSetEntry_1.blackHeight = 1;
 //    instance.root = _TreeSetEntry_1;
-//    instance.size = 1;
+//    instance.size = 2;
 //    instance.modCount = 7;
 //    instance.RED = false;
-//    instance.BLACK = true;
+//    instance.BLACK = true;  
 //    instance.add(aKey);
 //}
 
@@ -499,40 +503,30 @@ public class TreeSet {
 		}
 	}
 
-//	public static void main(String[] args) {
-//	    TreeSet instance = new roops.core.objects.TreeSet();
-//	    TreeSetEntry _TreeSetEntry_1 = new roops.core.objects.TreeSetEntry();
-//	    TreeSetEntry _TreeSetEntry_2 = new roops.core.objects.TreeSetEntry();
-//	    TreeSetEntry _TreeSetEntry_3 = new roops.core.objects.TreeSetEntry();
-//	    int aKey = -7;
-//	    // Fields Initialization for 'instance'
-//	    // Fields Initialization for '_TreeSetEntry_1'
-//	    _TreeSetEntry_1.key = -7;
-//	    _TreeSetEntry_1.parent = null;
-//	    _TreeSetEntry_1.color = true;
-//	    // Fields Initialization for '_TreeSetEntry_2'
-//	    _TreeSetEntry_2.key = -8;
-//	    _TreeSetEntry_2.parent = _TreeSetEntry_1;
-//	    _TreeSetEntry_2.color = false;
-//	    _TreeSetEntry_2.left = null;
-//	    _TreeSetEntry_2.right = null;
-//	    _TreeSetEntry_2.blackHeight = 1;
-//	    _TreeSetEntry_1.left = _TreeSetEntry_2;
-//	    // Fields Initialization for '_TreeSetEntry_3'
-//	    _TreeSetEntry_3.key = 1;
-//	    _TreeSetEntry_3.parent = _TreeSetEntry_1;
-//	    _TreeSetEntry_3.color = false;
-//	    _TreeSetEntry_3.left = null;
-//	    _TreeSetEntry_3.right = null;
-//	    _TreeSetEntry_3.blackHeight = 1;
-//	    _TreeSetEntry_1.right = _TreeSetEntry_3;
-//	    _TreeSetEntry_1.blackHeight = 1;
-//	    instance.root = _TreeSetEntry_1;
-//	    instance.size = 0;
-//	    instance.modCount = -1;
-//	    instance.RED = false;
-//	    instance.remove(aKey);
-//	}
+	public static void main(String[] args) {
+		    roops.core.objects.TreeSet instance = new roops.core.objects.TreeSet();
+		    roops.core.objects.TreeSetEntry _TreeSetEntry_1 = new roops.core.objects.TreeSetEntry();
+		    roops.core.objects.TreeSetEntry _TreeSetEntry_2 = new roops.core.objects.TreeSetEntry();
+		    int aKey = 7;
+		    _TreeSetEntry_1.key = -4;
+		    _TreeSetEntry_1.parent = null;
+		    _TreeSetEntry_1.color = true;
+		    _TreeSetEntry_1.left = null;
+		    _TreeSetEntry_2.key = -2;
+		    _TreeSetEntry_2.parent = _TreeSetEntry_1;
+		    _TreeSetEntry_2.color = false;
+		    _TreeSetEntry_2.left = null;
+		    _TreeSetEntry_2.right =  null;
+		    _TreeSetEntry_2.blackHeight = 1;
+		    _TreeSetEntry_1.right = _TreeSetEntry_2;
+		    _TreeSetEntry_1.blackHeight = 1;
+		    instance.root = _TreeSetEntry_1;
+		    instance.size = 2;
+		    instance.modCount = 7;
+		    instance.RED = false;
+		    instance.BLACK = true;
+		    instance.add(aKey);
+	}
 
 
 

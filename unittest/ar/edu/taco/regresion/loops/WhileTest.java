@@ -21,7 +21,7 @@ public class WhileTest extends GenericTestBase {
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyTypeScopes("ar.edu.taco.loops.WhileLoop:1,java.lang.Object:5");
 		
-		runAndCheck(GENERIC_PROPERTIES,"LoopInvariantDoesNotKeepInvariant_0", true);
+		runAndCheck(GENERIC_PROPERTIES,"LoopInvariantDoesNotKeepInvariant(int[])", true);
 	}
 	
 	public void testLoopInvariantKeepInvariant_max() throws VizException {
@@ -30,7 +30,7 @@ public class WhileTest extends GenericTestBase {
 		setConfigKeyInferScope(false);
 		setConfigKeyTypeScopes("ar.edu.taco.loops.WhileLoop:1,java.lang.Object:5");
 
-		runAndCheck(GENERIC_PROPERTIES,"LoopInvariantKeepInvariant_max_0", false);
+		runAndCheck(GENERIC_PROPERTIES,"LoopInvariantKeepInvariant_max(int[])", false);
 	}
 	
 	public void testLoopInvariantInvalidInvariant() throws VizException {

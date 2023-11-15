@@ -44,8 +44,8 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyAttemptToCorrectBug(false);
         setConfigKeyMaxStrykerMethodsPerFile(1);
         setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(false);
-        setConfigKeyUseTightUpperBounds(false);
+        setConfigKeyUseJavaSBP(true);
+        setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
         check(GENERIC_PROPERTIES,"insert(int)", false);
     }
@@ -66,8 +66,8 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyAttemptToCorrectBug(true);
         setConfigKeyMaxStrykerMethodsPerFile(1);
         setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(false);
-        setConfigKeyUseTightUpperBounds(false);
+        setConfigKeyUseJavaSBP(true);
+        setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:4");
         check(GENERIC_PROPERTIES,"findMinimum()", false);
     }
@@ -90,7 +90,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:5");
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
         check(GENERIC_PROPERTIES,"extractMin()", false);
     }
 

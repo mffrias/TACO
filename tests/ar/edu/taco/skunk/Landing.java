@@ -14,13 +14,9 @@ public class Landing {
 		return b;
 	}
 
-	public static void main(String[] args) {
-        int i1 = -76543212;
-        int i2 = -668466018;
-     boolean b = aerodynamic1(i1, i2);
-     System.out.println(b);
-     System.out.println(i1*i1 + i2*i2);
-	}
+
+
+
 
 	/*@ requires true;
 	  @ ensures true;
@@ -36,6 +32,17 @@ public class Landing {
 
 
 
+	/*@
+	 @ requires i1 > 0;
+	 @ ensures \result == false; 
+	 @*/
+	public static boolean sqrtOfMinus7 (int i1){
+		if (i1*i1 == -7)
+			return true;
+		else
+			return false;
+	}
+
 
 
 	/*@
@@ -43,34 +50,35 @@ public class Landing {
 	 @ ensures \result == false; 
 	 @*/
 	public static boolean aerodynamic1 (int i1, int i2){
+		if (i1*i1 + i2*i2 == -1358)
+			return true;
+		else
+			return false;
+	}
 
-		if (i1*i1 + i2*i2 == -76543212)
+
+	/*@
+	 @ requires factor1 > 1 && factor2 > 1 && factor1 < i && factor2 < i && i == 107151;
+	 @ ensures \result == false;
+	 @*/
+	public static boolean getFactor(int i, int factor1, int factor2) {
+		if (factor1 * factor2 == i)
 			return true;
 		else
 			return false;
 
 	}
 
+	//    public static void main (String[] args) {
+	//        int i1 = 479772853;
+	//        System.out.println(sqrtOfMinus7(i1));
+	//        System.out.println(i1*i1);
+	//     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-		
-
-
-
-
+	public static void main (String[] args) {
+	    int i1 = 605467611;
+	    int i2 = 605467611;
+	    System.out.println(i1*i1 + i2*i2);
 	}
+}

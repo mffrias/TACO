@@ -23,5 +23,12 @@ public class BubbleSort {
 	} 
 	
 
-	
+	public static void main(String[] args) {
+			BubbleSort b = new BubbleSort();
+		 int[] arr = new int[2];
+	        // Parameter Initialization
+	        arr[0] = -2147483646;
+	        arr[1] = -2147483648;
+	        int[] a = b.bubbleSort(arr);
+	}
 }

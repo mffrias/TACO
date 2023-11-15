@@ -2,6 +2,7 @@ package forArielGodio.absolute.bug01;
 public class Absolute {
 	
 	
+	
 //	/*@    requires 0 <= num && num <= Short.MAX_VALUE;
 //	  @    ensures \result == num;
 //	  @ also
@@ -31,5 +32,13 @@ public class Absolute {
 			return num;
 		else
 			return -num;	
+	}
+	
+	
+	//@ requires true;
+	//@ ensures false;
+	public int mostrarArbol() {
+		int k = 0;
+		return k;
 	}
 }

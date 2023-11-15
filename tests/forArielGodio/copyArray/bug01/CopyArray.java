@@ -9,7 +9,7 @@ public class CopyArray {
 	//@ signals (Exception e) false;
 	public static void copyArray(int[] b, int iBegin, int iEnd, int[] a) {
 		int k = iBegin;
-		//@ decreasing iEnd  - k;
+		//@ decreasing iEnd - k;
 		while (iEnd - k >= 0) {//while (iEnd - k > 0) {
 			a[k] = b[k];
 			k = k + 1 ;

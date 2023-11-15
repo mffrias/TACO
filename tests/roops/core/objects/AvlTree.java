@@ -126,22 +126,18 @@ public class AvlTree {
 	@ requires (\forall AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element != x);
 	@ ensures (\exists AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element == x);
 	@ ensures \reach(this.root, AvlNode, left+right).int_size() == \old(\reach(this.root, AvlNode, left+right)).int_size() + 1;
- 	@ signals (NullPointerException e) false; 
+ 	@ signals (Exception e) false; 
  	@*/
 	public void insert(int x) {
 		AvlNode n = new AvlNode();
 		n.element = x;
-		if (root == null){
-			root = n;
-		} else {
-			root = privateInsert(root, n);
-		}
-		size++;
+		root = privateInsert(root, n);
+//		size++;
 	}
 
 
-	
-	
+
+
 	private AvlNode privateInsert(/*@nullable@*/AvlNode n, AvlNode aux) {
 		if (n == null) {
 			n = aux;
@@ -212,7 +208,7 @@ public class AvlTree {
 		return k2;
 	}
 
-	
+
 	/*@
 	 @ requires true;
 	 @ ensures \result == false; 
@@ -223,6 +219,7 @@ public class AvlTree {
 		else
 			return false;
 	}
+
 
 
 }

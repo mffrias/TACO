@@ -15,7 +15,7 @@ public class CopyArray {
 			k = k + 1 ;
 		}
 	}
-}
+
 
 
 	//	public static void main(String[] args) {
@@ -37,4 +37,17 @@ public class CopyArray {
 	//	        copyArray(b, iBegin, iEnd, a);
 	//	        System.out.println("");
 	//	}
+
+	public static void main(String[] args) {
+
+		double d = 1234567890;
+		short s = (short)d;
+		System.out.println(s);
+		
+
+
+	}
+
+
+}
 

@@ -44,7 +44,13 @@ public class Fibonacci {
 	}
 
 
-
+	//@ requires true; 
+	//@ ensures \result == 0;
+	public int mfrias(int i) {
+		if (i > 0)
+			return i+1;
+		return 0;
+	}
 
 	//	public static void main(String[] args) {
 	//		Fibonacci f = new Fibonacci(6);

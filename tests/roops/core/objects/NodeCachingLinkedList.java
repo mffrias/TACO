@@ -1,9 +1,9 @@
 package roops.core.objects;
 
 import roops.core.objects.LinkedListNode;
-/**
- * @j2daType
- *//*@ nullable_by_default @*/public class NodeCachingLinkedList {
+
+
+public class NodeCachingLinkedList {
 
     public LinkedListNode header;
 
@@ -66,7 +66,9 @@ import roops.core.objects.LinkedListNode;
 	  @  ensures (\forall LinkedListNode n; \old(\reach(firstCachedNode, LinkedListNode, next)).has(n); n.previous == null);
 	  @  ensures this.maximumCacheSize == this.DEFAULT_MAXIMUM_CACHE_SIZE;
 	  @  signals (RuntimeException e) false;
-	  @*/    public /*@nullable@*/java.lang.Object remove( final int index ) {
+	  @*/    
+    
+    public /*@nullable@*/java.lang.Object remove( final int index ) {
         LinkedListNode node = null;
         if (index < 0) {
             throw new java.lang.RuntimeException();
@@ -97,11 +99,11 @@ import roops.core.objects.LinkedListNode;
         if (this.cacheSize < this.maximumCacheSize) {
             LinkedListNode nextCachedNode;
             nextCachedNode = this.firstCachedNode;
-            node.previous = firstCachedNode; //mutGenLimit 1
+            node.previous = null; 
             node.next = nextCachedNode;
             node.value = null;
             this.firstCachedNode = node;
-            this.cacheSize = this.cacheSize - 1; //mutGenLimit 1
+            this.cacheSize = this.cacheSize + 1; 
         }
         return oldValue;
     }
@@ -120,7 +122,7 @@ import roops.core.objects.LinkedListNode;
 		  LinkedListNode insertBeforeNode = this.header.next; //mutGenLimit 0
 		  newNode.next = insertBeforeNode; //mutGenLimit 0
 		  newNode.previous = insertBeforeNode.previous; //mutGenLimit 0
-		  insertBeforeNode.previous.next.previous = newNode; //mutGenLimit 1
+		  insertBeforeNode.previous.next = newNode; //mutGenLimit 0
 		  insertBeforeNode.previous = newNode; //mutGenLimit 0
 		  this.size++; //mutGenLimit 0
 		  this.modCount++; //mutGenLimit 0

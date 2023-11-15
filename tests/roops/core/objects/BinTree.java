@@ -51,7 +51,6 @@ public class BinTree {
     @*/
 	public boolean contains( int k ) {
 		BinTreeNode current = root;
-		//@decreasing \reach(current, BinTreeNode, left+right).int_size();
 		while (current != null) {
 			if (current.key < k) { //mutGenLimit 1
 				current = current.left;
@@ -67,47 +66,46 @@ public class BinTree {
 	}
 
 
-//
-//	/*@ requires true;
-//	  @ ensures (\exists BinTreeNode n; \reach(root, BinTreeNode, left+right).has(n); n.key == k);
-//	  @ signals (Exception e) false;
-//	  @*/
-//	public boolean insert(int k){
-//		BinTreeNode current = root; 
-//		//@decreasing \reach(current, BinTreeNode, left+right).int_size();
-//		while (current != null) { 
-//			if (current.key > k) { 
-//				if (current.left == null){
-//					BinTreeNode newNode = new BinTreeNode();
-//					newNode.parent = current;
-//					current.left = newNode;
-//					newNode.key = k;
-//					size++;
-//					return true;
-//				}
-//				current = current.left;
-//			} else {
-//				if (k > current.key) {
-//					if (current.right == null){
-//						BinTreeNode newNode = new BinTreeNode();
-//						newNode.parent = current;
-//						current.right = newNode;
-//						newNode.key = k;
-//						size++;
-//						return true;
-//					}
-//					current = current.right;
-//				} else {
-//					return false;
-//				}
-//			}
-//		}
-//		BinTreeNode newNode = new BinTreeNode();
-//		root = newNode;
-//		newNode.key = k;
-//		size++;
-//		return true;
-//	}
+
+	/*@ requires true;
+	  @ ensures (\exists BinTreeNode n; \reach(root, BinTreeNode, left+right).has(n); n.key == k);
+	  @ signals (Exception e) false;
+	  @*/
+	public boolean insert(int k){
+		BinTreeNode current = root; 
+		while (current != null) { 
+			if (current.key > k) { 
+				if (current.left == null){
+					BinTreeNode newNode = new BinTreeNode();
+					newNode.parent = current;
+					current.left = newNode;
+					newNode.key = k;
+					size++;
+					return true;
+				}
+				current = current.left;
+			} else {
+				if (k > current.key) {
+					if (current.right == null){
+						BinTreeNode newNode = new BinTreeNode();
+						newNode.parent = current;
+						current.right = newNode;
+						newNode.key = k;
+						size++;
+						return true;
+					}
+					current = current.right;
+				} else {
+					return false;
+				}
+			}
+		}
+		BinTreeNode newNode = new BinTreeNode();
+		root = newNode;
+		newNode.key = k;
+		size++;
+		return true;
+	}
 //
 //
 //

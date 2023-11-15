@@ -235,9 +235,9 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	@Override
 	public void visitJmlConstructorDeclaration(JmlConstructorDeclaration self) {
 		String fullyQualifiedConstructorName = this.getClassName() + self.ident();
-		String declaredConstructorToCheck = TacoConfigurator.getInstance().getMethodToCheck();
-		declaredConstructorToCheck = declaredConstructorToCheck.substring(0, declaredConstructorToCheck.indexOf('('));
-		if (fullyQualifiedConstructorName.equals(declaredConstructorToCheck)){
+		String declaredMethodToCheck = TacoConfigurator.getInstance().getMethodToCheck();
+		declaredMethodToCheck = declaredMethodToCheck.substring(0, declaredMethodToCheck.indexOf('('));
+		if (fullyQualifiedConstructorName.equals(declaredMethodToCheck)){
 			ArrayList<JStatement> newBody = new ArrayList<JStatement>();
 			newBody.add(self.body());
 

@@ -49,6 +49,13 @@ public class JfslToJDynAlloyEnv {
 
 	public JfslToJDynAlloyEnv() {
 		super();
+		
+		addJmlTypename("Error");
+		putRename("Error", "java_lang_Error");
+
+		addJmlTypename("AssertionError");
+		putRename("AssertionError", "java_lang_AssertionError");
+
 		addJmlTypename("RuntimeException");
 		putRename("RuntimeException", "java_lang_RuntimeException");
 		

@@ -33,9 +33,11 @@ import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.simplejml.JavaToJDynAlloyManager;
 import ar.edu.taco.simplejml.builtin.IBuiltInModule;
 import ar.edu.taco.simplejml.builtin.JArithmeticException;
+import ar.edu.taco.simplejml.builtin.JAssertionError;
 import ar.edu.taco.simplejml.builtin.JBoolean;
 import ar.edu.taco.simplejml.builtin.JClass;
 import ar.edu.taco.simplejml.builtin.JClassCastException;
+import ar.edu.taco.simplejml.builtin.JError;
 import ar.edu.taco.simplejml.builtin.JException;
 import ar.edu.taco.simplejml.builtin.JIllegalArgumentException;
 import ar.edu.taco.simplejml.builtin.JIndexOutOfBoundsException;
@@ -162,6 +164,14 @@ public class PrecompiledModules implements ITacoStage {
 		if (empty
 				|| config.getBuiltInModules().contains("JIndexOutOfBoundsException"))
 			precompiledModules.add(JIndexOutOfBoundsException.getInstance());
+
+		if (empty
+				|| config.getBuiltInModules().contains("JError"))
+			precompiledModules.add(JError.getInstance());
+
+		if (empty
+				|| config.getBuiltInModules().contains("JAssertionError"))
+			precompiledModules.add(JAssertionError.getInstance());
 
 		if (empty
 				|| config.getBuiltInModules().contains("JNegativeArraySizeException"))

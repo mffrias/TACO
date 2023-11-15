@@ -125,17 +125,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	private Stack<AlloyExpression> expressions = new Stack<AlloyExpression>();
 
-//	private AlloyTyping varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures = new AlloyTyping();
-	
-//	private List<AlloyFormula> predsEncodingValueOfArithmeticOperationsInRequiresAndEnsures = new ArrayList<AlloyFormula>();
+	//	private AlloyTyping varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures = new AlloyTyping();
 
-//	public AlloyTyping varsAndTheirTypeFromMathOperations = new AlloyTyping();
-		
-//	public List<AlloyFormula> predsFromMathOperations = new ArrayList<AlloyFormula>();
+	//	private List<AlloyFormula> predsEncodingValueOfArithmeticOperationsInRequiresAndEnsures = new ArrayList<AlloyFormula>();
 
-	
-	
-	
+	//	public AlloyTyping varsAndTheirTypeFromMathOperations = new AlloyTyping();
+
+	//	public List<AlloyFormula> predsFromMathOperations = new ArrayList<AlloyFormula>();
+
+
+
+
 	private Stack<ExprVariable> whileIndices = new Stack<ExprVariable>();
 
 	private static int variantFunctionIndex = 0;
@@ -480,9 +480,9 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		assignmentExpression.accept(this);
 	}
 
-	
-	
-	
+
+
+
 	@Override
 	public void visitJmlAssumeStatement(JmlAssumeStatement jmlAssumeStatement) {
 		jmlAssumeStatement.accept(prettyPrint);
@@ -706,21 +706,21 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		} else {
 			this.setPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures(al);
 		}
-//		programBuffer.openIf(alloyFormula);
+		//		programBuffer.openIf(alloyFormula);
 
-		
+
 		for (JSwitchGroup j : switchStatement.groups()){
 			j.accept(this);
 		}
-		
-//		programBuffer.switchToElseIf();
-//		if (jIfStatement.elseClause() != null) {
-//			jIfStatement.elseClause().accept(this);
-//		} else {
-//			programBuffer.skip();
-//		}
-//
-//		programBuffer.closeIf();
+
+		//		programBuffer.switchToElseIf();
+		//		if (jIfStatement.elseClause() != null) {
+		//			jIfStatement.elseClause().accept(this);
+		//		} else {
+		//			programBuffer.skip();
+		//		}
+		//
+		//		programBuffer.closeIf();
 
 		if (this.isTryCatchBlock) {
 			programBuffer.closeIf();
@@ -741,11 +741,11 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		for (org.multijava.mjc.JStatement j : js){
 			j.accept(this);
 		}
-		
+
 		if (this.isTryCatchBlock) {
 			programBuffer.closeIf();
 		}
-	
+
 
 	}
 
@@ -1056,7 +1056,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 			this.whileIndices.push(null);
 		}
 		self.body().accept(this);
-		this.whileIndices.pop();
+	//	this.whileIndices.pop();
 		programBuffer.closeDo();
 	}
 
@@ -1119,7 +1119,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 			this.whileIndices.push(null);
 		}
 		jWhileStatement.body().accept(this);
-		this.whileIndices.pop();
+//		this.whileIndices.pop();
 		programBuffer.closeWhile();
 	}
 

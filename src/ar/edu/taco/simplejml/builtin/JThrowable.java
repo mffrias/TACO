@@ -101,11 +101,6 @@ public class JThrowable implements IBuiltInModule {
 
 		List<AlloyVariable> varList = new ArrayList<AlloyVariable>(); 
 		varList.add(JExpressionFactory.THIS_VARIABLE);
-//		AlloyExpression var = AlloyExpression.asAlloyExpression(varList).get(0);
-		
-//		AlloyExpression nullExpr = ExprConstant.buildExprConstant("null");
-		
-//		JAssume ass = new JAssume(new NotFormula(new EqualsFormula(var, nullExpr)));
 		
 		JProgramDeclaration constructor = new JProgramDeclaration(false, true, false,
 				"java_lang_Throwable", "Constructor", parameters, Collections

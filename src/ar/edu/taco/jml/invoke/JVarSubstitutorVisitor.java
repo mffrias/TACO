@@ -540,11 +540,13 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	 * @see org.multijava.mjc.MjcVisitor#visitAssertStatement(org.multijava.mjc.JAssertStatement)
 	 */
 	@Override
-	public void visitAssertStatement(JAssertStatement arg0) {
-		throw new TacoNotImplementedYetException();
-
+	public void visitAssertStatement(JAssertStatement self) {
+		JExpression expr = self.predicate();
+		expr.accept(this);
+		JExpression newExpr = (JExpression)this.getStack().pop();
+		JAssertStatement newSelf = new JAssertStatement(self.getTokenReference(), newExpr, self.getComments());
+		this.getStack().push(newSelf);
 	}
-
 
 
 	/* (non-Javadoc)

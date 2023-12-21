@@ -5,7 +5,7 @@
 
 ## Requirements
 
-As for the moment, TACO requires Java 7.
+As for the moment, TACO requires [Java 7](https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html) and [Ant 1.9](https://ant.apache.org/bindownload.cgi).
 
 TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++](https://github.com/saiema/MuJava). These dependencies and their dependencies are all downloaded by the provided script `setupTACO.sh`.
 

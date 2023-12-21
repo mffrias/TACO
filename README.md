@@ -5,13 +5,15 @@
 
 ## Requirements
 
-As for the moment, TACO requires [Java 7](https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html) and [Ant 1.9](https://ant.apache.org/bindownload.cgi).
+As for the moment, TACO requires [Java 7](https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html) and [Apache Ant 1.9.16](https://ant.apache.org/bindownload.cgi).
+> [!TIP]
+> Apache Ant 1.9 can also be installed using [Homebrew](https://brew.sh). Ensure that Ant 1.9 is linked before executing `./setupTACO.sh`.
 
 TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++](https://github.com/saiema/MuJava). These dependencies and their dependencies are all downloaded by the provided script `setupTACO.sh`.
 
 ## Installation
 
-Download this repository and execute `./setupTACO.sh [full]`^. This script will download the following repositories:
+Download this repository and execute `./setupTACO.sh`^. This script will download the following repositories:
 
  * This one if this script was downloaded elsewhere or it can't find TACO's `build.xml` file.
  * JDynAlloy.

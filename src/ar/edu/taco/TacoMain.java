@@ -46,6 +46,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -374,6 +376,9 @@ public class TacoMain {
             }
 
             compilation_units = JmlParser.getInstance().getCompilationUnits();
+
+             JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
+             compilation_units.get(0).accept(theDeterminizer);
             // END JAVA PARSING
 
             // BEGIN SIMPLIFICATION

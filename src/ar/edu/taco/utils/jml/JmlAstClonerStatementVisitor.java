@@ -79,6 +79,7 @@ import org.multijava.mjc.JFieldDeclarationType;
 import org.multijava.mjc.JForStatement;
 import org.multijava.mjc.JIfStatement;
 import org.multijava.mjc.JLabeledStatement;
+import org.multijava.mjc.JMethodDeclaration;
 import org.multijava.mjc.JPackageImportType;
 import org.multijava.mjc.JPackageName;
 import org.multijava.mjc.JPhylum;
@@ -246,6 +247,7 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self) {
+		
 		JBlock newBody;
 		if (self.body() == null) {
 			newBody = null;
@@ -263,7 +265,6 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 		}
 
 
-		self.setBody(newBody);
 
 		if (methodSpecification != null) {
 			JmlSpecCase[] specCases = self.methodSpecification().specCases();
@@ -272,7 +273,13 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 				specCases[x] = methodSpecification.specCases()[x];
 			}
 		}
-		this.getStack().push(self);
+		
+				
+		JmlMethodDeclaration theClonedMethodDecl = 
+				JmlMethodDeclaration.makeInstance(self.getTokenReference(), self.modifiers(), self.typevariables(), self.returnType(), self.ident(), self.parameters(), self.getExceptions(), newBody, self.javadocComment(), new JavaStyleComment[0], self.methodSpecification());
+
+		
+		this.getStack().push(theClonedMethodDecl);
 	}
 
 	@Override

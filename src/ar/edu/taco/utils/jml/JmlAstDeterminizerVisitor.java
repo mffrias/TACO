@@ -43,6 +43,7 @@ import java.util.*;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 //import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
+import ar.edu.taco.jml.utils.ASTUtils;
 import org.jmlspecs.checker.*;
 import org.multijava.mjc.*;
 //import org.multijava.util.compiler.JavaStyleComment;
@@ -379,6 +380,31 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
     }
 
+    public void visitJmlLoopStatement(JmlLoopStatement self) {
+        if (self.stmt() instanceof JWhileStatement) {
+            self.stmt().accept(this);
+
+            JBlock block = (JBlock) this.getQueue().poll();
+
+            JWhileStatement newWhileStatement = (JWhileStatement) block.body()[1];
+
+            JmlLoopStatement newJmlLoopStatement = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), self.variantFunctions(), newWhileStatement, self.getComments());
+
+            JBlock generatedBlock = ASTUtils.createBlockStatement(block.body()[0], newJmlLoopStatement);
+
+            this.getQueue().offer(generatedBlock);
+        } else {
+            this.getQueue().offer(self);
+        }
+    }
+    public void visitWhileStatement(/* @non_null */JWhileStatement self) {
+        self.body().accept(this);
+        JStatement newBody = (JStatement) this.getQueue().poll();
+
+        JWhileStatement newSelf = new JWhileStatement(self.getTokenReference(), self.cond(), newBody, self.getComments());
+        this.getQueue().offer(newSelf);
+    }
+
     public void visitIfStatement(/* @non_null */JIfStatement self) {
         JStatement FP = null;
         JStatement SP = null;
@@ -392,7 +418,6 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
             FPBeforeBeingABlock[0] = branchAssertThenCase;
             FPBeforeBeingABlock[1] = theClonedThenBranchCode;
             FP = new JBlock(self.getTokenReference(), FPBeforeBeingABlock, self.getComments());
-
             if (self.elseClause() != null) {
                 JStatement theElseBranchCode = self.elseClause();
                 theElseBranchCode.accept(this);
@@ -405,16 +430,10 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
                 SPBeforeBeingABlock[0] = branchAssertElseCase;
                 SPBeforeBeingABlock[1] = theClonedElseBranchCode;
                 SP = new JBlock(self.getTokenReference(), SPBeforeBeingABlock, self.getComments());
-
             }
-
             this.getQueue().offer(FP);
             if (self.elseClause() != null)
                 this.getQueue().offer(SP);
-
-
-
-
         }
     }
 

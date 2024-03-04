@@ -1526,15 +1526,15 @@ public class RacPrettyPrinter2 extends MjcPrettyPrinter implements RacVisitor {
 
 	}
 
+	public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
+		self.assignmentStatement().accept(this);
+	}
+
 	/** Prints a JML <code>\nonnullelements</code> expression. */
 	public void visitJmlNonNullElementsExpression(JmlNonNullElementsExpression self) {
 		print("\\nonnullelements(");
 		self.specExpression().accept(this);
 		print(")");
-	}
-
-	public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
-		self.assignmentStatement().accept(this);
 	}
 
 	/** Prints a JML nondeterministic choice statement. */

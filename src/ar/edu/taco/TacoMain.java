@@ -29,13 +29,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
@@ -376,9 +370,6 @@ public class TacoMain {
             }
 
             compilation_units = JmlParser.getInstance().getCompilationUnits();
-
-             JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
-             compilation_units.get(0).accept(theDeterminizer);
             // END JAVA PARSING
 
             // BEGIN SIMPLIFICATION
@@ -388,6 +379,14 @@ public class TacoMain {
             List<JCompilationUnitType> simplified_compilation_units = aJavaCodeSimplifier.get_simplified_compilation_units();
 
             // END SIMPLIFICATION
+
+            // BEGIN AST DETERMINIZER
+            JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
+            simplified_compilation_units.remove(0).accept(theDeterminizer);
+            // END AST DETERMINIZER
+
+            simplified_compilation_units.add((JCompilationUnitType)theDeterminizer.getQueue().poll());
+           // compilation_units.add((JCompilationUnitType)(theDeterminizer.getQueue().peek()));
 
             // BEGIN JAVA TO JDYNALLOY TRANSLATION
             // JDynAlloy modules have Alloy contracts and dynAlloy programs

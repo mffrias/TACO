@@ -43,6 +43,9 @@ import java.util.*;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 //import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
+import ar.edu.taco.TacoNotImplementedYetException;
+import ar.edu.taco.jml.loop.LastStatementCollector;
+import ar.edu.taco.jml.loop.WhileBlockVisitor;
 import ar.edu.taco.jml.utils.ASTUtils;
 import org.jmlspecs.checker.*;
 import org.multijava.mjc.*;
@@ -55,6 +58,7 @@ import org.multijava.mjc.*;
 import ar.edu.taco.simplejml.JmlBaseVisitor;
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.TokenReference;
+import org.multijava.util.compiler.UnpositionedError;
 
 public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
@@ -72,7 +76,9 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
         TokenReference where = self.getTokenReference();
         JPackageName package_name = self.packageName();
-        CCompilationUnit export = null;
+
+        CCompilationUnit export = new CCompilationUnit(self.packageNameAsString());
+
         JPackageImportType[] imported_packages = self.importedPackages();
 
         @SuppressWarnings("rawtypes")
@@ -93,22 +99,26 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
                 ret_val = this.getQueue().poll();
                 JTypeDeclarationType cloned_type_declaration_second = (JTypeDeclarationType) ret_val;
                 new_type_declarationsSecond[i] = cloned_type_declaration_second;
-            } else {    // if (hasBeenSplit)
+            } else {
                 Object ret_val = this.getQueue().poll();
                 JTypeDeclarationType cloned_type_declaration = (JTypeDeclarationType) ret_val;
                 new_type_declarationsFirst[i] = cloned_type_declaration;
-                new_type_declarationsSecond[i] =cloned_type_declaration;
+                new_type_declarationsSecond[i] = cloned_type_declaration;
             }
         }
         @SuppressWarnings("rawtypes")
         ArrayList<JmlMethodDeclaration> top_level_methods = self.tlMethods();
         JmlRefinePrefix refinePrefix = self.refinePrefix();
-        JmlCompilationUnit compilationUnitFirst = new JmlCompilationUnit(where, package_name, export, imported_packages, imported_units, new_type_declarationsFirst,
-                top_level_methods, refinePrefix);
+        JmlCompilationUnit compilationUnitFirst = new JmlCompilationUnit(
+                where, package_name, export, imported_packages, imported_units, new_type_declarationsFirst,
+                top_level_methods, refinePrefix
+        );
         this.getQueue().offer(compilationUnitFirst);
-        if (somethingWasSplit) {    // -> if (hasBeenSplit)
-            JmlCompilationUnit compilationUnitSecond = new JmlCompilationUnit(where, package_name, export, imported_packages, imported_units, new_type_declarationsSecond,
-                    top_level_methods, refinePrefix);
+        if (somethingWasSplit) {
+            JmlCompilationUnit compilationUnitSecond = new JmlCompilationUnit(
+                    where, package_name, export, imported_packages, imported_units, new_type_declarationsSecond,
+                    top_level_methods, refinePrefix
+            );
             this.getQueue().offer(compilationUnitSecond);
         }
     }
@@ -280,14 +290,11 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
         boolean somethingWasSplit = false;
         for (int i = 0; i < self.body().length; i++) {
             self.body()[i].accept(this);
-            if (this.getQueue().size() == 2){
-
+            newBodyFirst[i] = (JStatement) this.getQueue().poll();
+            if (this.getQueue().size() == 2) {
                 somethingWasSplit = true;
-                newBodyFirst[i] = (JStatement) this.getQueue().poll();
                 newBodySecond[i] = (JStatement) this.getQueue().poll();
             }
-//            newBodyFirst[i] = (JStatement) this.getQueue().peek();
-//            newBodySecond[i] = (JStatement) this.getQueue().poll();
         }
         this.getQueue().offer(new JBlock(self.getTokenReference(), newBodyFirst, self.getComments()));
 
@@ -297,7 +304,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
     }
 
     public void visitReturnStatement(/* @non_null */JReturnStatement self) {
-        this.getQueue().offer(self);
+        JBlock newSelf = new JBlock(self.getTokenReference(), new JStatement[]{self},self.getComments());
+        this.getQueue().offer(newSelf);
     }
     public void visitJmlSpecification(JmlSpecification self) {
         JmlSpecification newSelf;
@@ -356,6 +364,16 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
     }
 
+    @Override
+    public void visitJmlSignalsClause(JmlSignalsClause self) {
+        if (self.isNotSpecified()) {
+            throw new IllegalArgumentException("Requires clause is not specified.");
+        }
+
+        JmlRequiresClause newSelf = new JmlRequiresClause(self.getTokenReference(), self.isRedundantly(), self.predOrNot());
+        this.getQueue().offer(newSelf);
+    }
+
     public void visitJmlEnsuresClause(JmlEnsuresClause self) {
         if (self.isNotSpecified()) {
             throw new IllegalArgumentException("Ensures clause is not specified.");
@@ -365,10 +383,6 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
         this.getQueue().offer(newSelf);
     }
 
-    public void visitVariableDeclarationStatement(/* @non_null */JVariableDeclarationStatement self) {
-        this.getQueue().offer(self);
-
-    }
 
     public void visitJmlRequiresClause(JmlRequiresClause self) {
         if (self.isNotSpecified()) {
@@ -380,30 +394,177 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
     }
 
-    public void visitJmlLoopStatement(JmlLoopStatement self) {
-        if (self.stmt() instanceof JWhileStatement) {
-            self.stmt().accept(this);
+    public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
 
-            JBlock block = (JBlock) this.getQueue().poll();
+        self.assignmentStatement().accept(this);
+        JExpressionStatement newExpressionStatement = (JExpressionStatement) this.getQueue().poll();
+        JmlAssignmentStatement newAssignamentStatement = new JmlAssignmentStatement(newExpressionStatement);
+        this.getQueue().offer(newAssignamentStatement);
 
-            JWhileStatement newWhileStatement = (JWhileStatement) block.body()[1];
-
-            JmlLoopStatement newJmlLoopStatement = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), self.variantFunctions(), newWhileStatement, self.getComments());
-
-            JBlock generatedBlock = ASTUtils.createBlockStatement(block.body()[0], newJmlLoopStatement);
-
-            this.getQueue().offer(generatedBlock);
-        } else {
-            this.getQueue().offer(self);
-        }
     }
-    public void visitWhileStatement(/* @non_null */JWhileStatement self) {
-        self.body().accept(this);
-        JStatement newBody = (JStatement) this.getQueue().poll();
-
-        JWhileStatement newSelf = new JWhileStatement(self.getTokenReference(), self.cond(), newBody, self.getComments());
+    public void visitExpressionStatement(/* @non_null */JExpressionStatement self) {
+        self.expr().accept(this);
+        JExpression newExpression = (JExpression)this.getQueue().poll();
+        JExpressionStatement newExpressionStatement = new JExpressionStatement(self.getTokenReference(), newExpression, self.getComments());
+        this.getQueue().offer(newExpressionStatement);
+    }
+    public void visitAssignmentExpression(/* @non_null */JAssignmentExpression self) {
+        self.left().accept(this);
+        JExpression newLeft = (JExpression)this.getQueue().poll();
+        self.right().accept(this);
+        JExpression newRight = (JExpression)this.getQueue().poll();
+        JAssignmentExpression newSelf = new JAssignmentExpression(self.getTokenReference(), newLeft, newRight);
         this.getQueue().offer(newSelf);
     }
+    public void visitLocalVariableExpression(/* @non_null */JLocalVariableExpression self) {
+        self.variable().accept(this);
+        JLocalVariable newLocVar = (JLocalVariable)this.getQueue().poll();
+        JLocalVariableExpression newSelf = new JLocalVariableExpression(self.getTokenReference(),newLocVar);
+        this.getQueue().offer(newSelf);
+    }
+
+    public void visitJmlFormalParameter(JmlFormalParameter self) {
+        this.getQueue().offer(new JmlFormalParameter(self.getTokenReference(), self.modifiers(), self.getDescription(), self.specializedType(), self.ident()));
+    }
+
+    @Override
+    public void visitJmlRelationalExpression(JmlRelationalExpression self) {
+        self.left().accept(this);
+        JExpression newLeft = (JExpression)this.getQueue().poll();
+        self.right().accept(this);
+        JExpression newRight = (JExpression)this.getQueue().poll();
+        self.setLeft(newLeft);
+        self.setRight(newRight);
+
+        this.getQueue().offer(self);
+    }
+
+    public void visitOrdinalLiteral(JOrdinalLiteral self){
+        this.getQueue().offer(self);
+    }
+
+    public void visitUnaryExpression(/* @non_null */JUnaryExpression self) {
+        self.expr().accept(this);
+
+    }
+    public void visitVariableDeclarationStatement(/* @non_null */JVariableDeclarationStatement self) {
+        JVariableDefinition[] vars = new JVariableDefinition[self.getVars().length];
+        for (int i = 0; i < self.getVars().length; i++) {
+            JVariableDefinition varDef = self.getVars()[i];
+            varDef.accept(this);
+            vars[i] = (JVariableDefinition) this.getQueue().poll();
+        }
+
+        JVariableDeclarationStatement newSelf = new JVariableDeclarationStatement(self.getTokenReference(),vars ,self.getComments());
+        this.getQueue().offer(newSelf);
+    }
+    @Override
+    public void visitVariableDefinition(/* @non_null */ JVariableDefinition self) {
+        this.getQueue().offer(self);
+    }
+
+
+    public void visitCompilationUnitType(JCompilationUnitType n) {
+        JTypeDeclarationType[] type_declarations = n.typeDeclarations();
+        for (int i = 0; i < type_declarations.length; i++) {
+            JTypeDeclarationType jTypeDeclarationType = type_declarations[i];
+            jTypeDeclarationType.accept(this);
+        }
+    }
+
+    @Override
+    public void visitCompilationUnit(JCompilationUnit n) {
+        visitCompilationUnitType(n);
+    }
+
+//    public void visitJmlLoopStatement(JmlLoopStatement self) {
+//
+//        JWhileStatement loopStatement = (JWhileStatement)self.loopStmt();
+//        //Will modify the while loop so that it handles the variant function.
+//
+//        JStatement whileBody = loopStatement.body();
+//
+//        JmlVariantFunction[] varFunctions = self.variantFunctions();
+//        if (varFunctions.length > 0){
+//            CType type = varFunctions[0].specExpression().getApparentType();
+//            String newVarName = "variant_" + WhileBlockVisitor.variantFunctions();
+//            WhileBlockVisitor.variantFunctionIndex++;
+//            JVariableDefinition variableVariantFunction = new JVariableDefinition(loopStatement.getTokenReference(), 0, type, newVarName, varFunctions[0].specExpression());
+//            JVariableDeclarationStatement theVariantFunctionVariableDeclaration = new JVariableDeclarationStatement(loopStatement.getTokenReference(), variableVariantFunction, new JavaStyleComment[]{});
+//
+//            CClassType theExceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+//            try {
+//                theExceptionType.checkType(null);
+//            } catch (UnpositionedError e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//
+//            JNewObjectExpression theExpre = new JNewObjectExpression(
+//                    self.getTokenReference(),
+//                    theExceptionType,
+//                    new JThisExpression(self.getTokenReference()),
+//                    new JExpression[]{});
+//
+//            JThrowStatement throwStmt = new JThrowStatement(
+//                    self.getTokenReference(),
+//                    theExpre,
+//                    new JavaStyleComment[]{});
+//            JExpression expreZero = new JOrdinalLiteral(loopStatement.getTokenReference(), 0, (CNumericType)type);
+//            JExpression ifCond = new JmlRelationalExpression(loopStatement.getTokenReference(), OPE_LT, variableVariantFunction.expr(), expreZero);
+//            JStatement theIf = new JIfStatement(loopStatement.getTokenReference(), ifCond, throwStmt, null, null);
+//            JExpression ifCond2 = new JmlRelationalExpression(loopStatement.getTokenReference(), OPE_GE, varFunctions[0].specExpression(), new JLocalVariableExpression(loopStatement.getTokenReference(), variableVariantFunction));
+//            JThrowStatement throwStmt2 = new JThrowStatement(
+//                    loopStatement.getTokenReference(),
+//                    new JNewObjectExpression(
+//                            loopStatement.getTokenReference(),
+//                            theExceptionType,
+//                            new JThisExpression(loopStatement.getTokenReference()),
+//                            new JExpression[]{}),
+//                    new JavaStyleComment[]{});
+//            org.multijava.mjc.JStatement theIf2 = new JIfStatement(loopStatement.getTokenReference(), ifCond2, throwStmt2, null, null);
+//
+//            org.multijava.mjc.JStatement newLoopBody = new org.multijava.mjc.JBlock(loopStatement.getTokenReference(), new org.multijava.mjc.JStatement[]{theVariantFunctionVariableDeclaration, theIf, whileBody, theIf2}, new JavaStyleComment[]{});
+//            JWhileStatement newLoopStatement = new JWhileStatement(loopStatement.getTokenReference(), loopStatement.cond(), newLoopBody, loopStatement.getComments());
+//            newLoopStatement.accept(this);
+//        } else {
+//            loopStatement.accept(this);
+//        }
+//
+////		self.loopStmt().accept(this);
+//        JStatement newStatement = (JStatement) this.getStack().pop();
+//        JmlLoopStatement jmlLoopStatement = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), new JmlVariantFunction[]{}, newStatement, self.getComments());
+//        JStatement[] blockStatements = new JStatement[this.newStatements.size() + 1];
+//        for (int i = 0; i< this.newStatements.size(); i++){
+//            blockStatements[i] = this.newStatements.get(i);
+//        }
+//        blockStatements[this.newStatements.size()] = jmlLoopStatement;
+//        this.newStatements = new ArrayList<JStatement>();
+//        JBlock newBlockIncludingNewStatements = new JBlock(self.getTokenReference(), blockStatements, self.getComments());
+//        this.getStack().push(newBlockIncludingNewStatements);
+//    }
+//    public void visitWhileStatement(JWhileStatement self) {
+//        self.body().accept(this);
+//        JStatement newBody = (JStatement) this.getQueue().poll();
+//        JWhileStatement whileStatement = null;
+//        String cond = newWhileVar();
+//        JVariableDefinition variableDefinition = new JVariableDefinition(self.getTokenReference(), 0, self.cond().getType(), cond, null);
+//        JVariableDeclarationStatement variableDeclarationStatement = new JVariableDeclarationStatement(self.getTokenReference(), variableDefinition,
+//                new JavaStyleComment[0]);
+//        getNewWhileStatements().add(variableDeclarationStatement);
+//        JLocalVariableExpression condReference = new JLocalVariableExpression(self.getTokenReference(), variableDefinition);
+//        JStatement assignamentStatement = ASTUtils.createAssignamentStatement(condReference, self.cond());
+//        getNewWhileStatements().add(assignamentStatement);
+//        LastStatementCollector lsc = new LastStatementCollector();
+//        newBody.accept(lsc);
+//        if (lsc.lastStatementClass != JBreakStatement.class){
+//            JBlock generatedBlock = ASTUtils.createBlockStatement(newBody, assignamentStatement);
+//            whileStatement = new JWhileStatement(self.getTokenReference(), condReference, generatedBlock, self.getComments());
+//        } else {
+//            whileStatement = new JWhileStatement(self.getTokenReference(), condReference, newBody, self.getComments());
+//        }
+//        this.getStack().push(whileStatement);
+//    }
 
     public void visitIfStatement(/* @non_null */JIfStatement self) {
         JStatement FP = null;
@@ -436,6 +597,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
                 this.getQueue().offer(SP);
         }
     }
+
 
     private String getClassName(JmlClassDeclaration self) {
         String cname = self.getCClass().qualifiedName();

@@ -87,7 +87,7 @@ public class SnapshotBuilder {
 
 
 
-	public boolean methodToCheckIsConstructor(Class<?> clazz){
+	public boolean methodToCheckIsConstructor(/*Class<?> clazz*/){
 		boolean result = false;
 		String methodToCheck = TacoConfigurator.getInstance().getMethodToCheck();
 		methodToCheck = methodToCheck.substring(0, methodToCheck.indexOf('('));
@@ -153,7 +153,7 @@ public class SnapshotBuilder {
 
 
 
-		if (methodToCheckIsConstructor(clazzToCheck)){
+		if (methodToCheckIsConstructor(/*clazzToCheck*/)){
 			Constructor<?> constructorToCheck = obtainConstructorToCheck(clazzToCheck);
 
 			// build this

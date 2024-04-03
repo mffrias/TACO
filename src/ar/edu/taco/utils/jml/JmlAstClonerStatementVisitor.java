@@ -264,8 +264,6 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 			methodSpecification = null;
 		}
 
-
-
 		if (methodSpecification != null) {
 			JmlSpecCase[] specCases = self.methodSpecification().specCases();
 
@@ -273,8 +271,7 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 				specCases[x] = methodSpecification.specCases()[x];
 			}
 		}
-		
-				
+			
 		JmlMethodDeclaration theClonedMethodDecl = 
 				JmlMethodDeclaration.makeInstance(self.getTokenReference(), self.modifiers(), self.typevariables(), self.returnType(), self.ident(), self.parameters(), self.getExceptions(), newBody, self.javadocComment(), new JavaStyleComment[0], self.methodSpecification());
 

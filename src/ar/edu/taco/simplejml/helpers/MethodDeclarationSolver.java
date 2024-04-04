@@ -139,10 +139,11 @@ public class MethodDeclarationSolver {
 		Vector<JVariableDeclaration> variableDeclaration;
 		variableDeclaration = call.encode(leftDeclaration, JDynAlloyFactory.THROW_DECLARATION, returnDeclaration, arguments);
 
+//		System.out.println("Method Id: " + methodDeclaration.ident());
 		JProgramDeclaration programDeclaration = new JProgramDeclaration(
 				methodDeclaration.isAbstract(), 
 				methodDeclaration.isConstructor(),
-				methodDeclaration.getMethod().isPure(),
+				JmlMethodDeclaration.hasFlag(methodDeclaration.modifiers(), JmlMethodDeclaration.ACC_PURE),
 				buffer.getSignatureId(), 
 				programId, 
 				variableDeclaration, 

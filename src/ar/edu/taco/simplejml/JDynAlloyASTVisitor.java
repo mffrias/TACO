@@ -337,7 +337,7 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 	@Override
 	public void visitJmlClassDeclaration(
 			/* @non_null */JmlClassDeclaration jmlClassDeclaration) {
-		jmlClassDeclaration.accept(prettyPrint);  //mfrias-mffrias-24-09-2012-Este puede ser el lugar para eliminar comas.
+//		jmlClassDeclaration.accept(prettyPrint);  //mfrias-mffrias-24-09-2012-Este puede ser el lugar para eliminar comas.
 		log.debug("Visiting: " + jmlClassDeclaration.getClass().getName());
 		log.debug("Class: \n" + this.prettyPrint.getPrettyPrint());
 

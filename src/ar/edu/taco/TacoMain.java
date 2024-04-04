@@ -52,7 +52,9 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
 import org.multijava.mjc.JCompilationUnitType;
+import org.multijava.mjc.JTypeDeclarationType;
 
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.MethodToCheckNotFoundException;
@@ -107,6 +109,7 @@ public class TacoMain {
 
     private static Logger log = Logger.getLogger(TacoMain.class);
 
+	static final private String OUTPUT_SIMPLIFIED_JAVA_EXTENSION = ".java";
     private static final String CMD = "Taco";
     private static final String HEADER = "Taco static analysis tool.";
     private static final String FOOTER = "For questions and comments please write to jgaleotti AT dc DOT uba DOT ar";
@@ -382,11 +385,17 @@ public class TacoMain {
 
             // BEGIN AST DETERMINIZER
             JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
+            
             simplified_compilation_units.remove(0).accept(theDeterminizer);
+//            JCompilationUnitType discarded = (JCompilationUnitType)theDeterminizer.getQueue().poll();
+            JCompilationUnitType theDeterminizedUnitType = (JCompilationUnitType)theDeterminizer.getQueue().poll();
+            List<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<JCompilationUnitType>();
+            theDeterminizedUnitTypeList.add(theDeterminizedUnitType);
+    		List<String> fileNames = write_simplified_compilation_units(theDeterminizedUnitTypeList);
+    		JCompilationUnitType theFirstDeterminizedUnitType = parse_simplified_compilation_units(fileNames).get(0);
             // END AST DETERMINIZER
 
-            simplified_compilation_units.add((JCompilationUnitType)theDeterminizer.getQueue().poll());
-           // compilation_units.add((JCompilationUnitType)(theDeterminizer.getQueue().peek()));
+            simplified_compilation_units.add(theFirstDeterminizedUnitType);
 
             // BEGIN JAVA TO JDYNALLOY TRANSLATION
             // JDynAlloy modules have Alloy contracts and dynAlloy programs
@@ -945,6 +954,58 @@ public class TacoMain {
 
         return fileName.substring(lastBackslash, lastDot);
     }
+    
+	private List<JCompilationUnitType> parse_simplified_compilation_units(List<String> files) {
+		String canonical_outdir_path;
+		try {
+			File output_dir = new File(TacoConfigurator.getInstance().getOutputDir());
+			canonical_outdir_path = output_dir.getCanonicalPath();
+		} catch (IOException e) {
+			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
+		}
+
+		JmlParser theParserInstance = JmlParser.getInstance();
+		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
+				files);
+		
+		return theParserInstance.getCompilationUnits();
+		
+	}
+
+	private List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
+		List<String> files = new LinkedList<String>();
+		String canonical_path = makeCanonicalPath();
+
+		for (JCompilationUnitType compilation_unit : newAsts) {
+			assert compilation_unit.typeDeclarations().length==1;
+			JTypeDeclarationType typeDeclaration = compilation_unit.typeDeclarations()[0];
+			String filename = canonical_path + java.io.File.separator + typeDeclaration.getCClass().getJavaName().replaceAll("\\.", "/");
+			files.add(typeDeclaration.getCClass().getJavaName());
+			try {
+				FileUtils.writeToFile(filename + OUTPUT_SIMPLIFIED_JAVA_EXTENSION, JavaAndJmlPrettyPrint2.print(compilation_unit));
+			} catch (IOException e) {
+				throw new RuntimeException("DYNJALLOY ERROR! " + e.getMessage());
+			}
+		}
+		return files;
+	}
+	
+	private String makeCanonicalPath() {
+		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		File out_dir_dir = new File(output_dir);
+
+		if (!out_dir_dir.exists()) {
+			out_dir_dir.mkdirs();
+		}
+
+		String canonical_path;
+		try {
+			canonical_path = out_dir_dir.getCanonicalPath();
+		} catch (IOException e1) {
+			throw new TacoException("path couldn't be found: " + out_dir_dir);
+		}
+		return canonical_path;
+	}
 }
 
 

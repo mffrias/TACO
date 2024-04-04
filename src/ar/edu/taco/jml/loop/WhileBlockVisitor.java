@@ -202,4 +202,22 @@ public class WhileBlockVisitor extends JmlAstClonerStatementVisitor {
 		JBlock newBlockIncludingNewStatements = new JBlock(self.getTokenReference(), blockStatements, self.getComments());
 		this.getStack().push(newBlockIncludingNewStatements);
 	}
+	
+//	public static void main(String[] args) {
+//		int x = 10;
+//		if (x > 0) {
+//			int y = x - 1;
+//			x = x - 1;
+//			while (x > 0) {
+//				y = x - 1;
+//				x = x - 1;
+//				while (y > 0) {
+//					y = x + 3;
+//				}
+//			}
+//		}
+//		assert (!(x>0));
+//		
+//	}
+	
 }

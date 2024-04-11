@@ -38,6 +38,7 @@ import ar.edu.taco.jml.literal.LiteralBlockVisitor;
 import ar.edu.taco.jml.loop.DoWhileBlockVisitor;
 import ar.edu.taco.jml.loop.LSBlockVisitor;
 import ar.edu.taco.jml.loop.WhileBlockVisitor;
+import ar.edu.taco.jml.loop.WhileRemoverSimplifier;
 import ar.edu.taco.jml.static_calls.QualifyStaticCallsVisitor;
 import ar.edu.taco.jml.varnames.VNBlockVisitor;
 import ar.edu.taco.simplejml.AssumeSimplifierVisitor;
@@ -56,6 +57,7 @@ public class ASTSimplifierManager {
 		// order of simplifiers
 		this.simplifiers = new ArrayList<JmlAstClonerStatementVisitor>();
 	
+	 	simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new BlockSimplifier());
 		simplifiers.add(new ShortcutRemoverVisitor());
 		simplifiers.add(new GhostFieldsSimplifier());
@@ -73,10 +75,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new QualifyStaticCallsVisitor());
 		simplifiers.add(new ActualParameterNormalizerVisitor());
 		simplifiers.add(new AssumeSimplifierVisitor());
-		simplifiers.add(new ReturnStatementWrapperVisitor());
-
-
-
+//		simplifiers.add(new ReturnStatementWrapperVisitor());
 	}
 
 	public JmlToSimpleJmlContext getJmlToSimpleJmlContext() {

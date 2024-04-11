@@ -602,7 +602,7 @@ public void visitSwitchGroup(JSwitchGroup self) {
 
 /** Visits the given if statement. */
 public void visitIfStatement(/* @non_null */JIfStatement self) {
-	this.getStack().push(self);
+//	this.getStack().push(self);
 	self.thenClause().accept(this);
 	JStatement newThen = (JStatement) this.getStack().pop();
 	JStatement newElse = null;

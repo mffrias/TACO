@@ -2,6 +2,8 @@ package ar.edu.taco.utils.jml;
 
 import java.util.*;
 
+import ar.edu.jdynalloy.factory.JSignatureFactory;
+import ar.edu.jdynalloy.xlator.JType;
 //import com.sun.jmx.remote.internal.ArrayQueue;
 //import org.jmlspecs.checker.JmlAssertStatement;
 //import org.jmlspecs.checker.JmlAssignableClause;
@@ -48,6 +50,7 @@ import ar.edu.taco.jml.loop.LastStatementCollector;
 import ar.edu.taco.jml.loop.WhileBlockVisitor;
 import ar.edu.taco.jml.utils.ASTUtils;
 import org.jmlspecs.checker.*;
+import org.jmlspecs.checker.Constants;
 import org.multijava.mjc.*;
 //import org.multijava.util.compiler.JavaStyleComment;
 //import org.multijava.util.compiler.TokenReference;
@@ -56,6 +59,13 @@ import org.multijava.mjc.*;
 //import ar.edu.taco.TacoNotImplementedYetException;
 //import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.simplejml.JmlBaseVisitor;
+import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory;
+import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory.JMLMultAuxiliaryConstants;
+import ar.edu.taco.simplejml.helpers.CTypeAdapter;
+import ar.edu.taco.simplejml.helpers.ExpressionSolver;
+import ar.uba.dc.rfm.alloy.AlloyVariable;
+import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
+
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.TokenReference;
 import org.multijava.util.compiler.UnpositionedError;
@@ -90,11 +100,11 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		for (int i = 0; i < typeDeclarations.length; i++) {
 			typeDeclarations[i].accept(this);
-			Object ret_val = this.getQueue().poll();
-			JTypeDeclarationType cloned_type_declaration_first = (JTypeDeclarationType) ret_val;
+			JTypeDeclarationType ret_val = (JTypeDeclarationType) this.getQueue().poll();
+			JTypeDeclarationType cloned_type_declaration_first = ret_val;
 			new_type_declarationsFirst[i] = cloned_type_declaration_first;
-			ret_val = this.getQueue().poll();
-			JTypeDeclarationType cloned_type_declaration_second = (JTypeDeclarationType) ret_val;
+			ret_val = (JTypeDeclarationType) this.getQueue().poll();
+			JTypeDeclarationType cloned_type_declaration_second = ret_val;
 			new_type_declarationsSecond[i] = cloned_type_declaration_second;
 		}
 
@@ -153,12 +163,12 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 				newMethodsFirst.add((JmlMethodDeclaration) ret_val);
 				ret_val = this.getQueue().poll();
 				newMethodsSecond.add((JmlMethodDeclaration) ret_val);
+				//				newMethodsFirst.add(methodDeclaration);
+				//				newMethodsSecond.add(methodDeclaration);
 			} else {
-				newMethodsFirst.add(methodDeclaration);
-				newMethodsSecond.add(methodDeclaration);
+				//				newMethodsFirst.add(methodDeclaration);
+				//				newMethodsSecond.add(methodDeclaration);
 			}
-
-
 		}
 
 		List<JFieldDeclarationType> jModelFieldDeclarationTypeListFirst = null;
@@ -175,7 +185,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 				JFieldDeclarationType newFieldDeclarationTypeSecond = (JFieldDeclarationType) this.getQueue().poll();
 				jModelFieldDeclarationTypeListSecond.add(newFieldDeclarationTypeSecond);
-			
+
 			}
 
 		}
@@ -229,12 +239,33 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 			}
 		}
 
+
+
 		JmlClassDeclaration jmlClassDeclarationFirst = new JmlClassDeclarationExtension(self, jmlInvariantListFirst, jmlRepresentsDeclListFirst, newConstraintsFirst, newMethodsFirst, jModelFieldDeclarationTypeListFirst, newInnersFirst);
+		jmlClassDeclarationFirst.setFields(newFieldsAndInitFirst);
+
 		JmlClassDeclaration jmlClassDeclarationSecond = new JmlClassDeclarationExtension(self, jmlInvariantListSecond, jmlRepresentsDeclListSecond, newConstraintsSecond, newMethodsSecond, jModelFieldDeclarationTypeListSecond, newInnersSecond);
+		jmlClassDeclarationFirst.setFields(newFieldsAndInitSecond);
 
 		this.getQueue().offer(jmlClassDeclarationFirst);
 		this.getQueue().offer(jmlClassDeclarationSecond);
 	}
+
+
+	@Override
+	public void visitJmlFieldDeclaration(JmlFieldDeclaration self) {
+		String fieldNameFirst = self.variable().ident();
+		JVariableDefinition newVarDefiFirst = new JVariableDefinition(self.getTokenReference(), self.variable().modifiers(), self.variable().getType(), fieldNameFirst, self.variable().expr());
+		JmlFieldDeclaration selfFirst = JmlFieldDeclaration.makeInstance(self.getTokenReference(), newVarDefiFirst, self.javadocComment(), new JavaStyleComment[0], self.getCombinedVarAssertions(), null );
+
+		String fieldNameSecond = self.variable().ident();
+		JVariableDefinition newVarDefiSecond = new JVariableDefinition(self.getTokenReference(), self.variable().modifiers(), self.variable().getType(), fieldNameSecond, self.variable().expr());
+		JmlFieldDeclaration selfSecond = JmlFieldDeclaration.makeInstance(self.getTokenReference(), newVarDefiSecond, self.javadocComment(), new JavaStyleComment[0], self.getCombinedVarAssertions(), null );
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+	}
+
 
 	@Override
 	public void visitJmlRepresentsDecl(JmlRepresentsDecl self) {
@@ -244,7 +275,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlConstraint(JmlConstraint self) {
 		JmlConstraint newSelfFirst = new JmlConstraint(self.getTokenReference(), self.modifiers(), self.isRedundantly(), self.predicate(), self.methodNames());
@@ -253,15 +284,15 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlInterfaceDeclaration(JmlInterfaceDeclaration self) {
 		this.getQueue().offer(self);
 		this.getQueue().offer(self);
 	}
 
-	
-	
+
+
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self) {
 
@@ -281,19 +312,19 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 			methodSpecificationSecond = (JmlMethodSpecification) this.getQueue().poll();
 		} 
 
-		JmlSpecCase[] specCases = null;
-		if (methodSpecificationFirst != null) {
-			specCases = self.methodSpecification().specCases();
-			for (int x = 0; x < methodSpecificationFirst.specCases().length; x++) {
-				specCases[x] = methodSpecificationFirst.specCases()[x];
-			}
-		}
-		if (methodSpecificationSecond != null) {
-			specCases = self.methodSpecification().specCases();
-			for (int x = 0; x < methodSpecificationSecond.specCases().length; x++) {
-				specCases[x] = methodSpecificationSecond.specCases()[x];
-			}
-		}
+		//		JmlSpecCase[] specCases = null;
+		//		if (methodSpecificationFirst != null) {
+		//			specCases = self.methodSpecification().specCases();
+		//			for (int x = 0; x < methodSpecificationFirst.specCases().length; x++) {
+		//				specCases[x] = methodSpecificationFirst.specCases()[x];
+		//			}
+		//		}
+		//		if (methodSpecificationSecond != null) {
+		//			specCases = self.methodSpecification().specCases();
+		//			for (int x = 0; x < methodSpecificationSecond.specCases().length; x++) {
+		//				specCases[x] = methodSpecificationSecond.specCases()[x];
+		//			}
+		//		}
 
 
 		JmlMethodDeclaration newMethodDeclFirst = JmlMethodDeclaration.makeInstance(self.getTokenReference(), self.modifiers(), self.typevariables(), self.returnType(), self.ident(), self.parameters(), self.getExceptions(), newBodyFirst, self.javadocComment(), new JavaStyleComment[0], methodSpecificationFirst);
@@ -303,7 +334,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newMethodDeclSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlConstructorDeclaration(JmlConstructorDeclaration self) {
 
@@ -333,11 +364,11 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 	}
 
 
-	
 
-	
-	
-	
+
+
+
+
 	public void visitJmlSpecification(JmlSpecification self) {
 		JmlSpecification newSelfFirst;
 		JmlSpecification newSelfSecond;
@@ -349,7 +380,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 				jmlSpecCase.accept(this);
 				jmlSpecCasesFirst.add((JmlSpecCase) this.getQueue().poll());
 				jmlSpecCasesSecond.add((JmlSpecCase) this.getQueue().poll());
-				
+
 			}
 			newSelfFirst = new JmlSpecification(self.getTokenReference(), jmlSpecCasesFirst.toArray(new JmlSpecCase[0]), self.redundantSpec());
 			newSelfSecond = new JmlSpecification(self.getTokenReference(), jmlSpecCasesSecond.toArray(new JmlSpecCase[0]), self.redundantSpec());
@@ -361,7 +392,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
 
 		self.assignmentStatement().accept(this);
@@ -370,12 +401,12 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		JmlAssignmentStatement newAssignamentStatementFirst = new JmlAssignmentStatement(newExpressionStatementFirst);
 		this.getQueue().offer(newAssignamentStatementFirst);
-		
+
 		JmlAssignmentStatement newAssignamentStatementSecond = new JmlAssignmentStatement(newExpressionStatementSecond);
 		this.getQueue().offer(newAssignamentStatementSecond);
 	}
-	
-	
+
+
 	public void visitJmlGenericSpecBody(JmlGenericSpecBody self) {
 		List<JmlSpecBodyClause> specClausesFirst;
 		List<JmlSpecBodyClause> specClausesSecond;
@@ -399,8 +430,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
-	
+
+
 	public void visitJmlGenericSpecCase(JmlGenericSpecCase self) {
 		List<JmlRequiresClause> jmlSpecHeaderFirst = new ArrayList<JmlRequiresClause>();
 		List<JmlRequiresClause> jmlSpecHeaderSecond = new ArrayList<JmlRequiresClause>();
@@ -423,28 +454,28 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		JmlGenericSpecCase newSelfFirst = new JmlGenericSpecCase(self.getTokenReference(), self.specVarDecls(), jmlSpecHeaderFirst.toArray(new JmlRequiresClause[0]), jmlSpecBodyFirst);
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JmlGenericSpecCase newSelfSecond = new JmlGenericSpecCase(self.getTokenReference(), self.specVarDecls(), jmlSpecHeaderSecond.toArray(new JmlRequiresClause[0]), jmlSpecBodySecond);
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlExceptionalBehaviorSpec(JmlExceptionalBehaviorSpec self) {
 		self.specCase().accept(this);
-		
+
 		JmlGeneralSpecCase theExceptionalBehaviorFirst = (JmlGeneralSpecCase) this.getQueue().poll();
 		JmlGeneralSpecCase theExceptionalBehaviorSecond = (JmlGeneralSpecCase) this.getQueue().poll();
 
 
 		JmlExceptionalBehaviorSpec newSelfFirst = new JmlExceptionalBehaviorSpec(self.getTokenReference(), self.privacy(), theExceptionalBehaviorFirst);
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JmlExceptionalBehaviorSpec newSelfSecond = new JmlExceptionalBehaviorSpec(self.getTokenReference(), self.privacy(), theExceptionalBehaviorSecond);
 		this.getQueue().offer(newSelfFirst);
 	}
 
-	
+
 	@Override
 	public void visitJmlExceptionalSpecBody(JmlExceptionalSpecBody self) {
 		List<JmlSpecBodyClause> specClausesFirst;
@@ -467,7 +498,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlExceptionalSpecCase(JmlExceptionalSpecCase self) {
 		List<JmlRequiresClause> jmlSpecHeaderFirst = new ArrayList<JmlRequiresClause>();
@@ -487,7 +518,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 			self.specBody().accept(this);
 			jmlSpecBodyFirst = (JmlExceptionalSpecBody) this.getQueue().poll();
 			jmlSpecBodySecond = (JmlExceptionalSpecBody) this.getQueue().poll();
-			
+
 		}
 
 		JmlExceptionalSpecCase newSelfFirst = new JmlExceptionalSpecCase(self.getTokenReference(), self.specVarDecls(), jmlSpecHeaderFirst
@@ -499,7 +530,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlNormalBehaviorSpec(JmlNormalBehaviorSpec self) {
 		self.specCase().accept(this);
@@ -509,7 +540,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlNormalSpecBody(JmlNormalSpecBody self) {
 		JmlNormalSpecBody newSelfFirst;
@@ -526,7 +557,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 			}
 			newSelfFirst = new JmlNormalSpecBody(specClausesFirst.toArray(new JmlSpecBodyClause[0]));
 			newSelfSecond = new JmlNormalSpecBody(specClausesSecond.toArray(new JmlSpecBodyClause[0]));
-			
+
 		} else {
 			List<JmlGeneralSpecCase> specClausesFirst;
 			List<JmlGeneralSpecCase> specClausesSecond;
@@ -544,8 +575,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
+
+
 	@Override
 	public void visitJmlNormalSpecCase(JmlNormalSpecCase self) {
 		List<JmlRequiresClause> jmlSpecHeaderFirst = new ArrayList<JmlRequiresClause>();
@@ -576,34 +607,34 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 
 	}
-	
-	
-	
+
+
+
 	@Override
 	public void visitJmlSignalsClause(JmlSignalsClause self) {
 		if (self.isNotSpecified()) {
-			throw new IllegalArgumentException("Requires clause is not specified.");
+			throw new IllegalArgumentException("Signals clause is not specified.");
 		}
 
-		JmlRequiresClause newSelfFirst= new JmlRequiresClause(self.getTokenReference(), self.isRedundantly(), self.predOrNot());
-		JmlRequiresClause newSelfSecond= new JmlRequiresClause(self.getTokenReference(), self.isRedundantly(), self.predOrNot());
+		JmlSignalsClause newSelfFirst= new JmlSignalsClause(self.getTokenReference(), self.isRedundantly(), self.type(), self.ident(), self.predOrNot(), self.isNotSpecified());
+		JmlSignalsClause newSelfSecond= new JmlSignalsClause(self.getTokenReference(), self.isRedundantly(), self.type(), self.ident(), self.predOrNot(), self.isNotSpecified());
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
+
 	@Override
 	public void visitJmlSignalsOnlyClause(JmlSignalsOnlyClause self) {
 		this.getQueue().offer(self);
 		this.getQueue().offer(self);
 	}
-	
+
 	public void visitJmlEnsuresClause(JmlEnsuresClause self) {
 		if (self.isNotSpecified()) {
 			throw new IllegalArgumentException("Ensures clause is not specified.");
 		}
 
-		
+
 		JmlEnsuresClause newSelfFirst = new JmlEnsuresClause(self.getTokenReference(), self.isRedundantly(), self.predOrNot());
 		JmlEnsuresClause newSelfSecond = new JmlEnsuresClause(self.getTokenReference(), self.isRedundantly(), self.predOrNot());
 		this.getQueue().offer(newSelfFirst);
@@ -622,17 +653,17 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfSecond);
 	}
 
-	
-//	public void visitWhileStatement(/* @non_null */JWhileStatement self) {
-//		self.body().accept(this);
-//		JStatement newBody = (JStatement) this.getStack().pop();
-//		
-//
-//		JWhileStatement newSelf = new JWhileStatement(self.getTokenReference(), self.cond(), newBody, self.getComments());
-//		this.getStack().push(newSelf);
-//	}
-	
-	
+
+	//	public void visitWhileStatement(/* @non_null */JWhileStatement self) {
+	//		self.body().accept(this);
+	//		JStatement newBody = (JStatement) this.getStack().pop();
+	//		
+	//
+	//		JWhileStatement newSelf = new JWhileStatement(self.getTokenReference(), self.cond(), newBody, self.getComments());
+	//		this.getStack().push(newSelf);
+	//	}
+
+
 	public void visitTryCatchStatement(/* @non_null */JTryCatchStatement self) {
 		self.tryClause().accept(this);
 		JBlock newTryClauseFirst = (JBlock) this.getQueue().poll();
@@ -652,8 +683,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
+
+
 	public void visitTryFinallyStatement(/* @non_null */JTryFinallyStatement self) {
 		self.tryClause().accept(this);
 		JBlock newTryClauseFirst = (JBlock) this.getQueue().poll();
@@ -665,12 +696,12 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		JTryFinallyStatement newSelfFirst = new JTryFinallyStatement(self.getTokenReference(), newTryClauseFirst, newFinallyClauseFirst, self.getComments());
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JTryFinallyStatement newSelfSecond = new JTryFinallyStatement(self.getTokenReference(), newTryClauseSecond, newFinallyClauseSecond, self.getComments());
 		this.getQueue().offer(newSelfSecond);
 	}	
-	
-	
+
+
 	public void visitSynchronizedStatement(/* @non_null */JSynchronizedStatement self) {
 		self.body().accept(this);
 		JBlock newBodyFirst = (JBlock) this.getQueue().poll();
@@ -681,27 +712,194 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
+
+
+
+	@Override
+	public void visitAssertStatement(JAssertStatement self) {
+		JExpression expre = self.predicate();
+		expre.accept(this);
+
+		JExpression expreFirst = (JExpression) this.getQueue().poll();
+		JExpression expreSecond = (JExpression) this.getQueue().poll();
+
+		JAssertStatement selfFirst = new JAssertStatement(self.getTokenReference(), expreFirst, self.getComments());
+		JAssertStatement selfSecond = new JAssertStatement(self.getTokenReference(), expreSecond, self.getComments());
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.multijava.mjc.MjcVisitor#visitNameExpression(org.multijava.mjc.JNameExpression)
+	 */
+	@Override
+	public void visitNameExpression(JNameExpression self) {
+		String identFirst = self.getName();
+		String identSecond = self.getName();
+
+		JNameExpression selfFirst = new JNameExpression(self.getTokenReference(), identFirst);
+		JNameExpression selfSecond = new JNameExpression(self.getTokenReference(), identSecond);
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see org.jmlspecs.checker.JmlVisitor#visitJmlInvariant(org.jmlspecs.checker.JmlInvariant)
+	 */
+	@Override
+	public void visitJmlInvariant(JmlInvariant self) {
+		JmlPredicate pred = self.predicate();
+		pred.accept(this);
+
+		JmlPredicate predFirst = (JmlPredicate) this.getQueue().poll();
+		JmlPredicate predSecond = (JmlPredicate) this.getQueue().poll();
+
+		JmlInvariant newSelfFirst = new JmlInvariant(self.getTokenReference(), self.modifiers(), self.isRedundantly(), predFirst);
+		JmlInvariant newSelfSecond = new JmlInvariant(self.getTokenReference(), self.modifiers(), self.isRedundantly(), predSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.multijava.mjc.MjcVisitor#visitBooleanLiteral(org.multijava.mjc.JBooleanLiteral)
+	 */
+	@Override
+	public void visitBooleanLiteral(JBooleanLiteral self) {
+		JBooleanLiteral newSelfFirst = new JBooleanLiteral(self.getTokenReference(), self.booleanValue());
+		JBooleanLiteral newSelfSecond = new JBooleanLiteral(self.getTokenReference(), self.booleanValue());
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	@Override
+	public void visitParenthesedExpression(JParenthesedExpression self) {
+		JExpression theExpre = self.expr();
+		theExpre.accept(this);
+		JExpression newExpreFirst = (JExpression) this.getQueue().poll();
+		JExpression newExpreSecond = (JExpression) this.getQueue().poll();
+
+		JParenthesedExpression selfFirst = new JParenthesedExpression(self.getTokenReference(), newExpreFirst);
+		JParenthesedExpression selfSecond = new JParenthesedExpression(self.getTokenReference(), newExpreSecond);
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+	}
+
+
+	@Override
+	public void visitUnaryPromoteExpression(JUnaryPromote self) {
+		JExpression theExpre = self.expr();
+		theExpre.accept(this);
+		JExpression newExpreFirst = (JExpression) this.getQueue().poll();
+		JExpression newExpreSecond = (JExpression) this.getQueue().poll();
+
+		JUnaryPromote selfFirst = new JUnaryPromote(newExpreFirst, self.getApparentType());
+		JUnaryPromote selfSecond = new JUnaryPromote(newExpreSecond, self.getApparentType());
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+
+	}
+
+
+	@Override
+	public void visitJmlPredicate(JmlPredicate self) {
+		JmlSpecExpression theExpre = self.specExpression();
+		theExpre.accept(this);
+
+		JmlSpecExpression theExpreFirst = (JmlSpecExpression) this.getQueue().poll();
+		JmlSpecExpression theExpreSecond = (JmlSpecExpression) this.getQueue().poll();
+
+		JmlPredicate selfFirst = new JmlPredicate(theExpreFirst);
+		JmlPredicate selfSecond = new JmlPredicate(theExpreSecond);
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.jmlspecs.checker.JmlVisitor#visitJmlSpecExpression(org.jmlspecs.checker.JmlSpecExpression)
+	 */
+	@Override
+	public void visitJmlSpecExpression(JmlSpecExpression self) {
+		JExpression expre = self.expression();
+		expre.accept(this);
+
+		JExpression expreFirst = (JExpression) this.getQueue().poll();
+		JExpression expreSecond = (JExpression) this.getQueue().poll();
+
+		JmlSpecExpression selfFirst = new JmlSpecExpression(expreFirst);
+		JmlSpecExpression selfSecond = new JmlSpecExpression(expreSecond);
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.multijava.mjc.MjcVisitor#visitConditionalAndExpression(org.multijava.mjc.JConditionalAndExpression)
+	 */
+	@Override
+	public void visitConditionalAndExpression(JConditionalAndExpression self) {
+		JExpression left = self.left();
+		left.accept(this);
+
+		JExpression leftFirst = (JExpression)this.getQueue().poll();
+		JExpression leftSecond = (JExpression)this.getQueue().poll();
+
+		JExpression right = self.right();
+		right.accept(this);
+
+		JExpression rightFirst = (JExpression)this.getQueue().poll();
+		JExpression rightSecond = (JExpression)this.getQueue().poll();
+
+		JConditionalAndExpression newSelfFirst = new JConditionalAndExpression(self.getTokenReference(), leftFirst, rightFirst);
+		JConditionalAndExpression newSelfSecond = new JConditionalAndExpression(self.getTokenReference(), leftSecond, rightSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
 	public void visitIfStatement(/* @non_null */JIfStatement self) {
 		JStatement FP = null;
 		JStatement SP = null;
+		if (hasBeenSplit) {
+			JmlAstClonerStatementVisitor cloner = new JmlAstClonerStatementVisitor();
+			self.accept(cloner);
+			this.getQueue().offer(cloner.getStack().pop());
+			self.accept(cloner);
+			this.getQueue().offer(cloner.getStack().pop());
+		} else {
 			hasBeenSplit = true;
 			JStatement theThenBranchCode = self.thenClause();
 			//No need to call recursively because we only want to split the code once.
-//			theThenBranchCode.accept(this);
+			//			theThenBranchCode.accept(this);
+
 			JStatement branchAssertThenCase = new JAssertStatement(self.getTokenReference(), self.cond(), self.getComments());
 			JStatement[] FPBeforeBeingABlock = new JStatement[2];
 			FPBeforeBeingABlock[0] = branchAssertThenCase;
 			FPBeforeBeingABlock[1] = theThenBranchCode;
 			FP = new JBlock(self.getTokenReference(), FPBeforeBeingABlock, self.getComments());
-			
+
 			JStatement theElseBranchCode = null;
 			if (self.elseClause() != null) {
 				theElseBranchCode = self.elseClause();
-//				theElseBranchCode.accept(this);
+				//				theElseBranchCode.accept(this);
 				JExpression theCondition = self.cond();
-				JExpression theNegatedCondition = new JUnaryExpression(theCondition.getTokenReference(),13, theCondition);
+				JExpression theNegatedCondition = new JUnaryExpression(theCondition.getTokenReference(),Constants.OPE_LNOT, theCondition);
 				JStatement branchAssertElseCase = new JAssertStatement(self.getTokenReference(),theNegatedCondition,self.getComments());
 				JStatement[] SPBeforeBeingABlock = new JStatement[2];
 				SPBeforeBeingABlock[0] = branchAssertElseCase;
@@ -709,41 +907,45 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 				SP = new JBlock(self.getTokenReference(), SPBeforeBeingABlock, self.getComments());
 			} else {
 				JExpression theCondition = self.cond();
-				JExpression theNegatedCondition = new JUnaryExpression(theCondition.getTokenReference(),13, theCondition);
+				JExpression theNegatedCondition = new JUnaryExpression(theCondition.getTokenReference(), Constants.OPE_LNOT, theCondition);
 				JStatement branchAssertElseCase = new JAssertStatement(self.getTokenReference(),theNegatedCondition,self.getComments());
 				JStatement[] SPBeforeBeingABlock = new JStatement[1];
 				SPBeforeBeingABlock[0] = branchAssertElseCase;
+				SP = new JBlock(self.getTokenReference(), SPBeforeBeingABlock, self.getComments());
+
 			}
-			this.getQueue().offer(FP);
-			this.getQueue().offer(SP);
+		}
+
+		this.getQueue().offer(FP);
+		this.getQueue().offer(SP);
 	}
-	
-	
-	
+
+
+
 	//Still have to consider For Statement
 
-	
+
 	public void visitCompoundStatement(/* @non_null */JCompoundStatement self) {
 		JStatement[] newStatementsFirst = new JStatement[self.body().length];
 		JStatement[] newStatementsSecond = new JStatement[self.body().length];
-		
+
 		for (int i = 0; i < self.body().length; i++) {
 			self.body()[i].accept(this);
 			newStatementsFirst[i] = (JStatement) this.getQueue().poll();
 			newStatementsSecond[i] = (JStatement) this.getQueue().poll();
 		}
-		
+
 		JCompoundStatement newSelfFirst = new JCompoundStatement(self.getTokenReference(), newStatementsFirst); 
 		JCompoundStatement newSelfSecond = new JCompoundStatement(self.getTokenReference(), newStatementsSecond);
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
-	
+
+
+
 	//Still have to consider Do While Statement
-	
-	
+
+
 	public void visitBlockStatement(/* @non_null */JBlock self) {
 		JStatement[] newBodyFirst = new JStatement[self.body().length];
 		JStatement[] newBodySecond = new JStatement[self.body().length];
@@ -756,20 +958,20 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(new JBlock(self.getTokenReference(), newBodyFirst, self.getComments()));
 		this.getQueue().offer(new JBlock(self.getTokenReference(), newBodySecond, self.getComments()));
 	}
-	
+
 	public void visitExpressionStatement(/* @non_null */JExpressionStatement self) {
 		self.expr().accept(this);
 		JExpression newExpressionFirst = (JExpression)this.getQueue().poll();
 		JExpression newExpressionSecond = (JExpression)this.getQueue().poll();
-		
+
 		JExpressionStatement newExpressionStatementFirst = new JExpressionStatement(self.getTokenReference(), newExpressionFirst, self.getComments());
 		this.getQueue().offer(newExpressionStatementFirst);
-		
+
 		JExpressionStatement newExpressionStatementSecond = new JExpressionStatement(self.getTokenReference(), newExpressionSecond, self.getComments());
 		this.getQueue().offer(newExpressionStatementSecond);
 	}
-	
-	
+
+
 	public void visitConstructorBlock(/* @non_null */JConstructorBlock self) {
 		JStatement[] newBodyFirst = null;
 		JStatement[] newBodySecond = null;
@@ -781,32 +983,150 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 			newBodyFirst = newBlockFirst.body();
 			newBodySecond = newBlockSecond.body();
 		}
-		
+
 		this.getQueue().offer(new JConstructorBlock(self.getTokenReference(), newBodyFirst));
 		this.getQueue().offer(new JConstructorBlock(self.getTokenReference(), newBodySecond));
 	}
-	
-	
+
+
 	@Override
 	public void visitCatchClause(JCatchClause self) {
 		JStatement[] newBodyFirst = new JStatement[self.body().body().length];
 		JStatement[] newBodySecond = new JStatement[self.body().body().length];
-		
+
 		for (int i = 0; i < self.body().body().length; i++) {
 			self.body().body()[i].accept(this);
 			newBodyFirst[i] = (JStatement) this.getQueue().poll();
 			newBodySecond[i] = (JStatement) this.getQueue().poll();
 		}
-		
+
 		JBlock newJBlockFirst = new JBlock(self.body().getTokenReference(), newBodyFirst, self.body().getComments());
 		JBlock newJBlockSecond = new JBlock(self.body().getTokenReference(), newBodySecond, self.body().getComments());
-		
+
 		this.getQueue().offer(new JCatchClause(self.getTokenReference(), self.exception(), newJBlockFirst));
 		this.getQueue().offer(new JCatchClause(self.getTokenReference(), self.exception(), newJBlockSecond));
 	}
-	
-	
-	
+
+
+	/* (non-Javadoc)
+	 * @see org.multijava.mjc.MjcVisitor#visitFieldExpression(org.multijava.mjc.JClassFieldExpression)
+	 */
+	@Override
+	public void visitFieldExpression(JClassFieldExpression self) {
+		self.prefix().accept(this);
+		JExpression expreFirst = (JExpression) this.getQueue().poll();
+		JExpression expreSecond = (JExpression) this.getQueue().poll();
+
+		CFieldAccessor theField = self.getField();
+
+		String idFirst = self.ident();
+		String idSecond = self.ident();
+
+		JClassFieldExpression newSelfFirst = new JClassFieldExpression(self.getTokenReference(), expreFirst, idFirst, self.sourceName());
+		newSelfFirst.setField(theField);
+		newSelfFirst.setType(self.getApparentType());
+
+		JClassFieldExpression newSelfSecond = new JClassFieldExpression(self.getTokenReference(), expreSecond, idSecond, self.sourceName());
+		newSelfSecond.setField(theField);
+		newSelfSecond.setType(self.getApparentType());
+
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	@Override
+	public void visitArrayLengthExpression(JArrayLengthExpression self) {
+		self.prefix().accept(this);
+
+		JExpression expreFirst = (JExpression) this.getQueue().poll();
+		JExpression expreSecond = (JExpression) this.getQueue().poll();
+
+		JArrayLengthExpression newSelfFirst = new JArrayLengthExpression(self.getTokenReference(), expreFirst);
+		JArrayLengthExpression newSelfSecond = new JArrayLengthExpression(self.getTokenReference(), expreSecond);
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	/** Visits the given minus expression. */
+	public void visitMinusExpression(/* @non_null */JMinusExpression self) {
+
+		self.left().accept(this);
+		JExpression leftFirst = (JExpression) this.getQueue().poll();
+		JExpression leftSecond = (JExpression) this.getQueue().poll();
+
+		self.right().accept(this);
+		JExpression rightFirst = (JExpression) this.getQueue().poll();
+		JExpression rightSecond = (JExpression) this.getQueue().poll();
+
+		JMinusExpression newSelfFirst = new JMinusExpression(self.getTokenReference(), leftFirst, rightFirst);
+		JMinusExpression newSelfSecond = new JMinusExpression(self.getTokenReference(), leftSecond, rightSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	/** Visits the given minus expression. */
+	public void visitAddExpression(/* @non_null */JAddExpression self) {
+
+		self.left().accept(this);
+		JExpression leftFirst = (JExpression) this.getQueue().poll();
+		JExpression leftSecond = (JExpression) this.getQueue().poll();
+
+		self.right().accept(this);
+		JExpression rightFirst = (JExpression) this.getQueue().poll();
+		JExpression rightSecond = (JExpression) this.getQueue().poll();
+
+		JAddExpression newSelfFirst = new JAddExpression(self.getTokenReference(), leftFirst, rightFirst);
+		JAddExpression newSelfSecond = new JAddExpression(self.getTokenReference(), leftSecond, rightSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	@Override
+	public void visitMultExpression(JMultExpression self) {
+		JExpression left = self.left();
+		left.accept(this);
+		JExpression leftFirst = (JExpression) this.getQueue().poll();
+		JExpression leftSecond = (JExpression) this.getQueue().poll();
+
+		JExpression right = self.right();
+		right.accept(this);
+		JExpression rightFirst = (JExpression) this.getQueue().poll();
+		JExpression rightSecond = (JExpression) this.getQueue().poll();
+
+		JMultExpression newSelfFirst = new JMultExpression(self.getTokenReference(), leftFirst, rightFirst);
+		JMultExpression newSelfSecond = new JMultExpression(self.getTokenReference(), leftSecond, rightSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+	@Override
+	public void visitDivideExpression(JDivideExpression self) {
+		JExpression left = self.left();
+		left.accept(this);
+		JExpression leftFirst = (JExpression) this.getQueue().poll();
+		JExpression leftSecond = (JExpression) this.getQueue().poll();
+
+		JExpression right = self.right();
+		right.accept(this);
+		JExpression rightFirst = (JExpression) this.getQueue().poll();
+		JExpression rightSecond = (JExpression) this.getQueue().poll();
+
+		JDivideExpression newSelfFirst = new JDivideExpression(self.getTokenReference(), leftFirst, rightFirst);
+		JDivideExpression newSelfSecond = new JDivideExpression(self.getTokenReference(), leftSecond, rightSecond);
+
+		this.getQueue().offer(newSelfFirst);
+		this.getQueue().offer(newSelfSecond);
+
+	}
+
 	//Notice that we assume no splitting occurs when accepting left and right. 
 	//Nevertheless, in order to preserve the invariant, we expect after accepting
 	//there are 2 expressions in the queue for left and 2 in the queue for right.
@@ -815,38 +1135,150 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		self.left().accept(this);
 		JExpression newLeftFirst = (JExpression)this.getQueue().poll();
 		JExpression newLeftSecond = (JExpression)this.getQueue().poll();
-		
+
 		self.right().accept(this);
 		JExpression newRightFirst = (JExpression)this.getQueue().poll();
 		JExpression newRightSecond = (JExpression)this.getQueue().poll();
 
 		JAssignmentExpression newSelfFirst = new JAssignmentExpression(self.getTokenReference(), newLeftFirst, newRightFirst);
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JAssignmentExpression newSelfSecond = new JAssignmentExpression(self.getTokenReference(), newLeftSecond, newRightSecond);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
+
+	/** Visits the given array access expression. */
+	public void visitArrayAccessExpression(/* @non_null */JArrayAccessExpression self) {
+		self.accessor().accept(this);
+		JExpression newAccesorFirst = (JExpression)this.getQueue().poll();
+		JExpression newAccesorSecond = (JExpression)this.getQueue().poll();
+
+		self.prefix().accept(this);
+		JExpression newPrefixFirst = (JExpression)this.getQueue().poll();
+		JExpression newPrefixSecond = (JExpression)this.getQueue().poll();
+
+		JArrayAccessExpression newSelfFirst = new JArrayAccessExpressionExtension(self, newPrefixFirst, newAccesorFirst);
+		this.getQueue().offer(newSelfFirst);
+
+		JArrayAccessExpression newSelfSecond = new JArrayAccessExpressionExtension(self, newPrefixSecond, newAccesorSecond);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+	@Override
+	public void visitArrayInitializer(JArrayInitializer self) {
+		JExpression[] newElemsFirst = new JExpression[self.elems().length];
+		JExpression[] newElemsSecond = new JExpression[self.elems().length];
+
+		for (int i = 0; i < self.elems().length; i++) {
+			JExpression expression = self.elems()[i];
+			expression.accept(this);
+			newElemsFirst[i] = (JExpression) this.getQueue().poll();
+			newElemsSecond[i] = (JExpression) this.getQueue().poll();
+		}
+
+		JArrayInitializer newSelfFirst = new JArrayInitializer(self.getTokenReference(), newElemsFirst);
+		this.getQueue().offer(newSelfFirst);
+
+		JArrayInitializer newSelfSecond = new JArrayInitializer(self.getTokenReference(), newElemsSecond);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+
+
+
+	@Override
+	public void visitNewArrayExpression(/* @non_null */JNewArrayExpression self) {
+
+		JExpression[] newDimsFirst = new JExpression[self.dims().dims().length];
+		JExpression[] newDimsSecond = new JExpression[self.dims().dims().length];
+		for (int i = 0; i < self.dims().dims().length; i++) {
+			JExpression expression = self.dims().dims()[i];
+			if (expression == null) {
+				newDimsFirst[i] = null;
+				newDimsSecond[i] = null;
+			} else {
+				expression.accept(this);
+				newDimsFirst[i] = (JExpression) this.getQueue().poll();
+				newDimsSecond[i] = (JExpression) this.getQueue().poll();
+
+			}
+		}
+
+		JArrayInitializer newInitFirst;
+		JArrayInitializer newInitSecond;
+		if (self.dims().init() == null) {
+			newInitFirst = null;
+			newInitSecond = null;
+		} else {
+			self.dims().init().accept(this);
+			newInitFirst = (JArrayInitializer) this.getQueue().poll();
+			newInitSecond = (JArrayInitializer) this.getQueue().poll();
+		}
+
+		JArrayDimsAndInitsExtension newDimsAndInitsFirst = new JArrayDimsAndInitsExtension(self.dims(), newDimsFirst, newInitFirst);
+		JArrayDimsAndInitsExtension newDimsAndInitsSecond = new JArrayDimsAndInitsExtension(self.dims(), newDimsSecond, newInitSecond);
+
+		JNewArrayExpression newSelfFirst = new JNewArrayExpression(self.getTokenReference(), self.getType(), newDimsAndInitsFirst);
+		this.getQueue().offer(newSelfFirst);
+
+		JNewArrayExpression newSelfSecond = new JNewArrayExpression(self.getTokenReference(), self.getType(), newDimsAndInitsSecond);
+		this.getQueue().offer(newSelfSecond);
+	}
+
+	@Override
+	public void visitEqualityExpression(JEqualityExpression self) {
+		self.left().accept(this);
+		JExpression expreLeftFirst = (JExpression)this.getQueue().poll();
+		JExpression expreLeftSecond = (JExpression)this.getQueue().poll();
+
+		self.right().accept(this);
+		JExpression expreRightFirst = (JExpression)this.getQueue().poll();
+		JExpression expreRightSecond = (JExpression)this.getQueue().poll();
+
+		JEqualityExpression newSelfFirst = new JEqualityExpression(self.getTokenReference(), self.oper(), expreLeftFirst, expreRightFirst);
+		this.theQueue.offer(newSelfFirst);
+
+		JEqualityExpression newSelfSecond = new JEqualityExpression(self.getTokenReference(), self.oper(), expreLeftSecond, expreRightSecond);
+		this.theQueue.offer(newSelfSecond);
+	}
+
+
+
+
+
 	public void visitLocalVariableExpression(/* @non_null */JLocalVariableExpression self) {
 		self.variable().accept(this);
 		JLocalVariable newLocVarFirst = (JLocalVariable)this.getQueue().poll();
 		JLocalVariable newLocVarSecond = (JLocalVariable)this.getQueue().poll();
-		
+
 		JLocalVariableExpression newSelfFirst = new JLocalVariableExpression(self.getTokenReference(),newLocVarFirst);
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JLocalVariableExpression newSelfSecond = new JLocalVariableExpression(self.getTokenReference(),newLocVarSecond);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
+
 
 	public void visitJmlFormalParameter(JmlFormalParameter self) {
 		this.getQueue().offer(new JmlFormalParameter(self.getTokenReference(), self.modifiers(), self.getDescription(), self.specializedType(), self.ident()));
 		this.getQueue().offer(new JmlFormalParameter(self.getTokenReference(), self.modifiers(), self.getDescription(), self.specializedType(), self.ident()));
 	}
 
-	
+
+	/* (non-Javadoc)
+	 * @see org.multijava.mjc.MjcVisitor#visitThisExpression(org.multijava.mjc.JThisExpression)
+	 */
+	@Override
+	public void visitThisExpression(JThisExpression self) {
+		JThisExpression selfFirst= new JThisExpression(self.getTokenReference());
+		JThisExpression selfSecond= new JThisExpression(self.getTokenReference());
+
+		this.getQueue().offer(selfFirst);
+		this.getQueue().offer(selfSecond);	
+	}
+
+
 	//Notice that we assume no splitting occurs when accepting left and right. 
 	//Nevertheless, in order to preserve the invariant, we expect after accepting
 	//there are 2 expressions in the queue for left and 2 in the queue for right.
@@ -855,7 +1287,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 	public void visitJmlRelationalExpression(JmlRelationalExpression self) {
 		JmlRelationalExpression relExpreFirst = null;
 		JmlRelationalExpression relExpreSecond = null;
-		
+
 		self.left().accept(this);
 		JExpression newLeftFirst = (JExpression)this.getQueue().poll();
 		JExpression newLeftSecond = (JExpression)this.getQueue().poll();
@@ -866,7 +1298,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		relExpreFirst = new JmlRelationalExpression(self.getTokenReference(), self.oper(), newLeftFirst, newRightFirst);
 		this.getQueue().offer(relExpreFirst);
-		
+
 		relExpreSecond = new JmlRelationalExpression(self.getTokenReference(), self.oper(), newLeftSecond, newRightSecond);
 		this.getQueue().offer(relExpreSecond);
 
@@ -875,7 +1307,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 	public void visitOrdinalLiteral(JOrdinalLiteral self){
 		JOrdinalLiteral litFirst = (JOrdinalLiteral)self.clone(); 
 		this.getQueue().offer(litFirst);
-		
+
 		JOrdinalLiteral litSecond = (JOrdinalLiteral)self.clone(); 
 		this.getQueue().offer(litSecond);
 
@@ -888,12 +1320,12 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(unaryFirst);
 		this.getQueue().offer(unarySecond);
 	}
-	
-	
+
+
 	public void visitVariableDeclarationStatement(/* @non_null */JVariableDeclarationStatement self) {
 		JVariableDefinition[] varsFirst = new JVariableDefinition[self.getVars().length];
 		JVariableDefinition[] varsSecond = new JVariableDefinition[self.getVars().length];
-		
+
 		for (int i = 0; i < self.getVars().length; i++) {
 			JVariableDefinition varDef = self.getVars()[i];
 			varDef.accept(this);
@@ -903,12 +1335,12 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 		JVariableDeclarationStatement newSelfFirst = new JVariableDeclarationStatement(self.getTokenReference(),varsFirst ,self.getComments());
 		this.getQueue().offer(newSelfFirst);
-		
+
 		JVariableDeclarationStatement newSelfSecond = new JVariableDeclarationStatement(self.getTokenReference(),varsSecond ,self.getComments());
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
+
+
 	@Override
 	public void visitVariableDefinition(/* @non_null */ JVariableDefinition self) {
 		JVariableDefinition varDefFirst = new JVariableDefinition(self.getTokenReference(), self.modifiers(), self.getType(), self.ident(), self.expr());
@@ -923,21 +1355,21 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		JTypeDeclarationType[] type_declarations = self.typeDeclarations();
 		JTypeDeclarationType[] typeDeclarationsFirst = new JTypeDeclarationType[type_declarations.length];
 		JTypeDeclarationType[] typeDeclarationsSecond = new JTypeDeclarationType[type_declarations.length];
-		
+
 		for (int i = 0; i < type_declarations.length; i++) {
 			JTypeDeclarationType jTypeDeclarationType = type_declarations[i];
 			jTypeDeclarationType.accept(this);
 			typeDeclarationsFirst[i] = (JTypeDeclarationType)this.getQueue().poll();
 			typeDeclarationsSecond[i] = (JTypeDeclarationType)this.getQueue().poll();
 		}
-		
+
 		JCompilationUnitType newSelfFirst = null;
 	}
 
-//	@Override
-//	public void visitCompilationUnit(JCompilationUnit n) {
-//		visitCompilationUnitType(n);
-//	}
+	//	@Override
+	//	public void visitCompilationUnit(JCompilationUnit n) {
+	//		visitCompilationUnitType(n);
+	//	}
 
 	//    public void visitJmlLoopStatement(JmlLoopStatement self) {
 	//
@@ -1035,9 +1467,9 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		this.getQueue().offer(newSelfFirst);
 		this.getQueue().offer(newSelfSecond);
 	}
-	
-	
-	
+
+
+
 	private String getClassName(JmlClassDeclaration self) {
 		String cname = self.getCClass().qualifiedName();
 		cname = cname.replace('/', '_');

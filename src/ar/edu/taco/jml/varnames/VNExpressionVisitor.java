@@ -25,6 +25,7 @@ import org.multijava.mjc.JFormalParameter;
 import org.multijava.mjc.JGeneratedLocalVariable;
 import org.multijava.mjc.JLocalVariable;
 import org.multijava.mjc.JLocalVariableExpression;
+import org.multijava.mjc.JNameExpression;
 import org.multijava.mjc.JVariableDefinition;
 
 import ar.edu.taco.TacoException;
@@ -53,6 +54,15 @@ public class VNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		this.getArrayStack().push(newSelf);
 	}
 
+
+	/** Visits the given name expression. */
+	public void visitNameExpression(/* @non_null */JNameExpression self) {
+		String newName = this.variableMapping.get(self.getName());
+		JNameExpression newSelf = self;
+		if (newName != null)
+			newSelf = new JNameExpression(self.getTokenReference(), newName);
+		this.getArrayStack().push(newSelf);
+	}
 
 
 	private String renameVariable(JLocalVariable variable) {

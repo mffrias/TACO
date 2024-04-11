@@ -914,10 +914,11 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 				SP = new JBlock(self.getTokenReference(), SPBeforeBeingABlock, self.getComments());
 
 			}
+
+			this.getQueue().offer(FP);
+			this.getQueue().offer(SP);
 		}
 
-		this.getQueue().offer(FP);
-		this.getQueue().offer(SP);
 	}
 
 

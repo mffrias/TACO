@@ -296,6 +296,8 @@ public class JmlAstClonerExpressionVisitor extends JmlBaseVisitor {
 		 * this.getArrayStack().push(newSelf);
 		 */
 	}
+	
+	
 
 	/** Visits the given add expression. */
 	public void visitAddExpression(/* @non_null */JAddExpression self) {
@@ -442,7 +444,7 @@ public class JmlAstClonerExpressionVisitor extends JmlBaseVisitor {
 	/** Visits the given local variable expression. */
 	public void visitLocalVariableExpression(/* @non_null */JLocalVariableExpression self) {
 
-		//JLocalVariableExpression newSelf = new JLocalVariableExpression(self.getTokenReference(), self.variable());
+		JLocalVariableExpression newSelf = new JLocalVariableExpression(self.getTokenReference(), self.variable());
 		this.getArrayStack().push(self);
 	}
 
@@ -557,7 +559,6 @@ public class JmlAstClonerExpressionVisitor extends JmlBaseVisitor {
 
 	/** Visits the given assignment expression. */
 	public void visitAssignmentExpression(/* @non_null */JAssignmentExpression self) {
-		JAssignmentExpression newSelf = (JAssignmentExpression)self.clone();
 		
 		self.left().accept(this);
 		JExpression left = this.getArrayStack().pop();
@@ -565,8 +566,7 @@ public class JmlAstClonerExpressionVisitor extends JmlBaseVisitor {
 		self.right().accept(this);
 		JExpression right = this.getArrayStack().pop();
 		
-		newSelf.setLeft(left);
-		newSelf.setRight(right);
+		JAssignmentExpression newSelf = new JAssignmentExpression(self.getTokenReference(), left, right);
 		
 		this.getArrayStack().push(newSelf);
 	}
@@ -673,6 +673,7 @@ public class JmlAstClonerExpressionVisitor extends JmlBaseVisitor {
 		}
 		this.getArrayStack().push(newSelf);
 	}
+	
 
 	/** Visits the given warn expression. */
 	public void visitWarnExpression(/* @non_null */MJWarnExpression self) {

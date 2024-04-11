@@ -383,17 +383,19 @@ public class TacoMain {
 
             // END SIMPLIFICATION
 
-            // BEGIN AST DETERMINIZER
+//			BEGIN AST DETERMINIZER
             JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
             
             simplified_compilation_units.remove(0).accept(theDeterminizer);
-//            JCompilationUnitType discarded = (JCompilationUnitType)theDeterminizer.getQueue().poll();
+    //        JCompilationUnitType discarded = (JCompilationUnitType)theDeterminizer.getQueue().poll();
             JCompilationUnitType theDeterminizedUnitType = (JCompilationUnitType)theDeterminizer.getQueue().poll();
             List<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<JCompilationUnitType>();
             theDeterminizedUnitTypeList.add(theDeterminizedUnitType);
     		List<String> fileNames = write_simplified_compilation_units(theDeterminizedUnitTypeList);
+//            List<String> fileNames = write_simplified_compilation_units(simplified_compilation_units);
+//            JCompilationUnitType theFirstDeterminizedUnitType = parse_simplified_compilation_units(fileNames).get(0);
     		JCompilationUnitType theFirstDeterminizedUnitType = parse_simplified_compilation_units(fileNames).get(0);
-            // END AST DETERMINIZER
+// 			END AST DETERMINIZER
 
             simplified_compilation_units.add(theFirstDeterminizedUnitType);
 

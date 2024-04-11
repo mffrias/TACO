@@ -510,8 +510,12 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 		JExpression[] newDims = new JExpression[dims.length];
 
 		for (int idx = 0; idx < dims.length; idx++){
-			dims[idx].accept(this);
-			newDims[idx] = (JExpression) this.getStack().pop();
+			if (dims[idx] != null) {
+				dims[idx].accept(this);
+				newDims[idx] = (JExpression) this.getStack().pop();
+			} else {
+				newDims[idx] = null;
+			}
 		}
 		JArrayDimsAndInits newSelf = new JArrayDimsAndInits(self.getTokenReference(), null, newDims, newInit);
 		this.getStack().push(newSelf);
@@ -522,11 +526,16 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	 * @see org.multijava.mjc.MjcVisitor#visitArrayInitializer(org.multijava.mjc.JArrayInitializer)
 	 */
 	@Override
-	public void visitArrayInitializer(JArrayInitializer arg0) {
-		throw new TacoNotImplementedYetException();
-
+	public void visitArrayInitializer(JArrayInitializer self) {
+		JExpression[] newElems = new JExpression[self.elems().length];
+		for (int i = 0; i < self.elems().length; i++) {
+			JExpression expression = self.elems()[i];
+			expression.accept(this);
+			newElems[i] = (JExpression) this.getStack().pop();
+		}
+		JArrayInitializer newSelf = new JArrayInitializer(self.getTokenReference(), newElems);
+		this.getStack().push(newSelf);
 	}
-
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitArrayLengthExpression(org.multijava.mjc.JArrayLengthExpression)
 	 */
@@ -549,6 +558,15 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	@Override
+	public void visitNameExpression(JNameExpression self) {
+		String ident = self.getName();
+		JNameExpression newSelf = new JNameExpression(self.getTokenReference(), ident);
+		this.getStack().push(newSelf);
+
+	}
+
+	
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitBlockStatement(org.multijava.mjc.JBlock)
 	 */

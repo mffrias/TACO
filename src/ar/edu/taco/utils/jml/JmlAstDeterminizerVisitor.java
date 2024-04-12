@@ -81,6 +81,10 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		return theQueue;
 	}
 
+	public boolean isSplit() {
+		return hasBeenSplit;
+	}
+
 	@Override
 	public void visitJmlCompilationUnit(JmlCompilationUnit self) {
 

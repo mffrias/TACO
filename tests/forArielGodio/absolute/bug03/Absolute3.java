@@ -1,5 +1,5 @@
 package forArielGodio.absolute.bug03;
-public class Absolute {
+public class Absolute3 {
 //	/*@    requires 0 <= num && num <= Short.MAX_VALUE;
 //	  @    ensures \result == num;
 //	  @ also

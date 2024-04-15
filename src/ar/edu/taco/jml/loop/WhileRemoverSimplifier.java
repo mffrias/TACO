@@ -55,7 +55,7 @@ import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.jml.varnames.VNWhileBlockVisitor;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
-import javafe.ast.ThisExpr;
+//import javafe.ast.ThisExpr;
 
 public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 

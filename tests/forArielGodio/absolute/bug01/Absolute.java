@@ -1,5 +1,5 @@
 package forArielGodio.absolute.bug01;
-public class Absolute {
+public class Absolute1 {
 	
 	
 	

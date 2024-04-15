@@ -8,11 +8,11 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
-		return "forArielGodio.absolute.bug01.Absolute";
+		return "forArielGodio.absolute.bug01.Absolute1";
 	}
 
 	public void test_genericMethod1Test() throws VizException {
-		setConfigKeyRelevantClasses("forArielGodio.absolute.bug01.Absolute");
+		setConfigKeyRelevantClasses("forArielGodio.absolute.bug01.Absolute1");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
 		setConfigKeyUseJavaArithmetic(true);
@@ -33,7 +33,7 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 	}
 
 	public void test_genericMethod2Test() throws VizException {
-		setConfigKeyRelevantClasses("forArielGodio.absolute.bug01.Absolute");
+		setConfigKeyRelevantClasses("forArielGodio.absolute.bug01.Absolute1");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
 		setConfigKeyUseJavaArithmetic(true);

@@ -42,7 +42,7 @@ public class ForArielGodioFibonacciBug01Test extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
+        setConfigKeyLoopUnroll(6);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);

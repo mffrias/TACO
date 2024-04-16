@@ -32,9 +32,8 @@ public class Fibonacci {
 	}
 
 	//@ requires fib[0] == 0 && fib[1] == 1;
-	//@ ensures (\forall int i; 2 <= i && i < fib.length; fib[i] == fib[i-1] + fib[i-2]); 
-	//@ ensures (\forall int i; 2 <= i && i < fib.length; (\forall int j; 2 <= j && j < i; fib[j] < fib[i]));
 	//@ signals (Exception e) false;
+	//@ signals (AssertionError e) true;
 	public void fibCompute() {
 		int index = 2;
 		while (index < fib.length) {

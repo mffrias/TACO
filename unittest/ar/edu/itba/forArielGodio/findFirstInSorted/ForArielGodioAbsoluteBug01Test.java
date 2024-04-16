@@ -15,11 +15,11 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 		setConfigKeyRelevantClasses("forArielGodio.findFirstInSorted.bug01.FindFirstInSorted");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
-		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
+		setConfigKeyIntBithwidth(6);
+        setConfigKeyLoopUnroll(6);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);

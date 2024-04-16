@@ -85,6 +85,10 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		return hasBeenSplit;
 	}
 
+	public void setIsSplit(boolean b) {
+		this.hasBeenSplit = b;
+	}
+
 	@Override
 	public void visitJmlCompilationUnit(JmlCompilationUnit self) {
 
@@ -877,10 +881,17 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 	}
 
 
+	private boolean itIsAWrappedReturn(JIfStatement self) {
+		boolean elseIsNull = self.elseClause() == null;
+		boolean thenIsJustReturn = self.thenClause() instanceof JReturnStatement;
+		boolean condIsTrue = self.cond().isBooleanLiteral() && ((JBooleanLiteral)self.cond()).booleanValue() == true;
+		return elseIsNull && thenIsJustReturn && condIsTrue;
+	}
+	
 	public void visitIfStatement(/* @non_null */JIfStatement self) {
 		JStatement FP = null;
 		JStatement SP = null;
-		if (hasBeenSplit) {
+		if (hasBeenSplit || itIsAWrappedReturn(self)) {
 			JmlAstClonerStatementVisitor cloner = new JmlAstClonerStatementVisitor();
 			self.accept(cloner);
 			this.getQueue().offer(cloner.getStack().pop());
@@ -1266,8 +1277,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 
 
 	public void visitJmlFormalParameter(JmlFormalParameter self) {
-		this.getQueue().offer(new JmlFormalParameter(self.getTokenReference(), self.modifiers(), self.getDescription(), self.specializedType(), self.ident()));
-		this.getQueue().offer(new JmlFormalParameter(self.getTokenReference(), self.modifiers(), self.getDescription(), self.specializedType(), self.ident()));
+		this.getQueue().offer(self);
+		this.getQueue().offer(self);
 	}
 
 

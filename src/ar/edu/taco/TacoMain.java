@@ -380,7 +380,8 @@ public class TacoMain {
 
         // BEGIN AST DETERMINIZER
 
-        Queue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 32);
+        Queue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 4096);
+        System.out.println("The total number of queued problems is " + splitProblems.size());
 
 
 
@@ -512,13 +513,23 @@ public class TacoMain {
 
                     AlloyStage alloy_stage = new AlloyStage(dynalloyToAlloy.get_alloy_filename());
                     dynalloyToAlloy = null;
+                    
+                    long initTime = System.nanoTime();
+
                     alloy_stage.execute();
+                    
+                    long finalTime = System.nanoTime();
+                    
+                    long elapsedTimeInSeconds = (finalTime - initTime) / 1000000000;
+                    
+                    System.out.println("Ellapsed time: " + elapsedTimeInSeconds +"s");
 
                     alloy_analysis_result = alloy_stage.get_analysis_result();
                     /**/
                     alloy_stage = null;
                 }
             }
+            
 
             tacoAnalysisResult = new TacoAnalysisResult(alloy_analysis_result);
 
@@ -669,7 +680,7 @@ public class TacoMain {
                 log.info("****** BugFix will not be generated. ******* ");
                 log.info("****** attemptToCorrectBug=false ******* ");
             }
-            System.out.println("Pending : " + (32 - splitProblems.size()));
+            System.out.println("Subproblems Left : " + splitProblems.size());
         }
         return tacoAnalysisResult;
     }
@@ -681,8 +692,8 @@ public class TacoMain {
 
         JCompilationUnitType dUnitType = null;
 
-        JCompilationUnitType ifUnit = null;
         JCompilationUnitType thenUnit = null;
+        JCompilationUnitType elseUnit = null;
 
 //        Queue<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<>();
 
@@ -690,22 +701,23 @@ public class TacoMain {
         Queue<JCompilationUnitType> newProblems = new LinkedList<JCompilationUnitType>();
         problems.offer(simpleDeterminizedUnitType);
 
+        boolean somethingWasSplit = false;
         while (problems.size() + newProblems.size() < size) {
-            boolean somethingWasSplit = false;
-
+            
             dUnitType = (JCompilationUnitType) problems.poll();
+            theDeterminizer.setIsSplit(false);
             dUnitType.accept(theDeterminizer);
 
             if (theDeterminizer.isSplit()) {
                 somethingWasSplit = true;
-                ifUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
                 thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
-                newProblems.offer(ifUnit);
+                elseUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
                 newProblems.offer(thenUnit);
+                newProblems.offer(elseUnit);
             } else {
                 newProblems.offer(dUnitType);
-                ifUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
-                ifUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
             }
 
             if (problems.isEmpty() && !somethingWasSplit) {

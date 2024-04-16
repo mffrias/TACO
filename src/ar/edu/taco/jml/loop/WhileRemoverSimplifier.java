@@ -61,21 +61,21 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 
 
 	private int whileIndex = 0;
-	
+
 
 	public void increaseWhileIndex() {
 		this.whileIndex++;
 	}
-	
-	
+
+
 	public int getWhileIndex() {
 		return this.whileIndex;
 	}
 
-	
+
 	public WhileRemoverSimplifier() {}
-	
-	
+
+
 	@Override
 	public void visitJmlLoopStatement(JmlLoopStatement self) {
 		JWhileStatement theWhileStatement = (JWhileStatement)self.loopStmt();
@@ -83,40 +83,65 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 		JStatement unrolledWhile = (JStatement)this.getStack().pop();
 		this.getStack().push(unrolledWhile);
 	}
-	
-	
-	
+
+
+
 	@Override
 	public void visitWhileStatement(JWhileStatement self) {
 		this.increaseWhileIndex();
 		WhileBodyLocalVariableCollectorVisitor variableCollector = new WhileBodyLocalVariableCollectorVisitor();
 		self.body().accept(variableCollector);
 		variableCollector.getStack().pop();
+		self.body().accept(this);
+		JStatement body = (JStatement) this.getStack().pop();
 		int numLoopUnrolls = TacoConfigurator.getInstance().getDynAlloyToAlloyLoopUnroll();
-		JStatement unrolledWhile = unrollWhileLoop(self.cond(), self.body(), this.getWhileIndex(), numLoopUnrolls, variableCollector.getLocalVars());		
-		this.getStack().push(unrolledWhile);
-		
+		JStatement unrolledWhile = unrollWhileLoop(self.cond(), body, this.getWhileIndex(), numLoopUnrolls, variableCollector.getLocalVars());
+		JAssertStatement finalAssert = new JAssertStatement(body.getTokenReference(), new JUnaryExpression(body.getTokenReference(), 13, self.cond()), null, body.getComments());
+		JStatement[] newBlockBody = new JStatement[2];
+		newBlockBody[0] = unrolledWhile;
+		newBlockBody[1] = finalAssert;
+		JBlock newBlock = new JBlock(body.getTokenReference(), newBlockBody, body.getComments());
+		this.getStack().push(newBlock);
 	}
-	
-	
+
+
 	public JStatement unrollWhileLoop(JExpression cond, JStatement body, int whileIndex, int numIterations, ArrayList<JVariableDeclarationStatement> renameVars) {
-		body.accept(this);
-		body = (JStatement) this.getStack().pop();
-		
-		JStatement[] newBlockBody = new JStatement[numIterations + 1];
-		
-		for (int i = 0; i < numIterations; i++) {
-			JStatement iterBody = replaceVarNames(body, whileIndex, i, renameVars);
-			JIfStatement newIf = new JIfStatement(body.getTokenReference(), cond, iterBody, null, body.getComments());
-			newBlockBody[i] = newIf;
+		JStatement newIf = null;
+		if (numIterations == 1) {
+			JStatement iterBody = replaceVarNames(body, whileIndex, 1, renameVars);
+			newIf = new JIfStatement(body.getTokenReference(), cond, iterBody, null, body.getComments());
+		} else {
+			JStatement iterBody = replaceVarNames(body, whileIndex, numIterations, renameVars);
+			JStatement[] newBlockBody = new JStatement[2];
+			newBlockBody[0] = iterBody;
+			newBlockBody[1] = unrollWhileLoop(cond, body, whileIndex, numIterations-1, renameVars);
+			JBlock newBlock = new JBlock(body.getTokenReference(), newBlockBody, body.getComments());
+			newIf = new JIfStatement(body.getTokenReference(), cond, newBlock, null, body.getComments());
 		}
-		JAssertStatement finalAssert = new JAssertStatement(body.getTokenReference(), new JUnaryExpression(body.getTokenReference(), 13, cond), null, body.getComments());
-		newBlockBody[numIterations] = finalAssert;
-		
-		JBlock unrolledBody = new JBlock(body.getTokenReference(), newBlockBody, body.getComments());
-				
-		return unrolledBody;
+		return newIf;
 	}
+
+
+
+
+	//	public JStatement unrollWhileLoop(JExpression cond, JStatement body, int whileIndex, int numIterations, ArrayList<JVariableDeclarationStatement> renameVars) {
+	//		body.accept(this);
+	//		body = (JStatement) this.getStack().pop();
+	//		
+	//		JStatement[] newBlockBody = new JStatement[numIterations + 1];
+	//		
+	//		for (int i = 0; i < numIterations; i++) {
+	//			JStatement iterBody = replaceVarNames(body, whileIndex, i, renameVars);
+	//			JIfStatement newIf = new JIfStatement(body.getTokenReference(), cond, iterBody, null, body.getComments());
+	//			newBlockBody[i] = newIf;
+	//		}
+	//		JAssertStatement finalAssert = new JAssertStatement(body.getTokenReference(), new JUnaryExpression(body.getTokenReference(), 13, cond), null, body.getComments());
+	//		newBlockBody[numIterations] = finalAssert;
+	//		
+	//		JBlock unrolledBody = new JBlock(body.getTokenReference(), newBlockBody, body.getComments());
+	//				
+	//		return unrolledBody;
+	//	}
 
 
 	private JStatement replaceVarNames(JStatement body, int whileIndex2, int i,

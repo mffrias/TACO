@@ -15,11 +15,11 @@ public class ForArielGodioBinarySeachBug01Test extends CollectionTestBase {
 		setConfigKeyRelevantClasses("forArielGodio.binarySearch.bug01.BinarySearch");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(3);
+        setConfigKeyLoopUnroll(10);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);

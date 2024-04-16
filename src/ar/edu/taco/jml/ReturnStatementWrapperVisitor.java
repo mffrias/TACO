@@ -34,14 +34,6 @@ public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor 
 			newBody = (JBlock) this.getStack().pop();
 		}
 
-		JmlMethodSpecification methodSpecification;
-		if (self.hasSpecification()) {
-			self.methodSpecification().accept(this);
-			methodSpecification = (JmlMethodSpecification) this.getStack().pop();
-		} else {
-			methodSpecification = null;
-		}
-
 		if (!self.returnType().isVoid()){
 			JExpression defaultValueExpre = null;
 			if (self.returnType().isReference())
@@ -57,14 +49,6 @@ public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor 
 			newBody = new JBlock(self.getTokenReference(), new JStatement[]{newBody, returnStatement}, null);
 		}
 		self.setBody(newBody);
-
-		if (methodSpecification != null) {
-			JmlSpecCase[] specCases = self.methodSpecification().specCases();
-
-			for (int x = 0; x < methodSpecification.specCases().length; x++) {
-				specCases[x] = methodSpecification.specCases()[x];
-			}
-		}
 
 		this.getStack().push(self);
 	}

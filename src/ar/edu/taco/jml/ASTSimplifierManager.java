@@ -75,7 +75,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new QualifyStaticCallsVisitor());
 		simplifiers.add(new ActualParameterNormalizerVisitor());
 		simplifiers.add(new AssumeSimplifierVisitor());
-//		simplifiers.add(new ReturnStatementWrapperVisitor());
+		simplifiers.add(new ReturnStatementWrapperVisitor());
 	}
 
 	public JmlToSimpleJmlContext getJmlToSimpleJmlContext() {

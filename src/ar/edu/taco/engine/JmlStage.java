@@ -42,6 +42,8 @@ import ar.edu.taco.utils.FileUtils;
  */
 public class JmlStage implements ITacoStage {
 
+	private static int outputNumDir = 0;
+	String canonical_path = makeCanonicalPath();
 	static final private String OUTPUT_SIMPLIFIED_JAVA_EXTENSION = ".java";
 //	static final private String FILE_SEPARATOR = File.separator;
 
@@ -73,16 +75,15 @@ public class JmlStage implements ITacoStage {
 	}
 
 	private void parse_simplified_compilation_units(List<String> files) {
-		String canonical_outdir_path;
-		try {
-			File output_dir = new File(TacoConfigurator.getInstance().getOutputDir());
-			canonical_outdir_path = output_dir.getCanonicalPath();
-		} catch (IOException e) {
-			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
-		}
+//		try {
+//			File output_dir = new File(TacoConfigurator.getInstance().getOutputDir());
+//			canonical_path = canonical_path;
+//		} catch (IOException e) {
+//			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
+//		}
 
 		JmlParser theParserInstance = JmlParser.getInstance();
-		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
+		theParserInstance.initialize(canonical_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
 				files);
 		
 		simplified_compilation_units = theParserInstance.getCompilationUnits();
@@ -91,7 +92,7 @@ public class JmlStage implements ITacoStage {
 
 	private List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
 		List<String> files = new LinkedList<String>();
-		String canonical_path = makeCanonicalPath();
+
 
 		for (JCompilationUnitType compilation_unit : newAsts) {
 			assert compilation_unit.typeDeclarations().length==1;
@@ -119,7 +120,8 @@ public class JmlStage implements ITacoStage {
 	}
 
 	private String makeCanonicalPath() {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		outputNumDir++;
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

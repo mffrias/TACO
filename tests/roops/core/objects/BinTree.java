@@ -2,7 +2,7 @@ package roops.core.objects;
 
 import roops.core.objects.BinTreeNode;
 
-public class BinTreeNew {
+public class BinTree {
 
 
 	/*@
@@ -29,7 +29,7 @@ public class BinTreeNew {
 
 	public int size;
 
-	public BinTreeNew() {
+	public BinTree() {
 	}
 
 	/*@

@@ -74,6 +74,7 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
     @Override
     public TacoAnalysisResult call() throws Exception {
         System.out.println("Thread Start: " + Thread.currentThread().getName());
+
         List<String> fileNames = null;
         JCompilationUnitType units = null;
 
@@ -84,19 +85,21 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
         units = TacoMain.parse_simplified_compilation_units(fileNames).remove(0);
         simplified_compilation_units.add(units);
 
-        System.out.println("test1");
         // BEGIN JAVA TO JDYNALLOY TRANSLATION
+        System.out.println("<-----Beginning JDynaAlloy Translation----->");
+
         // JDynAlloy modules have Alloy contracts and dynAlloy programs
         SimpleJmlStage aJavaToJDynAlloyTranslator = new SimpleJmlStage(simplified_compilation_units);
         //HERE IS WHERE THE PREDS AND VARS ARE PRODUCED
-
         aJavaToJDynAlloyTranslator.execute();
 
         // END JAVA TO JDYNALLOY TRANSLATION
+        System.out.println("<>-----End JDynaAlloy Translation-----");
 
         simpleJmlToJDynAlloyContext = aJavaToJDynAlloyTranslator.getSimpleJmlToJDynAlloyContext();
 
         // JFSL TO JDYNALLOY TRANSLATION
+        System.out.println("<-----Beginning JFSL Translation----->");
         JfslStage aJfslToDynJAlloyTranslator = new JfslStage(simplified_compilation_units, aJavaToJDynAlloyTranslator.getModules(), jmlToSimpleJmlContext,
                 simpleJmlToJDynAlloyContext);
 
@@ -104,15 +107,23 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
 
 
         aJfslToDynJAlloyTranslator = null;
+
+        System.out.println("<-----End JFSL Translation----->");
+
         // END JFSL TO JDYNALLOY TRANSLATION
 
         // PRINT JDYNALLOY
+
+        System.out.println("<-----Print JDynaAlloy Translation----->");
+
         JDynAlloyPrinterStage printerStage = new JDynAlloyPrinterStage(aJavaToJDynAlloyTranslator.getModules());
 
         printerStage.execute();
 
         printerStage = null;
         // END PRINT JDYNALLOY
+
+        System.out.println("<-----End Print JDynaAlloy Translation----->");
 
         List<JDynAlloyModule> jdynalloy_modules = new ArrayList<JDynAlloyModule>();
         jdynalloy_modules.addAll(aJavaToJDynAlloyTranslator.getModules());
@@ -122,6 +133,8 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
 //        }
 
         // JDYNALLOY BUILT-IN MODULES
+        System.out.println("<-----Begin JDynaAllow built-in modules----->");
+
         PrecompiledModules precompiledModules = null;
         if (this.inputToFix != null) {
             precompiledModules = new PrecompiledModules((HashMap<String, Object>) inputToFix);
@@ -130,16 +143,24 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
         }
         precompiledModules.execute();
         jdynalloy_modules.addAll(precompiledModules.getModules());
+        System.out.println("<-----End JDynaAlloy built-in modules----->");
         // END JDYNALLOY BUILT-IN MODULES
 
         // JDYNALLOY STATIC FIELDS CLASS
+        System.out.println("<-----Begin JDynaAlloy static fields class----->");
+
         JDynAlloyModule staticFieldsModule = precompiledModules.generateStaticFieldsModule();
         jdynalloy_modules.add(staticFieldsModule);
         /**/
         staticFieldsModule = null;
+
+        System.out.println("<-----End JDynaAlloy static fields----->");
+
         // END JDYNALLOY STATIC FIELDS CLASS
 
         // JDYNALLOY PARSING
+        System.out.println("<-----Begin JDynaAlloy parsing----->");
+
         if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.JDYNALLOY_PARSER_ENABLED, TacoConfigurator.JDYNALLOY_PARSER_ENABLED_DEFAULT)) {
             log.info("****** START: Parsing JDynAlloy files ****** ");
             JDynAlloyParsingStage jDynAlloyParser = new JDynAlloyParsingStage(jdynalloy_modules);
@@ -153,14 +174,20 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
         } else {
             log.info("****** INFO: Parsing JDynAlloy is disabled (hint enablet it using 'jdynalloy.parser.enabled') ****** ");
         }
+
+        System.out.println("<-----End JDynaAlloy parsing----->");
         // END JDYNALLOY PARSING
 
         // BEGIN JDYNALLOY TO DYNALLOY TRANSLATION
+        System.out.println("<-----Begin DynAlloy translation----->");
+
         String methodToCheckWithoutTyping = overridingProperties.getProperty("methodToCheck").substring(0, overridingProperties.getProperty("methodToCheck").indexOf('('));
         JDynAlloyStage dynJAlloyToDynAlloyTranslator = new JDynAlloyStage(jdynalloy_modules, overridingProperties.getProperty("classToCheck"), methodToCheckWithoutTyping, inputToFix);
         dynJAlloyToDynAlloyTranslator.setJavaArithmetic(TacoConfigurator.getInstance().getUseJavaArithmetic());
         dynJAlloyToDynAlloyTranslator.setRemoveQuantifiers(TacoConfigurator.getInstance().getRemoveQuantifiers());
         dynJAlloyToDynAlloyTranslator.execute();
+
+        System.out.println("<-----End DynAlloy translation----->");
         // END JDYNALLOY TO DYNALLOY TRANSLATION
 
         AlloyAnalysisResult alloy_analysis_result = null;
@@ -185,6 +212,7 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
         }
 
         // DYNALLOY TO ALLOY TRANSLATION
+        System.out.println("<-----Begin Alloy translation----->");
         if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.DYNALLOY_TO_ALLOY_ENABLE)) {
 
             dynalloyToAlloy = new DynalloyStage(dynJAlloyToDynAlloyTranslator.getOutputFileNames(),
@@ -196,6 +224,8 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
             dynalloyToAlloy.setSourceJDynAlloy(dynJAlloyToDynAlloyTranslator.getPrunedModules());
             dynalloyToAlloy.execute();
             // DYNALLOY TO ALLOY TRANSLATION
+
+            System.out.println("<-----End Alloy translation----->");
 
             log.info("****** Transformation process finished ****** ");
 

@@ -20,6 +20,7 @@
 
 package ar.edu.taco.engine;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,10 +89,20 @@ public class DynalloyStage implements ITacoStage {
 
 	@Override
 	public void execute() {
+			System.out.println("Current thread: " + Thread.currentThread().getName());
 			dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
 
-			String output_dir = TacoConfigurator.getInstance().getOutputDir();
-			alloy_filename = output_dir + java.io.File.separator + "output" + OUTPUT_ALLOY_EXTENSION;
+			String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+
+			//File output_dir_dir = new File(output_dir);
+
+			// check to see if the output directory exists
+			// if not, create directory
+			// if (!output_dir_dir.exists()){
+			// output_dir_dir.mkdir();
+			// }
+
+			alloy_filename = output_dir + java.io.File.separator + OUTPUT_ALLOY_EXTENSION;
 			String dynalloy_filename = output_dir + java.io.File.separator + "output.dals";
 			inputDynalloyModulesFileNames = Collections.singletonList(dynalloy_filename);
 

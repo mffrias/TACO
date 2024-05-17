@@ -13,7 +13,11 @@ public class Fibonacci {
 
 	//@ requires fib[0] == 0 && fib[1] == 1;
 	//@ signals (Exception e) false;
+<<<<<<< HEAD
 	//@ signals (AssertionError e) true;
+=======
+	//@ signals (AssertionError) true;
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 	public void fibCompute() {
 		int index = 2;
 		while (index < fib.length) {

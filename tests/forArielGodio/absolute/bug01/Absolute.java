@@ -1,5 +1,9 @@
 package forArielGodio.absolute.bug01;
+<<<<<<< HEAD
 public class Absolute1 {
+=======
+public class Absolute{
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 	
 	
 	

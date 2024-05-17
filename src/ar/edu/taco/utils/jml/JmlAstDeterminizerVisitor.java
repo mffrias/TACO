@@ -1382,6 +1382,7 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 		JCompilationUnitType newSelfFirst = null;
 	}
 
+<<<<<<< HEAD
 	//	@Override
 	//	public void visitCompilationUnit(JCompilationUnit n) {
 	//		visitCompilationUnitType(n);
@@ -1477,6 +1478,8 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
 	//    }
 
 
+=======
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 	public void visitReturnStatement(/* @non_null */JReturnStatement self) {
 		JBlock newSelfFirst = new JBlock(self.getTokenReference(), new JStatement[]{self},self.getComments());
 		JBlock newSelfSecond = new JBlock(self.getTokenReference(), new JStatement[]{self},self.getComments());

@@ -22,21 +22,25 @@ package ar.edu.taco;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+<<<<<<< HEAD
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.*;
+=======
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.*;
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
+import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
+import ar.edu.taco.utils.threads.TranslateThread;
 
 import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
 
@@ -56,32 +60,11 @@ import org.multijava.mjc.JTypeDeclarationType;
 
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.MethodToCheckNotFoundException;
-import ar.edu.jdynalloy.ast.JDynAlloyModule;
-import ar.edu.taco.engine.AlloyStage;
-import ar.edu.taco.engine.DynalloyStage;
-import ar.edu.taco.engine.JDynAlloyParsingStage;
-import ar.edu.taco.engine.JDynAlloyPrinterStage;
-import ar.edu.taco.engine.JDynAlloyStage;
-import ar.edu.taco.engine.JUnitStage;
-import ar.edu.taco.engine.JavaTraceStage;
 import ar.edu.taco.engine.JmlStage;
-import ar.edu.taco.engine.PrecompiledModules;
-import ar.edu.taco.engine.SimpleJmlStage;
-import ar.edu.taco.engine.SnapshotStage;
-import ar.edu.taco.engine.StrykerStage;
-import ar.edu.taco.jfsl.JfslStage;
 import ar.edu.taco.jml.JmlToSimpleJmlContext;
 import ar.edu.taco.jml.parser.JmlParser;
-import ar.edu.taco.junit.RecoveredInformation;
 import ar.edu.taco.simplejml.SimpleJmlToJDynAlloyContext;
-import ar.edu.taco.stryker.api.impl.MuJavaController.MsgDigest;
 import ar.edu.taco.utils.FileUtils;
-import ar.uba.dc.rfm.alloy.AlloyTyping;
-import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
-import ar.uba.dc.rfm.dynalloy.DynAlloyCompiler;
-import ar.uba.dc.rfm.dynalloy.analyzer.AlloyAnalysisResult;
-import ar.uba.dc.rfm.dynalloy.ast.DynalloyModule;
-import ar.uba.dc.rfm.dynalloy.ast.ProgramDeclaration;
 
 /**
  * <p>Runs the TACO analysis.</p>
@@ -102,7 +85,7 @@ import ar.uba.dc.rfm.dynalloy.ast.ProgramDeclaration;
  *
  * @author unknown (jgaleotti?)
  */
-public class TacoMain {
+public class TacoMain{
 
     private static Logger log = Logger.getLogger(TacoMain.class);
 
@@ -113,17 +96,18 @@ public class TacoMain {
     public static final String PATH_SEP = System.getProperty("path.separator");
     public static final String FILE_SEP = System.getProperty("file.separator");
 
-    private Object inputToFix;
+    private static Object inputToFix;
 
     /**
      * @param args
      */
     @SuppressWarnings({"static-access"})
     public static void main(String[] args) {
+
         @SuppressWarnings("unused")
         int loopUnrolling = 3;
 
-        String tacoVersion = getManifestAttribute(Attributes.Name.IMPLEMENTATION_VERSION);
+        String tacoVersion = getManifestAttribute(Name.IMPLEMENTATION_VERSION);
         String tacoCreatedBy = getManifestAttribute(new Name("Created-By"));
 
         System.out.println("TACO: Taco static analysis tool.");
@@ -300,7 +284,7 @@ public class TacoMain {
 
             TacoMain main = new TacoMain(null);
 
-            // BUILD TacoScope 
+            // BUILD TacoScope
 
             main.run(configFileArgument, overridingProperties);
 
@@ -320,7 +304,6 @@ public class TacoMain {
         this.inputToFix = inputToFix;
     }
 
-
     public void run(String configFile) throws IllegalArgumentException {
         this.run(configFile, new Properties());
     }
@@ -332,6 +315,21 @@ public class TacoMain {
 
     @SuppressWarnings("unchecked")
     public TacoAnalysisResult run(String configFile, Properties overridingProperties) throws IllegalArgumentException {
+        // -------------BEGIN EXECUTOR SERVICE-----------
+
+        // number of threads to use
+        int numThreads = 2;
+
+        // create executor service for thread processing
+        ExecutorService translationService = Executors.newFixedThreadPool(numThreads);
+
+        // make lists
+        List<Callable<TacoAnalysisResult>> translateThreadList = new ArrayList<>();
+
+        List<Future<TacoAnalysisResult>> futureThreadList = new ArrayList<>();
+
+        // end test
+
         if (configFile == null) {
             throw new IllegalArgumentException("Config file not found, please verify option -cf");
         }
@@ -344,6 +342,7 @@ public class TacoMain {
         JDynAlloyConfig.reset();
         JDynAlloyConfig.buildConfig(configFile, overridingProperties);
 
+<<<<<<< HEAD
 
         SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext;
         //if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.JMLPARSER_ENABLED, TacoConfigurator.JMLPARSER_ENABLED_DEFAULT)) {
@@ -565,6 +564,80 @@ public class TacoMain {
                 }
 
             }
+=======
+
+        SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext = null;
+        //if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.JMLPARSER_ENABLED, TacoConfigurator.JMLPARSER_ENABLED_DEFAULT)) {
+        // JAVA PARSING
+        String sourceRootDir = TacoConfigurator.getInstance().getString(TacoConfigurator.JMLPARSER_SOURCE_PATH_STR);
+
+        if (TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD) == null) {
+            throw new TacoException("Config key 'CLASS_TO_CHECK_FIELD' is mandatory. Please check your config file or add the -c parameter");
+        }
+        List<String> files = new ArrayList<String>(Arrays.asList(JDynAlloyConfig.getInstance().getClasses()));
+        classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
+        if (!files.contains(classToCheck)) {
+            files.add(classToCheck);
+        }
+
+
+        String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
+        boolean compilationSuccess = JmlParser.getInstance().initialize(sourceRootDir, userDir /* Unused */, files);
+
+        if (!compilationSuccess) {
+            return null; //this means compilation failed;
+        }
+
+        compilation_units = JmlParser.getInstance().getCompilationUnits();
+        // END JAVA PARSING
+
+        // BEGIN SIMPLIFICATION
+        JmlStage aJavaCodeSimplifier = new JmlStage(compilation_units);
+        aJavaCodeSimplifier.execute();
+        JmlToSimpleJmlContext jmlToSimpleJmlContext = aJavaCodeSimplifier.getJmlToSimpleJmlContext();
+        List<JCompilationUnitType> simplified_compilation_units = aJavaCodeSimplifier.get_simplified_compilation_units();
+
+
+        // END SIMPLIFICATION
+
+        // BEGIN AST DETERMINIZER
+
+        Queue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 2);
+        System.out.println("The total number of queued problems is " + splitProblems.size());
+
+        // END AST DETERMINIZER
+
+        TacoAnalysisResult tacoAnalysisResult = null;
+
+        while (!splitProblems.isEmpty()) {
+            //-------BEGIN TRANSLATION THREAD PROCESS
+
+            // create new callable thread with the type TacoAnalysisResult
+            Callable<TacoAnalysisResult> translationThread = new TranslateThread(splitProblems.poll(),jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+
+            translateThreadList.add(translationThread);
+
+            System.out.println("Subproblems Left : " + splitProblems.size() + " from Thread: " + Thread.currentThread().getName());
+        }
+        // invoke all process
+        try{
+            futureThreadList = translationService.invokeAll(translateThreadList);
+        }
+        catch (Exception e){
+            System.out.println("<---SERVICE ERROR--->");
+            System.out.println("Cause: " + e.getCause());
+        }
+
+        for(Future<TacoAnalysisResult> f: futureThreadList){
+            try{
+                tacoAnalysisResult = f.get();
+            }
+            catch (Exception e){
+                System.out.println("<---PRINT ERROR--->");
+                System.out.println("Cause: " + e.getCause());
+            }
+        }
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 
             if (TacoConfigurator.getInstance().getBuildJavaTrace()) {
                 if (tacoAnalysisResult.get_alloy_analysis_result().isSAT()) {
@@ -685,6 +758,10 @@ public class TacoMain {
         return tacoAnalysisResult;
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
     public Queue<JCompilationUnitType> removeNonDeterminism(List<JCompilationUnitType> simpleUnits, int size) {
         JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
 
@@ -695,7 +772,11 @@ public class TacoMain {
         JCompilationUnitType thenUnit = null;
         JCompilationUnitType elseUnit = null;
 
+<<<<<<< HEAD
 //        Queue<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<>();
+=======
+        // Queue<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<>();
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
 
         Queue<JCompilationUnitType> problems = new LinkedList<JCompilationUnitType>();
         Queue<JCompilationUnitType> newProblems = new LinkedList<JCompilationUnitType>();
@@ -703,7 +784,11 @@ public class TacoMain {
 
         boolean somethingWasSplit = false;
         while (problems.size() + newProblems.size() < size) {
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
             dUnitType = (JCompilationUnitType) problems.poll();
             theDeterminizer.setIsSplit(false);
             dUnitType.accept(theDeterminizer);
@@ -737,6 +822,39 @@ public class TacoMain {
 
     }
 
+<<<<<<< HEAD
+=======
+//    public List<Future<TacoAnalysisResult>> testService(int numThreads){
+//
+//        // create executor service for thread processing
+//        ExecutorService service1 = Executors.newFixedThreadPool(numThreads);
+//
+//        // create new callable thread with the type string
+//        Callable<TacoAnalysisResult> translationThread = new TranslateThread(splitProblems.poll(),jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+//
+//        // create a list for threads of type Callable<String>
+//        List<Callable<TacoAnalysisResult>> threadList = new ArrayList<>();
+//
+//        // create a list to hold Future objects, which hold processed thread's results
+//        List<Future<TacoAnalysisResult>> futureList = new ArrayList<>();
+//
+//        // add arbitrary number of threads to callable list -> (5 instances will run with numThreads number of threads)
+//        for (int i = 0; i < 5; i++) {
+//            threadList.add(threadCallable);
+//        }
+//
+//        // process threads with invokeAll() -> allows for logging ex: timeout, terminated, etc.
+//        try {
+//            futureList = service1.invokeAll(threadList);
+//        }
+//        catch (Exception e){
+//            e.getCause();
+//        }
+//
+//        return futureList;
+//    }
+
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
     /**
      *
      */
@@ -978,7 +1096,7 @@ public class TacoMain {
                     //					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     //					str = "           final ClassLoader cl2 = new URLClassLoader(new URL[]{new File(fileClasspath).toURI().toURL()}, cl);";
                     //					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    //					str = "           clazz = cl2.loadClass(className);";					
+                    //					str = "           clazz = cl2.loadClass(className);";
                     //					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     //					str = "           System.out.println(\"actual class inside method: \"+clazz.getName());";
                     //					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
@@ -1025,6 +1143,7 @@ public class TacoMain {
         return fileName.substring(lastBackslash, lastDot);
     }
 
+<<<<<<< HEAD
     private List<JCompilationUnitType> parse_simplified_compilation_units(List<String> files) {
         String canonical_outdir_path;
         try {
@@ -1034,6 +1153,19 @@ public class TacoMain {
             throw new TacoException("canonical path couldn't be computed " + e.getMessage());
         }
 
+=======
+    public static List<JCompilationUnitType> parse_simplified_compilation_units(List<String> files) {
+        String canonical_outdir_path = makeCanonicalPath();
+//        try {
+//            String theActualOutputDir = TacoConfigurator.getInstance().getOutputDir();
+//            File output_dir = new File(theActualOutputDir);
+//            canonical_outdir_path = output_dir.getCanonicalPath();
+//        } catch (IOException e) {
+//            throw new TacoException("canonical path couldn't be computed " + e.getMessage());
+//        }
+
+        //<---!GRABS FILE SOURCES FROM OUTPUT-MAIN IN theParserInstance!--->
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
         JmlParser theParserInstance = JmlParser.getInstance();
         theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
                 files);
@@ -1042,14 +1174,22 @@ public class TacoMain {
 
     }
 
+<<<<<<< HEAD
     private List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
+=======
+    public static List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
         List<String> files = new LinkedList<String>();
         String canonical_path = makeCanonicalPath();
 
         for (JCompilationUnitType compilation_unit : newAsts) {
             assert compilation_unit.typeDeclarations().length == 1;
             JTypeDeclarationType typeDeclaration = compilation_unit.typeDeclarations()[0];
+<<<<<<< HEAD
             String filename = canonical_path + java.io.File.separator + typeDeclaration.getCClass().getJavaName().replaceAll("\\.", "/");
+=======
+            String filename = canonical_path + File.separator + typeDeclaration.getCClass().getJavaName().replaceAll("\\.", "/");
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
             files.add(typeDeclaration.getCClass().getJavaName());
             try {
                 FileUtils.writeToFile(filename + OUTPUT_SIMPLIFIED_JAVA_EXTENSION, JavaAndJmlPrettyPrint2.print(compilation_unit));
@@ -1060,8 +1200,13 @@ public class TacoMain {
         return files;
     }
 
+<<<<<<< HEAD
     private String makeCanonicalPath() {
         String output_dir = TacoConfigurator.getInstance().getOutputDir();
+=======
+    private static String makeCanonicalPath() {
+        String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+>>>>>>> 2137881e422e556fc146f9fe738856ba2549b254
         File out_dir_dir = new File(output_dir);
 
         if (!out_dir_dir.exists()) {

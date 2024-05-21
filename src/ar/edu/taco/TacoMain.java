@@ -355,7 +355,7 @@ public class TacoMain{
 
         // BEGIN AST DETERMINIZER
 
-        Queue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 2);
+        BlockingQueue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 2);
         System.out.println("The total number of queued problems is " + splitProblems.size());
 
         // END AST DETERMINIZER
@@ -378,9 +378,10 @@ public class TacoMain{
 
         while (!splitProblems.isEmpty()) {
             //-------BEGIN TRANSLATION THREAD PROCESS
-
+            JCompilationUnitType determinizedUnit = splitProblems.poll();
+            System.out.println("Determinized Unit: " + determinizedUnit);
             // create new callable thread with the type TacoAnalysisResult
-            Callable<TacoAnalysisResult> translationThread = new TranslateThread(splitProblems.poll(),jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+            Callable<TacoAnalysisResult> translationThread = new TranslateThread(determinizedUnit,jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
 
             translateThreadList.add(translationThread);
 
@@ -393,6 +394,8 @@ public class TacoMain{
         catch (Exception e){
             System.out.println("<---SERVICE ERROR--->");
             System.out.println("Cause: " + e.getCause());
+            System.out.println("--Stack Trace--");
+            e.printStackTrace();
         }
 
         for(Future<TacoAnalysisResult> f: futureThreadList){
@@ -402,6 +405,8 @@ public class TacoMain{
             catch (Exception e){
                 System.out.println("<---PRINT ERROR--->");
                 System.out.println("Cause: " + e.getCause());
+                System.out.println("--Stack Trace--");
+                e.printStackTrace();
             }
         }
 
@@ -409,7 +414,7 @@ public class TacoMain{
     }
 
 
-    public Queue<JCompilationUnitType> removeNonDeterminism(List<JCompilationUnitType> simpleUnits, int size) {
+    public BlockingQueue<JCompilationUnitType> removeNonDeterminism(List<JCompilationUnitType> simpleUnits, int size) {
         JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
 
         JCompilationUnitType simpleDeterminizedUnitType = simpleUnits.remove(0);
@@ -421,8 +426,8 @@ public class TacoMain{
 
         // Queue<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<>();
 
-        Queue<JCompilationUnitType> problems = new LinkedList<JCompilationUnitType>();
-        Queue<JCompilationUnitType> newProblems = new LinkedList<JCompilationUnitType>();
+        BlockingQueue<JCompilationUnitType> problems = new LinkedBlockingQueue<JCompilationUnitType>();
+        BlockingQueue<JCompilationUnitType> newProblems = new LinkedBlockingQueue<JCompilationUnitType>();
         problems.offer(simpleDeterminizedUnitType);
 
         boolean somethingWasSplit = false;
@@ -450,7 +455,7 @@ public class TacoMain{
 
             if (problems.isEmpty()) {
                 problems = newProblems;
-                newProblems = new LinkedList<JCompilationUnitType>();
+                newProblems = new LinkedBlockingQueue<JCompilationUnitType>();
                 somethingWasSplit = false;
             }
         }
@@ -780,7 +785,10 @@ public class TacoMain{
     }
 
     public static List<JCompilationUnitType> parse_simplified_compilation_units(List<String> files) {
+        for (String s : files)
+            System.out.println("input file name: " + s);
         String canonical_outdir_path = makeCanonicalPath();
+        System.out.println("target file name: " + canonical_outdir_path);
 //        try {
 //            String theActualOutputDir = TacoConfigurator.getInstance().getOutputDir();
 //            File output_dir = new File(theActualOutputDir);
@@ -801,12 +809,13 @@ public class TacoMain{
     public static List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
         List<String> files = new LinkedList<String>();
         String canonical_path = makeCanonicalPath();
-
+        System.out.println("Canonical Path: " + canonical_path);
         for (JCompilationUnitType compilation_unit : newAsts) {
             assert compilation_unit.typeDeclarations().length == 1;
             JTypeDeclarationType typeDeclaration = compilation_unit.typeDeclarations()[0];
             String filename = canonical_path + File.separator + typeDeclaration.getCClass().getJavaName().replaceAll("\\.", "/");
-            files.add(typeDeclaration.getCClass().getJavaName());
+            System.out.println("Write files: " + filename);
+            files.add("output_" + Thread.currentThread().getName() + "." + typeDeclaration.getCClass().getJavaName());
             try {
                 FileUtils.writeToFile(filename + OUTPUT_SIMPLIFIED_JAVA_EXTENSION, JavaAndJmlPrettyPrint2.print(compilation_unit));
             } catch (IOException e) {

@@ -169,6 +169,13 @@ public class JmlParser {
 	}
 
 	protected String getFile(String className, List<String> sources) {
+		String prefixName = "output_" + Thread.currentThread().getName();
+		String classPrefix = className.substring(0,prefixName.length());
+		System.out.println("Prefix name: " + prefixName);
+		if (prefixName.equals(classPrefix)){
+			className = className.substring(prefixName.length()+1);
+		}
+		System.out.println("Class name: " + className);
 		String cu = ((className.contains("$")) ? className.substring(0, className.indexOf("$")) : className).replace(".", FILE_SEP);
 
 		// Look for the file
@@ -238,6 +245,16 @@ public class JmlParser {
 		List<JCompilationUnitType> compilation_units = new LinkedList<JCompilationUnitType>();
 
 		for (String class_name : this.parse) {
+
+			String prefixName = "output_" + Thread.currentThread().getName();
+			String classPrefix = class_name.substring(0,prefixName.length());
+			System.out.println("Prefix name: " + prefixName);
+			if (prefixName.equals(classPrefix)){
+				class_name = class_name.substring(prefixName.length()+1);
+			}
+
+			System.out.println("Get compilation unit for class: " + class_name + " on thread: " + Thread.currentThread().getName());
+
 			if (!TacoConfigurator.get_aux_classes_set().contains(class_name)){
 				String filename = getFile(class_name, file_sources);
 				File file = new File(filename);

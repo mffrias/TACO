@@ -75,6 +75,8 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
     public TacoAnalysisResult call() throws Exception {
         System.out.println("Thread Start: " + Thread.currentThread().getName());
 
+        String fileNameIdent = JUnit.fileNameIdent();
+
         List<String> fileNames = null;
         JCompilationUnitType units = null;
 
@@ -82,7 +84,9 @@ public class TranslateThread implements Callable<TacoAnalysisResult> {
         List<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<JCompilationUnitType>();
         theDeterminizedUnitTypeList.add(JUnit);
         fileNames = TacoMain.write_simplified_compilation_units(theDeterminizedUnitTypeList);
+        System.out.println("!!Write Simplified Compilation Units Complete for thread: " + Thread.currentThread().getName());
         units = TacoMain.parse_simplified_compilation_units(fileNames).remove(0);
+        System.out.println("!!Parse Simplified Compilation Units Complete for thread: " + Thread.currentThread().getName());
         simplified_compilation_units.add(units);
 
         // BEGIN JAVA TO JDYNALLOY TRANSLATION

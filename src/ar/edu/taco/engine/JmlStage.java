@@ -121,7 +121,6 @@ public class JmlStage implements ITacoStage {
 
 	private String makeCanonicalPath() {
 		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
-		outputNumDir++;
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

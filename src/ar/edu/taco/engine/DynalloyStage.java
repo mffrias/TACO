@@ -90,6 +90,7 @@ public class DynalloyStage implements ITacoStage {
 	@Override
 	public void execute() {
 			System.out.println("Current thread: " + Thread.currentThread().getName());
+
 			dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
 
 			String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();

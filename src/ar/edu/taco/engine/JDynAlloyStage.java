@@ -164,7 +164,7 @@ public class JDynAlloyStage implements ITacoStage {
 			String moduleName = entry.getKey();
 			String moduleBody = entry.getValue();
 
-			String output_dir = TacoConfigurator.getInstance().getOutputDir();
+			String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 
 			String moduleFilename = output_dir + java.io.File.separator + moduleName.replaceAll("_", "/") + OUTPUT_DYNALLOY_EXTENSION;
 			try {
@@ -179,7 +179,7 @@ public class JDynAlloyStage implements ITacoStage {
 		
 		
 		// print output in DynAlloy
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		String filename = output_dir + java.io.File.separator + "output" + OUTPUT_DYNALLOY_EXTENSION;
 
 		try {
@@ -240,7 +240,7 @@ public class JDynAlloyStage implements ITacoStage {
 	}
 
 	private void printToFile(JDynAlloyModule module, String extension) {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		String filePath = output_dir + java.io.File.separator + module.getModuleId().replaceAll("_", "/") + extension;
 		try {
 			String moduleOutput = JavaToJDynAlloyManager.getModuleOutput(module);

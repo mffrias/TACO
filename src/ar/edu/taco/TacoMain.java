@@ -304,20 +304,7 @@ public class TacoMain{
 
     @SuppressWarnings("unchecked")
     public TacoAnalysisResult run(String configFile, Properties overridingProperties) throws IllegalArgumentException {
-        // -------------BEGIN EXECUTOR SERVICE-----------
 
-        // number of threads to use
-        int numThreads = 2;
-
-        // create executor service for thread processing
-        ExecutorService translationService = Executors.newFixedThreadPool(numThreads);
-
-        // make lists
-        List<Callable<TacoAnalysisResult>> translateThreadList = new ArrayList<>();
-
-        List<Future<TacoAnalysisResult>> futureThreadList = new ArrayList<>();
-
-        // end test
 
         if (configFile == null) {
             throw new IllegalArgumentException("Config file not found, please verify option -cf");
@@ -374,6 +361,20 @@ public class TacoMain{
         // END AST DETERMINIZER
 
         TacoAnalysisResult tacoAnalysisResult = null;
+
+        // -------------BEGIN EXECUTOR SERVICE-----------
+
+        // number of threads to use
+        int numThreads = 2;
+
+        // create executor service for thread processing
+        ExecutorService translationService = Executors.newFixedThreadPool(numThreads);
+
+        // make lists
+        List<Callable<TacoAnalysisResult>> translateThreadList = new ArrayList<>();
+
+        List<Future<TacoAnalysisResult>> futureThreadList = new ArrayList<>();
+
 
         while (!splitProblems.isEmpty()) {
             //-------BEGIN TRANSLATION THREAD PROCESS

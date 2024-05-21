@@ -385,7 +385,7 @@ public class PrecompiledModules implements ITacoStage {
 
 	private void printToFile(JDynAlloyModule module) {
 
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 
 		String filePath = output_dir + java.io.File.separator
 				+ module.getModuleId().replaceAll("_", "/")

@@ -43,6 +43,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.jmlspecs.checker.JmlOldExpression;
 import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
 import org.multijava.mjc.JCompilationUnitType;
 import org.multijava.mjc.JTypeDeclarationType;
@@ -335,13 +336,14 @@ public class TacoMain{
 
 
         String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
-        boolean compilationSuccess = JmlParser.getInstance().initialize(sourceRootDir, userDir /* Unused */, files);
+        JmlParser theParser = new JmlParser();
+        boolean compilationSuccess = theParser.initialize(sourceRootDir, userDir /* Unused */, files);
 
         if (!compilationSuccess) {
             return null; //this means compilation failed;
         }
 
-        compilation_units = JmlParser.getInstance().getCompilationUnits();
+        compilation_units = theParser.getCompilationUnits();
         // END JAVA PARSING
 
         // BEGIN SIMPLIFICATION
@@ -355,7 +357,7 @@ public class TacoMain{
 
         // BEGIN AST DETERMINIZER
 
-        BlockingQueue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 2);
+        Queue<JCompilationUnitType> splitProblems = removeNonDeterminism(simplified_compilation_units, 2);
         System.out.println("The total number of queued problems is " + splitProblems.size());
 
         // END AST DETERMINIZER
@@ -379,10 +381,11 @@ public class TacoMain{
         while (!splitProblems.isEmpty()) {
             //-------BEGIN TRANSLATION THREAD PROCESS
             JCompilationUnitType determinizedUnit = splitProblems.poll();
-            System.out.println("Determinized Unit: " + determinizedUnit);
-            // create new callable thread with the type TacoAnalysisResult
+
+            // create new callable thread list with the type TacoAnalysisResult
             Callable<TacoAnalysisResult> translationThread = new TranslateThread(determinizedUnit,jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
 
+            // add to process to ThreadList
             translateThreadList.add(translationThread);
 
             System.out.println("Subproblems Left : " + splitProblems.size() + " from Thread: " + Thread.currentThread().getName());
@@ -414,7 +417,7 @@ public class TacoMain{
     }
 
 
-    public BlockingQueue<JCompilationUnitType> removeNonDeterminism(List<JCompilationUnitType> simpleUnits, int size) {
+    public Queue<JCompilationUnitType> removeNonDeterminism(List<JCompilationUnitType> simpleUnits, int size) {
         JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
 
         JCompilationUnitType simpleDeterminizedUnitType = simpleUnits.remove(0);
@@ -426,8 +429,8 @@ public class TacoMain{
 
         // Queue<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<>();
 
-        BlockingQueue<JCompilationUnitType> problems = new LinkedBlockingQueue<JCompilationUnitType>();
-        BlockingQueue<JCompilationUnitType> newProblems = new LinkedBlockingQueue<JCompilationUnitType>();
+        Queue<JCompilationUnitType> problems = new LinkedList<JCompilationUnitType>();
+        Queue<JCompilationUnitType> newProblems = new LinkedList<JCompilationUnitType>();
         problems.offer(simpleDeterminizedUnitType);
 
         boolean somethingWasSplit = false;
@@ -455,7 +458,7 @@ public class TacoMain{
 
             if (problems.isEmpty()) {
                 problems = newProblems;
-                newProblems = new LinkedBlockingQueue<JCompilationUnitType>();
+                newProblems = new LinkedList<JCompilationUnitType>();
                 somethingWasSplit = false;
             }
         }
@@ -466,39 +469,6 @@ public class TacoMain{
 
     }
 
-//    public List<Future<TacoAnalysisResult>> testService(int numThreads){
-//
-//        // create executor service for thread processing
-//        ExecutorService service1 = Executors.newFixedThreadPool(numThreads);
-//
-//        // create new callable thread with the type string
-//        Callable<TacoAnalysisResult> translationThread = new TranslateThread(splitProblems.poll(),jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
-//
-//        // create a list for threads of type Callable<String>
-//        List<Callable<TacoAnalysisResult>> threadList = new ArrayList<>();
-//
-//        // create a list to hold Future objects, which hold processed thread's results
-//        List<Future<TacoAnalysisResult>> futureList = new ArrayList<>();
-//
-//        // add arbitrary number of threads to callable list -> (5 instances will run with numThreads number of threads)
-//        for (int i = 0; i < 5; i++) {
-//            threadList.add(threadCallable);
-//        }
-//
-//        // process threads with invokeAll() -> allows for logging ex: timeout, terminated, etc.
-//        try {
-//            futureList = service1.invokeAll(threadList);
-//        }
-//        catch (Exception e){
-//            e.getCause();
-//        }
-//
-//        return futureList;
-//    }
-
-    /**
-     *
-     */
     private static String getManifestAttribute(Name name) {
         String manifestAttributeValue = "Undefined";
         try {
@@ -785,10 +755,12 @@ public class TacoMain{
     }
 
     public static List<JCompilationUnitType> parse_simplified_compilation_units(List<String> files) {
-        for (String s : files)
-            System.out.println("input file name: " + s);
+        //  for (String s : files)
+            //  System.out.println("input file name: " + s);
+
         String canonical_outdir_path = makeCanonicalPath();
-        System.out.println("target file name: " + canonical_outdir_path);
+
+        //  System.out.println("target file name: " + canonical_outdir_path);
 //        try {
 //            String theActualOutputDir = TacoConfigurator.getInstance().getOutputDir();
 //            File output_dir = new File(theActualOutputDir);
@@ -797,8 +769,7 @@ public class TacoMain{
 //            throw new TacoException("canonical path couldn't be computed " + e.getMessage());
 //        }
 
-        //<---!GRABS FILE SOURCES FROM OUTPUT-MAIN IN theParserInstance!--->
-        JmlParser theParserInstance = JmlParser.getInstance();
+        JmlParser theParserInstance = new JmlParser();
         theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
                 files);
 
@@ -809,12 +780,14 @@ public class TacoMain{
     public static List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
         List<String> files = new LinkedList<String>();
         String canonical_path = makeCanonicalPath();
-        System.out.println("Canonical Path: " + canonical_path);
+        //  System.out.println("Canonical Path: " + canonical_path);
         for (JCompilationUnitType compilation_unit : newAsts) {
             assert compilation_unit.typeDeclarations().length == 1;
             JTypeDeclarationType typeDeclaration = compilation_unit.typeDeclarations()[0];
             String filename = canonical_path + File.separator + typeDeclaration.getCClass().getJavaName().replaceAll("\\.", "/");
-            System.out.println("Write files: " + filename);
+
+            //  System.out.println("Write files: " + filename);
+
             files.add("output_" + Thread.currentThread().getName() + "." + typeDeclaration.getCClass().getJavaName());
             try {
                 FileUtils.writeToFile(filename + OUTPUT_SIMPLIFIED_JAVA_EXTENSION, JavaAndJmlPrettyPrint2.print(compilation_unit));

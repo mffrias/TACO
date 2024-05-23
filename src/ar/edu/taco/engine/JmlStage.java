@@ -82,7 +82,7 @@ public class JmlStage implements ITacoStage {
 //			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
 //		}
 
-		JmlParser theParserInstance = JmlParser.getInstance();
+		JmlParser theParserInstance = new JmlParser();
 		theParserInstance.initialize(canonical_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
 				files);
 		

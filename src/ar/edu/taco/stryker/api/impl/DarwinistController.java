@@ -598,7 +598,7 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         String junitFile = null;
 
 
-        List<JCompilationUnitType> compilation_units = JmlParser.getInstance().getCompilationUnits();
+        List<JCompilationUnitType> compilation_units = new JmlParser().getCompilationUnits();
 
         SnapshotStage snapshotStage = new SnapshotStage(
                 compilation_units, analysis_result, classToCheck, methodToCheck);

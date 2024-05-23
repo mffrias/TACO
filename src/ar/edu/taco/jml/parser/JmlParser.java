@@ -44,10 +44,10 @@ import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 
 public class JmlParser {
-	private static Logger log = Logger.getLogger(JmlParser.class);
+	private Logger log = Logger.getLogger(JmlParser.class);
 	private List<String> parse;
 
-	private static class TypeCheckerMain extends Main {
+	private class TypeCheckerMain extends Main {
 
 		@Override
 		protected boolean runCompilation(long arg0) {
@@ -75,18 +75,18 @@ public class JmlParser {
 
 	private static final String FILE_SEP = System.getProperty("file.separator");
 
-	private final static JmlParser instance = new JmlParser();
+	//	private final static JmlParser instance = new JmlParser();
 
 	private boolean initialized = false;
 	private List<String> file_sources;
 	private final HashMap<String, JCompilationUnitType> compilation_unit_of = new HashMap<String, JCompilationUnitType>();
 
-	public static JmlParser getInstance() {
-		return instance;
-	}
+//	public static JmlParser getInstance() {
+//		return instance;
+//	}
 
-	private JmlParser() {
-		initialized = false;
+	public JmlParser() {
+		//initialized = false;
 	}
 
 	public boolean initialize(String sourcePathStr, String appClassPath, List<String> parse) {
@@ -155,13 +155,14 @@ public class JmlParser {
 		main.run(fileNames.toArray(new String[] {}), options, os);
 				
 		if (os.toString().contains("error")){
+			System.out.println("Initialized value 1: " + initialized);
 			return false;
 		}
 
 		file_sources = sources;
-
+		System.out.println("Initialized value 2: " + initialized);
 		initialized = true;
-
+		System.out.println("Initialized value 3: " + initialized);
 		// DOB
 		this.parse = parse;
 		
@@ -169,13 +170,17 @@ public class JmlParser {
 	}
 
 	protected String getFile(String className, List<String> sources) {
+		// check if we are in a thread
+		// if true, remove prefix to get pure class name
 		String prefixName = "output_" + Thread.currentThread().getName();
 		String classPrefix = className.substring(0,prefixName.length());
-		System.out.println("Prefix name: " + prefixName);
+		//System.out.println("Prefix name: " + prefixName);
 		if (prefixName.equals(classPrefix)){
 			className = className.substring(prefixName.length()+1);
 		}
-		System.out.println("Class name: " + className);
+
+		// System.out.println("Class name: " + className);
+
 		String cu = ((className.contains("$")) ? className.substring(0, className.indexOf("$")) : className).replace(".", FILE_SEP);
 
 		// Look for the file
@@ -245,15 +250,15 @@ public class JmlParser {
 		List<JCompilationUnitType> compilation_units = new LinkedList<JCompilationUnitType>();
 
 		for (String class_name : this.parse) {
-
+			// check if we are in a thread
+			// if true, remove prefix to get pure class name
 			String prefixName = "output_" + Thread.currentThread().getName();
 			String classPrefix = class_name.substring(0,prefixName.length());
-			System.out.println("Prefix name: " + prefixName);
 			if (prefixName.equals(classPrefix)){
 				class_name = class_name.substring(prefixName.length()+1);
 			}
 
-			System.out.println("Get compilation unit for class: " + class_name + " on thread: " + Thread.currentThread().getName());
+			//	System.out.println("Get compilation unit for class: " + class_name + " on thread: " + Thread.currentThread().getName());
 
 			if (!TacoConfigurator.get_aux_classes_set().contains(class_name)){
 				String filename = getFile(class_name, file_sources);

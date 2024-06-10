@@ -1,0 +1,166 @@
+sig JavaPrimitiveCharValue {b00:boolean,
+b01:boolean,
+b02:boolean,
+b03:boolean,
+b04:boolean,
+b05:boolean,
+b06:boolean,
+b07:boolean,
+b08:boolean,
+b09:boolean,
+b10:boolean,
+b11:boolean,
+b12:boolean,
+b13:boolean,
+b14:boolean,
+b15:boolean}
+{all m:JavaPrimitiveCharValue,
+n:JavaPrimitiveCharValue | {
+  pred_java_primitive_char_value_CharChareq[m,n] implies (m=n)
+}
+}
+/*
+Authors: Marcelo Frias
+
+PREDICATES:
+
+pred_java_primitive_char_value_decrementToChar (char--)
+pred_java_primitive_char_value_subCharCharToJavaPrimitiveIntegerValue (- : char x char -> int)
+pred_java_primitive_char_value_subCharIntToJavaPrimitiveIntegerValue (- : char x int -> int)
+pred_java_primitive_char_value_subIntCharToJavaPrimitiveIntegerValue (- : int x char -> int)
+pred_java_primitive_char_value_CharInteq (== in char x int)
+pred_java_primitive_char_value_IntChareq (== in int x char)
+pred_java_primitive_char_value_CharChareq (== in char x char)
+pred_java_primitive_char_value_CharIntgt (> in char x int)
+pred_java_primitive_char_value_IntChargt (> in int x char)
+pred_java_primitive_char_value_CharChargt (> in char x char)
+pred_java_primitive_char_value_CharIntgte (>= in char x int)
+pred_java_primitive_char_value_IntChargte (>= in int x char)
+pred_java_primitive_char_value_CharChargte (>= in char x char)
+pred_java_primitive_char_value_CharIntlt (< in char x int)
+pred_java_primitive_char_value_IntCharlt (< in int x char)
+pred_java_primitive_char_value_CharCharlt (< in char x char)
+pred_java_primitive_char_value_CharIntlte (< in char x int)
+pred_java_primitive_char_value_IntCharlte (< in int x char)
+pred_java_primitive_char_value_CharCharlte (< in char x char)
+
+
+
+FUNCTIONS:
+
+
+
+
+*/
+
+// PREDICATES
+
+
+
+
+
+pred pred_java_primitive_char_value_subCharCharToJavaPrimitiveIntegerValue[a: JavaPrimitiveCharValue, b: JavaPrimitiveCharValue, result: JavaPrimitiveIntegerValue, overflow: boolean] { 
+	some i1, i2 : JavaPrimitiveIntegerValue | 
+	     pred_cast_char_to_int[a,i1] and 
+	     pred_cast_char_to_int[b,i2] and
+	     pred_java_primitive_integer_value_sub[i1,i2,result,overflow]
+}
+
+
+
+pred pred_java_primitive_char_value_CharChareq[a: JavaPrimitiveCharValue, b: JavaPrimitiveCharValue] {
+   a.b00 = b.b00
+   a.b01 = b.b01
+   a.b02 = b.b02
+   a.b03 = b.b03
+   a.b04 = b.b04
+   a.b05 = b.b05
+   a.b06 = b.b06
+   a.b07 = b.b07
+   a.b08 = b.b08
+   a.b09 = b.b09
+   a.b10 = b.b10
+   a.b11 = b.b11
+   a.b12 = b.b12
+   a.b13 = b.b13
+   a.b14 = b.b14
+   a.b15 = b.b15
+}
+
+
+
+
+
+
+pred pred_java_primitive_char_value_CharChargt[a: JavaPrimitiveCharValue, b: JavaPrimitiveCharValue]{
+   (a.b15 in true and b.b15 in false) 
+   or (a.b15 = b.b15 and a.b14 in true and b.b14 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 in true and b.b13 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 in true and b.b12 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 in true and b.b11 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 in true and b.b10 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 in true and b.b09 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 in true and b.b08 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 in true and b.b07 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 in true and b.b06 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 in true and b.b05 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 = b.b05 and a.b04 in true and b.b04 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 = b.b05 and a.b04 = b.b04 and a.b03 in true and b.b03 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 = b.b05 and a.b04 = b.b04 and a.b03 = b.b03 and a.b02 in true and b.b02 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 = b.b05 and a.b04 = b.b04 and a.b03 = b.b03 and a.b02 = b.b02 and a.b01 in true and b.b01 in false) 
+   or (a.b15 = b.b15 and a.b14 = b.b14 and a.b13 = b.b13 and a.b12 = b.b12 and a.b11 = b.b11 and a.b10 = b.b10 and a.b09 = b.b09 and a.b08 = b.b08 and a.b07 = b.b07 and a.b06 = b.b06 and a.b05 = b.b05 and a.b04 = b.b04 and a.b03 = b.b03 and a.b02 = b.b02 and a.b01 = b.b01 and a.b00 in true and b.b00 in false) 
+   
+}
+
+
+
+	
+pred pred_java_primitive_char_value_CharChargte[a: JavaPrimitiveCharValue, b: JavaPrimitiveCharValue]{
+	pred_java_primitive_char_value_CharChargt[a, b] or pred_java_primitive_char_value_CharChareq[a, b]
+}
+
+
+
+pred pred_java_primitive_char_value_CharCharlt[a: JavaPrimitiveCharValue, b: JavaPrimitiveCharValue]{
+   not pred_java_primitive_char_value_CharChargte[a, b]
+}
+
+
+
+
+pred pred_java_primitive_char_value_CharCharlte[a: JavaPrimitiveCharValue, b:JavaPrimitiveCharValue]{
+   pred_java_primitive_char_value_CharCharlt[a, b] or pred_java_primitive_char_value_CharChareq[a, b]
+}
+
+
+
+// FUNCTIONS
+
+
+pred pred_java_primitive_char_value_literal_u0000[ret: JavaPrimitiveCharValue] {
+ ret.b00=false 
+ ret.b01=false 
+ ret.b02=false 
+ ret.b03=false 
+ ret.b04=false 
+ ret.b05=false 
+ ret.b06=false 
+ ret.b07=false 
+ ret.b08=false 
+ ret.b09=false 
+ ret.b10=false 
+ ret.b11=false 
+ ret.b12=false 
+ ret.b13=false 
+ ret.b14=false 
+ ret.b15=false 
+}
+
+fun fun_java_primitive_char_value_literal_u0000[]: one JavaPrimitiveCharValue {
+ { ret: JavaPrimitiveCharValue | pred_java_primitive_char_value_literal_u0000[ret] }
+}
+
+
+
+
+

@@ -1,0 +1,7 @@
+one sig JavaPrimitiveIntegerLiteral3 extends JavaPrimitiveIntegerValue {}
+{pred_java_primitive_integer_value_literal_3[JavaPrimitiveIntegerLiteral3]
+}
+
+
+
+

@@ -1,0 +1,8 @@
+abstract one sig java_lang_IndexOutOfBoundsException extends java_lang_RuntimeException {}
+{}
+
+
+
+one sig java_lang_IndexOutOfBoundsExceptionLit extends java_lang_IndexOutOfBoundsException {}
+{}
+

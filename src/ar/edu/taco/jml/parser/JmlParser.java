@@ -44,10 +44,10 @@ import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 
 public class JmlParser {
-	private static Logger log = Logger.getLogger(JmlParser.class);
+	private Logger log = Logger.getLogger(JmlParser.class);
 	private List<String> parse;
 
-	private static class TypeCheckerMain extends Main {
+	public class TypeCheckerMain extends Main {
 
 		@Override
 		protected boolean runCompilation(long arg0) {
@@ -81,12 +81,12 @@ public class JmlParser {
 	private List<String> file_sources;
 	private final HashMap<String, JCompilationUnitType> compilation_unit_of = new HashMap<String, JCompilationUnitType>();
 
-	public static JmlParser getInstance() {
+	public JmlParser getInstance() {
 		return instance;
 	}
 
-	private JmlParser() {
-		initialized = false;
+	public JmlParser() {
+		//initialized = false;
 	}
 
 	public boolean initialize(String sourcePathStr, String appClassPath, List<String> parse) {
@@ -101,7 +101,7 @@ public class JmlParser {
 			} else
 				sources.add(f.getAbsolutePath());
 		}
-//		sources.add(System.getProperty("user.dir") + FILE_SEP + "specs");
+		//		sources.add(System.getProperty("user.dir") + FILE_SEP + "specs");
 
 		JmlOptions options = new JmlOptions("jml");
 
@@ -147,28 +147,40 @@ public class JmlParser {
 					throw new RuntimeException("Specification file not found for " + s);
 				else
 					fileNames.add(file);
-			}	
+			}
 		}
 		TypeCheckerMain main = new TypeCheckerMain();
 		OutputStream os = new ByteArrayOutputStream();
-				
+
 		main.run(fileNames.toArray(new String[] {}), options, os);
-				
+
 		if (os.toString().contains("error")){
+			System.out.println("Initialized value 1: " + initialized);
 			return false;
 		}
 
 		file_sources = sources;
-
+//		System.out.println("Initialized value 2: " + initialized);
 		initialized = true;
-
+//		System.out.println("Initialized value 3: " + initialized);
 		// DOB
 		this.parse = parse;
-		
+
 		return true;
 	}
 
 	protected String getFile(String className, List<String> sources) {
+		// check if we are in a thread
+		// if true, remove prefix to get pure class name
+		String prefixName = "output_" + Thread.currentThread().getName();
+		String classPrefix = className.substring(0,prefixName.length());
+		//System.out.println("Prefix name: " + prefixName);
+		if (prefixName.equals(classPrefix)){
+			className = className.substring(prefixName.length()+1);
+		}
+
+		// System.out.println("Class name: " + className);
+
 		String cu = ((className.contains("$")) ? className.substring(0, className.indexOf("$")) : className).replace(".", FILE_SEP);
 
 		// Look for the file
@@ -177,7 +189,7 @@ public class JmlParser {
 				StringBuilder sb = new StringBuilder();
 				sb.append(source).append(FILE_SEP).append(cu).append(ext);
 				String filename = sb.toString();
-//				System.out.println("looking for: "+filename);
+				//				System.out.println("looking for: "+filename);
 				if (new File(filename).exists())
 					return filename;
 			}
@@ -204,9 +216,9 @@ public class JmlParser {
 			throw new TacoException("could not find compilation unit for " + filename);
 		}
 
-//		boolean b1 = jmlSingleton.isTypeLoaded(clazzName);
+		//		boolean b1 = jmlSingleton.isTypeLoaded(clazzName);
 
-//		CClass clazz2 = jmlSingleton.loadType(clazzName);
+		//		CClass clazz2 = jmlSingleton.loadType(clazzName);
 
 		CClass clazz = jmlSingleton.lookupType(clazzName);
 
@@ -238,6 +250,16 @@ public class JmlParser {
 		List<JCompilationUnitType> compilation_units = new LinkedList<JCompilationUnitType>();
 
 		for (String class_name : this.parse) {
+			// check if we are in a thread
+			// if true, remove prefix to get pure class name
+			String prefixName = "output_" + Thread.currentThread().getName();
+			String classPrefix = class_name.substring(0,prefixName.length());
+			if (prefixName.equals(classPrefix)){
+				class_name = class_name.substring(prefixName.length()+1);
+			}
+
+			//	System.out.println("Get compilation unit for class: " + class_name + " on thread: " + Thread.currentThread().getName());
+
 			if (!TacoConfigurator.get_aux_classes_set().contains(class_name)){
 				String filename = getFile(class_name, file_sources);
 				File file = new File(filename);
@@ -248,13 +270,13 @@ public class JmlParser {
 				if (!compilation_units.contains(compilationUnit)) {
 					compilation_units.add(compilationUnit);
 				}
-			}	
+			}
 		}
 
 		return compilation_units;
 	}
-	
-	
-	
+
+
+
 
 }

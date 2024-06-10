@@ -1,6 +1,5 @@
 package ar.edu.taco.regresion.arithmetic.junit;
 
-import ar.edu.taco.arithmetic.BinSearch;
 import ar.edu.taco.regresion.GenericTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 

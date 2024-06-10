@@ -38,7 +38,7 @@ import ar.edu.taco.utils.FileUtils;
 
 /**
  * @author ggasser
- * 
+ *
  */
 public class JmlStage implements ITacoStage {
 
@@ -81,12 +81,17 @@ public class JmlStage implements ITacoStage {
 			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
 		}
 
-		JmlParser theParserInstance = JmlParser.getInstance();
+
+		JmlParser theParserInstance = new JmlParser().getInstance();
 		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
 				files);
-		
+
+//		JmlParser theParserInstance = ((TacoThread)(Thread.currentThread())).threadParserInstance.getInstance();
+//		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
+//				files);
+
 		simplified_compilation_units = theParserInstance.getCompilationUnits();
-		
+
 	}
 
 	private List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
@@ -109,7 +114,7 @@ public class JmlStage implements ITacoStage {
 
 	private List<JCompilationUnitType> simplify_compilation_units(ASTSimplifierManager aAstSimplifierManager) {
 		List<JCompilationUnitType> newAsts = new LinkedList<JCompilationUnitType>();
-		
+
 		for (JCompilationUnitType compilation_unit : this.compilation_units) {
 
 			List<JCompilationUnitType> new_compilation_units = aAstSimplifierManager.simplify(compilation_unit);

@@ -1,0 +1,5 @@
+//-------------- JavaPrimitiveIntegerLiteral93 --------------//
+module JavaPrimitiveIntegerLiteral93
+one sig JavaPrimitiveIntegerLiteral93 extends JavaPrimitiveIntegerValue {}
+{pred_java_primitive_integer_value_literal_93[JavaPrimitiveIntegerLiteral93]
+}

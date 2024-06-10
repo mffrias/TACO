@@ -1,0 +1,8 @@
+abstract sig java_lang_AssertionError extends java_lang_Error {}
+{}
+
+
+
+one sig java_lang_AssertionErrorLit extends java_lang_AssertionError {}
+{}
+

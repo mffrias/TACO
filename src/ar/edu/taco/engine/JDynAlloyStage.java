@@ -44,7 +44,7 @@ import ar.uba.dc.rfm.dynalloy.ast.DynalloyModule;
 
 /**
  * @author ggasser
- * 
+ *
  */
 public class JDynAlloyStage implements ITacoStage {
 	private static Logger log = Logger.getLogger(JDynAlloyStage.class);
@@ -54,19 +54,19 @@ public class JDynAlloyStage implements ITacoStage {
 	private boolean removeQuantifiers;
 	private boolean javaArithmetic;
 	private Object inputToFix = null;
-	
+
 	public boolean getRemoveQuantifiers(){
 		return this.removeQuantifiers;
 	}
- 
+
 	public void setRemoveQuantifiers(boolean rq){
 		this.removeQuantifiers = rq;
 	}
-	
+
 	public boolean getJavaArithmetic(){
 		return this.javaArithmetic;
 	}
- 
+
 	public void setJavaArithmetic(boolean b){
 		this.javaArithmetic = b;
 	}
@@ -80,9 +80,9 @@ public class JDynAlloyStage implements ITacoStage {
 	public Vector<DynalloyModule> getGeneratedModules(){
 		return generatedModules;
 	}
-	
-	
-	public JDynAlloyStage(List<JDynAlloyModule> modules, String classToCheck, String methodToCheck, Object inputToFix) {		
+
+
+	public JDynAlloyStage(List<JDynAlloyModule> modules, String classToCheck, String methodToCheck, Object inputToFix) {
 		this.modules = modules;
 		this.inputToFix = inputToFix;
 		this.classToCheck = classToCheck;
@@ -96,9 +96,9 @@ public class JDynAlloyStage implements ITacoStage {
 	public List<JDynAlloyModule> getPrunedModules() {
 		return modules;
 	}
-	
-	
-	
+
+
+
 	@Override
 	public void execute() {
 
@@ -106,7 +106,7 @@ public class JDynAlloyStage implements ITacoStage {
 
 		//relevancy analysis
 		TacoConfigurator tacoConfigurator = TacoConfigurator.getInstance();
-		
+
 		JDynAlloyBinding dynJAlloyBinding;
 		dynJAlloyBinding = regenerateBindings(tacoConfigurator.getDynAlloyToAlloyLoopUnroll());
 
@@ -137,8 +137,8 @@ public class JDynAlloyStage implements ITacoStage {
 		ModifiesSolverManager modifiesSolverManager = new ModifiesSolverManager();
 		this.modules = modifiesSolverManager.process(this.modules, (JDynAlloyBinding) null, TacoConfigurator.getInstance().getUseJavaArithmetic());
 
-		
-		
+
+
 		// activate setting "debug" logger lever for this class log4j
 		// configuration!
 		if (log.getLevel() == Level.DEBUG || log.getLevel() == Level.TRACE) {
@@ -159,12 +159,12 @@ public class JDynAlloyStage implements ITacoStage {
 		Map<String, String> output = dynJAlloyToDynAlloyManager.process(this.modules, dynJAlloyBinding);
 
 		this.generatedModules = dynJAlloyToDynAlloyManager.getDynalloyModules();
-		
+
 		for (Entry<String, String> entry : output.entrySet()) {
 			String moduleName = entry.getKey();
 			String moduleBody = entry.getValue();
 
-			String output_dir = TacoConfigurator.getInstance().getOutputDir();
+			String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 
 			String moduleFilename = output_dir + java.io.File.separator + moduleName.replaceAll("_", "/") + OUTPUT_DYNALLOY_EXTENSION;
 			try {
@@ -174,12 +174,12 @@ public class JDynAlloyStage implements ITacoStage {
 			}
 
 		}
-		
+
 //mfrias-mffrias 04082013: place where collected preds and vars can be updated in the structure.
-		
-		
+
+
 		// print output in DynAlloy
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		String filename = output_dir + java.io.File.separator + "output" + OUTPUT_DYNALLOY_EXTENSION;
 
 		try {

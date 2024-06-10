@@ -1,6 +1,5 @@
 package ar.edu.taco.regresion.arithmetic;
 
-import ar.edu.taco.arithmetic.BinSearch;
 import ar.edu.taco.regresion.GenericTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
@@ -22,13 +21,6 @@ public class TestBinSearch extends GenericTestBase {
 		setConfigKeyLoopUnroll(2);
 		
 		runAndCheck(GENERIC_PROPERTIES, "binarySearch_0", true);
-	}
-
-	public static void main(String[] args) {
-		int[] a = new int[1610612739];
-		a[805306369]=-1879048192;
-		int key=1610612739;
-		BinSearch.binarySearch(a, key);
 	}
 
 }

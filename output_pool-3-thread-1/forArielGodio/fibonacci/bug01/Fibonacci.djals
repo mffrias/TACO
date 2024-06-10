@@ -1,0 +1,759 @@
+//-------------- forArielGodio_fibonacci_bug01_Fibonacci --------------//
+module forArielGodio_fibonacci_bug01_Fibonacci
+sig forArielGodio_fibonacci_bug01_Fibonacci extends java_lang_Object {}
+{}
+field forArielGodio_fibonacci_bug01_Fibonacci_fib:(forArielGodio_fibonacci_bug01_Fibonacci)->one(java_lang_LongArray+null) {}
+
+object_invariant
+   pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral2,
+                                        arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]
+   and 
+   pred_java_primitive_integer_value_lte[arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length],
+                                        JavaPrimitiveIntegerLiteral93]
+
+object_invariant
+   not (
+     thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib=null)
+
+
+
+program forArielGodio_fibonacci_bug01_Fibonacci::fibCompute[
+  var thiz:forArielGodio_fibonacci_bug01_Fibonacci,
+  var throw:java_lang_Throwable+null] 
+Specification 
+{
+  SpecCase #0 {
+   requires {
+      pred_java_primitive_long_value_eq[arrayAccess[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_contents,JavaPrimitiveIntegerLiteral0],
+                                       JavaPrimitiveLongLiteral0]
+      and 
+      pred_java_primitive_long_value_eq[arrayAccess[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_contents,JavaPrimitiveIntegerLiteral1],
+                                       JavaPrimitiveLongLiteral1]
+   }
+   
+   ensures {
+      instanceOf[throw',
+                java_lang_Exception]
+      implies 
+              liftExpression[false]
+   }
+   
+   ensures {
+      (
+        throw'=null)
+      implies 
+              (
+                all i:JavaPrimitiveIntegerValue | {
+                  (
+                    pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral2,
+                                                         i]
+                    and 
+                    pred_java_primitive_integer_value_lt[i,
+                                                        arrayLength[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_length']]
+                  )
+                  implies 
+                          (
+                            all j:JavaPrimitiveIntegerValue | {
+                              (
+                                pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral2,
+                                                                     j]
+                                and 
+                                pred_java_primitive_integer_value_lt[j,
+                                                                    i]
+                              )
+                              implies 
+                                      pred_java_primitive_long_value_lt[arrayAccess[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_contents',j],
+                                                                       arrayAccess[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_contents',i]]
+                            
+                            }
+                          )
+                
+                }
+              )
+   }
+   
+   ensures {
+      (
+        throw'=null)
+      implies 
+              (
+                all i:JavaPrimitiveIntegerValue | {
+                  all SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4:JavaPrimitiveIntegerValue,
+                  SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_overflow_4:boolean,
+                  SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5:JavaPrimitiveIntegerValue,
+                  SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_overflow_5:boolean,
+                  SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2:JavaPrimitiveLongValue,
+                  SK_jml_pred_java_primitive_long_value_add_add_ARG_overflow_2:boolean | {
+                    (
+                      pred_java_primitive_integer_value_sub[i,
+                                                           JavaPrimitiveIntegerLiteral1,
+                                                           SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4,
+                                                           SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_overflow_4]
+                      and 
+                      (
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral0)
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral1)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral2)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral3)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral4)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4=JavaPrimitiveIntegerLiteral5)
+                      )
+                      and 
+                      pred_java_primitive_integer_value_sub[i,
+                                                           JavaPrimitiveIntegerLiteral2,
+                                                           SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5,
+                                                           SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_overflow_5]
+                      and 
+                      (
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral0)
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral1)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral2)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral3)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral4)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5=JavaPrimitiveIntegerLiteral5)
+                      )
+                      and 
+                      pred_java_primitive_long_value_add[arrayAccess[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_contents',SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_4],
+                                                        arrayAccess[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_contents',SK_jml_pred_java_primitive_integer_value_sub_minus_ARG_result_5],
+                                                        SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2,
+                                                        SK_jml_pred_java_primitive_long_value_add_add_ARG_overflow_2]
+                      and 
+                      (
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral0)
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral1)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral2)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral3)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral4)
+                        
+                        or 
+                        (
+                          SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2=JavaPrimitiveLongLiteral5)
+                      )
+                    )
+                    implies 
+                            (
+                              (
+                                pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral2,
+                                                                     i]
+                                and 
+                                pred_java_primitive_integer_value_lt[i,
+                                                                    arrayLength[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_length']]
+                              )
+                              implies 
+                                      pred_java_primitive_long_value_eq[arrayAccess[thiz'.forArielGodio_fibonacci_bug01_Fibonacci_fib',java_lang_LongArray_contents',i],
+                                                                       SK_jml_pred_java_primitive_long_value_add_add_ARG_result_2]
+                            )
+                  
+                  }
+                
+                }
+              )
+   }
+   
+   modifies {
+   EVERYTHING}
+  }
+}
+Implementation 
+
+   {
+      skip;
+      {
+         throw:=null;
+         var exit_stmt_reached:boolean;
+         exit_stmt_reached:=false;
+         {
+            var var_1_index:JavaPrimitiveIntegerValue;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false){
+               var_1_index:=JavaPrimitiveIntegerLiteral2;
+            } else {
+               skip;
+            };
+            var t_31:boolean;
+            var t_32:boolean;
+            var t_33:boolean;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_31:=(pred_java_primitive_integer_value_lt[var_1_index,
+                                                   arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]=>(true)else(false));
+            } else {
+               skip;
+            };
+            assert t_31=true;
+            var t_30:boolean;
+            var t_8:JavaPrimitiveIntegerValue;
+            var t_9:JavaPrimitiveLongValue;
+            var t_10:JavaPrimitiveIntegerValue;
+            var t_11:JavaPrimitiveLongValue;
+            var t_12:JavaPrimitiveIntegerValue;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_8:=fun_java_primitive_integer_value_sub[var_1_index,JavaPrimitiveIntegerLiteral2];
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_9,t_8];
+               };
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_17:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_17:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_17:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_17:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_17;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_17;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_17;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_17;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_17,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_17,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_17,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_17,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_17,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_17];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_10:=SK_pred_java_primitive_integer_value_add_ARG_result_17;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_11,t_10];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_write[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,fun_java_primitive_long_value_add[t_9,t_11],var_1_index];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_12:=var_1_index;
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_18:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_18:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_18:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_18:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_18;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_18;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_18;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_18;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_18,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_18,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_18,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_18,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_18,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_18];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               var_1_index:=SK_pred_java_primitive_integer_value_add_ARG_result_18;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_30:=(pred_java_primitive_integer_value_lt[var_1_index,
+                                                   arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]=>(true)else(false));
+            } else {
+               skip;
+            };
+            assert t_30=true;
+            var t_29:boolean;
+            var t_13:JavaPrimitiveIntegerValue;
+            var t_14:JavaPrimitiveLongValue;
+            var t_15:JavaPrimitiveIntegerValue;
+            var t_16:JavaPrimitiveLongValue;
+            var t_17:JavaPrimitiveIntegerValue;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_13:=fun_java_primitive_integer_value_sub[var_1_index,JavaPrimitiveIntegerLiteral2];
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_14,t_13];
+               };
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_19:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_19:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_19:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_19:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_19;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_19;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_19;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_19;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_19,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_19,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_19,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_19,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_19,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_19];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_15:=SK_pred_java_primitive_integer_value_add_ARG_result_19;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_16,t_15];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_write[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,fun_java_primitive_long_value_add[t_14,t_16],var_1_index];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_17:=var_1_index;
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_20:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_20:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_20:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_20:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_20;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_20;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_20;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_20;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_20,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_20,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_20,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_20,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_20,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_20];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               var_1_index:=SK_pred_java_primitive_integer_value_add_ARG_result_20;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_29:=(pred_java_primitive_integer_value_lt[var_1_index,
+                                                   arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]=>(true)else(false));
+            } else {
+               skip;
+            };
+            assert t_29=true;
+            var t_28:boolean;
+            var t_18:JavaPrimitiveIntegerValue;
+            var t_19:JavaPrimitiveLongValue;
+            var t_20:JavaPrimitiveIntegerValue;
+            var t_21:JavaPrimitiveLongValue;
+            var t_22:JavaPrimitiveIntegerValue;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_18:=fun_java_primitive_integer_value_sub[var_1_index,JavaPrimitiveIntegerLiteral2];
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_19,t_18];
+               };
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_21:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_21:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_21:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_21:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_21;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_21;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_21;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_21;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_21,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_21,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_21,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_21,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_21,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_21];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_20:=SK_pred_java_primitive_integer_value_add_ARG_result_21;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_read[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,t_21,t_20];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               if isEmptyOrNull[thiz]
+               or 
+               isEmptyOrNull[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib]
+               {
+                  throw:=java_lang_NullPointerExceptionLit;
+               } else {
+                  call long_array_write[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,throw,fun_java_primitive_long_value_add[t_19,t_21],var_1_index];
+               };
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_22:=var_1_index;
+            } else {
+               skip;
+            };
+            var SK_pred_java_primitive_integer_value_add_ARG_left_22:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_right_22:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_result_22:JavaPrimitiveIntegerValue;
+            var SK_pred_java_primitive_integer_value_add_ARG_overflow_22:boolean;
+            {
+               havoc SK_pred_java_primitive_integer_value_add_ARG_left_22;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_right_22;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_result_22;
+               havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_22;
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_22,
+                  var_1_index];
+               assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_22,
+                  JavaPrimitiveIntegerLiteral1];
+               assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_22,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_right_22,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_result_22,
+                                                           SK_pred_java_primitive_integer_value_add_ARG_overflow_22];
+            
+            }
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               var_1_index:=SK_pred_java_primitive_integer_value_add_ARG_result_22;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_28:=(pred_java_primitive_integer_value_lt[var_1_index,
+                                                   arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]=>(true)else(false));
+            } else {
+               skip;
+            };
+            assert Not[t_28]=true;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_32:=(pred_java_primitive_integer_value_lt[var_1_index,
+                                                   arrayLength[thiz.forArielGodio_fibonacci_bug01_Fibonacci_fib,java_lang_LongArray_length]]=>(true)else(false));
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_33:=Not[t_32];
+            } else {
+               skip;
+            };
+            assert t_33=true;
+         
+         }
+      
+      }
+      skip;
+   
+   }
+
+
+

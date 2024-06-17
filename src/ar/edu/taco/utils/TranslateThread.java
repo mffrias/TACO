@@ -113,11 +113,11 @@ public class TranslateThread extends Thread {
 		TacoAnalysisResult tacoAnalysisResult = null;
 
 		try{
-			int timeout = Integer.MAX_VALUE;
-			if (!JUnit.getDeterminized()) {
-				timeout = JUnit.getTimeout();
-			} 
-			this.JUnit.setTimeout(timeout);
+//			int timeout = Integer.MAX_VALUE;
+//			if (!JUnit.getDeterminized()) {
+//				timeout = JUnit.getTimeout();
+//			}
+//			this.JUnit.setTimeout(timeout);
 
 
 			tacoAnalysisResult = theFuture.get(Integer.MAX_VALUE, TimeUnit.SECONDS);
@@ -140,18 +140,12 @@ public class TranslateThread extends Thread {
 			if (this.getCompilationUnitWrapper().getTimeOuted()) {
 				m.setTO(true);
 			} else {
-				System.out.println("IT WAS NOT TIMEOUT");
 				m.setTheResult(this.getCompilationUnitWrapper().getOutput());
 			}
 		}
 
-		System.out.println("Message in Translate " + 
-				m.theResult + " " + 
-				m.TO + " " + 
-				m.theWorkingThread.getCompilationUnitWrapper().getDeterminized() +  " " + 
-				m.theWorkingThread.getCompilationUnitWrapper().getTimeout());
 
-		
+
 		theSharedQueue.offer(m);
 		callableService.shutdown(); // Disable new tasks from being submitted
 		try {
@@ -166,7 +160,6 @@ public class TranslateThread extends Thread {
 			callableService.shutdownNow();
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
-			System.out.println("THIS SHOULD NOT PRINT");
 		}
 	}
 

@@ -8,14 +8,14 @@ public class ForArielGodioFindFirstInSortedTest extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
-		return "forArielGodio.FindFirstInSorted";
+		return "forArielGodio.findFirstInSorted.bug01.FindFirstInSorted";
 	}
 
 	public void test_genericMethod1Test() throws VizException {
-		setConfigKeyRelevantClasses("forArielGodio.FindFirstInSorted");
+		setConfigKeyRelevantClasses("forArielGodio.findFirstInSorted.bug01.FindFirstInSorted");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeyUseJavaArithmetic(true);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(5);
@@ -28,7 +28,7 @@ public class ForArielGodioFindFirstInSortedTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("forArielGodio.FindFirstInSorted:1");
+		setConfigKeyTypeScopes("forArielGodio.findFirstInSorted.bug01.FindFirstInSorted:1");
 		check(GENERIC_PROPERTIES,"findfirstinsorted(int[], int)",true);
 	}
 }

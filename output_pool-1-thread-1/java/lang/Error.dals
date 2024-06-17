@@ -1,8 +1,0 @@
-abstract sig java_lang_Error extends java_lang_Throwable {}
-{}
-
-
-
-one sig java_lang_ErrorLit extends java_lang_Error {}
-{}
-

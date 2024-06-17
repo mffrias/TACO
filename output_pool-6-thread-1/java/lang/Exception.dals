@@ -1,8 +1,0 @@
-abstract sig java_lang_Exception extends java_lang_Throwable {}
-{}
-
-
-
-one sig java_lang_ExceptionLit extends java_lang_Exception {}
-{}
-

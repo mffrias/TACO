@@ -1,7 +1,0 @@
-one sig JavaPrimitiveIntegerLiteral2 extends JavaPrimitiveIntegerValue {}
-{pred_java_primitive_integer_value_literal_2[JavaPrimitiveIntegerLiteral2]
-}
-
-
-
-

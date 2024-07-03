@@ -390,14 +390,14 @@ public class TacoMain {
         Semaphore semJDyn2Dyn = new Semaphore(1);
         Semaphore semJUnitConstruction = new Semaphore(1);
 
-        int numProcessorThreads = 6;
+        int numProcessorThreads = 4;
 
         // create executor service for thread processing
         //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
         //		ThreadPoolExecutor pool = (ThreadPoolExecutor) translationService;
 
-        int maxPendingQueueSize = 20 * numProcessorThreads;
-        int minPendingQueueSize = 4 * numProcessorThreads;
+        int maxPendingQueueSize = 1 * numProcessorThreads;
+        int minPendingQueueSize = 1 * numProcessorThreads;
 
 
         //		Set<ar.edu.taco.utils.TranslateThread> theAvailableThreadsPool = new HashSet<ar.edu.taco.utils.TranslateThread>();
@@ -408,8 +408,8 @@ public class TacoMain {
         //			theAvailableThreadsPool.add(tt);
         //		}
 
-        int timeout = 3;
-        int timeoutDeterminizedPrograms = 5;
+        int timeout = 100;
+        int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
         String space = "   ";
         pendingProblems.add(initialTask);
         int theRunningThreads = 0;
@@ -448,11 +448,13 @@ public class TacoMain {
                     JCompilationUnitTypeWrapper theWrappedCU = theEmployedThread.getCompilationUnitWrapper();
                     problemsToFurtherDeterminize.offer(theWrappedCU);
                     numInterrupted++;
+
+
                 } else {
                     if (m.TO && m.getTheWorkingThread().getCompilationUnitWrapper().getDeterminized()) {
                         numDiscarded++;
                     } else {
-                        if (m.theResult) { //using true to mode SAT
+                        if (m.theResult) { //using true to model SAT
                             System.out.println("SAT WAS DETECTED");
                             numSAT++;
                             numFinished++;
@@ -465,19 +467,27 @@ public class TacoMain {
                 }
                 theRunningThreads--;
             }
-
+            int numGenerated = 0;
             if (!problemsToFurtherDeterminize.isEmpty() && partitionAllowed(minPendingQueueSize, maxPendingQueueSize, pendingProblems.size())) {
                 JCompilationUnitTypeWrapper toDeterminize = problemsToFurtherDeterminize.poll();
                 int num_Problems = numDeterminizedProblems(minPendingQueueSize, maxPendingQueueSize, pendingProblems.size());
                 ConcurrentLinkedQueue<JCompilationUnitTypeWrapper> moreDeterminizedProblems = removeNonDeterminism(toDeterminize, num_Problems);
+                int numNewProblems = moreDeterminizedProblems.size();
                 if (moreDeterminizedProblems.size() == 1) {
                     JCompilationUnitTypeWrapper determinized = moreDeterminizedProblems.poll();
                     determinized.setDeterminized();
-                    System.out.println("A fully determinized problem");
                     pendingProblems.add(determinized);
                 } else {
                     pendingProblems.addAll(moreDeterminizedProblems);
                 }
+
+                String splittedInfo = String.format("split             new %1$8d",  numNewProblems);
+                System.out.println(splittedInfo);
+
+
+
+
+
             }
 
 
@@ -522,9 +532,10 @@ public class TacoMain {
                 title = makeTitle("Time ellapsed", "Num Attended", "Num SAT", "Num UNSAT", "Num Unknown", "Num Errors", "Num Interrupted", "Num Pending", "Num To Split", "Num Running Threads", "TO");
                 content = makeContent(currentTime / 1000, numAttended, numSAT, numUNSAT, numDiscarded, numErrors, numInterrupted, numPending, toSplitSize, theRunningThreads, timeout);
 
+                System.out.println();
                 System.out.println(title);
                 System.out.println(content);
-
+                System.out.println();
 
             }
         }

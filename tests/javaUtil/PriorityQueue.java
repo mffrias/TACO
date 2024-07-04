@@ -248,16 +248,16 @@ public class PriorityQueue {
 //    }
 
 
-
     /*@ requires true;
       @ ensures \result == -1 <==> (\forall int i; 0<=i && i<size; queue[i] != o);
       @ ensures (0<= \result && \result < size) ==> queue[\result] == o;
       @*/
-    private int indexOf(int o) {
+    public int indexOf(int o) {
+
 //        if (o != null) {
-            for (int i = 0; i < size; i++)
-                if (o == queue[i])
-                    return i;
+        for (int i = 0; i < size; i++)
+            if (o == queue[i])
+                return i;
 //        }
         return -1;
     }

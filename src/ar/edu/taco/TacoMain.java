@@ -390,14 +390,14 @@ public class TacoMain {
         Semaphore semJDyn2Dyn = new Semaphore(1);
         Semaphore semJUnitConstruction = new Semaphore(1);
 
-        int numProcessorThreads = 4;
+        int numProcessorThreads = 10;
 
         // create executor service for thread processing
         //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
         //		ThreadPoolExecutor pool = (ThreadPoolExecutor) translationService;
 
-        int maxPendingQueueSize = 1 * numProcessorThreads;
-        int minPendingQueueSize = 1 * numProcessorThreads;
+        int maxPendingQueueSize = 20 * numProcessorThreads;
+        int minPendingQueueSize = 4 * numProcessorThreads;
 
 
         //		Set<ar.edu.taco.utils.TranslateThread> theAvailableThreadsPool = new HashSet<ar.edu.taco.utils.TranslateThread>();
@@ -408,7 +408,7 @@ public class TacoMain {
         //			theAvailableThreadsPool.add(tt);
         //		}
 
-        int timeout = 100;
+        int timeout = 5;
         int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
         String space = "   ";
         pendingProblems.add(initialTask);
@@ -455,11 +455,11 @@ public class TacoMain {
                         numDiscarded++;
                     } else {
                         if (m.theResult) { //using true to model SAT
-                            System.out.println("SAT WAS DETECTED");
+//                            System.out.println("SAT WAS DETECTED");
                             numSAT++;
                             numFinished++;
                         } else {
-                            System.out.println("UNSAT WAS DETECTED");
+//                            System.out.println("UNSAT WAS DETECTED");
                             numUNSAT++; //using false to model UNSAT
                             numFinished++;
                         }
@@ -518,8 +518,6 @@ public class TacoMain {
                 previousUpdateTime = System.currentTimeMillis();
                 numFinishedPreviousWindow = numFinishedLastWindow;
                 numFinishedLastWindow = numFinished;
-                System.out.println();
-                System.out.println("                                                                                                                                                                                                                               Previous: " + numFinishedPreviousWindow + "          Current: " + numFinishedLastWindow);
                 numFinished = 0;
             }
 

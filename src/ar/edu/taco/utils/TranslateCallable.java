@@ -381,33 +381,25 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 //							String fileNameToLookFor = fileToAnalyze.replace("output.als", "verdict.txt");
 //							File fileToLookFor = new File(fileNameToLookFor);
                             if (fileToLookFor.exists()) {
+                                pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                                action = "ended";
+                                isDeterminized = JUnitWrapped.getDeterminized();
+                                TOinSecs = JUnitWrapped.getTimeout();
+                                long runTime = (System.nanoTime() - initTime) / 1000000000;
+
                                 if (fileToLookFor.length() != 0L) {
                                     this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
 
-                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
-                                    action = "ended";
-                                    isDeterminized = JUnitWrapped.getDeterminized();
-                                    TOinSecs = JUnitWrapped.getTimeout();
-                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
                                     String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
                                     System.out.println(EndSatContent);
-
                                     return null;
                                 } else {
                                     this.getCompilationUnitWrapper().setOutput(false);  // outcome was UNSAT
 
-                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
-                                    action = "ended";
-                                    isDeterminized = JUnitWrapped.getDeterminized();
-                                    TOinSecs = JUnitWrapped.getTimeout();
-                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
                                     String EndUnSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
                                     System.out.println(EndUnSatContent);
-
                                     return null;
                                 }
-                            } else {
-//								System.out.println("File not yet there");
                             }
 
                             //							}

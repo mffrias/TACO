@@ -27,14 +27,9 @@ package javaUtil;
 public class PriorityQueue {
 
     //@ invariant size <= queue.length;
-    // invariant size >= 1 ==> queue[0] >= queue[0];
-    // invariant size >= 2 ==> queue[1] >= queue[0];
-    // invariant size >= 3 ==> queue[2] >= queue[0];
-    // invariant size >= 4 ==> queue[3] >= queue[1];
-    // invariant !(\exists int i; 0<i && i<size; queue[i/2] < queue[i]);
     //@ invariant size > 0 ==> (\forall int i; 0<=i && i<size; queue[0] >= queue[i]);
 
-//    private static final long serialVersionUID = -7720805057305804111L;
+    private static final long serialVersionUID = -7720805057305804111L;
 
     private static final int DEFAULT_INITIAL_CAPACITY = 11;
 
@@ -241,16 +236,25 @@ public class PriorityQueue {
         return true;
     }
 
-//    public Object peek() {
+
+
+    /*@ requires size > 0;
+      @ ensures \result == queue[0];
+      @ signals (Exception e) false;
+      @ signals (AssertionError) true;
+      @*/
+    public int peek() {
 //        if (size == 0)
 //            return null;
-//        return (Object) queue[0];
-//    }
+        return queue[0];
+    }
 
 
     /*@ requires true;
       @ ensures \result == -1 <==> (\forall int i; 0<=i && i<size; queue[i] != o);
       @ ensures (0<= \result && \result < size) ==> queue[\result] == o;
+      @ signals (Exception e) false;
+      @ signals (AssertionError e) true;
       @*/
     public int indexOf(int o) {
 

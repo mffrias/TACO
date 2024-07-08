@@ -1,10 +1,10 @@
-package realbugs;
+package javaUtil;
 
 
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class ForActualBugsTest extends CollectionTestBase {
+public class PriorityQueueTest extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
@@ -20,7 +20,7 @@ public class ForActualBugsTest extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(1);
-        setConfigKeyLoopUnroll(1);
+        setConfigKeyLoopUnroll(3);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);
@@ -42,7 +42,7 @@ public class ForActualBugsTest extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(1);
-		setConfigKeyLoopUnroll(4);
+		setConfigKeyLoopUnroll(10);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);
@@ -56,6 +56,29 @@ public class ForActualBugsTest extends CollectionTestBase {
 	}
 
 
+	public void test_peekTest() throws VizException {
+		setConfigKeyRelevantClasses("javaUtil.PriorityQueue");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeyNumericTypeQuantificationRange(0, 4);
+		setConfigKeyInferScope(true);
+		setConfigKeyObjectScope(0);
+		setConfigKeyIntBithwidth(1);
+		setConfigKeyLoopUnroll(10);
+		setConfigKeySkolemizeInstanceInvariant(true);
+		setConfigKeySkolemizeInstanceAbstraction(false);
+		setConfigKeyGenerateUnitTestCase(true);
+		setConfigKeyAttemptToCorrectBug(false);
+		setConfigKeyMaxStrykerMethodsPerFile(1);
+		setConfigKeyRemoveQuantifiers(true);
+		setConfigKeyUseJavaSBP(false);
+		setConfigKeyUseTightUpperBounds(false);
+		setConfigKeyTypeScopes("javaUtil.PriorityQueue:1");
+		check(GENERIC_PROPERTIES,"peek()",true);
+	}
+
+
 	public void test_pollTest() throws VizException {
 		setConfigKeyRelevantClasses("javaUtil.PriorityQueue");
 		setConfigKeyRelevancyAnalysis(true);
@@ -65,7 +88,7 @@ public class ForActualBugsTest extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(1);
-		setConfigKeyLoopUnroll(4);
+		setConfigKeyLoopUnroll(3);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);

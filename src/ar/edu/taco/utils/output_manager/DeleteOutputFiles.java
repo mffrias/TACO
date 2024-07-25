@@ -14,8 +14,7 @@ public class DeleteOutputFiles {
      */
 
     public static void run() throws IOException {
-        String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
-        System.out.println(parentDirectory);
+        String parentDirectory = "/Users/gajimenez7/Desktop/Threading_Taco/TACO/output_threads";
         File parentFolder = new File(parentDirectory);
         File[] files = parentFolder.listFiles();
 
@@ -36,18 +35,18 @@ public class DeleteOutputFiles {
         for(File f: files){
             if(f.isDirectory()) isEmpty = f.listFiles().length == 0;
 
-//            System.out.println("File location: " + f);
-//            System.out.println("Is Directory?: " + f.isDirectory());
-//            System.out.println();
+            System.out.println("File location: " + f);
+            System.out.println("Is Directory?: " + f.isDirectory());
+            System.out.println();
 
             if(f.isDirectory()) {
                 if(!isEmpty) deleteFiles(f);
             }
-            if(f.delete()){} /*System.out.println("Deleted " + f.getName() + " successfully!");
-            else System.out.println("Failed to delete" + f.getName() + "!")*/;
+            if(f.delete()) System.out.println("Deleted " + f.getName() + " successfully!");
+            else System.out.println("Failed to delete" + f.getName() + "!");
 
         }
-        if(directory.delete()){};// System.out.println("Deleted " + directory.getName() + " successfully!");
-        //else System.out.println("Failed to delete " + directory.getName());
+        if(directory.delete()) System.out.println("Deleted " + directory.getName() + " successfully!");
+        else System.out.println("Failed to delete " + directory.getName());
     }
 }

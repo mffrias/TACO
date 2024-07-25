@@ -37,6 +37,7 @@ import ar.edu.taco.utils.Message;
 import ar.edu.taco.utils.TranslateCallable;
 import ar.edu.taco.utils.TranslateThread;
 
+import ar.edu.taco.utils.output_manager.DeleteOutputFiles;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -309,7 +310,20 @@ public class TacoMain {
 
     @SuppressWarnings("unchecked")
     public TacoAnalysisResult run(String configFile, Properties overridingProperties) throws IllegalArgumentException {
+        // parent directory where output files are stored
+        String parentDirectory = "/Users/gajimenez7/Desktop/Threading_Taco/TACO/output_threads";
+        File parentFolder = new File(parentDirectory);
 
+        // do you want to delete output files?
+        boolean deleteOutput = true;
+        try {
+            // delete all output files
+            if(parentFolder.isDirectory() && deleteOutput) DeleteOutputFiles.run();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("---FINISHED DELETING OUTPUT FILES---");
 
         if (configFile == null) {
             throw new IllegalArgumentException("Config file not found, please verify option -cf");
@@ -408,7 +422,7 @@ public class TacoMain {
         //			theAvailableThreadsPool.add(tt);
         //		}
 
-        int timeout = 100;
+        int timeout = 5;
         int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
         String space = "   ";
         pendingProblems.add(initialTask);

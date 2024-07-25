@@ -341,7 +341,7 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.redirectErrorStream(true);
-                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/mfrias/eclipse-workspace-new/FreshTACO1/TACO/lib/alloyRunner.jar", fileToAnalyze);
+                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/gajimenez7/Desktop/Threading_Taco/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
 
 
                 try {
@@ -646,7 +646,7 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
     }
 
     private String makeCanonicalPath() {
-        String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+        String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
         File out_dir_dir = new File(output_dir);
 
         if (!out_dir_dir.exists()) {

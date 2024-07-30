@@ -128,10 +128,11 @@ public class AvlTree {
 	@ ensures \reach(this.root, AvlNode, left+right).int_size() == \old(\reach(this.root, AvlNode, left+right)).int_size() + 1;
  	@ signals (Exception e) false; 
  	@*/
-	public void insert(int x) {
+	public boolean insert(int x) {
 		AvlNode n = new AvlNode();
 		n.element = x;
 		root = privateInsert(root, n);
+		return true;
 //		size++;
 	}
 

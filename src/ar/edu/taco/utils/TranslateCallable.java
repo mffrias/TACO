@@ -341,16 +341,29 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.redirectErrorStream(true);
-                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/mfrias/eclipse-workspace-new/FreshTACO1/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
+                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/gajimenez7/Desktop/Threading_Taco/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
 
 
                 try {
                     long initTimeMillis = System.currentTimeMillis();
                     Process process = pb.start();
+
+                    String pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                    String action = "start";
+                    boolean isDeterminized = JUnitWrapped.getDeterminized();
+                    int TOinSecs = JUnitWrapped.getTimeout();
+                    String startContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d", pId, action, isDeterminized, TOinSecs);
+                    System.out.println(startContent);
+
+
+
 //					BufferedReader reader =
 //							new BufferedReader(new InputStreamReader(process.getInputStream()));
 //					StringBuilder builder = new StringBuilder();
 //					String line = null;
+
+
+
                     while ((System.currentTimeMillis() - initTimeMillis) / 1000 < this.JUnitWrapped.getTimeout()) {
 //						System.out.println("TOTOTO: " + (System.currentTimeMillis() - initTimeMillis)/1000 + " OUT OF " + this.JUnitWrapped.getTimeout());
                         try {
@@ -369,10 +382,28 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 //							File fileToLookFor = new File(fileNameToLookFor);
                             if (fileToLookFor.exists()) {
                                 if (fileToLookFor.length() != 0L) {
-                                    this.getCompilationUnitWrapper().setOutput(true);
+                                    this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
+
+                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                                    action = "ended";
+                                    isDeterminized = JUnitWrapped.getDeterminized();
+                                    TOinSecs = JUnitWrapped.getTimeout();
+                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
+                                    String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                    System.out.println(EndSatContent);
+
                                     return null;
                                 } else {
-                                    this.getCompilationUnitWrapper().setOutput(false);
+                                    this.getCompilationUnitWrapper().setOutput(false);  // outcome was UNSAT
+
+                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                                    action = "ended";
+                                    isDeterminized = JUnitWrapped.getDeterminized();
+                                    TOinSecs = JUnitWrapped.getTimeout();
+                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
+                                    String EndUnSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                    System.out.println(EndUnSatContent);
+
                                     return null;
                                 }
                             } else {
@@ -389,7 +420,14 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                     long elapsedTimeInSeconds = (finalTime - initTime) / 1000000000;
                     this.getCompilationUnitWrapper().setTimeOuted();
 
-                    System.out.println("Timeouted after: " + elapsedTimeInSeconds);
+                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                    action = "interr";
+                    isDeterminized = JUnitWrapped.getDeterminized();
+                    TOinSecs = JUnitWrapped.getTimeout();
+                    long runTime = (System.nanoTime() - initTime) / 1000000000;
+                    String EndInterruptedContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d    runT: %5$6d    outcome timeouted ", pId, action, isDeterminized, TOinSecs, runTime);
+                    System.out.println(EndInterruptedContent);
+
                     process.destroy();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -597,7 +635,7 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
             //  System.out.println("Write files: " + filename);
 
-            files.add("output_" + Thread.currentThread().getName() + "." + typeDeclaration.getCClass().getJavaName());
+            files.add(typeDeclaration.getCClass().getJavaName());
             try {
                 FileUtils.writeToFile(filename + TacoMain.OUTPUT_SIMPLIFIED_JAVA_EXTENSION, JavaAndJmlPrettyPrint2.print(compilation_unit));
             } catch (IOException e) {
@@ -608,7 +646,7 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
     }
 
     private String makeCanonicalPath() {
-        String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+        String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
         File out_dir_dir = new File(output_dir);
 
         if (!out_dir_dir.exists()) {

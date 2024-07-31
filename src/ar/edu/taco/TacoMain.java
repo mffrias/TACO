@@ -31,12 +31,13 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import ar.edu.taco.utils.*;
 import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
 import ar.edu.taco.utils.JCompilationUnitTypeWrapper;
 import ar.edu.taco.utils.Message;
-import ar.edu.taco.utils.TranslateCallable;
 import ar.edu.taco.utils.TranslateThread;
 
+import ar.edu.taco.utils.WindowList;
 import ar.edu.taco.utils.output_manager.DeleteOutputFiles;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -48,10 +49,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.jmlspecs.checker.JmlOldExpression;
-import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
 import org.multijava.mjc.JCompilationUnitType;
-import org.multijava.mjc.JTypeDeclarationType;
 
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.MethodToCheckNotFoundException;
@@ -59,7 +57,6 @@ import ar.edu.taco.engine.JmlStage;
 import ar.edu.taco.jml.JmlToSimpleJmlContext;
 import ar.edu.taco.jml.parser.JmlParser;
 import ar.edu.taco.simplejml.SimpleJmlToJDynAlloyContext;
-import ar.edu.taco.utils.FileUtils;
 
 /**
  * <p>Runs the TACO analysis.</p>
@@ -311,19 +308,25 @@ public class TacoMain {
     @SuppressWarnings("unchecked")
     public TacoAnalysisResult run(String configFile, Properties overridingProperties) throws IllegalArgumentException {
         // parent directory where output files are stored
-        String parentDirectory = "/Users/gajimenez7/Desktop/Threading_Taco/TACO/output_threads";
+        String parentDirectory = "/root/testing_TACO/TACO/output_threads";
         File parentFolder = new File(parentDirectory);
 
         // do you want to delete output files?
         boolean deleteOutput = true;
+        boolean deleteSuccess = false;
         try {
             // delete all output files
-            if(parentFolder.isDirectory() && deleteOutput) DeleteOutputFiles.run();
+            if(parentFolder.isDirectory() && deleteOutput) {
+                DeleteOutputFiles.run();
+                deleteSuccess = true;
+            }
+            else System.out.println("Not a valid directory!!!!!");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("---FINISHED DELETING OUTPUT FILES---");
+        if(deleteSuccess) System.out.println("---FINISHED DELETING OUTPUT FILES---");
+        else System.out.println("---FAILED TO DELETE FILES---");
 
         if (configFile == null) {
             throw new IllegalArgumentException("Config file not found, please verify option -cf");
@@ -404,14 +407,14 @@ public class TacoMain {
         Semaphore semJDyn2Dyn = new Semaphore(1);
         Semaphore semJUnitConstruction = new Semaphore(1);
 
-        int numProcessorThreads = 4;
+        int numProcessorThreads = 6;
 
         // create executor service for thread processing
         //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
         //		ThreadPoolExecutor pool = (ThreadPoolExecutor) translationService;
 
-        int maxPendingQueueSize = 1 * numProcessorThreads;
-        int minPendingQueueSize = 1 * numProcessorThreads;
+        int maxPendingQueueSize = 20 * numProcessorThreads;
+        int minPendingQueueSize = 4 * numProcessorThreads;
 
 
         //		Set<ar.edu.taco.utils.TranslateThread> theAvailableThreadsPool = new HashSet<ar.edu.taco.utils.TranslateThread>();
@@ -439,6 +442,9 @@ public class TacoMain {
         int numFinishedPreviousWindow = 0;
         int numFinished = 0;
 
+        Window windowValWrapper;
+        WindowList winList = new WindowList(updateTime);
+
         while (!pendingProblems.isEmpty() || !problemsToFurtherDeterminize.isEmpty() || !theSharedQueue.isEmpty() || theRunningThreads > 0) {
             //-------BEGIN TRANSLATION THREAD PROCESS
             int numPending = pendingProblems.size();
@@ -462,13 +468,11 @@ public class TacoMain {
                     JCompilationUnitTypeWrapper theWrappedCU = theEmployedThread.getCompilationUnitWrapper();
                     problemsToFurtherDeterminize.offer(theWrappedCU);
                     numInterrupted++;
-
-
                 } else {
                     if (m.TO && m.getTheWorkingThread().getCompilationUnitWrapper().getDeterminized()) {
                         numDiscarded++;
                     } else {
-                        if (m.theResult) { //using true to model SAT
+                        if (m.theResult) { //using true to mode SAT
                             System.out.println("SAT WAS DETECTED");
                             numSAT++;
                             numFinished++;
@@ -481,7 +485,7 @@ public class TacoMain {
                 }
                 theRunningThreads--;
             }
-            int numGenerated = 0;
+
             if (!problemsToFurtherDeterminize.isEmpty() && partitionAllowed(minPendingQueueSize, maxPendingQueueSize, pendingProblems.size())) {
                 JCompilationUnitTypeWrapper toDeterminize = problemsToFurtherDeterminize.poll();
                 int num_Problems = numDeterminizedProblems(minPendingQueueSize, maxPendingQueueSize, pendingProblems.size());
@@ -532,6 +536,10 @@ public class TacoMain {
                 previousUpdateTime = System.currentTimeMillis();
                 numFinishedPreviousWindow = numFinishedLastWindow;
                 numFinishedLastWindow = numFinished;
+
+                windowValWrapper = new Window(numFinishedPreviousWindow, numFinishedLastWindow);
+                winList.addWLVals(windowValWrapper);
+
                 System.out.println();
                 System.out.println("                                                                                                                                                                                                                               Previous: " + numFinishedPreviousWindow + "          Current: " + numFinishedLastWindow);
                 numFinished = 0;
@@ -553,6 +561,15 @@ public class TacoMain {
 
             }
         }
+        winList.printVals();
+
+        System.out.println();
+
+        System.out.println("Mean: " + winList.getMeanVal());
+        System.out.println("Range: " + winList.getRangeVal());
+        System.out.println("Minimum Difference: " + winList.getMinVal());
+        System.out.println("Maximum Difference: " + winList.getMaxVal());
+
         return tacoAnalysisResult;
     }
 

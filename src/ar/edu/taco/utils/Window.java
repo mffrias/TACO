@@ -4,7 +4,6 @@ public class Window {
     int valA;
     int valB;
     int valDiff;
-    int numSAT;
 
     /*
     *
@@ -18,10 +17,9 @@ public class Window {
     */
     public Window(){}
 
-    public Window(int diffA, int diffB, int SAT){
+    public Window(int diffA, int diffB){
         this.valA = diffA;
         this.valB = diffB;
-        this.numSAT = SAT;
         this.valDiff = Math.abs(valB - valA);
     }
 
@@ -31,7 +29,6 @@ public class Window {
     public int getValB(){
         return  valB;
     }
-    public int getSAT() {return numSAT;}
     public int getValDiff(){
         return valDiff;
     }

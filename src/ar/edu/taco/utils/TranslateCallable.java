@@ -343,7 +343,8 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.redirectErrorStream(true);
-                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/gajimenez7/Desktop/Threading_Taco/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
+                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/root/testing_TACO/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
+
 
 
                 try {

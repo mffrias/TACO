@@ -1,5 +1,9 @@
 package ar.edu.taco.utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +30,14 @@ public class WindowList {
 
     public void addWLVals(Window windowVals){
         windowList.add(windowVals);
+    }
+
+    public int totalSAT(){
+        int ts = 0;
+        for(Window w: windowList){
+            ts += w.numSAT;
+        }
+        return ts;
     }
 
     public void diffMean(){
@@ -81,7 +93,6 @@ public class WindowList {
         // space length between values should be total length - value length
 
         System.out.println();
-        System.out.println("--Update Time: " + wTime + "--");
 
         //while(!newLineFlag) {
 
@@ -98,6 +109,24 @@ public class WindowList {
                     }
                 }
                 System.out.print("Group " + i + ":" + space);
+            }
+            System.out.println();
+
+            // print num SAT title
+            for (int i = 0; i < windowList.size(); i++) {
+                System.out.print("Num SAT:             ");
+            }
+            System.out.println();
+
+            // print num SAT value
+            for(Window w: windowList){
+                int numSAT = w.getSAT();
+                int valLeng = String.valueOf(numSAT).length();
+                String space = "                    ";
+                if (valLeng > 1) {
+                    space = space.substring(valLeng);
+                }
+                System.out.print(numSAT + space);
             }
             System.out.println();
 
@@ -160,6 +189,37 @@ public class WindowList {
                 newLineFlag = false;
             }
 
-        //}
+    }
+
+    public void writeToFile(){
+        // output directory
+        File file = new File("WindowOutput.txt");
+        // create output file
+        FileWriter fileWrite = null;
+        try {
+            fileWrite = new FileWriter(file, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try (BufferedWriter out = new BufferedWriter(fileWrite)){
+            // write timeout
+            out.write(Integer.toString(this.wTime));
+
+            // write num sat
+            out.write(Integer.toString(totalSAT()));
+
+            for (Window w: windowList){
+                out.write(Integer.toString(w.getValDiff()));
+            }
+            out.newLine();
+            out.close();
+            fileWrite.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+
     }
 }

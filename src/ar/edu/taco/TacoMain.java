@@ -20,6 +20,7 @@
 
 package ar.edu.taco;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,12 +32,10 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import ar.edu.taco.utils.*;
 import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
-import ar.edu.taco.utils.JCompilationUnitTypeWrapper;
-import ar.edu.taco.utils.Message;
-import ar.edu.taco.utils.TranslateCallable;
-import ar.edu.taco.utils.TranslateThread;
 
+import ar.edu.taco.utils.output_manager.DeleteOutputFiles;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -47,10 +46,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.jmlspecs.checker.JmlOldExpression;
-import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
 import org.multijava.mjc.JCompilationUnitType;
-import org.multijava.mjc.JTypeDeclarationType;
 
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.MethodToCheckNotFoundException;
@@ -58,7 +54,6 @@ import ar.edu.taco.engine.JmlStage;
 import ar.edu.taco.jml.JmlToSimpleJmlContext;
 import ar.edu.taco.jml.parser.JmlParser;
 import ar.edu.taco.simplejml.SimpleJmlToJDynAlloyContext;
-import ar.edu.taco.utils.FileUtils;
 
 /**
  * <p>Runs the TACO analysis.</p>
@@ -309,130 +304,167 @@ public class TacoMain {
 
     @SuppressWarnings("unchecked")
     public TacoAnalysisResult run(String configFile, Properties overridingProperties) throws IllegalArgumentException {
+        TacoAnalysisResult tacoAnalysisResult;
+        tacoAnalysisResult = null;
+
+        int numTests = 10;
+        boolean increaseTimeout = false;
+
+        int timeout = 5;
+
+//        for (int i = 0; i < 5 * numTests; i++) {
+
+//            if(i % 5 == 0 && i != 0) increaseTimeout = true;
+
+//            System.out.println("TEST NUMBER: " + i);
+//            System.out.println();
+
+            // parent directory where output files are stored
+            String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
+            File parentFolder = new File(parentDirectory);
+
+            // do you want to delete output files?
+            boolean deleteOutput = true;
+            boolean deleteSuccess = false;
+            try {
+                // delete all output files
+                if (parentFolder.isDirectory() && deleteOutput) {
+                    DeleteOutputFiles.run();
+                    deleteSuccess = true;
+                } else System.out.println("Not a valid directory!!!!!");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (deleteSuccess) System.out.println("---FINISHED DELETING OUTPUT FILES---");
+            else System.out.println("---FAILED TO DELETE FILES---");
+
+            if (configFile == null) {
+                throw new IllegalArgumentException("Config file not found, please verify option -cf");
+            }
+
+            List<JCompilationUnitType> compilation_units = null;
+            String classToCheck = null;
+            String methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
+
+            // Start configurator
+            JDynAlloyConfig.reset();
+            JDynAlloyConfig.buildConfig(configFile, overridingProperties);
 
 
-        if (configFile == null) {
-            throw new IllegalArgumentException("Config file not found, please verify option -cf");
-        }
+            SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext = null;
+            //if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.JMLPARSER_ENABLED, TacoConfigurator.JMLPARSER_ENABLED_DEFAULT)) {
+            // JAVA PARSING
+            String sourceRootDir = TacoConfigurator.getInstance().getString(TacoConfigurator.JMLPARSER_SOURCE_PATH_STR);
 
-        List<JCompilationUnitType> compilation_units = null;
-        String classToCheck = null;
-        String methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
-
-        // Start configurator
-        JDynAlloyConfig.reset();
-        JDynAlloyConfig.buildConfig(configFile, overridingProperties);
-
-
-        SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext = null;
-        //if (TacoConfigurator.getInstance().getBoolean(TacoConfigurator.JMLPARSER_ENABLED, TacoConfigurator.JMLPARSER_ENABLED_DEFAULT)) {
-        // JAVA PARSING
-        String sourceRootDir = TacoConfigurator.getInstance().getString(TacoConfigurator.JMLPARSER_SOURCE_PATH_STR);
-
-        if (TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD) == null) {
-            throw new TacoException("Config key 'CLASS_TO_CHECK_FIELD' is mandatory. Please check your config file or add the -c parameter");
-        }
-        List<String> files = new ArrayList<String>(Arrays.asList(JDynAlloyConfig.getInstance().getClasses()));
-        classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
-        if (!files.contains(classToCheck)) {
-            files.add(classToCheck);
-        }
+            if (TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD) == null) {
+                throw new TacoException("Config key 'CLASS_TO_CHECK_FIELD' is mandatory. Please check your config file or add the -c parameter");
+            }
+            List<String> files = new ArrayList<String>(Arrays.asList(JDynAlloyConfig.getInstance().getClasses()));
+            classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
+            if (!files.contains(classToCheck)) {
+                files.add(classToCheck);
+            }
 
 
-        String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
-        JmlParser theParser = new JmlParser();
+            String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
+            JmlParser theParser = new JmlParser();
 
-        boolean compilationSuccess = theParser.initialize(sourceRootDir, userDir /* Unused */, files);
+            boolean compilationSuccess = theParser.initialize(sourceRootDir, userDir /* Unused */, files);
 
-        if (!compilationSuccess) {
-            return null; //this means compilation failed;
-        }
+            if (!compilationSuccess) {
+                return null; //this means compilation failed;
+            }
 
-        compilation_units = theParser.getCompilationUnits();
-        // END JAVA PARSING
+            compilation_units = theParser.getCompilationUnits();
+            // END JAVA PARSING
 
-        // BEGIN SIMPLIFICATION
-        JmlStage aJavaCodeSimplifier = new JmlStage(compilation_units);
-        aJavaCodeSimplifier.execute();
-        JmlToSimpleJmlContext jmlToSimpleJmlContext = aJavaCodeSimplifier.getJmlToSimpleJmlContext();
-        List<JCompilationUnitType> simplified_compilation_units = aJavaCodeSimplifier.get_simplified_compilation_units();
-
-
-        // END SIMPLIFICATION
-
-        Queue<JCompilationUnitTypeWrapper> pendingProblems = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
-
-        Queue<JCompilationUnitTypeWrapper> problemsToFurtherDeterminize = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
-        JCompilationUnitTypeWrapper initialTask = new JCompilationUnitTypeWrapper(simplified_compilation_units.get(0));
-        //		problemsToFurtherDeterminize.offer(initialTask);
-
-        TacoAnalysisResult tacoAnalysisResult = null;
-
-        int numSAT = 0;
-        int numUNSAT = 0;
-        int numErrors = 0;
-        int numAttended = 0;
-        int pendingSize = pendingProblems.size();
-        int toSplitSize = 0;
-        int numInterrupted = 0;
-        int numDiscarded = 0;
-
-        // -------------BEGIN EXECUTOR SERVICE-----------
+            // BEGIN SIMPLIFICATION
+            JmlStage aJavaCodeSimplifier = new JmlStage(compilation_units);
+            aJavaCodeSimplifier.execute();
+            JmlToSimpleJmlContext jmlToSimpleJmlContext = aJavaCodeSimplifier.getJmlToSimpleJmlContext();
+            List<JCompilationUnitType> simplified_compilation_units = aJavaCodeSimplifier.get_simplified_compilation_units();
 
 
-        // make lists
-        //		List<Callable<TacoAnalysisResult>> translateThreadList = new ArrayList<>();
-        //
-        //		List<Future<TacoAnalysisResult>> futureThreadList = new ArrayList<>();
+            // END SIMPLIFICATION
 
-        Semaphore semJmlParser = new Semaphore(1);
-        Semaphore semJava2JDyn = new Semaphore(1);
-        Semaphore semJDyn2Dyn = new Semaphore(1);
-        Semaphore semJUnitConstruction = new Semaphore(1);
+            Queue<JCompilationUnitTypeWrapper> pendingProblems = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
 
-        int numProcessorThreads = 5;
+            Queue<JCompilationUnitTypeWrapper> problemsToFurtherDeterminize = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
+            JCompilationUnitTypeWrapper initialTask = new JCompilationUnitTypeWrapper(simplified_compilation_units.get(0));
+            //		problemsToFurtherDeterminize.offer(initialTask);
 
-        // create executor service for thread processing
-        //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
-        //		ThreadPoolExecutor pool = (ThreadPoolExecutor) translationService;
+            tacoAnalysisResult = null;
 
-        int maxPendingQueueSize = 20 * numProcessorThreads;
-        int minPendingQueueSize = 4 * numProcessorThreads;
+            int numSAT = 0;
+            int numUNSAT = 0;
+            int numErrors = 0;
+            int numAttended = 0;
+            int pendingSize = pendingProblems.size();
+            int toSplitSize = 0;
+            int numInterrupted = 0;
+            int numDiscarded = 0;
+
+            // -------------BEGIN EXECUTOR SERVICE-----------
 
 
-        //		Set<ar.edu.taco.utils.TranslateThread> theAvailableThreadsPool = new HashSet<ar.edu.taco.utils.TranslateThread>();
-        ConcurrentLinkedQueue<Message> theSharedQueue = new ConcurrentLinkedQueue<Message>();
+            // make lists
+            //		List<Callable<TacoAnalysisResult>> translateThreadList = new ArrayList<>();
+            //
+            //		List<Future<TacoAnalysisResult>> futureThreadList = new ArrayList<>();
 
-        //		for (int numThreads = 0; numThreads < numProcessorThreads; numThreads++) {
-        //			ar.edu.taco.utils.TranslateThread tt = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, null, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
-        //			theAvailableThreadsPool.add(tt);
-        //		}
+            Semaphore semJmlParser = new Semaphore(1);
+            Semaphore semJava2JDyn = new Semaphore(1);
+            Semaphore semJDyn2Dyn = new Semaphore(1);
+            Semaphore semJUnitConstruction = new Semaphore(1);
 
-        int timeout = 12;
-        int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
-        String space = "   ";
-        pendingProblems.add(initialTask);
-        int theRunningThreads = 0;
+            int numProcessorThreads = 6;
 
-        long initialTime = System.currentTimeMillis();
-        long previousTime = initialTime;
-        long previousUpdateTime = initialTime;
-        String title = "";
-        String content = "";
+            // create executor service for thread processing
+            //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
+            //		ThreadPoolExecutor pool = (ThreadPoolExecutor) translationService;
 
-        int updateTime = 3;
-        int numFinishedLastWindow = 0;
-        int numFinishedPreviousWindow = 0;
-        int numFinished = 0;
+            int maxPendingQueueSize = 20 * numProcessorThreads;
+            int minPendingQueueSize = 4 * numProcessorThreads;
 
-        while (!pendingProblems.isEmpty() || !problemsToFurtherDeterminize.isEmpty() || !theSharedQueue.isEmpty() || theRunningThreads > 0) {
-            //-------BEGIN TRANSLATION THREAD PROCESS
-            int numPending = pendingProblems.size();
-            int numToSplit = problemsToFurtherDeterminize.size();
 
-            if (!theSharedQueue.isEmpty()) {
+            //		Set<ar.edu.taco.utils.TranslateThread> theAvailableThreadsPool = new HashSet<ar.edu.taco.utils.TranslateThread>();
+            ConcurrentLinkedQueue<Message> theSharedQueue = new ConcurrentLinkedQueue<Message>();
 
-                Message m = theSharedQueue.poll();
+            //		for (int numThreads = 0; numThreads < numProcessorThreads; numThreads++) {
+            //			ar.edu.taco.utils.TranslateThread tt = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, null, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
+            //			theAvailableThreadsPool.add(tt);
+            //		}
+
+
+
+            int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
+            String space = "   ";
+            pendingProblems.add(initialTask);
+            int theRunningThreads = 0;
+
+            long initialTime = System.currentTimeMillis();
+            long previousTime = initialTime;
+            long previousUpdateTime = initialTime;
+            String title = "";
+            String content = "";
+
+            int updateTime = 3;
+            int numFinishedLastWindow = 0;
+            int numFinishedPreviousWindow = 0;
+            int numFinished = 0;
+
+            Window windowValWrapper;
+            WindowList winList = new WindowList(timeout);
+
+            while (!pendingProblems.isEmpty() || !problemsToFurtherDeterminize.isEmpty() || !theSharedQueue.isEmpty() || theRunningThreads > 0) {
+                //-------BEGIN TRANSLATION THREAD PROCESS
+                int numPending = pendingProblems.size();
+                int numToSplit = problemsToFurtherDeterminize.size();
+
+                if (!theSharedQueue.isEmpty()) {
+
+                    Message m = theSharedQueue.poll();
 
 //				System.out.println("Message in TacoMain " +
 //						m.theResult + " " +
@@ -441,7 +473,7 @@ public class TacoMain {
 //						m.theWorkingThread.getCompilationUnitWrapper().getTimeout());
 
 
-                TranslateThread theEmployedThread = m.theWorkingThread;
+                    TranslateThread theEmployedThread = m.theWorkingThread;
 
                 if (m.TO && !m.getTheWorkingThread().getCompilationUnitWrapper().getDeterminized()) {
                     //					JCompilationUnitType theCU = theEmployedThread.getCompilationUnitWrapper().getUnit();
@@ -481,62 +513,78 @@ public class TacoMain {
                     pendingProblems.addAll(moreDeterminizedProblems);
                 }
 
-                String splittedInfo = String.format("split             new %1$8d",  numNewProblems);
-                System.out.println(splittedInfo);
+                    String splittedInfo = String.format("split             new %1$8d", numNewProblems);
+                    System.out.println(splittedInfo);
 
 
-
-
-
-            }
-
-
-            //			boolean someFreeThread = theRunningThreads < numProcessorThreads;
-            boolean someFreeThread = theRunningThreads < numProcessorThreads;
-            if (!pendingProblems.isEmpty() && someFreeThread) {
-                JCompilationUnitTypeWrapper determinizedWrapped = pendingProblems.poll();
-                int problemTO = timeout;
-                if (determinizedWrapped.getDeterminized()) {
-                    problemTO = timeoutDeterminizedPrograms;
                 }
-                determinizedWrapped.setTimeout(problemTO);
 
-                //				ar.edu.taco.utils.TranslateThread theCurrentThread = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
-                //				Callable<TacoAnalysisResult> translationThread =
-                //						new ar.edu.taco.utils.TranslateThread(semJmlParser, semJava2JDyn, semJDyn2Dyn, determinizedUnit, jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
-                TranslateThread translateThread =
-                        new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, timeout);
 
-                theRunningThreads++;
-                numAttended++;
-                translateThread.start();
+                //			boolean someFreeThread = theRunningThreads < numProcessorThreads;
+                boolean someFreeThread = theRunningThreads < numProcessorThreads;
+                if (!pendingProblems.isEmpty() && someFreeThread) {
+                    JCompilationUnitTypeWrapper determinizedWrapped = pendingProblems.poll();
+                    int problemTO = timeout;
+                    if (determinizedWrapped.getDeterminized()) {
+                        problemTO = timeoutDeterminizedPrograms;
+                    }
+                    determinizedWrapped.setTimeout(problemTO);
+
+                    //				ar.edu.taco.utils.TranslateThread theCurrentThread = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
+                    //				Callable<TacoAnalysisResult> translationThread =
+                    //						new ar.edu.taco.utils.TranslateThread(semJmlParser, semJava2JDyn, semJDyn2Dyn, determinizedUnit, jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+                    TranslateThread translateThread =
+                            new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, timeout);
+
+                    theRunningThreads++;
+                    numAttended++;
+                    translateThread.start();
+                }
+
+                long currentTime = System.currentTimeMillis() - initialTime;
+
+                if (System.currentTimeMillis() >= previousUpdateTime + 1000 * updateTime) {
+                    previousUpdateTime = System.currentTimeMillis();
+                    numFinishedPreviousWindow = numFinishedLastWindow;
+                    numFinishedLastWindow = numFinished;
+
+                    windowValWrapper = new Window(numFinishedPreviousWindow, numFinishedLastWindow, numSAT);
+                    winList.addWLVals(windowValWrapper);
+
+                    System.out.println();
+                    System.out.println("                                                                                                                                                                                                                               Previous: " + numFinishedPreviousWindow + "          Current: " + numFinishedLastWindow);
+                    numFinished = 0;
+                }
+
+                if (System.currentTimeMillis() >= previousTime + 1000) {
+                    previousTime = System.currentTimeMillis();
+                    toSplitSize = problemsToFurtherDeterminize.size();
+                    numErrors = numAttended - numSAT - numUNSAT - numInterrupted - numDiscarded - theRunningThreads;
+
+
+                    title = makeTitle("Time ellapsed", "Num Attended", "Num SAT", "Num UNSAT", "Num Unknown", "Num Errors", "Num Interrupted", "Num Pending", "Num To Split", "Num Running Threads", "TO");
+                    content = makeContent(currentTime / 1000, numAttended, numSAT, numUNSAT, numDiscarded, numErrors, numInterrupted, numPending, toSplitSize, theRunningThreads, timeout);
+
+                    System.out.println();
+                    System.out.println(title);
+                    System.out.println(content);
+                    System.out.println();
+
+                }
             }
+            winList.printVals();
 
-            long currentTime = System.currentTimeMillis() - initialTime;
+            System.out.println();
 
-            if (System.currentTimeMillis() >= previousUpdateTime + 1000*updateTime) {
-                previousUpdateTime = System.currentTimeMillis();
-                numFinishedPreviousWindow = numFinishedLastWindow;
-                numFinishedLastWindow = numFinished;
-                numFinished = 0;
-            }
+            System.out.println("Mean: " + winList.getMeanVal());
+            System.out.println("Range: " + winList.getRangeVal());
+            System.out.println("Minimum Difference: " + winList.getMinVal());
+            System.out.println("Maximum Difference: " + winList.getMaxVal());
 
-            if (System.currentTimeMillis() >= previousTime + 1000) {
-                previousTime = System.currentTimeMillis();
-                toSplitSize = problemsToFurtherDeterminize.size();
-                numErrors = numAttended - numSAT - numUNSAT - numInterrupted - numDiscarded - theRunningThreads;
+            winList.writeToFile();
 
-
-                title = makeTitle("Time ellapsed", "Num Attended", "Num SAT", "Num UNSAT", "Num Unknown", "Num Errors", "Num Interrupted", "Num Pending", "Num To Split", "Num Running Threads", "TO");
-                content = makeContent(currentTime / 1000, numAttended, numSAT, numUNSAT, numDiscarded, numErrors, numInterrupted, numPending, toSplitSize, theRunningThreads, timeout);
-
-                System.out.println();
-                System.out.println(title);
-                System.out.println(content);
-                System.out.println();
-
-            }
-        }
+            increaseTimeout = false;
+//        }
         return tacoAnalysisResult;
     }
 

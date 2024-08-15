@@ -336,8 +336,10 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                 //				}
 
                 String fileToAnalyze = makeCanonicalPath() + "/output.als";
-                String fileNameToLookFor = fileToAnalyze.replace("output.als", "verdict.txt");
-                File fileToLookFor = new File(fileNameToLookFor);
+                String fileNameToLookForSAT = fileToAnalyze.replace("output.als", "verdictSAT.txt");
+                String fileNameToLookForUNSAT = fileToAnalyze.replace("output.als", "verdictUNSAT.txt");
+                File fileToLookForSAT = new File(fileNameToLookForSAT);
+                File fileToLookForUNSAT = new File(fileNameToLookForUNSAT);
 
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.redirectErrorStream(true);
@@ -356,12 +358,10 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                     System.out.println(startContent);
 
 
-
 //					BufferedReader reader =
 //							new BufferedReader(new InputStreamReader(process.getInputStream()));
 //					StringBuilder builder = new StringBuilder();
 //					String line = null;
-
 
 
                     while ((System.currentTimeMillis() - initTimeMillis) / 1000 < this.JUnitWrapped.getTimeout()) {
@@ -380,27 +380,31 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
 //							String fileNameToLookFor = fileToAnalyze.replace("output.als", "verdict.txt");
 //							File fileToLookFor = new File(fileNameToLookFor);
-                            if (fileToLookFor.exists()) {
-                                pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                            pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                            isDeterminized = JUnitWrapped.getDeterminized();
+                            TOinSecs = JUnitWrapped.getTimeout();
+                            long runTime = 0;
+
+                            if (fileToLookForSAT.exists()) {
                                 action = "ended";
-                                isDeterminized = JUnitWrapped.getDeterminized();
-                                TOinSecs = JUnitWrapped.getTimeout();
-                                long runTime = (System.nanoTime() - initTime) / 1000000000;
+                                runTime = (System.nanoTime() - initTime) / 1000000000;
+                                this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
 
-                                if (fileToLookFor.length() != 0L) {
-                                    this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
+                                String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                System.out.println(EndSatContent);
+                                return null;
+                            } else {
+                                if (fileToLookForUNSAT.exists()) {
 
-                                    String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
-                                    System.out.println(EndSatContent);
-                                    return null;
-                                } else {
-                                    this.getCompilationUnitWrapper().setOutput(false);  // outcome was UNSAT
+                                    action = "ended";
+                                    runTime = (System.nanoTime() - initTime) / 1000000000;
 
-                                    String EndUnSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
-                                    System.out.println(EndUnSatContent);
+                                    String EndUNSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                    System.out.println(EndUNSatContent);
                                     return null;
                                 }
                             }
+
 
                             //							}
                         } catch (IllegalThreadStateException e) {
@@ -638,7 +642,7 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
     }
 
     private String makeCanonicalPath() {
-        String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+        String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
         File out_dir_dir = new File(output_dir);
 
         if (!out_dir_dir.exists()) {

@@ -25,7 +25,7 @@ public class JDynAlloyPrinterStage implements ITacoStage {
 	}
 
 	private static void printToFile(JDynAlloyModule module) {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		String filename = output_dir + java.io.File.separator
 				+ module.getModuleId().replaceAll("_", "/");
 		try {

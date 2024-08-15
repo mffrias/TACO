@@ -405,6 +405,8 @@ public class TacoMain {
             int numInterrupted = 0;
             int numDiscarded = 0;
 
+            timeout = 15;
+
             // -------------BEGIN EXECUTOR SERVICE-----------
 
 
@@ -418,7 +420,7 @@ public class TacoMain {
             Semaphore semJDyn2Dyn = new Semaphore(1);
             Semaphore semJUnitConstruction = new Semaphore(1);
 
-            int numProcessorThreads = 6;
+            int numProcessorThreads = 2;
 
             // create executor service for thread processing
             //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);

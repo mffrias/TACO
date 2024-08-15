@@ -93,7 +93,7 @@ public class ASTSimplifierManager {
 
 
 	private String makeCanonicalPath() {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

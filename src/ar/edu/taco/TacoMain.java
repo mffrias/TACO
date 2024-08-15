@@ -390,7 +390,7 @@ public class TacoMain {
         Semaphore semJDyn2Dyn = new Semaphore(1);
         Semaphore semJUnitConstruction = new Semaphore(1);
 
-        int numProcessorThreads = 10;
+        int numProcessorThreads = 5;
 
         // create executor service for thread processing
         //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
@@ -408,7 +408,7 @@ public class TacoMain {
         //			theAvailableThreadsPool.add(tt);
         //		}
 
-        int timeout = 5;
+        int timeout = 12;
         int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
         String space = "   ";
         pendingProblems.add(initialTask);

@@ -425,7 +425,7 @@ public class PriorityQueue {
         modCount++;
         int result = queue[0];
         int x = queue[s];
-        queue[s] = 0;
+   `            `        queue[s] = 0;
         if (s != 0) {
 
 

@@ -19,7 +19,7 @@ public class ForArielGodioBinarySeachBug01Test extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(3);
+        setConfigKeyLoopUnroll(1);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);

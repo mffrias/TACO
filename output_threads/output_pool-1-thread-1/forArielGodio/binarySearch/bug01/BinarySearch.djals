@@ -1,0 +1,839 @@
+//-------------- forArielGodio_binarySearch_bug01_BinarySearch --------------//
+module forArielGodio_binarySearch_bug01_BinarySearch
+sig forArielGodio_binarySearch_bug01_BinarySearch extends java_lang_Object {}
+{}
+program forArielGodio_binarySearch_bug01_BinarySearch::BinarySearch[
+  var thiz:forArielGodio_binarySearch_bug01_BinarySearch,
+  var throw:java_lang_Throwable+null] 
+Implementation 
+
+   {
+      skip;
+      {
+         throw:=null;
+         var exit_stmt_reached:boolean;
+         exit_stmt_reached:=false;
+         skip;
+      
+      }
+      skip;
+   
+   }
+
+
+program forArielGodio_binarySearch_bug01_BinarySearch::binary[
+  var throw:java_lang_Throwable+null,
+  var return:JavaPrimitiveIntegerValue,
+  var arr:java_lang_IntArray+null,
+  var key:JavaPrimitiveIntegerValue] 
+Specification 
+{
+  SpecCase #0 {
+   requires {
+      all j:JavaPrimitiveIntegerValue | {
+        (
+          pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                               j]
+          and 
+          pred_java_primitive_integer_value_lt[j,
+                                              arrayLength[arr,java_lang_IntArray_length]]
+        )
+        implies 
+                (
+                  all i:JavaPrimitiveIntegerValue | {
+                    (
+                      pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                           i]
+                      and 
+                      pred_java_primitive_integer_value_lt[i,
+                                                          j]
+                    )
+                    implies 
+                            pred_java_primitive_integer_value_lte[arrayAccess[arr,java_lang_IntArray_contents,i],
+                                                                 arrayAccess[arr,java_lang_IntArray_contents,j]]
+                  
+                  }
+                )
+      
+      }
+   }
+   
+   requires {
+      not (
+        arr=null)
+   }
+   
+   ensures {
+      (
+        throw'=null)
+      implies 
+              (
+                (
+                  pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                       return']
+                  and 
+                  pred_java_primitive_integer_value_lt[return',
+                                                      arrayLength[arr',java_lang_IntArray_length']]
+                )
+                implies 
+                        pred_java_primitive_integer_value_eq[arrayAccess[arr',java_lang_IntArray_contents',return'],
+                                                            key']
+              )
+   }
+   
+   ensures {
+      (
+        throw'=null)
+      implies 
+              (
+                (
+                  pred_java_primitive_integer_value_eq[return',
+                                                      JavaPrimitiveIntegerLiteralMinus1]
+                  implies 
+                          (
+                            all i:JavaPrimitiveIntegerValue | {
+                              (
+                                pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                                     i]
+                                and 
+                                pred_java_primitive_integer_value_lt[i,
+                                                                    arrayLength[arr',java_lang_IntArray_length']]
+                              )
+                              implies 
+                                      neq[arrayAccess[arr',java_lang_IntArray_contents',i],
+                                         key']
+                            
+                            }
+                          )
+                )
+                and 
+                (
+                  (
+                    all i:JavaPrimitiveIntegerValue | {
+                      (
+                        pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                             i]
+                        and 
+                        pred_java_primitive_integer_value_lt[i,
+                                                            arrayLength[arr',java_lang_IntArray_length']]
+                      )
+                      implies 
+                              neq[arrayAccess[arr',java_lang_IntArray_contents',i],
+                                 key']
+                    
+                    }
+                  )
+                  implies 
+                          pred_java_primitive_integer_value_eq[return',
+                                                              JavaPrimitiveIntegerLiteralMinus1]
+                )
+              )
+   }
+   
+   modifies {
+   EVERYTHING}
+  }
+}
+Implementation 
+
+   {
+      skip;
+      {
+         throw:=null;
+         var exit_stmt_reached:boolean;
+         exit_stmt_reached:=false;
+         {
+            var param_arr_0:java_lang_IntArray+null;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               param_arr_0:=arr;
+            } else {
+               skip;
+            };
+            var param_key_1:JavaPrimitiveIntegerValue;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               param_key_1:=key;
+            } else {
+               skip;
+            };
+            var t_16:boolean;
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)
+            and 
+            (
+              true=true){
+               t_16:=(neq[arrayLength[arr,java_lang_IntArray_length],
+                  JavaPrimitiveIntegerLiteral0]=>(true)else(false));
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false){
+               if t_16=true{
+                  if (
+                    throw=null)
+                  and 
+                  (
+                    exit_stmt_reached=false){
+                     if true=true{
+                        if (
+                          throw=null)
+                        and 
+                        (
+                          exit_stmt_reached=false)   {
+                              return:=JavaPrimitiveIntegerLiteralMinus1;
+                              exit_stmt_reached:=true;
+                           
+                           }
+                         else {
+                           skip;
+                        };
+                     } else {
+                        skip;
+                     };
+                  } else {
+                     skip;
+                  };
+               } else    {
+                     var t_1:JavaPrimitiveIntegerValue;
+                     var t_15:boolean;
+                     var var_1_low:JavaPrimitiveIntegerValue;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        var_1_low:=JavaPrimitiveIntegerLiteral0;
+                     } else {
+                        skip;
+                     };
+                     var var_2_high:JavaPrimitiveIntegerValue;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        var_2_high:=arrayLength[arr,java_lang_IntArray_length];
+                     } else {
+                        skip;
+                     };
+                     var auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:JavaPrimitiveIntegerValue;
+                     havoc auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0;
+                     assume equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+                        JavaPrimitiveIntegerLiteral2];
+                     var SK_pred_java_primitive_integer_value_div_rem_ARG_left_1:JavaPrimitiveIntegerValue;
+                     var SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:JavaPrimitiveIntegerValue;
+                     var SK_pred_java_primitive_integer_value_div_rem_ARG_result_1:JavaPrimitiveIntegerValue;
+                     var SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1:JavaPrimitiveIntegerValue;
+                     if pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+                                                         JavaPrimitiveIntegerLiteral0]   {
+                           throw:=java_lang_ArithmeticExceptionLit;
+                           {
+                              havoc SK_pred_java_primitive_integer_value_div_rem_ARG_left_1;
+                              havoc auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0;
+                              havoc SK_pred_java_primitive_integer_value_div_rem_ARG_right_1;
+                              havoc SK_pred_java_primitive_integer_value_div_rem_ARG_result_1;
+                              havoc SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1;
+                              assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+                                 var_2_high];
+                              assume equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+                                 JavaPrimitiveIntegerLiteral2];
+                              assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+                                 JavaPrimitiveIntegerLiteral1];
+                              assume pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+                                                                              SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+                                                                              SK_pred_java_primitive_integer_value_div_rem_ARG_result_1,
+                                                                              SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1];
+                           
+                           }
+                        
+                        }
+                      else    {
+                           havoc SK_pred_java_primitive_integer_value_div_rem_ARG_left_1;
+                           havoc SK_pred_java_primitive_integer_value_div_rem_ARG_right_1;
+                           havoc SK_pred_java_primitive_integer_value_div_rem_ARG_result_1;
+                           havoc SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1;
+                           assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+                              var_2_high];
+                           assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+                              JavaPrimitiveIntegerLiteral2];
+                           assume pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+                                                                           SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+                                                                           SK_pred_java_primitive_integer_value_div_rem_ARG_result_1,
+                                                                           SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1];
+                        
+                        }
+                     ;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false)
+                     and 
+                     (
+                       true=true){
+                        t_1:=SK_pred_java_primitive_integer_value_div_rem_ARG_result_1;
+                     } else {
+                        skip;
+                     };
+                     var var_3_mid:JavaPrimitiveIntegerValue;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        var_3_mid:=t_1;
+                     } else {
+                        skip;
+                     };
+                     var t_6:boolean;
+                     var t_7:boolean;
+                     var t_8:JavaPrimitiveIntegerValue;
+                     var t_9:boolean;
+                     var t_10:boolean;
+                     var t_11:boolean;
+                     var t_12:JavaPrimitiveIntegerValue;
+                     var t_13:boolean;
+                     var t_14:boolean;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false)
+                     and 
+                     (
+                       true=true){
+                        t_7:=(pred_java_primitive_integer_value_lt[var_1_low,
+                                                            var_2_high]=>(true)else(false));
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        if t_7=true   {
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 if isEmptyOrNull[param_arr_0]{
+                                    throw:=java_lang_NullPointerExceptionLit;
+                                 } else {
+                                    call int_array_read[param_arr_0,throw,t_8,var_3_mid];
+                                 };
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 t_9:=(neq[t_8,
+                                    param_key_1]=>(true)else(false));
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false){
+                                 if t_9=true{
+                                    if (
+                                      throw=null)
+                                    and 
+                                    (
+                                      exit_stmt_reached=false)
+                                    and 
+                                    (
+                                      true=true){
+                                       t_6:=true;
+                                    } else {
+                                       skip;
+                                    };
+                                 } else {
+                                    if (
+                                      throw=null)
+                                    and 
+                                    (
+                                      exit_stmt_reached=false)
+                                    and 
+                                    (
+                                      true=true){
+                                       t_6:=false;
+                                    } else {
+                                       skip;
+                                    };
+                                 };
+                              } else {
+                                 skip;
+                              };
+                           
+                           }
+                         else {
+                           if (
+                             throw=null)
+                           and 
+                           (
+                             exit_stmt_reached=false)
+                           and 
+                           (
+                             true=true){
+                              t_6:=false;
+                           } else {
+                              skip;
+                           };
+                        };
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        if t_6=true   {
+                              var t_2:JavaPrimitiveIntegerValue;
+                              var t_3:boolean;
+                              var t_4:JavaPrimitiveIntegerValue;
+                              var t_5:JavaPrimitiveIntegerValue;
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 if isEmptyOrNull[param_arr_0]{
+                                    throw:=java_lang_NullPointerExceptionLit;
+                                 } else {
+                                    call int_array_read[param_arr_0,throw,t_2,var_3_mid];
+                                 };
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 t_3:=(pred_java_primitive_integer_value_lt[t_2,
+                                                                     param_key_1]=>(true)else(false));
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false){
+                                 if t_3=true   {
+                                       var SK_pred_java_primitive_integer_value_add_ARG_left_0:JavaPrimitiveIntegerValue;
+                                       var SK_pred_java_primitive_integer_value_add_ARG_right_0:JavaPrimitiveIntegerValue;
+                                       var SK_pred_java_primitive_integer_value_add_ARG_result_0:JavaPrimitiveIntegerValue;
+                                       var SK_pred_java_primitive_integer_value_add_ARG_overflow_0:boolean;
+                                       {
+                                          havoc SK_pred_java_primitive_integer_value_add_ARG_left_0;
+                                          havoc SK_pred_java_primitive_integer_value_add_ARG_right_0;
+                                          havoc SK_pred_java_primitive_integer_value_add_ARG_result_0;
+                                          havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_0;
+                                          assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_0,
+                                             var_3_mid];
+                                          assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_0,
+                                             JavaPrimitiveIntegerLiteral1];
+                                          assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_0,
+                                                                                      SK_pred_java_primitive_integer_value_add_ARG_right_0,
+                                                                                      SK_pred_java_primitive_integer_value_add_ARG_result_0,
+                                                                                      SK_pred_java_primitive_integer_value_add_ARG_overflow_0];
+                                       
+                                       }
+                                       if (
+                                         throw=null)
+                                       and 
+                                       (
+                                         exit_stmt_reached=false)
+                                       and 
+                                       (
+                                         true=true){
+                                          var_1_low:=SK_pred_java_primitive_integer_value_add_ARG_result_0;
+                                       } else {
+                                          skip;
+                                       };
+                                    
+                                    }
+                                  else {
+                                    if (
+                                      throw=null)
+                                    and 
+                                    (
+                                      exit_stmt_reached=false)
+                                    and 
+                                    (
+                                      true=true){
+                                       var_2_high:=var_3_mid;
+                                    } else {
+                                       skip;
+                                    };
+                                 };
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 t_4:=fun_java_primitive_integer_value_sub[var_2_high,var_1_low];
+                              } else {
+                                 skip;
+                              };
+                              var auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:JavaPrimitiveIntegerValue;
+                              havoc auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2;
+                              assume equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+                                 JavaPrimitiveIntegerLiteral2];
+                              var SK_pred_java_primitive_integer_value_div_rem_ARG_left_3:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_div_rem_ARG_result_3:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3:JavaPrimitiveIntegerValue;
+                              if pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+                                                                  JavaPrimitiveIntegerLiteral0]   {
+                                    throw:=java_lang_ArithmeticExceptionLit;
+                                    {
+                                       havoc SK_pred_java_primitive_integer_value_div_rem_ARG_left_3;
+                                       havoc auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2;
+                                       havoc SK_pred_java_primitive_integer_value_div_rem_ARG_right_3;
+                                       havoc SK_pred_java_primitive_integer_value_div_rem_ARG_result_3;
+                                       havoc SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3;
+                                       assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+                                          t_4];
+                                       assume equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+                                          JavaPrimitiveIntegerLiteral2];
+                                       assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+                                          JavaPrimitiveIntegerLiteral1];
+                                       assume pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+                                                                                       SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+                                                                                       SK_pred_java_primitive_integer_value_div_rem_ARG_result_3,
+                                                                                       SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3];
+                                    
+                                    }
+                                 
+                                 }
+                               else    {
+                                    havoc SK_pred_java_primitive_integer_value_div_rem_ARG_left_3;
+                                    havoc SK_pred_java_primitive_integer_value_div_rem_ARG_right_3;
+                                    havoc SK_pred_java_primitive_integer_value_div_rem_ARG_result_3;
+                                    havoc SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3;
+                                    assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+                                       t_4];
+                                    assume equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+                                       JavaPrimitiveIntegerLiteral2];
+                                    assume pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+                                                                                    SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+                                                                                    SK_pred_java_primitive_integer_value_div_rem_ARG_result_3,
+                                                                                    SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3];
+                                 
+                                 }
+                              ;
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 t_5:=SK_pred_java_primitive_integer_value_div_rem_ARG_result_3;
+                              } else {
+                                 skip;
+                              };
+                              var SK_pred_java_primitive_integer_value_add_ARG_left_1:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_add_ARG_right_1:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_add_ARG_result_1:JavaPrimitiveIntegerValue;
+                              var SK_pred_java_primitive_integer_value_add_ARG_overflow_1:boolean;
+                              {
+                                 havoc SK_pred_java_primitive_integer_value_add_ARG_left_1;
+                                 havoc SK_pred_java_primitive_integer_value_add_ARG_right_1;
+                                 havoc SK_pred_java_primitive_integer_value_add_ARG_result_1;
+                                 havoc SK_pred_java_primitive_integer_value_add_ARG_overflow_1;
+                                 assume equ[SK_pred_java_primitive_integer_value_add_ARG_left_1,
+                                    var_1_low];
+                                 assume equ[SK_pred_java_primitive_integer_value_add_ARG_right_1,
+                                    t_5];
+                                 assume pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_1,
+                                                                             SK_pred_java_primitive_integer_value_add_ARG_right_1,
+                                                                             SK_pred_java_primitive_integer_value_add_ARG_result_1,
+                                                                             SK_pred_java_primitive_integer_value_add_ARG_overflow_1];
+                              
+                              }
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 var_3_mid:=SK_pred_java_primitive_integer_value_add_ARG_result_1;
+                              } else {
+                                 skip;
+                              };
+                           
+                           }
+                         else {
+                           skip;
+                        };
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false)
+                     and 
+                     (
+                       true=true){
+                        t_11:=(pred_java_primitive_integer_value_lt[var_1_low,
+                                                            var_2_high]=>(true)else(false));
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        if t_11=true   {
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 if isEmptyOrNull[param_arr_0]{
+                                    throw:=java_lang_NullPointerExceptionLit;
+                                 } else {
+                                    call int_array_read[param_arr_0,throw,t_12,var_3_mid];
+                                 };
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false)
+                              and 
+                              (
+                                true=true){
+                                 t_13:=(neq[t_12,
+                                    param_key_1]=>(true)else(false));
+                              } else {
+                                 skip;
+                              };
+                              if (
+                                throw=null)
+                              and 
+                              (
+                                exit_stmt_reached=false){
+                                 if t_13=true{
+                                    if (
+                                      throw=null)
+                                    and 
+                                    (
+                                      exit_stmt_reached=false)
+                                    and 
+                                    (
+                                      true=true){
+                                       t_10:=true;
+                                    } else {
+                                       skip;
+                                    };
+                                 } else {
+                                    if (
+                                      throw=null)
+                                    and 
+                                    (
+                                      exit_stmt_reached=false)
+                                    and 
+                                    (
+                                      true=true){
+                                       t_10:=false;
+                                    } else {
+                                       skip;
+                                    };
+                                 };
+                              } else {
+                                 skip;
+                              };
+                           
+                           }
+                         else {
+                           if (
+                             throw=null)
+                           and 
+                           (
+                             exit_stmt_reached=false)
+                           and 
+                           (
+                             true=true){
+                              t_10:=false;
+                           } else {
+                              skip;
+                           };
+                        };
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false)
+                     and 
+                     (
+                       true=true){
+                        t_14:=Not[t_10];
+                     } else {
+                        skip;
+                     };
+                     assert t_14=true;
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false)
+                     and 
+                     (
+                       true=true){
+                        t_15:=(pred_java_primitive_integer_value_gte[var_1_low,
+                                                             var_2_high]=>(true)else(false));
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        if t_15=true{
+                           if (
+                             throw=null)
+                           and 
+                           (
+                             exit_stmt_reached=false){
+                              if true=true{
+                                 if (
+                                   throw=null)
+                                 and 
+                                 (
+                                   exit_stmt_reached=false)   {
+                                       return:=JavaPrimitiveIntegerLiteralMinus1;
+                                       exit_stmt_reached:=true;
+                                    
+                                    }
+                                  else {
+                                    skip;
+                                 };
+                              } else {
+                                 skip;
+                              };
+                           } else {
+                              skip;
+                           };
+                        } else {
+                           skip;
+                        };
+                     } else {
+                        skip;
+                     };
+                     if (
+                       throw=null)
+                     and 
+                     (
+                       exit_stmt_reached=false){
+                        if true=true{
+                           if (
+                             throw=null)
+                           and 
+                           (
+                             exit_stmt_reached=false)   {
+                                 return:=var_3_mid;
+                                 exit_stmt_reached:=true;
+                              
+                              }
+                            else {
+                              skip;
+                           };
+                        } else {
+                           skip;
+                        };
+                     } else {
+                        skip;
+                     };
+                  
+                  }
+               ;
+            } else {
+               skip;
+            };
+            if (
+              throw=null)
+            and 
+            (
+              exit_stmt_reached=false)   {
+                  return:=JavaPrimitiveIntegerLiteral0;
+                  exit_stmt_reached:=true;
+               
+               }
+             else {
+               skip;
+            };
+         
+         }
+      
+      }
+      skip;
+   
+   }
+
+
+

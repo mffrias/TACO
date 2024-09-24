@@ -1,0 +1,1217 @@
+sig forArielGodio_binarySearch_bug01_BinarySearch extends java_lang_Object {}
+{}
+
+
+
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition33[
+  SK_pred_java_primitive_integer_value_add_ARG_left_1:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_1:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_result_1:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_right_1:univ
+]{
+   pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_1,
+                                               SK_pred_java_primitive_integer_value_add_ARG_right_1,
+                                               SK_pred_java_primitive_integer_value_add_ARG_result_1,
+                                               SK_pred_java_primitive_integer_value_add_ARG_overflow_1]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition6[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:univ
+]{
+   equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+      JavaPrimitiveIntegerLiteral2]
+
+}
+
+pred precondition_forArielGodio_binarySearch_bug01_BinarySearch_binary[
+  arr:univ,
+  java_lang_IntArray_contents:univ->univ->univ,
+  java_lang_IntArray_length:univ->univ,
+  throw:univ
+]{
+   java_lang_IntArray_object_invariant[java_lang_IntArray_length]
+   and 
+   equ[throw,
+      null]
+   and 
+   forArielGodio_binarySearch_bug01_BinarySearch_requires[arr,
+                                                         java_lang_IntArray_contents,
+                                                         java_lang_IntArray_length]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition10[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+      JavaPrimitiveIntegerLiteral2]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition22[
+  t_3:univ
+]{
+   t_3=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearch_ensures[
+  arr':univ,
+  java_lang_IntArray_contents':univ->univ->univ,
+  java_lang_IntArray_length':univ->univ,
+  key':univ,
+  return':univ,
+  throw':univ
+]{
+   (
+     (
+       throw'=null)
+     implies 
+             (
+               (
+                 pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                      return']
+                 and 
+                 pred_java_primitive_integer_value_lt[return',
+                                                     arrayLength[arr',java_lang_IntArray_length']]
+               )
+               implies 
+                       pred_java_primitive_integer_value_eq[arrayAccess[arr',java_lang_IntArray_contents',return'],
+                                                           key']
+             )
+   )
+   and 
+   (
+     (
+       throw'=null)
+     implies 
+             (
+               (
+                 pred_java_primitive_integer_value_eq[return',
+                                                     JavaPrimitiveIntegerLiteralMinus1]
+                 implies 
+                         (
+                           all i:JavaPrimitiveIntegerValue | {
+                             (
+                               pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                                    i]
+                               and 
+                               pred_java_primitive_integer_value_lt[i,
+                                                                   arrayLength[arr',java_lang_IntArray_length']]
+                             )
+                             implies 
+                                     neq[arrayAccess[arr',java_lang_IntArray_contents',i],
+                                        key']
+                           
+                           }
+                         )
+               )
+               and 
+               (
+                 (
+                   all i:JavaPrimitiveIntegerValue | {
+                     (
+                       pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                            i]
+                       and 
+                       pred_java_primitive_integer_value_lt[i,
+                                                           arrayLength[arr',java_lang_IntArray_length']]
+                     )
+                     implies 
+                             neq[arrayAccess[arr',java_lang_IntArray_contents',i],
+                                key']
+                   
+                   }
+                 )
+                 implies 
+                         pred_java_primitive_integer_value_eq[return',
+                                                             JavaPrimitiveIntegerLiteralMinus1]
+               )
+             )
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition26[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+      JavaPrimitiveIntegerLiteral1]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition23[
+  t_3:univ
+]{
+   not (
+     t_3=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition9[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_1:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_1:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:univ
+]{
+   pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_result_1,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition20[
+  SK_pred_java_primitive_integer_value_add_ARG_right_0:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_add_ARG_right_0,
+      JavaPrimitiveIntegerLiteral1]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition24[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:univ
+]{
+   equ[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+      JavaPrimitiveIntegerLiteral2]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition21[
+  SK_pred_java_primitive_integer_value_add_ARG_left_0:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_0:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_result_0:univ,
+  SK_pred_java_primitive_integer_value_add_ARG_right_0:univ
+]{
+   pred_java_primitive_integer_value_add_marker[SK_pred_java_primitive_integer_value_add_ARG_left_0,
+                                               SK_pred_java_primitive_integer_value_add_ARG_right_0,
+                                               SK_pred_java_primitive_integer_value_add_ARG_result_0,
+                                               SK_pred_java_primitive_integer_value_add_ARG_overflow_0]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition31[
+  SK_pred_java_primitive_integer_value_add_ARG_left_1:univ,
+  var_1_low:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_add_ARG_left_1,
+      var_1_low]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition19[
+  SK_pred_java_primitive_integer_value_add_ARG_left_0:univ,
+  var_3_mid:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_add_ARG_left_0,
+      var_3_mid]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition30[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:univ
+]{
+   not (
+     pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+                                         JavaPrimitiveIntegerLiteral0]
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition16[
+  t_9:univ
+]{
+   not (
+     t_9=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition18[
+  t_7:univ
+]{
+   not (
+     t_7=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition15[
+  t_9:univ
+]{
+   t_9=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition17[
+  t_7:univ
+]{
+   t_7=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition37[
+  t_13:univ
+]{
+   not (
+     t_13=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition39[
+  t_11:univ
+]{
+   not (
+     t_11=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition36[
+  t_13:univ
+]{
+   t_13=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition38[
+  t_11:univ
+]{
+   t_11=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition1[
+  exit_stmt_reached:univ,
+  throw:univ
+]{
+   not (
+     (
+       throw=null)
+     and 
+     (
+       exit_stmt_reached=false)
+     and 
+     (
+       true=true)
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition0[
+  exit_stmt_reached:univ,
+  throw:univ
+]{
+   (
+     throw=null)
+   and 
+   (
+     exit_stmt_reached=false)
+   and 
+   (
+     true=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition25[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_3:univ,
+  t_4:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+      t_4]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition8[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1,
+      JavaPrimitiveIntegerLiteral1]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition27[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_3:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_3:univ,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:univ
+]{
+   pred_java_primitive_integer_value_div_rem_marker[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_result_3,
+                                                   SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition5[
+]{
+   not (
+     true=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition4[
+]{
+   true=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition28[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3,
+      JavaPrimitiveIntegerLiteral2]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition44[
+  t_16:univ
+]{
+   not (
+     t_16=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition29[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:univ
+]{
+   pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2,
+                                       JavaPrimitiveIntegerLiteral0]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition43[
+  t_16:univ
+]{
+   t_16=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition42[
+  t_15:univ
+]{
+   not (
+     t_15=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition3[
+  exit_stmt_reached:univ,
+  throw:univ
+]{
+   not (
+     (
+       throw=null)
+     and 
+     (
+       exit_stmt_reached=false)
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition40[
+  t_14:univ
+]{
+   t_14=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition41[
+  t_15:univ
+]{
+   t_15=true
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition2[
+  exit_stmt_reached:univ,
+  throw:univ
+]{
+   (
+     throw=null)
+   and 
+   (
+     exit_stmt_reached=false)
+
+}
+
+pred postcondition_forArielGodio_binarySearch_bug01_BinarySearch_binary[
+  arr':univ,
+  java_lang_IntArray_contents':univ->univ->univ,
+  java_lang_IntArray_length':univ->univ,
+  key':univ,
+  return':univ,
+  throw':univ
+]{
+   forArielGodio_binarySearch_bug01_BinarySearch_ensures[arr',
+                                                        java_lang_IntArray_contents',
+                                                        java_lang_IntArray_length',
+                                                        key',
+                                                        return',
+                                                        throw']
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition7[
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_1:univ,
+  var_2_high:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,
+      var_2_high]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearch_requires[
+  arr:univ,
+  java_lang_IntArray_contents:univ->univ->univ,
+  java_lang_IntArray_length:univ->univ
+]{
+   (
+     all j:JavaPrimitiveIntegerValue | {
+       (
+         pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                              j]
+         and 
+         pred_java_primitive_integer_value_lt[j,
+                                             arrayLength[arr,java_lang_IntArray_length]]
+       )
+       implies 
+               (
+                 all i:JavaPrimitiveIntegerValue | {
+                   (
+                     pred_java_primitive_integer_value_lte[JavaPrimitiveIntegerLiteral0,
+                                                          i]
+                     and 
+                     pred_java_primitive_integer_value_lt[i,
+                                                         j]
+                   )
+                   implies 
+                           pred_java_primitive_integer_value_lte[arrayAccess[arr,java_lang_IntArray_contents,i],
+                                                                arrayAccess[arr,java_lang_IntArray_contents,j]]
+                 
+                 }
+               )
+     
+     }
+   )
+   and 
+   (
+     not (
+       arr=null)
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition12[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:univ
+]{
+   not (
+     pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+                                         JavaPrimitiveIntegerLiteral0]
+   )
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition11[
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:univ
+]{
+   pred_java_primitive_integer_value_eq[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0,
+                                       JavaPrimitiveIntegerLiteral0]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition14[
+  param_arr_0:univ
+]{
+   not (
+     isEmptyOrNull[param_arr_0])
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition13[
+  param_arr_0:univ
+]{
+   isEmptyOrNull[param_arr_0]
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition32[
+  SK_pred_java_primitive_integer_value_add_ARG_right_1:univ,
+  t_5:univ
+]{
+   equ[SK_pred_java_primitive_integer_value_add_ARG_right_1,
+      t_5]
+
+}
+
+pred java_lang_IntArray_object_invariant[
+  java_lang_IntArray_length:univ->univ
+]{
+   all oa:java_lang_IntArray | {
+     pred_java_primitive_integer_value_gte_zero[oa.java_lang_IntArray_length]
+   }
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition35[
+  t_6:univ
+]{
+   not (
+     t_6=true)
+
+}
+
+pred forArielGodio_binarySearch_bug01_BinarySearchCondition34[
+  t_6:univ
+]{
+   t_6=true
+
+}
+
+program forArielGodio_binarySearch_bug01_BinarySearch_binary[
+  throw:java_lang_Throwable+null,
+  return:JavaPrimitiveIntegerValue,
+  arr:java_lang_IntArray+null,
+  key:JavaPrimitiveIntegerValue,
+  java_lang_IntArray_contents:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue),
+  java_lang_Boolean_FALSE:(ClassFields)->one(java_lang_Boolean),
+  java_lang_Boolean_TRUE:(ClassFields)->one(java_lang_Boolean),
+  markerFieldToForceAddingInts:JavaPrimitiveIntegerValue,
+  java_lang_IntArray_length:(java_lang_IntArray)->one(JavaPrimitiveIntegerValue),
+  java_lang_System_out:(ClassFields)->(java_io_PrintStream),
+  booleanValue:(java_lang_Boolean)->one(boolean),
+  usedObjects:set (java_lang_Object)
+] var [
+  var_2_high:JavaPrimitiveIntegerValue,
+  t_15:boolean,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:JavaPrimitiveIntegerValue,
+  t_16:boolean,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3:JavaPrimitiveIntegerValue,
+  t_13:boolean,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:JavaPrimitiveIntegerValue,
+  t_14:boolean,
+  t_11:boolean,
+  t_12:JavaPrimitiveIntegerValue,
+  t_10:boolean,
+  SK_pred_java_primitive_integer_value_add_ARG_left_0:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_left_1:JavaPrimitiveIntegerValue,
+  var_1_low:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_3:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_3:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_right_0:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_right_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_1:boolean,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_0:boolean,
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:JavaPrimitiveIntegerValue,
+  t_2:JavaPrimitiveIntegerValue,
+  t_3:boolean,
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:JavaPrimitiveIntegerValue,
+  exit_stmt_reached:boolean,
+  t_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_result_1:JavaPrimitiveIntegerValue,
+  var_3_mid:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_result_0:JavaPrimitiveIntegerValue,
+  param_key_1:JavaPrimitiveIntegerValue,
+  t_8:JavaPrimitiveIntegerValue,
+  t_9:boolean,
+  t_6:boolean,
+  t_7:boolean,
+  t_4:JavaPrimitiveIntegerValue,
+  param_arr_0:java_lang_IntArray+null,
+  t_5:JavaPrimitiveIntegerValue
+]{
+   skip;
+   throw:=null;
+   skip;
+   exit_stmt_reached:=false;
+   skip;
+   if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+      param_arr_0:=arr
+   
+   } else {
+      skip
+   
+   }
+   ;
+   skip;
+   if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+      param_key_1:=key
+   
+   } else {
+      skip
+   
+   }
+   ;
+   skip;
+   if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+      t_16:=(neq[arrayLength[arr,java_lang_IntArray_length],JavaPrimitiveIntegerLiteral0]=>(true)else(false))
+   
+   } else {
+      skip
+   
+   }
+   ;
+   if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+      if forArielGodio_binarySearch_bug01_BinarySearchCondition43[t_16]  {
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition4[]  {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  return:=JavaPrimitiveIntegerLiteralMinus1;
+                  exit_stmt_reached:=true
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               skip
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+      
+      } else {
+         skip;
+         skip;
+         skip;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            var_1_low:=JavaPrimitiveIntegerLiteral0
+         
+         } else {
+            skip
+         
+         }
+         ;
+         skip;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            var_2_high:=arrayLength[arr,java_lang_IntArray_length]
+         
+         } else {
+            skip
+         
+         }
+         ;
+         skip;
+         havocVariable[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0];
+         assume forArielGodio_binarySearch_bug01_BinarySearchCondition6[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0];
+         skip;
+         skip;
+         skip;
+         skip;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition11[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0]  {
+            throw:=java_lang_ArithmeticExceptionLit;
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1];
+            havocVariable[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_result_1];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition7[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,var_2_high];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition6[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition8[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition9[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1,SK_pred_java_primitive_integer_value_div_rem_ARG_result_1,SK_pred_java_primitive_integer_value_div_rem_ARG_right_1]
+         
+         } else {
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_result_1];
+            havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition7[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,var_2_high];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition10[SK_pred_java_primitive_integer_value_div_rem_ARG_right_1];
+            assume forArielGodio_binarySearch_bug01_BinarySearchCondition9[SK_pred_java_primitive_integer_value_div_rem_ARG_left_1,SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1,SK_pred_java_primitive_integer_value_div_rem_ARG_result_1,SK_pred_java_primitive_integer_value_div_rem_ARG_right_1]
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+            t_1:=SK_pred_java_primitive_integer_value_div_rem_ARG_result_1
+         
+         } else {
+            skip
+         
+         }
+         ;
+         skip;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            var_3_mid:=t_1
+         
+         } else {
+            skip
+         
+         }
+         ;
+         skip;
+         skip;
+         skip;
+         skip;
+         skip;
+         skip;
+         skip;
+         skip;
+         skip;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+            t_7:=(pred_java_primitive_integer_value_lt[var_1_low,var_2_high]=>(true)else(false))
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition17[t_7]  {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition13[param_arr_0]  {
+                     throw:=java_lang_NullPointerExceptionLit
+                  
+                  } else {
+                     call java_lang_IntArray_int_array_read[param_arr_0,throw,t_8,var_3_mid,java_lang_IntArray_contents,java_lang_Boolean_FALSE,java_lang_Boolean_TRUE,markerFieldToForceAddingInts,java_lang_IntArray_length,java_lang_System_out,booleanValue,usedObjects]
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_9:=(neq[t_8,param_key_1]=>(true)else(false))
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition15[t_9]  {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        t_6:=true
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  } else {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        t_6:=false
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_6:=false
+               
+               } else {
+                  skip
+               
+               }
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition34[t_6]  {
+               skip;
+               skip;
+               skip;
+               skip;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition13[param_arr_0]  {
+                     throw:=java_lang_NullPointerExceptionLit
+                  
+                  } else {
+                     call java_lang_IntArray_int_array_read[param_arr_0,throw,t_2,var_3_mid,java_lang_IntArray_contents,java_lang_Boolean_FALSE,java_lang_Boolean_TRUE,markerFieldToForceAddingInts,java_lang_IntArray_length,java_lang_System_out,booleanValue,usedObjects]
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_3:=(pred_java_primitive_integer_value_lt[t_2,param_key_1]=>(true)else(false))
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition22[t_3]  {
+                     skip;
+                     skip;
+                     skip;
+                     skip;
+                     havocVariable[SK_pred_java_primitive_integer_value_add_ARG_left_0];
+                     havocVariable[SK_pred_java_primitive_integer_value_add_ARG_right_0];
+                     havocVariable[SK_pred_java_primitive_integer_value_add_ARG_result_0];
+                     havocVariable[SK_pred_java_primitive_integer_value_add_ARG_overflow_0];
+                     assume forArielGodio_binarySearch_bug01_BinarySearchCondition19[SK_pred_java_primitive_integer_value_add_ARG_left_0,var_3_mid];
+                     assume forArielGodio_binarySearch_bug01_BinarySearchCondition20[SK_pred_java_primitive_integer_value_add_ARG_right_0];
+                     assume forArielGodio_binarySearch_bug01_BinarySearchCondition21[SK_pred_java_primitive_integer_value_add_ARG_left_0,SK_pred_java_primitive_integer_value_add_ARG_overflow_0,SK_pred_java_primitive_integer_value_add_ARG_result_0,SK_pred_java_primitive_integer_value_add_ARG_right_0];
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        var_1_low:=SK_pred_java_primitive_integer_value_add_ARG_result_0
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  } else {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        var_2_high:=var_3_mid
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_4:=fun_java_primitive_integer_value_sub[var_2_high,var_1_low]
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               skip;
+               havocVariable[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2];
+               assume forArielGodio_binarySearch_bug01_BinarySearchCondition24[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2];
+               skip;
+               skip;
+               skip;
+               skip;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition29[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2]  {
+                  throw:=java_lang_ArithmeticExceptionLit;
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3];
+                  havocVariable[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_result_3];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition25[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,t_4];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition24[auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition26[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition27[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3,SK_pred_java_primitive_integer_value_div_rem_ARG_result_3,SK_pred_java_primitive_integer_value_div_rem_ARG_right_3]
+               
+               } else {
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_result_3];
+                  havocVariable[SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition25[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,t_4];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition28[SK_pred_java_primitive_integer_value_div_rem_ARG_right_3];
+                  assume forArielGodio_binarySearch_bug01_BinarySearchCondition27[SK_pred_java_primitive_integer_value_div_rem_ARG_left_3,SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3,SK_pred_java_primitive_integer_value_div_rem_ARG_result_3,SK_pred_java_primitive_integer_value_div_rem_ARG_right_3]
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_5:=SK_pred_java_primitive_integer_value_div_rem_ARG_result_3
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               skip;
+               skip;
+               skip;
+               skip;
+               havocVariable[SK_pred_java_primitive_integer_value_add_ARG_left_1];
+               havocVariable[SK_pred_java_primitive_integer_value_add_ARG_right_1];
+               havocVariable[SK_pred_java_primitive_integer_value_add_ARG_result_1];
+               havocVariable[SK_pred_java_primitive_integer_value_add_ARG_overflow_1];
+               assume forArielGodio_binarySearch_bug01_BinarySearchCondition31[SK_pred_java_primitive_integer_value_add_ARG_left_1,var_1_low];
+               assume forArielGodio_binarySearch_bug01_BinarySearchCondition32[SK_pred_java_primitive_integer_value_add_ARG_right_1,t_5];
+               assume forArielGodio_binarySearch_bug01_BinarySearchCondition33[SK_pred_java_primitive_integer_value_add_ARG_left_1,SK_pred_java_primitive_integer_value_add_ARG_overflow_1,SK_pred_java_primitive_integer_value_add_ARG_result_1,SK_pred_java_primitive_integer_value_add_ARG_right_1];
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  var_3_mid:=SK_pred_java_primitive_integer_value_add_ARG_result_1
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               skip
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+            t_11:=(pred_java_primitive_integer_value_lt[var_1_low,var_2_high]=>(true)else(false))
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition38[t_11]  {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition13[param_arr_0]  {
+                     throw:=java_lang_NullPointerExceptionLit
+                  
+                  } else {
+                     call java_lang_IntArray_int_array_read[param_arr_0,throw,t_12,var_3_mid,java_lang_IntArray_contents,java_lang_Boolean_FALSE,java_lang_Boolean_TRUE,markerFieldToForceAddingInts,java_lang_IntArray_length,java_lang_System_out,booleanValue,usedObjects]
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_13:=(neq[t_12,param_key_1]=>(true)else(false))
+               
+               } else {
+                  skip
+               
+               }
+               ;
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition36[t_13]  {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        t_10:=true
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  } else {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                        t_10:=false
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+                  t_10:=false
+               
+               } else {
+                  skip
+               
+               }
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+            t_14:=Not[t_10]
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition40[t_14]  {
+            skip
+         
+         } else {
+            throw:=java_lang_AssertionErrorLit
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition0[exit_stmt_reached,throw]  {
+            t_15:=(pred_java_primitive_integer_value_gte[var_1_low,var_2_high]=>(true)else(false))
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition41[t_15]  {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  if forArielGodio_binarySearch_bug01_BinarySearchCondition4[]  {
+                     if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                        return:=JavaPrimitiveIntegerLiteralMinus1;
+                        exit_stmt_reached:=true
+                     
+                     } else {
+                        skip
+                     
+                     }
+                  
+                  } else {
+                     skip
+                  
+                  }
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               skip
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+         ;
+         if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+            if forArielGodio_binarySearch_bug01_BinarySearchCondition4[]  {
+               if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+                  return:=var_3_mid;
+                  exit_stmt_reached:=true
+               
+               } else {
+                  skip
+               
+               }
+            
+            } else {
+               skip
+            
+            }
+         
+         } else {
+            skip
+         
+         }
+      
+      }
+   
+   } else {
+      skip
+   
+   }
+   ;
+   if forArielGodio_binarySearch_bug01_BinarySearchCondition2[exit_stmt_reached,throw]  {
+      return:=JavaPrimitiveIntegerLiteral0;
+      exit_stmt_reached:=true
+   
+   } else {
+      skip
+   
+   }
+   ;
+   skip
+
+}
+
+assertCorrectness check_forArielGodio_binarySearch_bug01_BinarySearch_binary[
+  SK_pred_java_primitive_integer_value_add_ARG_left_0:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_left_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_0:boolean,
+  SK_pred_java_primitive_integer_value_add_ARG_overflow_1:boolean,
+  SK_pred_java_primitive_integer_value_add_ARG_result_0:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_result_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_right_0:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_add_ARG_right_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_left_3:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_remainder_3:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_result_3:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_1:JavaPrimitiveIntegerValue,
+  SK_pred_java_primitive_integer_value_div_rem_ARG_right_3:JavaPrimitiveIntegerValue,
+  arr:java_lang_IntArray+null,
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_0:JavaPrimitiveIntegerValue,
+  auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_2:JavaPrimitiveIntegerValue,
+  booleanValue:(java_lang_Boolean)->one(boolean),
+  exit_stmt_reached:boolean,
+  java_lang_Boolean_FALSE:(ClassFields)->one(java_lang_Boolean),
+  java_lang_Boolean_TRUE:(ClassFields)->one(java_lang_Boolean),
+  java_lang_IntArray_contents:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue),
+  java_lang_IntArray_length:(java_lang_IntArray)->one(JavaPrimitiveIntegerValue),
+  java_lang_System_out:(ClassFields)->(java_io_PrintStream),
+  key:JavaPrimitiveIntegerValue,
+  markerFieldToForceAddingInts:JavaPrimitiveIntegerValue,
+  param_arr_0:java_lang_IntArray+null,
+  param_key_1:JavaPrimitiveIntegerValue,
+  return:JavaPrimitiveIntegerValue,
+  t_1:JavaPrimitiveIntegerValue,
+  t_10:boolean,
+  t_11:boolean,
+  t_12:JavaPrimitiveIntegerValue,
+  t_13:boolean,
+  t_14:boolean,
+  t_15:boolean,
+  t_16:boolean,
+  t_2:JavaPrimitiveIntegerValue,
+  t_3:boolean,
+  t_4:JavaPrimitiveIntegerValue,
+  t_5:JavaPrimitiveIntegerValue,
+  t_6:boolean,
+  t_7:boolean,
+  t_8:JavaPrimitiveIntegerValue,
+  t_9:boolean,
+  throw:java_lang_Throwable+null,
+  usedObjects:set (java_lang_Object),
+  var_1_low:JavaPrimitiveIntegerValue,
+  var_2_high:JavaPrimitiveIntegerValue,
+  var_3_mid:JavaPrimitiveIntegerValue
+]{
+pre={
+   precondition_forArielGodio_binarySearch_bug01_BinarySearch_binary[arr,
+                                                                    java_lang_IntArray_contents,
+                                                                    java_lang_IntArray_length,
+                                                                    throw]
+
+}
+program={
+   call forArielGodio_binarySearch_bug01_BinarySearch_binary[throw,return,arr,key,java_lang_IntArray_contents,java_lang_Boolean_FALSE,java_lang_Boolean_TRUE,markerFieldToForceAddingInts,java_lang_IntArray_length,java_lang_System_out,booleanValue,usedObjects]
+
+}
+post={
+   postcondition_forArielGodio_binarySearch_bug01_BinarySearch_binary[arr',
+                                                                     java_lang_IntArray_contents',
+                                                                     java_lang_IntArray_length',
+                                                                     key',
+                                                                     return',
+                                                                     throw']
+
+}
+}
+

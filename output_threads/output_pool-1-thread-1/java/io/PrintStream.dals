@@ -1,0 +1,6 @@
+sig java_io_PrintStream extends java_lang_Object {}
+{}
+
+
+
+

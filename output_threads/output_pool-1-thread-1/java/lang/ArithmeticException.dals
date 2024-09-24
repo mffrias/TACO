@@ -1,0 +1,8 @@
+abstract one sig java_lang_ArithmeticException extends java_lang_RuntimeException {}
+{}
+
+
+
+one sig java_lang_ArithmeticExceptionLit extends java_lang_ArithmeticException {}
+{}
+

@@ -22,7 +22,15 @@ public class Window {
         this.valA = diffA;
         this.valB = diffB;
         this.numSAT = SAT;
-        this.valDiff = Math.abs(valB - valA);
+        calculateDifference();
+    }
+
+    public void calculateDifference(){
+        int diff = (valB - valA);
+
+        if(diff < 0) diff = 0;
+
+        this.valDiff = diff;
     }
 
     public int getValA(){

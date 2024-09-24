@@ -35,7 +35,7 @@ public class WindowList {
     public int totalSAT(){
         int ts = 0;
         for(Window w: windowList){
-            ts += w.numSAT;
+            ts += w.getSAT();
         }
         return ts;
     }
@@ -205,12 +205,22 @@ public class WindowList {
             // write timeout
             out.write(Integer.toString(this.wTime));
 
+            out.write(",");
             // write num sat
             out.write(Integer.toString(totalSAT()));
 
+            out.write(",");
+
+            int count = 1;
+
             for (Window w: windowList){
                 out.write(Integer.toString(w.getValDiff()));
+
+                if(count ++ != windowList.size()) {
+                    out.write(",");
+                }
             }
+
             out.newLine();
             out.close();
             fileWrite.close();

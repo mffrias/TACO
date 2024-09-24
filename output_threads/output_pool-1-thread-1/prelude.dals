@@ -1,0 +1,473 @@
+module moduleId 
+
+open util/integer 
+open util/sequniv as sequniv 
+
+one sig null {} 
+
+fun fun_reach[h: univ, 
+              type: set univ, 
+              field: univ -> univ
+]: set univ { 
+  h.*(field & type->(type+null)) & type 
+}
+
+fun fun_weak_reach[h: univ, 
+              type: set univ, 
+              field: univ -> univ
+]: set univ { 
+  h.*(field) & type 
+}
+
+abstract sig boolean {} 
+one sig true extends boolean {} 
+one sig false extends boolean {} 
+
+abstract sig char {} 
+
+pred TruePred[] {} 
+pred FalsePred[] { not TruePred[] } 
+pred equ[l,r:univ] {l=r} 
+pred neq[l,r:univ] {l!=r} 
+
+fun shl[l,r: Int]: Int { l << r } 
+fun sshr[l,r: Int]: Int { l >> r } 
+fun ushr[l,r: Int]: Int { l >>> r } 
+
+fun fun_univ_equals[
+  l:univ, 
+  r: univ 
+]: boolean { 
+  (equ[l,r]) => true else false 
+} 
+
+fun fun_set_add[
+  l: set univ,
+  e: univ
+]: set univ { 
+  l+e 
+} 
+
+fun fun_set_remove[
+  l: set univ,
+  e: univ
+]: set univ {
+  l-e
+}
+fun fun_set_contains[
+  l: set univ,
+  e: univ
+]: boolean {
+  (e in l) => true else false 
+} 
+pred isSubset[
+  l: set univ,
+  r: set univ
+] {
+  (l in r) 
+} 
+pred isNotSubset[
+  l: set univ,
+  r: set univ
+] {
+  (l !in r) 
+} 
+fun fun_set_size[s: set univ]: Int { #s } 
+
+fun fun_not_empty_set[s: set univ]: boolean { (no s) => false else true } 
+
+fun fun_set_is_empty[s: set univ]: boolean { (no s) => true else false } 
+
+pred pred_empty_set[l: set univ] { (no l) } 
+
+pred pred_set_some[l: set univ] { some l } 
+
+pred pred_set_one[l: set univ] { one l } 
+
+pred pred_set_lone[l: set univ] { lone l } 
+
+pred pred_Object_subset[
+  s: set univ
+] {
+  s in java_lang_Object+null
+}
+
+fun fun_set_intersection[
+  l: set univ,
+  r: set univ
+]: set univ {
+  l & r 
+} 
+fun fun_set_difference[
+  l: set univ,
+  r: set univ
+]: set univ {
+  l - r 
+} 
+fun fun_rel_difference[ 
+  rel: univ -> univ, 
+  l: univ,
+  r: univ
+]: univ->univ {
+ rel - (l->r) 
+}
+fun fun_rel_add[ 
+  rel: univ -> univ, 
+  l: univ,
+  r: univ
+]: univ->univ {
+ rel + (l->r) 
+}
+fun fun_set_sum[
+  s: set Int
+]: Int {
+  sum s 
+} 
+pred pred_empty_list[l: Int -> univ] { (no l) } 
+
+fun fun_list_add[
+  l: Int -> univ,
+  e: univ
+]: Int -> univ {
+  l + (Int[#(l.univ)]->e)
+} 
+
+fun fun_list_get[
+  l: Int -> univ, 
+  index: Int
+]: univ { 
+  index.l 
+} 
+
+fun fun_list_contains[
+  l: Int -> univ, 
+  e: univ
+]: boolean { 
+  (e in Int.l) => true else false 
+} 
+
+fun fun_list_remove[
+  l: Int -> univ, 
+  index: Int
+]: Int -> univ { 
+  prevs[index]<:(l-(index->univ)) + next.(nexts[index]<:(l-(index->univ))) 
+} 
+
+fun fun_list_size[s: Int -> univ]: Int { #s } 
+
+fun fun_list_equals[
+  s1:Int -> univ, 
+  s2: Int -> univ
+]: boolean { 
+  (s1=s2) => true else false 
+} 
+
+fun fun_list_empty[s: Int -> univ]: boolean { (#s = 0) => true else false } 
+
+pred pred_empty_map[map: univ -> univ] { (no map) } 
+
+fun fun_map_put[
+  map: univ->univ, 
+  k: univ, 
+  v: univ
+]: univ-> univ { 
+  map ++ (k->v) 
+}
+
+fun fun_map_contains_key[
+  map: univ -> univ, 
+  k: univ
+]: boolean { 
+  (some k.map) => true else false 
+}
+
+fun fun_map_remove[
+  map: univ -> univ, 
+  k: univ
+]: univ->univ {
+  map - (k->univ) 
+} 
+
+fun fun_map_get[
+  map: univ -> univ, 
+  k: univ
+]: univ { 
+  (some k.map) => k.map else null 
+} 
+
+fun fun_map_is_empty[
+  map: univ -> univ, 
+]: boolean { 
+  (some map) => false else true 
+}
+
+fun fun_map_clear[
+  mapEntries1: univ -> univ -> univ, 
+  map: univ
+]: univ -> univ -> univ { 
+  mapEntries1 - (map -> univ -> univ)
+}
+
+fun fun_map_size[
+  map: univ -> univ, 
+]: univ {
+  #map 
+} 
+
+pred isEmptyOrNull[u: univ] { u in null } 
+fun fun_closure[
+  rel: univ -> univ 
+]: univ -> univ {
+  ^rel 
+} 
+
+fun fun_reflexive_closure[
+  rel: univ -> univ 
+]: univ -> univ {
+  *rel 
+} 
+
+fun fun_transpose[
+  rel: univ -> univ 
+]: univ -> univ {
+  ~rel 
+} 
+
+pred liftExpression[
+  expr: univ 
+] {
+  expr=true 
+} 
+
+fun rel_override[
+  r:univ->univ,
+  k:univ, 
+  v:univ
+]: univ->univ { 
+  r - (k->univ) + (k->v) 
+} 
+
+fun Not[a: boolean]: boolean {
+    (a=true) => false else true 
+}
+fun Or[a: boolean, b: boolean]: boolean {
+    (a=true or b=true) => true else false
+}
+fun And[a: boolean, b: boolean]: boolean {
+    (a=true and b=true) => true else false
+}
+fun Xor[a: boolean, b: boolean]: boolean {
+    ((a=true and b=false) or (a=false and b=true)) => true else false
+}
+fun AdderCarry[a: boolean, b: boolean, cin: boolean]: boolean {
+    Or[ And[a,b], And[cin, Xor[a,b]]] 
+}
+fun AdderSum[a: boolean, b: boolean, cin: boolean]: boolean {
+    Xor[Xor[a, b], cin]
+}
+pred updateFieldPost[
+  f1:univ->univ,
+  f0:univ->univ,
+  l:univ,
+  r:univ
+]{ 
+  (r=none) => f1=f0-(l->univ) else f1 = f0 ++ (l->r) 
+} 
+
+pred havocVarPost[u:univ]{} 
+pred havocVariable2Post[u:univ->univ]{}
+action havocVariable2[u:univ->univ]{
+ pre{TruePred[]}
+ post{havocVariable2Post[u']}
+}
+
+pred havocVariable3Post[u:univ->(seq univ)]{}
+action havocVariable3[u:univ->(seq univ)]{
+ pre{TruePred[]}
+ post{havocVariable3Post[u']}
+}
+
+pred havocFieldPost[f0,f1: univ->univ, u:univ]{ 
+  u<:f0 = u<:f1 
+  some u.f1  
+} 
+
+pred havocArrayContentsPost[array:  univ,
+                            domain: set univ,
+                            Array_0: univ -> (JavaPrimitiveIntegerValue set -> lone univ),
+                            Array_1: univ -> (JavaPrimitiveIntegerValue set -> lone univ)
+                           ] {
+  Array_1 - (array->(domain->univ)) = Array_0 - (array->(domain->univ))
+  (array.Array_1).univ = (array.Array_0).univ
+}action havocArrayContents[
+                          array: univ,
+                          domain: set univ,
+                          Array: univ -> (JavaPrimitiveIntegerValue set -> lone univ)
+                         ] {
+pre { TruePred[] }
+post { havocArrayContentsPost[
+                              array,
+                              domain,
+                              Array,
+                              Array'
+                             ]
+     }
+}
+pred havocFieldContentsPost[target: univ, 
+                            field_0: univ -> univ, 
+                            field_1: univ -> univ] { 
+  field_1 - (target->univ) = field_0 - (target->univ) 
+}
+
+action havocFieldContents[target: univ, 
+                          field: univ->univ] {
+  pre  { TruePred[] }
+  post { havocFieldContentsPost[target,field,field'] }
+}
+
+pred havocListSeqPost[target: univ,
+                            field_0: univ -> Int -> univ, 
+                            field_1: univ -> Int -> univ] { 
+  field_1 - (target->Int->univ) = field_0 - (target->Int->univ) 
+}
+
+action havocListSeq[target: univ,
+                          field: univ->Int->univ] {
+  pre  { TruePred[] }
+  post { havocListSeqPost[target,field,field'] }
+}
+
+pred pred_in[n: univ, t: set univ] { n in t } 
+
+pred instanceOf[n: univ, t: set univ] { n in t } 
+
+pred isCasteableTo[n: univ, t: set univ] { (n in t) or (n = null) } 
+
+pred getUnusedObjectPost[
+  usedObjects1:set java_lang_Object, 
+  usedObjects0:set java_lang_Object,
+  n1: java_lang_Object+null
+]{ 
+  n1 !in usedObjects0 
+  usedObjects1 = usedObjects0 + (n1)
+} 
+
+pred updateArrayPost[
+  Int_Array1: java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue), 
+  Int_Array0: java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue),
+  array: java_lang_IntArray+null,
+  index:JavaPrimitiveIntegerValue,
+  elem:JavaPrimitiveIntegerValue
+]{ 
+  Int_Array1 = Int_Array0 ++ 
+  (array->(array.Int_Array0++(index->elem)))
+} 
+
+fun arrayAccess[
+  Int_Array:java_lang_IntArray, 
+  array_field:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue), 
+  index: JavaPrimitiveIntegerValue
+]: JavaPrimitiveIntegerValue {
+  some (Int_Array.array_field)[index] implies (Int_Array.array_field)[index] else JavaPrimitiveIntegerLiteral0
+}
+
+fun arrayLength[
+  array: java_lang_IntArray+null,
+  length_field: java_lang_IntArray -> one JavaPrimitiveIntegerValue
+]: JavaPrimitiveIntegerValue {
+  array.length_field
+}
+
+fun arrayElements[
+  array_contents:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue), 
+  array: java_lang_IntArray+null
+]: set JavaPrimitiveIntegerValue {
+  JavaPrimitiveIntegerValue.(array.array_contents)
+}
+
+action updateField[
+  l:univ,
+  f:univ->univ,
+  r:univ
+]{
+pre {
+   TruePred[]
+}
+post {
+   updateFieldPost[f',
+                  f,
+                  l,
+                  r]
+}
+}
+
+action getUnusedObject[
+  n:java_lang_Object+null,
+  usedObjects:set java_lang_Object
+]{
+pre {
+   TruePred[]
+}
+post {
+   getUnusedObjectPost[usedObjects',
+                      usedObjects,
+                      n']
+}
+}
+
+action havocField[
+  f:univ->univ,
+  u:univ
+]{
+pre {
+   TruePred[]
+}
+post {
+   havocFieldPost[f,
+                 f',
+                 u]
+}
+}
+
+action updateVariable[
+  l:univ,
+  r:univ
+]{
+pre {
+   TruePred[]
+}
+post {
+   equ[l',
+      r]
+}
+}
+
+action havocVariable[
+  v:univ
+]{
+pre {
+   TruePred[]
+}
+post {
+   havocVarPost[v']
+}
+}
+
+action updateArray[
+  Int_Array:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue),
+  array:java_lang_IntArray+null,
+  index:JavaPrimitiveIntegerValue,
+  elem:univ
+]{
+pre {
+   TruePred[]
+}
+post {
+   updateArrayPost[Int_Array',
+                  Int_Array,
+                  array,
+                  index,
+                  elem]
+}
+}
+

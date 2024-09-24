@@ -1,0 +1,5 @@
+//-------------- JavaPrimitiveIntegerLiteralMinus4 --------------//
+module JavaPrimitiveIntegerLiteralMinus4
+one sig JavaPrimitiveIntegerLiteralMinus4 extends JavaPrimitiveIntegerValue {}
+{pred_java_primitive_integer_value_literal_minus_4[JavaPrimitiveIntegerLiteralMinus4]
+}

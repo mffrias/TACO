@@ -1,0 +1,97 @@
+sig java_lang_IntArray extends java_lang_Object {}
+{}
+
+
+
+
+pred java_lang_IntArrayCondition3[
+  index:univ,
+  java_lang_IntArray_length:univ->univ,
+  thiz:univ
+]{
+   pred_java_primitive_integer_value_lt_zero[index]
+   or 
+   pred_java_primitive_integer_value_gte[index,
+                                        thiz.java_lang_IntArray_length]
+
+}
+
+pred java_lang_IntArrayCondition0[
+  return:univ
+]{
+   pred_java_primitive_integer_value_eq_zero[return]
+
+}
+
+pred java_lang_IntArrayCondition2[
+  index:univ,
+  java_lang_IntArray_contents:univ->univ->univ,
+  thiz:univ
+]{
+   not (
+     pred_in[index,
+            (thiz.java_lang_IntArray_contents).univ]
+   )
+
+}
+
+pred java_lang_IntArrayCondition1[
+  index:univ,
+  java_lang_IntArray_contents:univ->univ->univ,
+  thiz:univ
+]{
+   pred_in[index,
+          (thiz.java_lang_IntArray_contents).univ]
+
+}
+
+pred java_lang_IntArrayCondition4[
+  index:univ,
+  java_lang_IntArray_length:univ->univ,
+  thiz:univ
+]{
+   not (
+     pred_java_primitive_integer_value_lt_zero[index]
+     or 
+     pred_java_primitive_integer_value_gte[index,
+                                          thiz.java_lang_IntArray_length]
+   )
+
+}
+
+program java_lang_IntArray_int_array_read[
+  thiz:java_lang_IntArray,
+  throw:java_lang_Throwable+null,
+  return:JavaPrimitiveIntegerValue,
+  index:JavaPrimitiveIntegerValue,
+  java_lang_IntArray_contents:java_lang_IntArray -> (JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue),
+  java_lang_Boolean_FALSE:(ClassFields)->one(java_lang_Boolean),
+  java_lang_Boolean_TRUE:(ClassFields)->one(java_lang_Boolean),
+  markerFieldToForceAddingInts:JavaPrimitiveIntegerValue,
+  java_lang_IntArray_length:(java_lang_IntArray)->one(JavaPrimitiveIntegerValue),
+  java_lang_System_out:(ClassFields)->(java_io_PrintStream),
+  booleanValue:(java_lang_Boolean)->one(boolean),
+  usedObjects:set (java_lang_Object)
+] var [
+
+]{
+   throw:=null;
+   if java_lang_IntArrayCondition3[index,java_lang_IntArray_length,thiz] lblpos if_1 {
+      throw:=java_lang_IndexOutOfBoundsExceptionLit
+   
+   } else {
+      if java_lang_IntArrayCondition1[index,java_lang_IntArray_contents,thiz] lblpos if_1 {
+         return:=index.(thiz.java_lang_IntArray_contents)
+      
+      } else {
+         havocVariable[return];
+         assume java_lang_IntArrayCondition0[return]
+      
+      }
+   
+   }
+   ;
+   skip
+
+}
+

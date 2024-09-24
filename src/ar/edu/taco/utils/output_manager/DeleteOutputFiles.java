@@ -14,7 +14,7 @@ public class DeleteOutputFiles {
      */
 
     public static void run() throws IOException {
-        String parentDirectory = "/root/testing_TACO/TACO/output_threads";
+        String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
         File parentFolder = new File(parentDirectory);
         File[] files = parentFolder.listFiles();
 

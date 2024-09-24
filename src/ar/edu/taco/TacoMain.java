@@ -324,7 +324,7 @@ public class TacoMain {
 //            System.out.println();
 
             // parent directory where output files are stored
-            String parentDirectory = "/root/testing_TACO/TACO/output_threads";
+            String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
             File parentFolder = new File(parentDirectory);
 
             // do you want to delete output files?

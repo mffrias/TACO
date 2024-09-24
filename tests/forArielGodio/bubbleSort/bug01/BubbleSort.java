@@ -11,24 +11,15 @@ public class BubbleSort {
 		int n = arr.length;
 
 		//@ decreasing n - i;
-		for (int i = 0; i < n-1; i--) {// for (int i = 0; i < n-1; i++) {	
+		for (int i = 0; i < n-1; i++) {// for (int i = 0; i < n-1; i++) {
 			//@ decreasing n - j;
 			for (int j = 0; j < n-i-1; j++) {
-				if (arr[j+1] < arr[j]) {  
-					s.swap(j, j + 1, arr); 
-				} 
+				if (arr[j+1] < arr[j]) {
+					s.swap(j, j + 1, arr);
+				}
 			}
-		} 
+		}
 		return arr;
 	} 
-	
 
-	public static void main(String[] args) {
-			BubbleSort b = new BubbleSort();
-		 int[] arr = new int[2];
-	        // Parameter Initialization
-	        arr[0] = -2147483646;
-	        arr[1] = -2147483648;
-	        int[] a = b.bubbleSort(arr);
-	}
 }

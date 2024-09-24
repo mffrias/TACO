@@ -316,12 +316,12 @@ public class TacoMain {
 
         int timeout = 5;
 
-        for (int i = 0; i < 5 * numTests; i++) {
+//        for (int i = 0; i < 5 * numTests; i++) {
 
-            if(i % 5 == 0 && i != 0) increaseTimeout = true;
+//            if(i % 5 == 0 && i != 0) increaseTimeout = true;
 
-            System.out.println("TEST NUMBER: " + i);
-            System.out.println();
+//            System.out.println("TEST NUMBER: " + i);
+//            System.out.println();
 
             // parent directory where output files are stored
             String parentDirectory = "/root/testing_TACO/TACO/output_threads";
@@ -395,7 +395,7 @@ public class TacoMain {
             Queue<JCompilationUnitTypeWrapper> pendingProblems = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
 
             Queue<JCompilationUnitTypeWrapper> problemsToFurtherDeterminize = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
-            JCompilationUnitTypeWrapper initialTask = new JCompilationUnitTypeWrapper(simplified_compilation_units.get(0));
+            JCompilationUnitTypeWrapper initialTask = new JCompilationUnitTypeWrapper(simplified_compilation_units);
             //		problemsToFurtherDeterminize.offer(initialTask);
 
             tacoAnalysisResult = null;
@@ -422,7 +422,7 @@ public class TacoMain {
             Semaphore semJDyn2Dyn = new Semaphore(1);
             Semaphore semJUnitConstruction = new Semaphore(1);
 
-            int numProcessorThreads = 6;
+            int numProcessorThreads = 10;
 
             // create executor service for thread processing
             //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
@@ -441,10 +441,10 @@ public class TacoMain {
             //		}
 
 
-            if(increaseTimeout) {
-                timeout = timeout + 5;
-                System.out.println("Increased timeout: " + timeout);
-            }
+//            if(increaseTimeout) {
+//                timeout = timeout + 5;
+//                System.out.println("Increased timeout: " + timeout);
+//            }
 
             int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
             String space = "   ";
@@ -590,7 +590,7 @@ public class TacoMain {
             winList.writeToFile();
 
             increaseTimeout = false;
-        }
+//        }
         return tacoAnalysisResult;
     }
 
@@ -637,7 +637,18 @@ public class TacoMain {
                                                                                            simpleUnit, int size) {
         JmlAstDeterminizerVisitor theDeterminizer = new JmlAstDeterminizerVisitor();
 
-        JCompilationUnitType simpleDeterminizedUnitType = simpleUnit.getUnit();
+        JCompilationUnitType simpleDeterminizedUnitType =  null;
+        List<JCompilationUnitType> remainingUnitTypes = new LinkedList<JCompilationUnitType>();
+        for (JCompilationUnitType unit : simpleUnit.getUnit()){
+            String classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
+            String unitDeclaresType = (unit.packageNameAsString()).replace(System.getProperty("file.separator"),".") + unit.fileNameIdent();
+            if (classToCheck.equals(unitDeclaresType)){
+                simpleDeterminizedUnitType = unit;
+            } else {
+                remainingUnitTypes.add(unit);
+            }
+        }
+
 
         JCompilationUnitType dUnitType = null;
 
@@ -685,9 +696,13 @@ public class TacoMain {
         ConcurrentLinkedQueue<JCompilationUnitTypeWrapper> theWrappedProblems = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
 
         for (JCompilationUnitType p : problems) {
-            JCompilationUnitTypeWrapper wrapped_p = new JCompilationUnitTypeWrapper(p);
+            LinkedList<JCompilationUnitType> determinizedAndFriends = new LinkedList<>();
+            determinizedAndFriends.addAll(remainingUnitTypes);
+            determinizedAndFriends.add(p);
+            JCompilationUnitTypeWrapper wrapped_p = new JCompilationUnitTypeWrapper(determinizedAndFriends);
             theWrappedProblems.offer(wrapped_p);
         }
+
 
         return theWrappedProblems;
 
@@ -1039,4 +1054,8 @@ public class TacoMain {
     //        }
     //        return canonical_path;
     //    }
+
+
+
+
 }

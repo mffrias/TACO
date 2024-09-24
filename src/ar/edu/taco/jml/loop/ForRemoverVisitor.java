@@ -1,10 +1,20 @@
 package ar.edu.taco.jml.loop;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
+import org.jmlspecs.checker.JmlLoopStatement;
 import org.multijava.mjc.*;
 import org.multijava.util.compiler.TokenReference;
 
 public class ForRemoverVisitor extends JmlAstClonerStatementVisitor {
+
+
+    public void visitJmlLoopStatement(JmlLoopStatement self) {
+        (self.loopStmt()).accept(this);
+        JStatement unrolledJmlLoop = (JStatement)this.getStack().pop();
+        this.getStack().push(unrolledJmlLoop);
+    }
+
+
     @Override
     public void visitForStatement(JForStatement self) {
         self.body().accept(this);

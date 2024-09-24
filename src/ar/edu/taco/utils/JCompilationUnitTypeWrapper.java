@@ -2,21 +2,23 @@ package ar.edu.taco.utils;
 
 import org.multijava.mjc.JCompilationUnitType;
 
+import java.util.List;
+
 public class JCompilationUnitTypeWrapper {
 
-	JCompilationUnitType theUnit;
+	List<JCompilationUnitType> theUnit;
 	boolean fullyDeterminized = false;
 	private int timeout;
 	boolean timeOuted = false;
 	boolean theOutput = false;
 	
-	public JCompilationUnitTypeWrapper(JCompilationUnitType theUnit) {
+	public JCompilationUnitTypeWrapper(List<JCompilationUnitType> theUnit) {
 		this.theUnit = theUnit;
 		this.fullyDeterminized = false;
 		this.timeout = 0;
 	}
 	
-	public JCompilationUnitType getUnit() {
+	public List<JCompilationUnitType> getUnit() {
 		return this.theUnit;
 	}
 	

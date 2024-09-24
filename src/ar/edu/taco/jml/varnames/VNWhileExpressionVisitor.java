@@ -3,12 +3,7 @@ package ar.edu.taco.jml.varnames;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.multijava.mjc.JExpression;
-import org.multijava.mjc.JFormalParameter;
-import org.multijava.mjc.JGeneratedLocalVariable;
-import org.multijava.mjc.JLocalVariable;
-import org.multijava.mjc.JLocalVariableExpression;
-import org.multijava.mjc.JVariableDefinition;
+import org.multijava.mjc.*;
 
 import ar.edu.taco.TacoException;
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
@@ -37,8 +32,20 @@ public class VNWhileExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		JLocalVariable localVariable = null;
 
 		if (variable instanceof JFormalParameter) {
-			JFormalParameter jFormalParameter = (JFormalParameter) variable; 
-			localVariable = new JFormalParameter(jFormalParameter.getTokenReference(), jFormalParameter.modifiers(),jFormalParameter.getDescription(), jFormalParameter.specializedType(), newIden);
+			JFormalParameter jFormalParameter = (JFormalParameter) variable;
+			CType specializedType = null;
+			if (jFormalParameter.dynamicType() != null){
+				specializedType = jFormalParameter.dynamicType();
+			} else {
+				if (jFormalParameter.staticType() != null){
+					specializedType = jFormalParameter.staticType();
+				} else {
+					assert(false);
+				}
+			}
+			CSpecializedType specialized = new CSpecializedType(specializedType);
+			new CSpecializedType(jFormalParameter.dynamicType());
+			localVariable = new JFormalParameter(jFormalParameter.getTokenReference(), jFormalParameter.modifiers(),jFormalParameter.getDescription(), specialized, newIden);
 		} else if (variable instanceof JGeneratedLocalVariable) {
 			JGeneratedLocalVariable jGeneratedLocalVariable = (JGeneratedLocalVariable) variable;
 			localVariable = new JGeneratedLocalVariable(jGeneratedLocalVariable.getTokenReference(), jGeneratedLocalVariable.modifiers(), jGeneratedLocalVariable.getType() , newIden, newExpre);

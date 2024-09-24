@@ -78,10 +78,9 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 
 	@Override
 	public void visitJmlLoopStatement(JmlLoopStatement self) {
-		JWhileStatement theWhileStatement = (JWhileStatement)self.loopStmt();
-		theWhileStatement.accept(this);
-		JStatement unrolledWhile = (JStatement)this.getStack().pop();
-		this.getStack().push(unrolledWhile);
+		(self.loopStmt()).accept(this);
+		JStatement unrolledJmlLoop = (JStatement)this.getStack().pop();
+		this.getStack().push(unrolledJmlLoop);
 	}
 
 

@@ -31,4 +31,9 @@ public class ForArielGodioBubbleSortBug01Test extends CollectionTestBase {
 		setConfigKeyTypeScopes("forArielGodio.bubbleSort.bug01.BubbleSort:1, forArielGodio.bubbleSort.bug01.SwapInArray:1");
 		check(GENERIC_PROPERTIES,"bubbleSort(int[])",true);
 	}
+
+
+	public static void main(String[] args){
+		System.out.println(System.getProperty("user.dir"));
+	}
 }

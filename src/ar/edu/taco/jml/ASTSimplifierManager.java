@@ -62,8 +62,8 @@ public class ASTSimplifierManager {
 		// order of simplifiers
 		this.simplifiers = new ArrayList<JmlAstClonerStatementVisitor>();
 
-		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new BreakRemoverSimplifier());
+		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new BlockSimplifier());
 		simplifiers.add(new ShortcutRemoverVisitor());

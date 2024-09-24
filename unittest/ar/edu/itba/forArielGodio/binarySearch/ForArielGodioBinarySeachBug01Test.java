@@ -1,8 +1,8 @@
 package ar.edu.itba.forArielGodio.binarySearch;
 
 
-import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
+import ar.edu.taco.regresion.CollectionTestBase;
 
 public class ForArielGodioBinarySeachBug01Test extends CollectionTestBase {
 

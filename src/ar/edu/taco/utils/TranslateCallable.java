@@ -116,31 +116,41 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
     @Override
     public TacoAnalysisResult call() throws Exception {
 
-        JCompilationUnitType JUnit = this.JUnitWrapped.theUnit;
-        TacoAnalysisResult translatedAnalysisResult = new TacoAnalysisResult();
-        translatedAnalysisResult.setCompilationUnit(JUnit);
-
-        String fileNameIdent = JUnit.fileNameIdent();
-
+//        JCompilationUnitType JUnit = null;
+//        List<JCompilationUnitType> theJUnits = this.JUnitWrapped.theUnit;
+//
+//        for (JCompilationUnitType unit : theJUnits){
+//            if (unit.declaresType(TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD))){
+//                JUnit = unit;
+//            }
+//        }
+//
+//        TacoAnalysisResult translatedAnalysisResult = new TacoAnalysisResult();
+//        translatedAnalysisResult.setCompilationUnit(JUnit);
+//
+////        String fileNameIdent = JUnit.fileNameIdent();
+//
         List<String> fileNames = null;
-        JCompilationUnitType units = null;
+        List<JCompilationUnitType> units = null;
 
         List<JCompilationUnitType> simplified_compilation_units = new ArrayList<JCompilationUnitType>();
-        List<JCompilationUnitType> theDeterminizedUnitTypeList = new ArrayList<JCompilationUnitType>();
+        List<JCompilationUnitType> theDeterminizedUnitTypeList = this.JUnitWrapped.theUnit;
 
         try {
             semJmlParser.acquire();
-            theDeterminizedUnitTypeList.add(JUnit);
             fileNames = write_simplified_compilation_units(theDeterminizedUnitTypeList);
-            units = parse_simplified_compilation_units(fileNames).remove(0);
 
+            //This index 0 that was used below (removed now) strongly depends on the order the user lists the typed in the
+            //driver for the analysis. Needs to be improved.
+
+            units = parse_simplified_compilation_units(fileNames);
         } catch (InterruptedException exc) {
             System.out.println(exc);
         } finally {
             semJmlParser.release();
         }
         //  System.out.println("!!Parse Simplified Compilation Units Complete for thread: " + Thread.currentThread().getName());
-        simplified_compilation_units.add(units);
+        simplified_compilation_units.addAll(units);
 
         // BEGIN JAVA TO JDYNALLOY TRANSLATION
         //  System.out.println("<-----Beginning JDynaAlloy Translation----->");
@@ -336,13 +346,14 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                 //				}
 
                 String fileToAnalyze = makeCanonicalPath() + "/output.als";
-                String fileNameToLookFor = fileToAnalyze.replace("output.als", "verdict.txt");
-                File fileToLookFor = new File(fileNameToLookFor);
+                String fileNameToLookForSAT = fileToAnalyze.replace("output.als", "verdictSAT.txt");
+                String fileNameToLookForUNSAT = fileToAnalyze.replace("output.als", "verdictUNSAT.txt");
+                File fileToLookForSAT = new File(fileNameToLookForSAT);
+                File fileToLookForUNSAT = new File(fileNameToLookForUNSAT);
 
                 ProcessBuilder pb = new ProcessBuilder();
                 pb.redirectErrorStream(true);
-                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/root/testing_TACO/TACO/lib/alloyTerminationEnabled.jar", fileToAnalyze);
-
+                pb.command("/usr/bin/java", "-Xss300m", "-jar", "/Users/mfrias/eclipse-workspace-new/FreshTACO1/TACO/lib/alloyRunner.jar", fileToAnalyze);
 
 
                 try {
@@ -357,12 +368,10 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                     System.out.println(startContent);
 
 
-
 //					BufferedReader reader =
 //							new BufferedReader(new InputStreamReader(process.getInputStream()));
 //					StringBuilder builder = new StringBuilder();
 //					String line = null;
-
 
 
                     while ((System.currentTimeMillis() - initTimeMillis) / 1000 < this.JUnitWrapped.getTimeout()) {
@@ -381,35 +390,31 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
 //							String fileNameToLookFor = fileToAnalyze.replace("output.als", "verdict.txt");
 //							File fileToLookFor = new File(fileNameToLookFor);
-                            if (fileToLookFor.exists()) {
-                                if (fileToLookFor.length() != 0L) {
-                                    this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
+                            pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                            isDeterminized = JUnitWrapped.getDeterminized();
+                            TOinSecs = JUnitWrapped.getTimeout();
+                            long runTime = 0;
 
-                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
+                            if (fileToLookForSAT.exists()) {
+                                action = "ended";
+                                runTime = (System.nanoTime() - initTime) / 1000000000;
+                                this.getCompilationUnitWrapper().setOutput(true);  // outcome was SAT
+
+                                String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                System.out.println(EndSatContent);
+                                return null;
+                            } else {
+                                if (fileToLookForUNSAT.exists()) {
+
                                     action = "ended";
-                                    isDeterminized = JUnitWrapped.getDeterminized();
-                                    TOinSecs = JUnitWrapped.getTimeout();
-                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
-                                    String EndSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome SAT ", pId, action, isDeterminized, TOinSecs, runTime);
-                                    System.out.println(EndSatContent);
+                                    runTime = (System.nanoTime() - initTime) / 1000000000;
 
-                                    return null;
-                                } else {
-                                    this.getCompilationUnitWrapper().setOutput(false);  // outcome was UNSAT
-
-                                    pId = Thread.currentThread().getName().substring(5, Thread.currentThread().getName().length() - 9);
-                                    action = "ended";
-                                    isDeterminized = JUnitWrapped.getDeterminized();
-                                    TOinSecs = JUnitWrapped.getTimeout();
-                                    long runTime = (System.nanoTime() - initTime) / 1000000000;
-                                    String EndUnSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
-                                    System.out.println(EndUnSatContent);
-
+                                    String EndUNSatContent = String.format("pid   %1$6s      stat %2$7s    det %3$5s      to: %4$5d      runT: %5$6d     outcome UNSAT ", pId, action, isDeterminized, TOinSecs, runTime);
+                                    System.out.println(EndUNSatContent);
                                     return null;
                                 }
-                            } else {
-//								System.out.println("File not yet there");
                             }
+
 
                             //							}
                         } catch (IllegalThreadStateException e) {

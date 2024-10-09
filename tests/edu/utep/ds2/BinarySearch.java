@@ -1,35 +1,32 @@
 package edu.utep.ds2;
 public class BinarySearch {
-	//@ requires (\forall int j; 0 <= j && j < arr.length; (\forall int i; 0 <= i && i < j ;arr[i] <= arr[j]));
-	//@ ensures \result == false <==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key);
+	//@ requires lo == 0 && hi == array.length - 1;
+	//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < array.length; array[i] != target);
+	//@ ensures \result != -1 ==> (0 <= \result && \result < array.length && array[\result] == target);
 	//@ signals (Exception e) false;
-	public static boolean binary(int[] arr, int key) {
-		int lo = 0;
-		int hi = arr.length-1;
-		int middle;
-		//@ decreasing hi - lo;
-		while (lo <= hi) {
-			middle = (lo + hi) / 2;
-			if (arr[middle] == key) {
-				return true;
-			} else {
-				if (arr[middle] > key) {
-					hi = middle - 1;
-				} else 
-					lo = middle + 1;
-			}
+	public static int search(int[] array, int target, int lo, int hi) {
+		if (lo > hi) {
+			return -1; // Target not found
 		}
-		return false;
+
+		// Find the middle index
+		int mid = (lo + hi) / 2;
+
+		// Check if target is present at mid
+		if (array[mid] == target) {
+			return mid;
+		}
+
+		// Recur for the left half if target is smaller than mid
+		if (target < array[mid]) {
+			return search(array, target, lo, mid - 1);
+		}
+
+		// Recur for the right half if target is greater than mid
+		return search(array, target, mid + 1, hi);
 	}
 
 
-	public static void main(String[] args) {
-	    int[] arr = new int[1074999999];
-	    int key = 1009668096;
-	    // Parameter Initialization
-	    arr[0] = -1939075073;
-	    arr[1] = -1939075073;
-	    arr[2] = -969537536;
-	    binary(arr, key);
-	}
+
+
 }

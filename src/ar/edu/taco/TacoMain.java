@@ -20,11 +20,17 @@
 
 package ar.edu.taco;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
+import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -96,7 +102,6 @@ public class TacoMain {
      */
     @SuppressWarnings({"static-access"})
     public static void main(String[] args) {
-
         @SuppressWarnings("unused")
         int loopUnrolling = 3;
 
@@ -327,21 +332,141 @@ public class TacoMain {
             String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
             File parentFolder = new File(parentDirectory);
 
-            // do you want to delete output files?
-            boolean deleteOutput = true;
-            boolean deleteSuccess = false;
-            try {
-                // delete all output files
-                if (parentFolder.isDirectory() && deleteOutput) {
-                    DeleteOutputFiles.run();
-                    deleteSuccess = true;
-                } else System.out.println("Not a valid directory!!!!!");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            //Check if the directory exists and is not empty
+            if(parentFolder.isDirectory() && parentFolder.list().length > 0){
+                BufferedReader user = new BufferedReader(new InputStreamReader(System.in));
+                System.out.println("The directory is not empty. Choose an option:");
+                System.out.println("1. Interrupt the process");
+                System.out.println("2. Overwrite the files");
+                System.out.println("3. Make a copy of the files in another directory");
+
+                String inputOption = "";
+
+                boolean correctInput = false;
+                int choice = 0;
+
+                while (! correctInput) {
+                    try {
+                        inputOption = user.readLine();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                    try {
+                        choice = Integer.parseInt(inputOption);
+                        if (choice < 1 || choice > 3){
+                            throw new NumberFormatException();
+                        }
+                        correctInput = true;
+                    } catch (NumberFormatException e) {
+                        System.out.println("Enter a correct option: ");
+                        correctInput = false;
+                    }
+                }
+
+                switch(choice){
+                    case 1:
+                        System.out.println();
+                        System.out.println("Process interrupted...");
+                        return null; //Exit the program
+                    case 2:
+                        System.out.println();
+                        System.out.println("Overwriting files...");
+                        // do you want to delete output files?
+                        boolean deleteOutput = true;
+                        boolean deleteSuccess = false;
+                        try {
+                            // delete all output files
+                            if (parentFolder.isDirectory() && deleteOutput) {
+                                DeleteOutputFiles.run();
+                                deleteSuccess = true;
+                            } else System.out.println("Not a valid directory!!!!!");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        if (deleteSuccess) System.out.println("---FINISHED DELETING OUTPUT FILES---");
+                        else System.out.println("---FAILED TO DELETE FILES---");
+                        //deleteOutputFiles.run(parentFolder);
+                        break;
+                    case 3:
+                        // Ask for the destination directory
+                        System.out.print("Enter the destination directory path: ");
+                        String destDirPath = null;
+                        try {
+                            destDirPath = user.readLine();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        File destDir = new File(destDirPath);
+
+                        // Check if the destination directory exists, if not, create it
+                        if (!destDir.exists()) {
+                            if (destDir.mkdirs()) {
+                                System.out.println("Destination directory created: " + destDir.getPath());
+                            } else {
+                                System.out.println("Failed to create destination directory.");
+                                return null;
+                            }
+                        }
+
+                        // Copy files from parentFolder to destDir using a while loop
+                        File[] files = parentFolder.listFiles();
+                        if (files != null) {
+                            int index = 0;
+                            while (index < files.length) {
+                                File file = files[index];
+                                if (!file.isDirectory()) {
+                                    Path sourcePath = file.toPath();
+                                    String fileName = file.getName();
+                                    Path destinationPath = new File(destDir, fileName).toPath();
+
+                                    // Check if the file already exists in the destination
+                                    int counter = 1;
+                                    while (Files.exists(destinationPath)) {
+                                        // Create a new filename by appending a counter
+                                        String newFileName = fileName.substring(0, fileName.lastIndexOf('.')) + "_" + counter +
+                                                fileName.substring(fileName.lastIndexOf('.'));
+                                        destinationPath = new File(destDir, newFileName).toPath();
+                                        counter++;
+                                    }
+
+                                    // Copy the file
+                                    try {
+                                        Files.copy(sourcePath, destinationPath);
+                                        System.out.println("Copied: " + file.getName() + " to " + destinationPath.toString());
+                                    } catch (IOException e) {
+                                        System.out.println("Error while copying file: " + e.getMessage());
+                                    }
+                                }
+                                index++;
+                            }
+                        } else {
+                            System.out.println("No files found in the source directory.");
+                        }
+                        break;
+                    default:
+                        System.out.println("Invalid option. Exiting.");
+                        return null;
+                }
+            }else{
+                System.out.println("Directory is empty or not valid.");
             }
 
-            if (deleteSuccess) System.out.println("---FINISHED DELETING OUTPUT FILES---");
-            else System.out.println("---FAILED TO DELETE FILES---");
+//            // do you want to delete output files?
+//            boolean deleteOutput = true;
+//            boolean deleteSuccess = false;
+//            try {
+//                // delete all output files
+//                if (parentFolder.isDirectory() && deleteOutput) {
+//                    DeleteOutputFiles.run();
+//                    deleteSuccess = true;
+//                } else System.out.println("Not a valid directory!!!!!");
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            if (deleteSuccess) System.out.println("---FINISHED DELETING OUTPUT FILES---");
+//            else System.out.println("---FAILED TO DELETE FILES---");
 
             if (configFile == null) {
                 throw new IllegalArgumentException("Config file not found, please verify option -cf");
@@ -461,6 +586,7 @@ public class TacoMain {
             int numFinishedLastWindow = 0;
             int numFinishedPreviousWindow = 0;
             int numFinished = 0;
+            boolean isTheInitialProblem = true;
 
             Window windowValWrapper;
             WindowList winList = new WindowList(timeout);
@@ -473,6 +599,7 @@ public class TacoMain {
                 if (!theSharedQueue.isEmpty()) {
 
                     Message m = theSharedQueue.poll();
+//                    System.out.println("Processing in infinite timeout thread.");
 
 //				System.out.println("Message in TacoMain " +
 //						m.theResult + " " +
@@ -530,6 +657,20 @@ public class TacoMain {
                 boolean someFreeThread = theRunningThreads < numProcessorThreads;
                 if (!pendingProblems.isEmpty() && someFreeThread) {
                     JCompilationUnitTypeWrapper determinizedWrapped = pendingProblems.poll();
+
+                    if (isTheInitialProblem) {
+                        int problemTO = Integer.MAX_VALUE;
+                        determinizedWrapped.setTimeout(problemTO);
+
+                        //infinite timeout
+                        TranslateThread translateThreadInfinite =
+                                new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, Integer.MAX_VALUE);
+                        theRunningThreads++;
+                        numAttended++;
+                        translateThreadInfinite.start();
+                        isTheInitialProblem = false;
+
+                    }
                     int problemTO = timeout;
                     if (determinizedWrapped.getDeterminized()) {
                         problemTO = timeoutDeterminizedPrograms;
@@ -539,6 +680,9 @@ public class TacoMain {
                     //				ar.edu.taco.utils.TranslateThread theCurrentThread = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
                     //				Callable<TacoAnalysisResult> translationThread =
                     //						new ar.edu.taco.utils.TranslateThread(semJmlParser, semJava2JDyn, semJDyn2Dyn, determinizedUnit, jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+
+
+                    //normal timeout
                     TranslateThread translateThread =
                             new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, timeout);
 

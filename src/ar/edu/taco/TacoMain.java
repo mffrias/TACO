@@ -520,8 +520,8 @@ public class TacoMain {
             Queue<JCompilationUnitTypeWrapper> pendingProblems = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
 
             Queue<JCompilationUnitTypeWrapper> problemsToFurtherDeterminize = new ConcurrentLinkedQueue<JCompilationUnitTypeWrapper>();
-            JCompilationUnitTypeWrapper initialTask = new JCompilationUnitTypeWrapper(simplified_compilation_units);
-            //		problemsToFurtherDeterminize.offer(initialTask);
+            JCompilationUnitTypeWrapper initialTaskSeq = new JCompilationUnitTypeWrapper(simplified_compilation_units);
+            JCompilationUnitTypeWrapper initialTaskPar = new JCompilationUnitTypeWrapper(simplified_compilation_units);
 
             tacoAnalysisResult = null;
 
@@ -573,8 +573,10 @@ public class TacoMain {
 
             int timeoutDeterminizedPrograms = Integer.MAX_VALUE;
             String space = "   ";
-            pendingProblems.add(initialTask);
-            int theRunningThreads = 0;
+            pendingProblems.add(initialTaskSeq);
+            pendingProblems.add(initialTaskPar);
+
+        int theRunningThreads = 0;
 
             long initialTime = System.currentTimeMillis();
             long previousTime = initialTime;
@@ -656,9 +658,10 @@ public class TacoMain {
                 //			boolean someFreeThread = theRunningThreads < numProcessorThreads;
                 boolean someFreeThread = theRunningThreads < numProcessorThreads;
                 if (!pendingProblems.isEmpty() && someFreeThread) {
-                    JCompilationUnitTypeWrapper determinizedWrapped = pendingProblems.poll();
 
+                    JCompilationUnitTypeWrapper determinizedWrapped = null;
                     if (isTheInitialProblem) {
+                        determinizedWrapped = pendingProblems.poll();
                         int problemTO = Integer.MAX_VALUE;
                         determinizedWrapped.setTimeout(problemTO);
 
@@ -671,6 +674,7 @@ public class TacoMain {
                         isTheInitialProblem = false;
 
                     }
+                    determinizedWrapped = pendingProblems.poll();
                     int problemTO = timeout;
                     if (determinizedWrapped.getDeterminized()) {
                         problemTO = timeoutDeterminizedPrograms;

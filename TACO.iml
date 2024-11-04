@@ -16,5 +16,6 @@
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="module" module-name="jDynAlloy" />
     <orderEntry type="module" module-name="dynalloy4" />
+    <orderEntry type="library" name="alloyRunner" level="project" />
   </component>
 </module>

@@ -362,6 +362,7 @@ public class TacoMain {
                         correctInput = false;
                     }
                 }
+
                 switch(choice){
                     case 1:
                         System.out.println();
@@ -585,6 +586,7 @@ public class TacoMain {
             int numFinishedLastWindow = 0;
             int numFinishedPreviousWindow = 0;
             int numFinished = 0;
+            boolean isTheInitialProblem = true;
 
             Window windowValWrapper;
             WindowList winList = new WindowList(timeout);
@@ -597,6 +599,7 @@ public class TacoMain {
                 if (!theSharedQueue.isEmpty()) {
 
                     Message m = theSharedQueue.poll();
+//                    System.out.println("Processing in infinite timeout thread.");
 
 //				System.out.println("Message in TacoMain " +
 //						m.theResult + " " +
@@ -654,6 +657,20 @@ public class TacoMain {
                 boolean someFreeThread = theRunningThreads < numProcessorThreads;
                 if (!pendingProblems.isEmpty() && someFreeThread) {
                     JCompilationUnitTypeWrapper determinizedWrapped = pendingProblems.poll();
+
+                    if (isTheInitialProblem) {
+                        int problemTO = Integer.MAX_VALUE;
+                        determinizedWrapped.setTimeout(problemTO);
+
+                        //infinite timeout
+                        TranslateThread translateThreadInfinite =
+                                new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, Integer.MAX_VALUE);
+                        theRunningThreads++;
+                        numAttended++;
+                        translateThreadInfinite.start();
+                        isTheInitialProblem = false;
+
+                    }
                     int problemTO = timeout;
                     if (determinizedWrapped.getDeterminized()) {
                         problemTO = timeoutDeterminizedPrograms;
@@ -663,6 +680,9 @@ public class TacoMain {
                     //				ar.edu.taco.utils.TranslateThread theCurrentThread = new ar.edu.taco.utils.TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, 0);
                     //				Callable<TacoAnalysisResult> translationThread =
                     //						new ar.edu.taco.utils.TranslateThread(semJmlParser, semJava2JDyn, semJDyn2Dyn, determinizedUnit, jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
+
+
+                    //normal timeout
                     TranslateThread translateThread =
                             new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, timeout);
 

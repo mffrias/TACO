@@ -38,7 +38,7 @@ import ar.edu.taco.utils.FileUtils;
 
 /**
  * @author ggasser
- * 
+ *
  */
 public class JmlStage implements ITacoStage {
 
@@ -75,18 +75,25 @@ public class JmlStage implements ITacoStage {
 	private void parse_simplified_compilation_units(List<String> files) {
 		String canonical_outdir_path;
 		try {
-			File output_dir = new File(TacoConfigurator.getInstance().getOutputDir());
+			String path = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+			File output_dir = new File(path);
+			output_dir.mkdir();
 			canonical_outdir_path = output_dir.getCanonicalPath();
 		} catch (IOException e) {
 			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
 		}
 
-		JmlParser theParserInstance = JmlParser.getInstance();
+
+		JmlParser theParserInstance = new JmlParser().getInstance();
 		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
 				files);
-		
+
+//		JmlParser theParserInstance = ((TacoThread)(Thread.currentThread())).threadParserInstance.getInstance();
+//		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
+//				files);
+
 		simplified_compilation_units = theParserInstance.getCompilationUnits();
-		
+
 	}
 
 	private List<String> write_simplified_compilation_units(List<JCompilationUnitType> newAsts) {
@@ -109,7 +116,7 @@ public class JmlStage implements ITacoStage {
 
 	private List<JCompilationUnitType> simplify_compilation_units(ASTSimplifierManager aAstSimplifierManager) {
 		List<JCompilationUnitType> newAsts = new LinkedList<JCompilationUnitType>();
-		
+
 		for (JCompilationUnitType compilation_unit : this.compilation_units) {
 
 			List<JCompilationUnitType> new_compilation_units = aAstSimplifierManager.simplify(compilation_unit);
@@ -119,7 +126,7 @@ public class JmlStage implements ITacoStage {
 	}
 
 	private String makeCanonicalPath() {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

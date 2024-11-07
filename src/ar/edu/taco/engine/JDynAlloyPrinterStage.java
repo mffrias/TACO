@@ -25,14 +25,14 @@ public class JDynAlloyPrinterStage implements ITacoStage {
 	}
 
 	private static void printToFile(JDynAlloyModule module) {
-		String output_dir = TacoConfigurator.getInstance().getOutputDir();
+		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
 		String filename = output_dir + java.io.File.separator
 				+ module.getModuleId().replaceAll("_", "/");
 		try {
 			String moduleOutput = JavaToJDynAlloyManager
 					.getModuleOutput(module);
-			FileUtils.writeToFile(filename
-					+ SimpleJmlStage.OUTPUT_JDYNALLOY_EXTENSION, moduleOutput);
+			String completeOutputFileName = filename + SimpleJmlStage.OUTPUT_JDYNALLOY_EXTENSION;
+			FileUtils.writeToFile(completeOutputFileName, moduleOutput);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

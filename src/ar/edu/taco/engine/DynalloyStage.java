@@ -46,15 +46,15 @@ public class DynalloyStage implements ITacoStage {
 	private String alloy_filename;
 
 	private SpecContext specContext;
-	
+
 	private DynalloyToAlloyManager dynalloyToAlloyManager;
-	
+
 	private boolean translatingForStryker = false;
-	
+
 //	private AlloyTyping varsEncodingValueOfArithmeticOperationsInContracts;
-	
+
 //	private List<AlloyFormula> predsEncodingValueOfArithmeticOperationsInContracts;
-	
+
 	/**
 	 * This method returns the SpecContext used by the last stage execution
 	 * or null if the stage has never been executed.
@@ -63,20 +63,20 @@ public class DynalloyStage implements ITacoStage {
 		return specContext;
 	}
 
-	
+
 	HashMap<String, AlloyTyping> varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram = new HashMap<String, AlloyTyping>();
 	HashMap<String, List<AlloyFormula>> predsComingFromArithmeticConstraintsInContractsByProgram = new HashMap<String, List<AlloyFormula>>();
 
 	HashMap<String, AlloyTyping> varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule = new HashMap<String,AlloyTyping>();
 	HashMap<String, List<AlloyFormula>> predsComingFromArithmeticConstraintsInObjectInvariantsByModule = new HashMap<String, List<AlloyFormula>> ();
 
-	
-	public DynalloyStage(List<String> inputDynalloyModulesFileNames, 
-			HashMap<String, AlloyTyping> varsFromInvPerMod, 
-			HashMap<String, List<AlloyFormula>> predsFromInvPerMod,
-			HashMap<String, AlloyTyping> varsFromContractsPerProg,
-			HashMap<String, List<AlloyFormula>> predsFromContractsPerProg,
-			Object inputToFix) {
+
+	public DynalloyStage(List<String> inputDynalloyModulesFileNames,
+						 HashMap<String, AlloyTyping> varsFromInvPerMod,
+						 HashMap<String, List<AlloyFormula>> predsFromInvPerMod,
+						 HashMap<String, AlloyTyping> varsFromContractsPerProg,
+						 HashMap<String, List<AlloyFormula>> predsFromContractsPerProg,
+						 Object inputToFix) {
 		this.inputDynalloyModulesFileNames = inputDynalloyModulesFileNames;
 		this.varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule = varsFromInvPerMod;
 		this.predsComingFromArithmeticConstraintsInObjectInvariantsByModule = predsFromInvPerMod;
@@ -88,35 +88,35 @@ public class DynalloyStage implements ITacoStage {
 
 	@Override
 	public void execute() {
-			dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
+		dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
 
-			String output_dir = TacoConfigurator.getInstance().getOutputDir();
-			alloy_filename = output_dir + java.io.File.separator + "output" + OUTPUT_ALLOY_EXTENSION;
-			String dynalloy_filename = output_dir + java.io.File.separator + "output.dals";
-			inputDynalloyModulesFileNames = Collections.singletonList(dynalloy_filename);
+		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		alloy_filename = output_dir + java.io.File.separator + "output" + OUTPUT_ALLOY_EXTENSION;
+		String dynalloy_filename = output_dir + java.io.File.separator + "output.dals";
+		inputDynalloyModulesFileNames = Collections.singletonList(dynalloy_filename);
 
-			JavaClassNameNormalizer classToCheckNormalizer = new JavaClassNameNormalizer(TacoConfigurator.getInstance().getString(
-					TacoConfigurator.CLASS_TO_CHECK_FIELD));
-			int finalPos = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).indexOf('(');
-			String methodToCheckWithoutTyping = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).substring(0, finalPos);
-			String assertion_id = "check_" + classToCheckNormalizer.getQualifiedClassName() + "_"
-					+ methodToCheckWithoutTyping;
+		JavaClassNameNormalizer classToCheckNormalizer = new JavaClassNameNormalizer(TacoConfigurator.getInstance().getString(
+				TacoConfigurator.CLASS_TO_CHECK_FIELD));
+		int finalPos = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).indexOf('(');
+		String methodToCheckWithoutTyping = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).substring(0, finalPos);
+		String assertion_id = "check_" + classToCheckNormalizer.getQualifiedClassName() + "_"
+				+ methodToCheckWithoutTyping;
 
-			dynalloyToAlloyManager.setSourceJDynAlloyModules(this.src_jdynalloy_modules);
-			specContext = dynalloyToAlloyManager.process_dynalloy_module(dynalloy_filename , alloy_filename, assertion_id,
-					varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule, 
-					predsComingFromArithmeticConstraintsInObjectInvariantsByModule, 
-					varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram, 
-					predsComingFromArithmeticConstraintsInContractsByProgram);
+		dynalloyToAlloyManager.setSourceJDynAlloyModules(this.src_jdynalloy_modules);
+		specContext = dynalloyToAlloyManager.process_dynalloy_module(dynalloy_filename , alloy_filename, assertion_id,
+				varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule,
+				predsComingFromArithmeticConstraintsInObjectInvariantsByModule,
+				varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram,
+				predsComingFromArithmeticConstraintsInContractsByProgram);
 	}
 
 	public String get_alloy_filename() {
 		return alloy_filename;
 	}
 
-	
+
 	private List<JDynAlloyModule> src_jdynalloy_modules;
-	
+
 	public void setSourceJDynAlloy(List<JDynAlloyModule> jdynalloy_modules) {
 		src_jdynalloy_modules = jdynalloy_modules;
 	}

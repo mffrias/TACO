@@ -85,7 +85,7 @@ public class JmlParser {
 		return instance;
 	}
 
-	private JmlParser() {
+	public JmlParser() {
 		initialized = false;
 	}
 

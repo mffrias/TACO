@@ -181,7 +181,7 @@ public class RegresionTestBase extends TestCase {
 	/**
 	 * Additional classes to analize
 	 * 
-	 * @param classToCheck
+	 *
 	 */
 	protected void setConfigKeyRelevantClasses(String relevantClasses) {
 		checkAnalizerIsCalled();
@@ -213,7 +213,7 @@ public class RegresionTestBase extends TestCase {
 	/**
 	 * Additional classes to parse
 	 * 
-	 * @param classToCheck
+	 *
 	 */
 	protected void setConfigKeyClasses(String classes) {
 		checkAnalizerIsCalled();

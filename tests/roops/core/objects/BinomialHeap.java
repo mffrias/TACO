@@ -1,7 +1,5 @@
 package roops.core.objects;
 
-import java.lang.reflect.Field;
-
 public class BinomialHeap {
 
 	/*@
@@ -57,7 +55,7 @@ public class BinomialHeap {
 				unionNodes(temp);
 				size++;
 			}
-		} 
+		}
 	}
 
 
@@ -78,7 +76,7 @@ public class BinomialHeap {
 		return y;
 	}
 
-	
+
 
 
 	/*@ requires true;
@@ -89,7 +87,7 @@ public class BinomialHeap {
     @*/
 	public /* @ nullable @ */BinomialHeapNode extractMin() {
 //		boolean cover = true;
-		if (Nodes == null) 
+		if (Nodes == null)
 			return null;
 
 		BinomialHeapNode temp = Nodes, prevTemp = null;
@@ -130,9 +128,9 @@ public class BinomialHeap {
 
 		return minNode;
 	}
-	
-	
-	
+
+
+
 
 
 	// 3. Unite two binomial heaps
@@ -143,7 +141,7 @@ public class BinomialHeap {
 		while ((temp1 != null) && (temp2 != null)) {
 			if (temp1.degree == temp2.degree) {
 				BinomialHeapNode tmp = temp2;
-				temp2 = temp2.sibling;
+				temp2 = temp2.child;
 				tmp.sibling = temp1.sibling;
 				temp1.sibling = tmp;
 				temp1 = tmp.sibling;
@@ -166,7 +164,7 @@ public class BinomialHeap {
 					temp1.sibling = tmp;
 					if (tmp == Nodes) {
 						Nodes = temp1;
-					} 
+					}
 				}
 			}
 		}
@@ -177,7 +175,7 @@ public class BinomialHeap {
 				temp1 = temp1.sibling;
 			}
 			temp1.sibling = temp2;
-		} 
+		}
 
 	}
 
@@ -230,39 +228,26 @@ public class BinomialHeap {
 	public int findMinimum() {
 		BinomialHeapNode x = Nodes;
 		BinomialHeapNode y = Nodes;
-		int min = x.key; 
+		int min = x.key;
 		//decreasing \reach(x, BinomialHeapNode, sibling).int_size();
 		while (x != null) {
-			if (x.key < min) { 
-				y = x; 
-				min = x.key; 
+			if (x.key < min) {
+				y = x;
+				min = x.key;
 			}
 			x = x.sibling;
 		}
 		return y.key;
 	}
-	
-	
-//	public static void main(String[] args) {
-//    roops.core.objects.BinomialHeap instance = new roops.core.objects.BinomialHeap();
-//    roops.core.objects.BinomialHeapNode _BinomialHeapNode_1 = new roops.core.objects.BinomialHeapNode();
-//    roops.core.objects.BinomialHeapNode _BinomialHeapNode_2 = new roops.core.objects.BinomialHeapNode();
-//    // Fields Initialization for 'instance'
-//    // Fields Initialization for '_BinomialHeapNode_1'
-//    _BinomialHeapNode_1.key = 0;
-//    _BinomialHeapNode_1.degree = 1;
-//    _BinomialHeapNode_1.parent = null;
-//    _BinomialHeapNode_1.sibling = null;
-//    // Fields Initialization for '_BinomialHeapNode_2'
-//    _BinomialHeapNode_2.key = 9;
-//    _BinomialHeapNode_2.degree = 0;
-//    _BinomialHeapNode_2.parent = _BinomialHeapNode_1;
-//    _BinomialHeapNode_2.sibling = null;
-//    _BinomialHeapNode_2.child = null;
-//    _BinomialHeapNode_1.child = _BinomialHeapNode_2;
-//    instance.Nodes = _BinomialHeapNode_1;
-//    instance.size  = 2;
-//    boolean covered = instance.extractMin();
-//}
+
+
+	public void TestAddToEmptyBinomialHeap(){
+		BinomialHeap bh1 = new BinomialHeap();   //Binomial heap construction. In this case, an empty Binomial Heap.
+		int aKey = 10; // Integer to be added definition.
+		int bh1_Size = bh1.size;
+		bh1.insert(aKey);
+		int new_bh1_Size = bh1.size;
+		assert(new_bh1_Size == bh1_Size + 1); //assertion
+	}
 
 }

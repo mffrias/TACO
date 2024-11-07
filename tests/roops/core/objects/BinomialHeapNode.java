@@ -60,7 +60,7 @@ public class BinomialHeapNode {
 		else
 			ret = this;
 		sibling = sibl;
-		return ret;
+		return ret.child;
 	}
 
 	/*@ requires true;

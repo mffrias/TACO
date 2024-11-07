@@ -95,6 +95,10 @@ class ArithmeticOpCollector extends DfsProgramVisitor {
 						arithmetic_op_counter.integerOpCounter.inc_mul();
 					} else if (expr_variable_str.contains("pred_java_primitive_integer_value_div_rem_ARG_result_")) {
 						arithmetic_op_counter.integerOpCounter.inc_div_rem();
+					} else if (expr_variable_str.contains("pred_java_primitive_integer_value_add_ARG_result_")) {
+						arithmetic_op_counter.integerOpCounter.inc_add();
+					} else if (expr_variable_str.contains("pred_java_primitive_integer_value_sub_ARG_result_")) {
+						arithmetic_op_counter.integerOpCounter.inc_sub();
 					}
 
 					// long operations

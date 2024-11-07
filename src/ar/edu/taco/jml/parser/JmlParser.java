@@ -155,6 +155,7 @@ public class JmlParser {
 		main.run(fileNames.toArray(new String[] {}), options, os);
 				
 		if (os.toString().contains("error")){
+			System.out.println(os.toString());
 			return false;
 		}
 

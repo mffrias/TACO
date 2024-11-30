@@ -316,10 +316,17 @@ public class TacoMain {
         TacoAnalysisResult tacoAnalysisResult;
         tacoAnalysisResult = null;
 
+
         int numTests = 10;
         boolean increaseTimeout = false;
 
-        int timeout = 5;
+        int maxTimeout = 30;
+        int minTimeout = 5;
+        int timeout = minTimeout; //initial timeout
+
+        long lastReportTime = System.currentTimeMillis();
+
+        //int timeout = 5;
 
 //        for (int i = 0; i < 5 * numTests; i++) {
 
@@ -451,6 +458,22 @@ public class TacoMain {
             }else{
                 System.out.println("Directory is empty or not valid.");
             }
+//            while(experimentsRemaining > 0){
+//                if(System.currentTimeMillis() - lastReportTime >= 10000){
+//                    System.out.println("Timeout: " + timeout + " seconds");
+//                    System.out.println("Resolved experiments: " + experimentsResolved + " / " + numTests);
+//                    System.out.println("Remaining experiments: " + experimentsRemaining);
+//
+//                    if(experimentsRemaining <= 2){
+//                        timeout = Math.min(timeout + 2, maxTimeout);
+//                        System.out.println("Increasing timeout to " + timeout + " seconds.");
+//                    }else if(experimentsRemaining > 5){
+//                        timeout = Math.max(timeout - 2, minTimeout);
+//                        System.out.println("Decreasing timeout to " + timeout + " seconds.");
+//                    }
+//                    lastReportTime = System.currentTimeMillis();
+//                }
+//            }
 
 //            // do you want to delete output files?
 //            boolean deleteOutput = true;
@@ -593,6 +616,9 @@ public class TacoMain {
             Window windowValWrapper;
             WindowList winList = new WindowList(timeout);
 
+            int numSATorUNSATinPreviousPeriod = 0;
+            int numSATorUNSATinCurrentPeriod = 0;
+
             while (!pendingProblems.isEmpty() || !problemsToFurtherDeterminize.isEmpty() || !theSharedQueue.isEmpty() || theRunningThreads > 0) {
                 //-------BEGIN TRANSLATION THREAD PROCESS
                 int numPending = pendingProblems.size();
@@ -625,10 +651,12 @@ public class TacoMain {
                                 System.out.println("SAT WAS DETECTED");
                                 numSAT++;
                                 numFinished++;
+                                numSATorUNSATinCurrentPeriod++;
                             } else {
                                 System.out.println("UNSAT WAS DETECTED");
                                 numUNSAT++; //using false to model UNSAT
                                 numFinished++;
+                                numSATorUNSATinCurrentPeriod++;
                             }
                         }
                     }
@@ -711,6 +739,19 @@ public class TacoMain {
                 }
 
                 if (System.currentTimeMillis() >= previousTime + 1000) {
+
+                    // Dynamic TO setting according to current abd previous period
+
+                    if(numSATorUNSATinCurrentPeriod > numSATorUNSATinPreviousPeriod){
+                        timeout = Math.min(timeout + 2, maxTimeout);
+                    }else{
+                        timeout = Math.max(timeout - 2, minTimeout);
+                    }
+
+                    numSATorUNSATinPreviousPeriod = numSATorUNSATinCurrentPeriod;
+                    numSATorUNSATinCurrentPeriod = 0;
+                    // --------------------------------------------------//
+
                     previousTime = System.currentTimeMillis();
                     toSplitSize = problemsToFurtherDeterminize.size();
                     numErrors = numAttended - numSAT - numUNSAT - numInterrupted - numDiscarded - theRunningThreads;

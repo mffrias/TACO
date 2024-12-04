@@ -265,4 +265,13 @@ public class BinomialHeap {
 //    boolean covered = instance.extractMin();
 //}
 
+
+	public static void main(String[] args){
+		BinomialHeap bh1 = new BinomialHeap();
+		bh1.insert(3);
+		bh1.insert(3);
+		int s = bh1.size;
+		System.out.println(s);
+	}
+
 }

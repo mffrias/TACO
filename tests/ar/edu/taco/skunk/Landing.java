@@ -75,10 +75,27 @@ public class Landing {
 	//        System.out.println(i1*i1);
 	//     }
 
+    /*@ requires true;
+         ensures true;
+         signals (Exception e) false;
+     @*/
+	int sum(int limit)
+	{
+		int[] array = new int[10];
+		int i, sum;
 
-	public static void main (String[] args) {
-	    int i1 = 605467611;
-	    int i2 = 605467611;
-	    System.out.println(i1*i1 + i2*i2);
+		sum = 0;
+		for(i = 0; i < limit; i++){
+			array[i] = i;
+		}
+
+		return sum;
 	}
+
+
+//	public static void main (String[] args) {
+//	    int i1 = 605467611;
+//	    int i2 = 605467611;
+//	    System.out.println(i1*i1 + i2*i2);
+//	}
 }

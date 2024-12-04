@@ -19,7 +19,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
-		setConfigKeyIntBithwidth(4);
+		setConfigKeyIntBithwidth(6);
         setConfigKeyLoopUnroll(4);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
@@ -29,7 +29,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:8");
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:15");
 		check(GENERIC_PROPERTIES,"contains(int)",false);
 	}
 
@@ -52,7 +52,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:5");
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:15");
 		check(GENERIC_PROPERTIES,"add(int)",false);
 	}
 	

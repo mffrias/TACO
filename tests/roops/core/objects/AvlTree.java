@@ -126,45 +126,49 @@ public class AvlTree {
 	@ requires (\forall AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element != x);
 	@ ensures (\exists AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element == x);
 	@ ensures \reach(this.root, AvlNode, left+right).int_size() == \old(\reach(this.root, AvlNode, left+right)).int_size() + 1;
- 	@ signals (Exception e) false; 
+ 	@ signals (Exception e) false;
  	@*/
-	public boolean insert(int x) {
+	public void insert(int x) {
 		AvlNode n = new AvlNode();
 		n.element = x;
-		root = privateInsert(root, n);
-		return true;
-//		size++;
+		if (root == null){
+			root = n;
+		} else {
+			root = privateInsert(root, n);
+		}
+		size++;
 	}
 
 
 
 
 	private AvlNode privateInsert(/*@nullable@*/AvlNode n, AvlNode aux) {
-		if (n == null) {
-			n = aux;
-		} else {
-			if (aux.element < n.element) {
-				n.left = privateInsert(n.left, aux);
-				if (AvlTree.height(n.left) - AvlTree.height(n.right) == 2) {
-					if (aux.element < n.left.element) {
-						n = AvlTree.rotateWithLeftChild(n);
-					} else {
-						n = AvlTree.doubleWithLeftChild(n);
-					}
-				}
+			if (n == null){
+				return aux;
 			} else {
-				if (aux.element > n.element) {
-					n.right = privateInsert(n.right, aux);
-					if (AvlTree.height(n.right) - AvlTree.height(n.left) == 2) {
-						if (aux.element > n.right.element) {
-							n = AvlTree.rotateWithRightChild(n);
+				if (aux.element < n.element) {
+					n.left = privateInsert(n.left, aux);
+					if (AvlTree.height(n.left) - AvlTree.height(n.right) == 2) {
+						if (aux.element < n.left.element) {
+							n = AvlTree.rotateWithLeftChild(n);
 						} else {
-							n = AvlTree.doubleWithRightChild(n);
+							n = AvlTree.doubleWithLeftChild(n);
+						}
+					}
+				} else {
+					if (aux.element > n.element) {
+						n.right = privateInsert(n.right, aux);
+						if (AvlTree.height(n.right) - AvlTree.height(n.left) == 2) {
+							if (aux.element > n.right.element) {
+								n = AvlTree.rotateWithRightChild(n);
+							} else {
+								n = AvlTree.doubleWithRightChild(n);
+							}
 						}
 					}
 				}
 			}
-		}
+
 		n.height = AvlTree.max(AvlTree.height(n.left), AvlTree.height(n.right)) + 1;
 		return n;
 	}
@@ -215,12 +219,18 @@ public class AvlTree {
 	 @ ensures \result == false; 
 	 @*/
 	public boolean generateTreeInstance() {
-		if (size == 8)
+		if (size == 20)
 			return true;
 		else
 			return false;
 	}
 
 
+	public static void main(String[] args){
+		AvlTree instance = new AvlTree();
+		instance.root = null;
+		instance.size = 0;
+		instance.insert(-1);
+	}
 
 }

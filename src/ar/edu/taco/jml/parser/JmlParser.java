@@ -83,7 +83,7 @@ public class JmlParser {
     private List<String> file_sources;
     private final HashMap<String, JCompilationUnitType> compilation_unit_of = new HashMap<String, JCompilationUnitType>();
 
-    public JmlParser getInstance() {
+    public static JmlParser getInstance() {
         return instance;
     }
 
@@ -174,7 +174,7 @@ public class JmlParser {
     protected String getFile(String className, List<String> sources) {
         // check if we are in a thread
         // if true, remove prefix to get pure class name
-        String prefixName = "output_" + Thread.currentThread().getName();
+        String prefixName = "output";
 //		String classPrefix = className.substring(0,prefixName.length());//System.out.println("Prefix name: " + prefixName);
 //		if (prefixName.equals(classPrefix)){
 //			className = className.substring(prefixName.length()+1);

@@ -332,8 +332,11 @@ public class TacoMain {
         int minTimeout = 5;
         int timeout = minTimeout; //initial timeout
         int timeoutStep = 2;
-        if (overridingProperties.getProperty("parallelTOStep") != null)
+        if (overridingProperties.getProperty("parallelTOStep") != null) {
             timeoutStep = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
+            minTimeout = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
+            maxTimeout = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
+        }
 
         long lastReportTime = System.currentTimeMillis();
 
@@ -755,9 +758,9 @@ public class TacoMain {
 
                     if (overridingProperties.getProperty("parallelTOStep") != null) {
                         if (numSATorUNSATinCurrentPeriod > numSATorUNSATinPreviousPeriod) {
-                            timeout = Math.min(timeout + 2, maxTimeout);
+                            timeout = Math.min(timeout + timeoutStep, maxTimeout);
                         } else {
-                            timeout = Math.max(timeout - 2, minTimeout);
+                            timeout = Math.max(timeout - timeoutStep, minTimeout);
                         }
                     }
 

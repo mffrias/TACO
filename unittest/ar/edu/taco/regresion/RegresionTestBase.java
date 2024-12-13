@@ -131,7 +131,7 @@ public class RegresionTestBase extends TestCase {
 
 	protected void notInstance(String configFile, String methodToCheck) throws VizException {
 		AlloyAnalysisResult runAnalysisResult = runAssertionSupport(configFile, methodToCheck);
-		assertTrue("The method shouldtn't have instance ", runAnalysisResult.isUNSAT());
+		assertTrue("The method shouldn't have instance ", runAnalysisResult.isUNSAT());
 	}
 
 	protected void simulate(String configFile, String methodToCheck) throws VizException {
@@ -181,7 +181,6 @@ public class RegresionTestBase extends TestCase {
 	/**
 	 * Additional classes to analize
 	 * 
-	 * @param classToCheck
 	 */
 	protected void setConfigKeyRelevantClasses(String relevantClasses) {
 		checkAnalizerIsCalled();
@@ -213,7 +212,6 @@ public class RegresionTestBase extends TestCase {
 	/**
 	 * Additional classes to parse
 	 * 
-	 * @param classToCheck
 	 */
 	protected void setConfigKeyClasses(String classes) {
 		checkAnalizerIsCalled();
@@ -367,7 +365,11 @@ public class RegresionTestBase extends TestCase {
 		this.overridingProperties.put("maxStrykerMethodForFile", value);
 	}
 
-	
+	//PARALLEL TIMEOUT ------------------------------------------------------------------------------------
+	protected void setConfigKeyParallelTOStep(int minTimeout, int maxTimeout, int stepTimeout){
+		this.overridingProperties.put("parallelTOStep", stepTimeout + "");
+	}
+
 	/**
 	 * Methods added in order to make the translation work.
 	 * 

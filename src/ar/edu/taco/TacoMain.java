@@ -136,6 +136,7 @@ public class TacoMain {
         Option relevancyAnalysisOption = OptionBuilder.withLongOpt("relevancyAnalysis").withDescription("calculate the needed relevantClasses").create("ra");
         Option scopeRestrictionOption = OptionBuilder.withLongOpt("scopeRestriction").withDescription("restrict signature scope to value set in -b option")
                 .create("sr");
+        Option parallelTOStepOption = OptionBuilder.withArgName("integer").withLongOpt("timeout").hasArg().withDescription("set the number of timeout").create('t');
         /*
          * Option noVerifyOption = OptionBuilder.withLongOpt(
          * "noVerify").withDescription(
@@ -158,6 +159,7 @@ public class TacoMain {
         options.addOption(modularReasoningOption);
         options.addOption(relevancyAnalysisOption);
         options.addOption(scopeRestrictionOption);
+        options.addOption(parallelTOStepOption);
         // options.addOption(noVerifyOption)
 
         String configFileArgument = null;
@@ -265,6 +267,12 @@ public class TacoMain {
                 overridingProperties.put(TacoConfigurator.RELEVANCY_ANALYSIS, true);
             }
 
+            // Parallel Timeout
+            if (line.hasOption(parallelTOStepOption.getOpt())) {
+                String parallelTimeoutStep = line.getOptionValue(parallelTOStepOption.getOpt());
+                overridingProperties.put(TacoConfigurator.PARALLEL_TIMEOUT_STEP, parallelTimeoutStep);
+            }
+
         } catch (ParseException e) {
             System.err.println("Command line parsing failed: " + e.getMessage());
         }
@@ -323,7 +331,7 @@ public class TacoMain {
         int maxTimeout = 30;
         int minTimeout = 5;
         int timeout = minTimeout; //initial timeout
-
+        int timeoutStep = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
         long lastReportTime = System.currentTimeMillis();
 
         //int timeout = 5;
@@ -714,7 +722,7 @@ public class TacoMain {
                     //						new ar.edu.taco.utils.TranslateThread(semJmlParser, semJava2JDyn, semJDyn2Dyn, determinizedUnit, jmlToSimpleJmlContext,overridingProperties,log,tacoAnalysisResult,inputToFix,compilation_units,classToCheck,methodToCheck,sourceRootDir,configFile,FILE_SEP);
 
 
-                    //normal timeout
+                    //standard timeout
                     TranslateThread translateThread =
                             new TranslateThread(theSharedQueue, semJmlParser, semJava2JDyn, semJDyn2Dyn, semJUnitConstruction, determinizedWrapped, jmlToSimpleJmlContext, overridingProperties, log, tacoAnalysisResult, inputToFix, classToCheck, methodToCheck, sourceRootDir, configFile, FILE_SEP, timeout);
 
@@ -740,7 +748,7 @@ public class TacoMain {
 
                 if (System.currentTimeMillis() >= previousTime + 1000) {
 
-                    // Dynamic TO setting according to current abd previous period
+                    // Dynamic TO setting according to current and previous period
 
                     if(numSATorUNSATinCurrentPeriod > numSATorUNSATinPreviousPeriod){
                         timeout = Math.min(timeout + 2, maxTimeout);

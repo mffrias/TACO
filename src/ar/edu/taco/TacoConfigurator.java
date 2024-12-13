@@ -219,6 +219,10 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 	public static final String MAX_STRYKER_METHODS_FOR_FILE = "maxStrykerMethodForFile";
 	private static final int DEFAULT_MAX_STRYKER_METHODS_FOR_FILE = 50;
 
+	//PARALLEL TIMEOUT
+	public static final String PARALLEL_TIMEOUT_STEP = "parallelTOStep";
+	private static final int DEFAULT_PARALLEL_TIMEOUT_STEP = 2;
+
 	public static final String[] aux_classes = new String[]{"java.util.Set"};
 	
 	private static TacoConfigurator instance;
@@ -774,7 +778,12 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 		return this.getInt(MAX_STRYKER_METHODS_FOR_FILE,
 				DEFAULT_MAX_STRYKER_METHODS_FOR_FILE);
 	}
-	
+
+	//PARALLEL TIMEOUT--------------------------------------------------
+	public int getParallelTOStep(){
+		return this.getInt(PARALLEL_TIMEOUT_STEP, DEFAULT_PARALLEL_TIMEOUT_STEP);
+	}
+
 	
 	public int getLowerBound() {
 		return this.getInt(NUMERIC_RANGE_QUANTIFICATION_LOWER, DEFAULT_NUMERIC_RANGE_QUANTIFICATION_LOWER);
@@ -783,6 +792,5 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 	public int getUpperBound() {
 		return this.getInt(NUMERIC_RANGE_QUANTIFICATION_UPPER, DEFAULT_NUMERIC_RANGE_QUANTIFICATION_UPPER);
 	}
-
 
 }

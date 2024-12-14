@@ -221,7 +221,14 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 
 	//PARALLEL TIMEOUT
 	public static final String PARALLEL_TIMEOUT_STEP = "parallelTOStep";
-	private static final int DEFAULT_PARALLEL_TIMEOUT_STEP = 2;
+	private static final int DEFAULT_PARALLEL_TIMEOUT_STEP = 1;
+
+	public static final String PARALLEL_MIN_TIMEOUT = "parallelMinTO";
+	private static final int DEFAULT_PARALLEL_MIN_TIMEOUT = 5;
+
+	public static final String PARALLEL_MAX_TIMEOUT = "parallelMaxTO";
+	private static final int DEFAULT_PARALLEL_MAX_TIMEOUT = 30;
+
 
 	public static final String[] aux_classes = new String[]{"java.util.Set"};
 	

@@ -137,6 +137,10 @@ public class TacoMain {
         Option scopeRestrictionOption = OptionBuilder.withLongOpt("scopeRestriction").withDescription("restrict signature scope to value set in -b option")
                 .create("sr");
         Option parallelTOStepOption = OptionBuilder.withArgName("integer").withLongOpt("timeout").hasArg().withDescription("set the number of timeout").create('t');
+        //MIssing option for Min and Max TO in command line options
+
+
+
         /*
          * Option noVerifyOption = OptionBuilder.withLongOpt(
          * "noVerify").withDescription(
@@ -269,6 +273,7 @@ public class TacoMain {
 
             // Parallel Timeout
             if (line.hasOption(parallelTOStepOption.getOpt())) {
+
                 String parallelTimeoutStep = line.getOptionValue(parallelTOStepOption.getOpt());
                 overridingProperties.put(TacoConfigurator.PARALLEL_TIMEOUT_STEP, parallelTimeoutStep);
             }
@@ -326,28 +331,26 @@ public class TacoMain {
 
 
         int numTests = 10;
-        boolean increaseTimeout = false;
+     //   boolean increaseTimeout = false;
 
-        int maxTimeout = 30;
-        int minTimeout = 5;
-        int timeout = minTimeout; //initial timeout
-        int timeoutStep = 2;
+        int maxTimeout = 0;
+        int minTimeout = 0;
+        int timeout = 0; //initial timeout
+        int timeoutStep = 0;
         if (overridingProperties.getProperty("parallelTOStep") != null) {
             timeoutStep = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
-            minTimeout = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
-            maxTimeout = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
+            minTimeout = Integer.parseInt(overridingProperties.getProperty("parallelMinTO"));
+            maxTimeout = Integer.parseInt(overridingProperties.getProperty("parallelMaxTO"));
+            timeout = minTimeout;
+        } else {
+            timeout = 5;
         }
 
-        long lastReportTime = System.currentTimeMillis();
+        System.out.println("TOStep = " + timeoutStep);
+        System.out.println("TOMin = " + minTimeout);
+        System.out.println("TOMax = " + maxTimeout);
 
-        //int timeout = 5;
 
-//        for (int i = 0; i < 5 * numTests; i++) {
-
-//            if(i % 5 == 0 && i != 0) increaseTimeout = true;
-
-//            System.out.println("TEST NUMBER: " + i);
-//            System.out.println();
 
             // parent directory where output files are stored
             String parentDirectory = System.getProperty("user.dir") + System.getProperty("file.separator") + "output_threads";
@@ -584,7 +587,7 @@ public class TacoMain {
             Semaphore semJDyn2Dyn = new Semaphore(1);
             Semaphore semJUnitConstruction = new Semaphore(1);
 
-            int numProcessorThreads = 10;
+            int numProcessorThreads = 8;
 
             // create executor service for thread processing
             //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);
@@ -613,7 +616,7 @@ public class TacoMain {
             pendingProblems.add(initialTaskSeq);
             pendingProblems.add(initialTaskPar);
 
-        int theRunningThreads = 0;
+            int theRunningThreads = 0;
 
             long initialTime = System.currentTimeMillis();
             long previousTime = initialTime;
@@ -760,7 +763,9 @@ public class TacoMain {
                         if (numSATorUNSATinCurrentPeriod > numSATorUNSATinPreviousPeriod) {
                             timeout = Math.min(timeout + timeoutStep, maxTimeout);
                         } else {
-                            timeout = Math.max(timeout - timeoutStep, minTimeout);
+                            if (numSATorUNSATinCurrentPeriod < numSATorUNSATinPreviousPeriod) {
+                                timeout = Math.max(timeout - timeoutStep, minTimeout);
+                            }
                         }
                     }
 
@@ -794,7 +799,7 @@ public class TacoMain {
 
             winList.writeToFile();
 
-            increaseTimeout = false;
+//increaseTimeout = false;
 //        }
         return tacoAnalysisResult;
     }

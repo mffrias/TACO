@@ -66,6 +66,7 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyGenerateUnitTestCase(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyInferScope(false);
+		setConfigKeyParallelTOStep(2, 25, 3);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
 		check(GENERIC_PROPERTIES,"insert(int)", true);
 	}

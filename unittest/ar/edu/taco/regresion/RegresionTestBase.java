@@ -368,6 +368,9 @@ public class RegresionTestBase extends TestCase {
 	//PARALLEL TIMEOUT ------------------------------------------------------------------------------------
 	protected void setConfigKeyParallelTOStep(int minTimeout, int maxTimeout, int stepTimeout){
 		this.overridingProperties.put("parallelTOStep", stepTimeout + "");
+		this.overridingProperties.put("parallelMinTO", minTimeout + "");
+		this.overridingProperties.put("parallelMaxTO", maxTimeout + "");
+
 	}
 
 	/**

@@ -136,8 +136,11 @@ public class TacoMain {
         Option relevancyAnalysisOption = OptionBuilder.withLongOpt("relevancyAnalysis").withDescription("calculate the needed relevantClasses").create("ra");
         Option scopeRestrictionOption = OptionBuilder.withLongOpt("scopeRestriction").withDescription("restrict signature scope to value set in -b option")
                 .create("sr");
-        Option parallelTOStepOption = OptionBuilder.withArgName("integer").withLongOpt("timeout").hasArg().withDescription("set the number of timeout").create('t');
-        //MIssing option for Min and Max TO in command line options
+        Option parallelTOStepOption = OptionBuilder.withArgName("integer").withLongOpt("timeout").hasArg().withDescription("set the number of timeout").create("to");
+        Option parallelTOMinOption = OptionBuilder.withArgName("integer").withLongOpt("mintimeout").hasArg().withDescription("set the number of min timeout").create("minTo");
+        Option parallelTOMaxOption = OptionBuilder.withArgName("integer").withLongOpt("maxtimeout").hasArg().withDescription("set the number of max timeout").create("maxTo");
+        Option parallelNumThreadsOption = OptionBuilder.withArgName("integer").withLongOpt("threads").hasArg().withDescription("set the number of threads").create("threads");
+        //Missing option for Min and Max TO in command line options
 
 
 
@@ -164,6 +167,9 @@ public class TacoMain {
         options.addOption(relevancyAnalysisOption);
         options.addOption(scopeRestrictionOption);
         options.addOption(parallelTOStepOption);
+        options.addOption(parallelTOMinOption);
+        options.addOption(parallelTOMaxOption);
+        options.addOption(parallelNumThreadsOption);
         // options.addOption(noVerifyOption)
 
         String configFileArgument = null;
@@ -273,9 +279,20 @@ public class TacoMain {
 
             // Parallel Timeout
             if (line.hasOption(parallelTOStepOption.getOpt())) {
-
                 String parallelTimeoutStep = line.getOptionValue(parallelTOStepOption.getOpt());
                 overridingProperties.put(TacoConfigurator.PARALLEL_TIMEOUT_STEP, parallelTimeoutStep);
+            }
+            if (line.hasOption(parallelTOMinOption.getOpt())) {
+                String parallelTimeoutMin = line.getOptionValue(parallelTOMinOption.getOpt());
+                overridingProperties.put(TacoConfigurator.PARALLEL_MIN_TIMEOUT, parallelTimeoutMin);
+            }
+            if (line.hasOption(parallelTOMaxOption.getOpt())) {
+                String parallelTimeoutMax = line.getOptionValue(parallelTOMaxOption.getOpt());
+                overridingProperties.put(TacoConfigurator.PARALLEL_MAX_TIMEOUT, parallelTimeoutMax);
+            }
+            if (line.hasOption(parallelNumThreadsOption.getOpt())) {
+                String parallelNumThreads = line.getOptionValue(parallelTOMinOption.getOpt());
+                overridingProperties.put(TacoConfigurator.PARALLEL_NUM_THREADS, parallelNumThreads);
             }
 
         } catch (ParseException e) {
@@ -337,18 +354,24 @@ public class TacoMain {
         int minTimeout = 0;
         int timeout = 0; //initial timeout
         int timeoutStep = 0;
+        int numProcessorThreads = 0;
+
         if (overridingProperties.getProperty("parallelTOStep") != null) {
             timeoutStep = Integer.parseInt(overridingProperties.getProperty("parallelTOStep"));
             minTimeout = Integer.parseInt(overridingProperties.getProperty("parallelMinTO"));
             maxTimeout = Integer.parseInt(overridingProperties.getProperty("parallelMaxTO"));
+            numProcessorThreads = Integer.parseInt(overridingProperties.getProperty("parallelNumThreads"));
             timeout = minTimeout;
         } else {
             timeout = 5;
+            numProcessorThreads = 8;
         }
 
         System.out.println("TOStep = " + timeoutStep);
         System.out.println("TOMin = " + minTimeout);
         System.out.println("TOMax = " + maxTimeout);
+        System.out.println("NumOfThreads = " + numProcessorThreads);
+        System.out.println();
 
 
 
@@ -587,7 +610,6 @@ public class TacoMain {
             Semaphore semJDyn2Dyn = new Semaphore(1);
             Semaphore semJUnitConstruction = new Semaphore(1);
 
-            int numProcessorThreads = 8;
 
             // create executor service for thread processing
             //		ExecutorService translationService = Executors.newFixedThreadPool(numProcessorThreads);

@@ -44,7 +44,7 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyAttemptToCorrectBug(true);
 		setConfigKeyMaxStrykerMethodsPerFile(1);
 		setConfigKeyRemoveQuantifiers(true);
-		setConfigKeyParallelTOStep(1, 5, 2);
+		setConfigKeyParallelTOStep(5, 25, 2, 6);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
@@ -66,7 +66,7 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyGenerateUnitTestCase(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyInferScope(false);
-		setConfigKeyParallelTOStep(2, 25, 3);
+		//setConfigKeyParallelTOStep(5, 25, 2, 6);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
 		check(GENERIC_PROPERTIES,"insert(int)", true);
 	}

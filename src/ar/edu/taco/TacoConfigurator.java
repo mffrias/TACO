@@ -229,6 +229,8 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 	public static final String PARALLEL_MAX_TIMEOUT = "parallelMaxTO";
 	private static final int DEFAULT_PARALLEL_MAX_TIMEOUT = 30;
 
+	public static final String PARALLEL_NUM_THREADS = "parallelNumThreads";
+	private static final int DEFAULT_PARALLEL_NUM_THREADS = 8;
 
 	public static final String[] aux_classes = new String[]{"java.util.Set"};
 	
@@ -790,7 +792,15 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 	public int getParallelTOStep(){
 		return this.getInt(PARALLEL_TIMEOUT_STEP, DEFAULT_PARALLEL_TIMEOUT_STEP);
 	}
-
+	public int getParallelMinTO(){
+		return this.getInt(PARALLEL_MIN_TIMEOUT, DEFAULT_PARALLEL_MIN_TIMEOUT);
+	}
+	public int getParallelMAxTO(){
+		return this.getInt(PARALLEL_MAX_TIMEOUT, DEFAULT_PARALLEL_MAX_TIMEOUT);
+	}
+	public int getParallelNumThreads(){
+		return this.getInt(PARALLEL_NUM_THREADS, DEFAULT_PARALLEL_NUM_THREADS);
+	}
 	
 	public int getLowerBound() {
 		return this.getInt(NUMERIC_RANGE_QUANTIFICATION_LOWER, DEFAULT_NUMERIC_RANGE_QUANTIFICATION_LOWER);

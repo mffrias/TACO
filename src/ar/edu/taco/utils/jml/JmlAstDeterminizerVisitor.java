@@ -1525,6 +1525,16 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
     }
 
 
+    public void visitThrowStatement(/* @non_null */JThrowStatement self) {
+        JmlAstClonerExpressionVisitor theExpreCloner = new JmlAstClonerExpressionVisitor();
+        self.expr().accept(theExpreCloner);
+        JThrowStatement newThrowFirst = new JThrowStatement(self.getTokenReference(), theExpreCloner.getArrayStack().pop(), self.getComments());
+        self.expr().accept(theExpreCloner);
+        JThrowStatement newThrowSecond = new JThrowStatement(self.getTokenReference(), theExpreCloner.getArrayStack().pop(), self.getComments());
+        this.getQueue().offer(newThrowFirst);
+        this.getQueue().offer(newThrowSecond);
+    }
+
     private String getClassName(JmlClassDeclaration self) {
         String cname = self.getCClass().qualifiedName();
         cname = cname.replace('/', '_');

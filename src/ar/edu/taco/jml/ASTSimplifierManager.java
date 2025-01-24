@@ -30,6 +30,7 @@ import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 import ar.edu.taco.jml.loop.*;
 import ar.edu.taco.utils.FileUtils;
+import ar.edu.taco.utils.jml.JmlAstArrayAccessCheckerStatementVisitor;
 import org.apache.log4j.Logger;
 import org.jmlspecs.checker.JmlSourceMethod;
 import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
@@ -65,6 +66,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new BreakRemoverSimplifier());
 		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
+		simplifiers.add(new JmlAstArrayAccessCheckerStatementVisitor());
 		simplifiers.add(new BlockSimplifier());
 		simplifiers.add(new ShortcutRemoverVisitor());
 		simplifiers.add(new GhostFieldsSimplifier());

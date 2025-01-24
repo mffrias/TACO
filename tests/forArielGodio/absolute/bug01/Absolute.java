@@ -8,7 +8,8 @@ public class Absolute {
 	  @    ensures (Integer.MIN_VALUE < \old(num) && \old(num) < 0) ==> \result == -num;
 	  @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		if (0 > num)//if (0 <= num)
+		int[] A = new int[5];
+		if (0 > A[num])//if (0 <= num)
 			return num;
 		else
 			return -num;

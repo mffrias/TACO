@@ -27,6 +27,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
             JExpression leftOfOR = new JRelationalExpression(self.getTokenReference(), 14, theAccessor, constantZero);
             JExpression rightOfOR = new JRelationalExpression(self.getTokenReference(), 16, theAccessor, new JArrayLengthExpression(self.getTokenReference(), thePrefix));
             JConditionalOrExpression theOr = new JConditionalOrExpression(self.getTokenReference(), leftOfOR, rightOfOR);
+            theOr.setType(self.cond().getType());
             CClassType theExceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
 
             try {

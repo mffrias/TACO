@@ -346,9 +346,7 @@ public class TacoMain {
         TacoAnalysisResult tacoAnalysisResult;
         tacoAnalysisResult = null;
 
-
-        int numTests = 10;
-     //   boolean increaseTimeout = false;
+        //   boolean increaseTimeout = false;
 
         int maxTimeout = 0;
         int minTimeout = 0;
@@ -363,7 +361,7 @@ public class TacoMain {
             numProcessorThreads = Integer.parseInt(overridingProperties.getProperty("parallelNumThreads"));
             timeout = minTimeout;
         } else {
-            timeout = 5;
+            timeout = 1;
             numProcessorThreads = 8;
         }
 
@@ -893,6 +891,7 @@ public class TacoMain {
         ConcurrentLinkedQueue<JCompilationUnitType> newProblems = new ConcurrentLinkedQueue<JCompilationUnitType>();
         problems.offer(simpleDeterminizedUnitType);
 
+        MethodBlockCleanUpVisitor cleanUp = new MethodBlockCleanUpVisitor();
         boolean somethingWasSplit = false;
         while (problems.size() > 0 && problems.size() + newProblems.size() < size) {
 
@@ -903,13 +902,22 @@ public class TacoMain {
             if (theDeterminizer.isSplit()) {
                 somethingWasSplit = true;
                 thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                thenUnit.accept(cleanUp);
+                thenUnit = (JCompilationUnitType)cleanUp.getStack().pop();
+                cleanUp.removeAfterwards = false;
                 elseUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                elseUnit.accept(cleanUp);
+                elseUnit = (JCompilationUnitType)cleanUp.getStack().pop();
+                cleanUp.removeAfterwards = false;
                 newProblems.offer(thenUnit);
                 newProblems.offer(elseUnit);
             } else {
+                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
+                dUnitType.accept(cleanUp);
+                dUnitType = (JCompilationUnitType)cleanUp.getStack().pop();
+                cleanUp.removeAfterwards = false;
                 newProblems.offer(dUnitType);
-                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
-                thenUnit = (JCompilationUnitType) theDeterminizer.getQueue().poll();
             }
 
             if (problems.isEmpty() && !somethingWasSplit) {

@@ -1,5 +1,6 @@
 package ar.edu.taco.utils.jml;
 
+import org.jmlspecs.checker.JmlAssignmentStatement;
 import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.UnpositionedError;

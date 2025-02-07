@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
+import ar.edu.jdynalloy.xlator.JType;
 import org.jmlspecs.checker.JmlAssertStatement;
 import org.jmlspecs.checker.JmlAssignableClause;
 import org.jmlspecs.checker.JmlAssignmentStatement;
@@ -60,44 +61,9 @@ import org.jmlspecs.checker.JmlSourceMethod;
 import org.jmlspecs.checker.JmlSpecBodyClause;
 import org.jmlspecs.checker.JmlSpecCase;
 import org.jmlspecs.checker.JmlSpecification;
-import org.multijava.mjc.CClass;
-import org.multijava.mjc.CCompilationUnit;
-import org.multijava.mjc.CType;
-import org.multijava.mjc.JAssertStatement;
-import org.multijava.mjc.JBlock;
-import org.multijava.mjc.JBreakStatement;
-import org.multijava.mjc.JCatchClause;
-import org.multijava.mjc.JClassBlock;
-import org.multijava.mjc.JCompoundStatement;
-import org.multijava.mjc.JConstructorBlock;
-import org.multijava.mjc.JContinueStatement;
-import org.multijava.mjc.JDoStatement;
-import org.multijava.mjc.JEmptyStatement;
-import org.multijava.mjc.JExpressionListStatement;
-import org.multijava.mjc.JExpressionStatement;
-import org.multijava.mjc.JFieldDeclarationType;
-import org.multijava.mjc.JForStatement;
-import org.multijava.mjc.JIfStatement;
-import org.multijava.mjc.JLabeledStatement;
-import org.multijava.mjc.JMethodDeclaration;
-import org.multijava.mjc.JPackageImportType;
-import org.multijava.mjc.JPackageName;
-import org.multijava.mjc.JPhylum;
-import org.multijava.mjc.JReturnStatement;
-import org.multijava.mjc.JStatement;
-import org.multijava.mjc.JSwitchGroup;
-import org.multijava.mjc.JSwitchStatement;
-import org.multijava.mjc.JSynchronizedStatement;
-import org.multijava.mjc.JThrowStatement;
-import org.multijava.mjc.JTryCatchStatement;
-import org.multijava.mjc.JTryFinallyStatement;
-import org.multijava.mjc.JTypeDeclarationStatement;
-import org.multijava.mjc.JTypeDeclarationType;
-import org.multijava.mjc.JVariableDeclarationStatement;
-import org.multijava.mjc.JVariableDefinition;
-import org.multijava.mjc.JWhileStatement;
-import org.multijava.mjc.JmlClassDeclarationExtension;
+import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
+import org.multijava.util.compiler.PositionedError;
 import org.multijava.util.compiler.TokenReference;
 
 import ar.edu.taco.TacoException;
@@ -105,7 +71,7 @@ import ar.edu.taco.TacoNotImplementedYetException;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.simplejml.JmlBaseVisitor;
 
-public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
+public class 	JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 
 	private Stack<Object> stack = new Stack<Object>();
 
@@ -113,7 +79,9 @@ public class JmlAstClonerStatementVisitor extends JmlBaseVisitor {
 		return stack;
 	}
 
+	private Stack<JExpression> arrayStack = new Stack<>();
 
+	public Stack<JExpression> getArrayStack(){ return arrayStack;}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -605,7 +573,6 @@ public void visitSwitchGroup(JSwitchGroup self) {
 
 /** Visits the given if statement. */
 public void visitIfStatement(/* @non_null */JIfStatement self) {
-	this.getStack().push(self);
 	self.thenClause().accept(this);
 	JStatement newThen = (JStatement) this.getStack().pop();
 	JStatement newElse = null;

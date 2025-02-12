@@ -584,6 +584,18 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	@Override
+	public void visitNameExpression(JNameExpression self) {
+		JNameExpression newSelf = self;
+		String oldName = self.getName();
+		if (binding.containsKey(oldName)){
+			String newName = binding.get(oldName);
+			newSelf = new JNameExpression(self.getTokenReference(), newName);
+		}
+		this.getStack().push(newSelf);
+	}
+
+
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitCatchClause(org.multijava.mjc.JCatchClause)
 	 */

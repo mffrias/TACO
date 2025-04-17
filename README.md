@@ -79,6 +79,7 @@ TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++]
   - `./setupTACO.sh`
 
 - Change into Intellij Directory
+- go back to home directory `cd ~`
   - `cd idea-IC-whatever-numbers`, use tab to autocomplete
   - `cd bin`
 
@@ -91,6 +92,7 @@ TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++]
   - Find the location you would like to create it and give it a name
 
   - JDK version 1.7
+  - Create project
 
   - Top Left (Hamburger 4 lines) -> Project Structure ->
   Modules -> + (Plus Sign) -> Insert Modules -> Import Module ->

@@ -5,6 +5,7 @@ import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.UnpositionedError;
 
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -45,6 +46,8 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
                             new JThisExpression(self.getTokenReference()),
                             new JExpression[]{}),
                     new JavaStyleComment[]{});
+
+
             JIfStatement theIf = new JIfStatement(self.getTokenReference(), theOr, theThrow, null, self.getComments());
             theIFsAndTheIfArray[index] = theIf;
             index++;
@@ -231,6 +234,32 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
         }
 
         this.getStack().push(new JmlAssignmentStatement(assignmentStatement));
+    }
+
+    public void visitBlockStatement(JBlock self){
+        JStatement[] theArrayOfStatements = self.body();
+        Queue<JStatement> cummulativeQueue = new LinkedList<JStatement>();
+        for (JStatement s : theArrayOfStatements){
+            s.accept(this);
+            if (this.getStack().peek() instanceof JBlock){
+                JStatement[] innerSentences = ((JBlock)(this.getStack().pop())).body();
+                for (JStatement inner : innerSentences){
+                    cummulativeQueue.offer(inner);
+                }
+            } else {
+                cummulativeQueue.offer((JStatement)(this.getStack().pop()));
+            }
+        }
+
+        JStatement[] theNewArrayOfStatements = new JStatement[cummulativeQueue.size()];
+        int arrayIndex = 0;
+        for (JStatement finalStatement : cummulativeQueue){
+            theNewArrayOfStatements[arrayIndex] = finalStatement;
+            arrayIndex++;
+        }
+
+        JBlock newSelf = new JBlock(self.getTokenReference(), theNewArrayOfStatements, self.getComments());
+        this.getStack().push(newSelf);
     }
 
 }

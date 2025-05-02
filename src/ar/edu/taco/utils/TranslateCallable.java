@@ -1,6 +1,7 @@
 package ar.edu.taco.utils;
 
 import ar.edu.jdynalloy.ast.JDynAlloyModule;
+import ar.edu.jdynalloy.factory.JExpressionFactory;
 import ar.edu.taco.TacoAnalysisResult;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
@@ -86,7 +87,6 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
     Semaphore semJava2JDyn;
     Semaphore semJDyn2Dyn;
     Semaphore semJUnitConstruction;
-
     ConcurrentLinkedQueue<Message> theSharedQueue;
 
 
@@ -229,8 +229,8 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
 
         JDynAlloyModule staticFieldsModule = precompiledModules.generateStaticFieldsModule();
         jdynalloy_modules.add(staticFieldsModule);
+
         /**/
-        staticFieldsModule = null;
 
 
         //  System.out.println("<-----End JDynaAlloy static fields----->");
@@ -355,6 +355,8 @@ public class TranslateCallable implements Callable<TacoAnalysisResult> {
                 pb.redirectErrorStream(true);
                 String alloyRunner = System.getProperty("user.dir") + System.getProperty("file.separator") + "lib" + System.getProperty("file.separator") + "alloyRunner.jar";
                 pb.command("/usr/bin/java", "-Xss300m", "-jar", alloyRunner, fileToAnalyze);
+
+                //nt timeoutInSecs = TacoConfigurator.getInstance().getTimeout();
 
 
                 try {

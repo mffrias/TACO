@@ -60,6 +60,8 @@ public class JavaToJDynAlloyManager {
 		StringBuffer sb = new StringBuffer();
 
 		String modHeader = headerComment(module.getSignature().getSignatureId());
+		if (module.getModuleId().contains("sFields"))
+			System.out.println("Not broke yet" + modHeader);
 		String modBody = (String) module.accept(new JDynAlloyPrinter(TacoConfigurator.getInstance().getUseJavaArithmetic()));
 		sb.append(modHeader);
 		sb.append(modBody);

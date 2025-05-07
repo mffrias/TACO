@@ -71,6 +71,8 @@ import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
 public class JPrintStream implements IBuiltInModule {
 
+	private static JPrintStream instance = null;
+
 	private final JDynAlloyModule module;
 
 	private JPrintStream() {
@@ -78,7 +80,6 @@ public class JPrintStream implements IBuiltInModule {
 
 		JDynAlloyTyping systemFields = new JDynAlloyTyping();
 		List<JField> fields = new LinkedList<JField>();
-
 
 		JSignature signature = JSignatureFactory.buildClass(false,
 				"java_io_PrintStream", systemFields, "java_lang_Object",
@@ -105,8 +106,8 @@ public class JPrintStream implements IBuiltInModule {
 	}
 
 	private JProgramDeclaration buildPrintln() {
-		JVariableDeclaration thisDeclaration = new JVariableDeclaration(
-				THIS_VARIABLE, parse("java_io_PrintStream"));
+
+		JVariableDeclaration thisDeclaration = new JVariableDeclaration(JExpressionFactory.THIS_VARIABLE, JType.parse("java_io_PrintStream"));
 
 
 
@@ -156,7 +157,7 @@ public class JPrintStream implements IBuiltInModule {
 
 
 
-	private static JPrintStream instance = null;
+
 
 	public static JPrintStream getInstance() {
 		if (instance == null)

@@ -57,6 +57,8 @@ public class JException implements IBuiltInModule {
 
 	private static JException instance;
 
+	private final JDynAlloyModule module;
+
 	private JException() {
 		final boolean signatureIsAbstract;
 		if (JDynAlloyConfig.getInstance().getNewExceptionsAreLiterals() == true) {
@@ -114,7 +116,7 @@ public class JException implements IBuiltInModule {
 	//	private static final JBindingKey EXCEPTION_CONSTRUCTOR_KEY = new JBindingKey(
 	//			"Ljava/lang/Exception;.()V");
 
-	private final JDynAlloyModule module;
+
 	//	private final Map<JBindingKey, JProgramDeclaration> bindings;
 
 	@Override

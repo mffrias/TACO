@@ -1,4 +1,4 @@
-package genai;
+package genai.gemini;
 
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
@@ -7,12 +7,12 @@ public class AbsoluteTest extends CollectionTestBase {
 
         @Override
         protected String getClassToCheck() {
-            return "genai.Absolute";
+            return "genai.chatGPT.Absolute";
         }
 
         private void config() throws VizException {
             // To solve imports
-            setConfigKeyRelevantClasses("genai.Absolute");
+            setConfigKeyRelevantClasses("genai.chatGPT.Absolute");
 
             // Scope
             setConfigKeyUseJavaArithmetic(true);
@@ -20,7 +20,7 @@ public class AbsoluteTest extends CollectionTestBase {
             setConfigKeyInferScope(true);
             setConfigKeyObjectScope(0);
             setConfigKeyLoopUnroll(5);
-            setConfigKeyTypeScopes("genai.Absolute:1");
+            setConfigKeyTypeScopes("genai.chatGPT.Absolute:1");
 
             // Always true
             setConfigKeyRelevancyAnalysis(true);

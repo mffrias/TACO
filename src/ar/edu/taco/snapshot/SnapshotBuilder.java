@@ -111,6 +111,7 @@ public class SnapshotBuilder {
 
 		instances.put("true$0", true);
 		instances.put("false$0", true);
+		// mfrias4: check this. Shouldn't it be false for false?
 
 		instances.put("char$0", 'a');
 		instances.put("char$1", 'b');

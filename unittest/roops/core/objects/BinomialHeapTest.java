@@ -37,7 +37,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyInferScope(true);
         setConfigKeyObjectScope(0);
         setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
+        setConfigKeyLoopUnroll(6);
         setConfigKeySkolemizeInstanceInvariant(true);
         setConfigKeySkolemizeInstanceAbstraction(false);
         setConfigKeyGenerateUnitTestCase(true);
@@ -46,7 +46,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:12");
         check(GENERIC_PROPERTIES,"insert(int)", false);
     }
 

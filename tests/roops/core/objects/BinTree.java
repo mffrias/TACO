@@ -52,7 +52,7 @@ public class BinTree {
 	public boolean contains( int k ) {
 		BinTreeNode current = root;
 		while (current != null) {
-			if (current.key < k) { //mutGenLimit 1
+			if (current.key > k) { //mutGenLimit 1
 				current = current.left;
 			} else {
 				if (k > current.key) {

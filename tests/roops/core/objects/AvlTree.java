@@ -83,7 +83,7 @@ public class AvlTree {
 	@ signals (Exception e) false;
 	@*/
 	public int findMin() {
-		AvlNode n = root; 
+		AvlNode n = root;
 		if (n == null) {
 			return -1;
 		}
@@ -126,22 +126,25 @@ public class AvlTree {
 	@ requires (\forall AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element != x);
 	@ ensures (\exists AvlNode n; \reach(this.root, AvlNode, left+right).has(n) == true; n.element == x);
 	@ ensures \reach(this.root, AvlNode, left+right).int_size() == \old(\reach(this.root, AvlNode, left+right)).int_size() + 1;
- 	@ signals (Exception e) false; 
+ 	@ signals (Exception e) false;
  	@*/
-	public boolean insert(int x) {
+	public void insert(int x) {
 		AvlNode n = new AvlNode();
 		n.element = x;
-		root = privateInsert(root, n);
-		return true;
-//		size++;
+		if (root == null){
+			root = n;
+		} else {
+			root = privateInsert(root, n);
+		}
+		size++;
 	}
 
 
 
 
 	private AvlNode privateInsert(/*@nullable@*/AvlNode n, AvlNode aux) {
-		if (n == null) {
-			n = aux;
+		if (n == null){
+			return aux;
 		} else {
 			if (aux.element < n.element) {
 				n.left = privateInsert(n.left, aux);
@@ -165,6 +168,7 @@ public class AvlTree {
 				}
 			}
 		}
+
 		n.height = AvlTree.max(AvlTree.height(n.left), AvlTree.height(n.right)) + 1;
 		return n;
 	}
@@ -189,13 +193,13 @@ public class AvlTree {
 		return lhs > rhs ? lhs : rhs;
 	}
 
-	private static AvlNode rotateWithLeftChild( AvlNode k2) {
-		AvlNode k1 = k2.left;
-		k2.left = k1.right;
-		k1.right = k2;
-		k2.height = AvlTree.max(AvlTree.height(k2.left),
-				AvlTree.height(k2.right)) + 1;
-		k1.height = AvlTree.max(AvlTree.height(k1.left), k2.height) + 1;
+	private static AvlNode rotateWithLeftChild( AvlNode y) {
+		AvlNode k1 = y.left;
+		y.left = k1.right;
+		k1.right = y;
+		y.height = AvlTree.max(AvlTree.height(y.left),
+				AvlTree.height(y.right)) + 1;
+		k1.height = AvlTree.max(AvlTree.height(k1.left), y.height) + 1;
 		return k1;
 	}
 
@@ -215,12 +219,24 @@ public class AvlTree {
 	 @ ensures \result == false; 
 	 @*/
 	public boolean generateTreeInstance() {
-		if (size == 8)
+		if (size == 20)
 			return true;
 		else
 			return false;
 	}
 
 
+	public static void main(String[] args){
+		roops.core.objects.AvlTree avlTree0 = new roops.core.objects.AvlTree();
+		int int1 = avlTree0.size;
+		int int2 = avlTree0.findMin();
+		boolean boolean3 = avlTree0.generateTreeInstance();
+		int int5 = avlTree0.find((int) (short) 0);
+		avlTree0.insert((int) (short) 10);
+		int int8 = avlTree0.findMin();
+		int int9 = avlTree0.findMax();
+		// during test generation this statement threw an exception of type java.lang.NullPointerException in error
+		avlTree0.insert((-1));
+	}
 
 }

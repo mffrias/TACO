@@ -2,7 +2,7 @@ package roops.core.objects;
 
 import roops.core.objects.LinkedListNode;
 
-
+/*@nullable_by_default@*/
 public class NodeCachingLinkedList {
 
     public LinkedListNode header;
@@ -51,7 +51,10 @@ public class NodeCachingLinkedList {
 	  @ invariant this.DEFAULT_MAXIMUM_CACHE_SIZE == 3;
 	  @
 	  @ invariant this.cacheSize == \reach(this.firstCachedNode, LinkedListNode, next).int_size();
-	  @*//*@
+	  @*/
+
+
+    /*@
 	  @  requires index>=0 && index<this.size;
 	  @  requires this.maximumCacheSize == this.DEFAULT_MAXIMUM_CACHE_SIZE;
 	  @  ensures this.size == \old(this.size) - 1;
@@ -96,7 +99,7 @@ public class NodeCachingLinkedList {
         node.next.previous = node.previous;
         this.size = this.size - 1;
         this.modCount = this.modCount + 1;
-        if (this.cacheSize < this.maximumCacheSize) {
+        if (this.cacheSize <= this.maximumCacheSize) {
             LinkedListNode nextCachedNode;
             nextCachedNode = this.firstCachedNode;
             node.previous = null; 
@@ -143,5 +146,12 @@ public class NodeCachingLinkedList {
 		  }
 		  return false; //mutGenLimit 0
 	  }
+
+      /*@ requires size == 10;
+        @ ensures \result == true;
+        @*/
+      public boolean generateInstance(){
+          return false;
+      }
 
 }

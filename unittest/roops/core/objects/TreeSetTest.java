@@ -19,7 +19,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
-		setConfigKeyIntBithwidth(4);
+		setConfigKeyIntBithwidth(6);
         setConfigKeyLoopUnroll(4);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
@@ -29,7 +29,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:8");
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:15");
 		check(GENERIC_PROPERTIES,"contains(int)",false);
 	}
 
@@ -65,7 +65,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(3);
+        setConfigKeyLoopUnroll(4);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);
@@ -79,7 +79,26 @@ public class TreeSetTest extends CollectionTestBase {
 	}
 
 
-
+	public void test_generateTest() throws VizException {
+		setConfigKeyRelevantClasses("roops.core.objects.TreeSet,roops.core.objects.TreeSetEntry");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeyInferScope(true);
+		setConfigKeyObjectScope(0);
+		setConfigKeyIntBithwidth(5);
+		setConfigKeyLoopUnroll(3);
+		setConfigKeySkolemizeInstanceInvariant(true);
+		setConfigKeySkolemizeInstanceAbstraction(false);
+		setConfigKeyGenerateUnitTestCase(true);
+		setConfigKeyAttemptToCorrectBug(false);
+		setConfigKeyMaxStrykerMethodsPerFile(1);
+		setConfigKeyRemoveQuantifiers(true);
+		setConfigKeyUseJavaSBP(true);
+		setConfigKeyUseTightUpperBounds(true);
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:10");
+		check(GENERIC_PROPERTIES,"generateInstance()",false);
+	}
 
 
 }

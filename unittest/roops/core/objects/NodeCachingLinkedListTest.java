@@ -56,4 +56,25 @@ public class NodeCachingLinkedListTest extends CollectionTestBase {
 	}
 
 
+        public void test_generateInstanceTest() throws VizException {
+                setConfigKeyRelevantClasses("roops.core.objects.NodeCachingLinkedList,roops.core.objects.LinkedListNode");
+                setConfigKeyRelevancyAnalysis(true);
+                setConfigKeyCheckNullDereference(true);
+                setConfigKeyUseJavaArithmetic(false);
+                setConfigKeyInferScope(true);
+                setConfigKeyObjectScope(0);
+                setConfigKeyIntBithwidth(5);
+                setConfigKeyLoopUnroll(4);
+                setConfigKeySkolemizeInstanceInvariant(true);
+                setConfigKeySkolemizeInstanceAbstraction(false);
+                setConfigKeyGenerateUnitTestCase(true);
+                setConfigKeyAttemptToCorrectBug(false);
+                setConfigKeyMaxStrykerMethodsPerFile(1);
+                setConfigKeyRemoveQuantifiers(true);
+                setConfigKeyUseJavaSBP(true);
+                setConfigKeyUseTightUpperBounds(true);
+                setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:11");
+                check(GENERIC_PROPERTIES,"generateInstance()",true);
+        }
+
 }

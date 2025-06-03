@@ -75,7 +75,7 @@ public class JmlStage implements ITacoStage {
 	private void parse_simplified_compilation_units(List<String> files) {
 		String canonical_outdir_path;
 		try {
-			String path = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+			String path = TacoConfigurator.getInstance().getOutputDir() ;
 			File output_dir = new File(path);
 			output_dir.mkdir();
 			canonical_outdir_path = output_dir.getCanonicalPath();
@@ -126,7 +126,7 @@ public class JmlStage implements ITacoStage {
 	}
 
 	private String makeCanonicalPath() {
-		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir();
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

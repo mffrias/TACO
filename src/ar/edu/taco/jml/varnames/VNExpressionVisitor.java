@@ -21,11 +21,8 @@ package ar.edu.taco.jml.varnames;
 
 import java.util.Map;
 
-import org.multijava.mjc.JFormalParameter;
-import org.multijava.mjc.JGeneratedLocalVariable;
-import org.multijava.mjc.JLocalVariable;
-import org.multijava.mjc.JLocalVariableExpression;
-import org.multijava.mjc.JVariableDefinition;
+import ar.edu.taco.TacoNotImplementedYetException;
+import org.multijava.mjc.*;
 
 import ar.edu.taco.TacoException;
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
@@ -53,7 +50,15 @@ public class VNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		this.getArrayStack().push(newSelf);
 	}
 
+	public void visitNameExpression(JNameExpression self) {
+		JNameExpression newSelf = (JNameExpression) self.clone();
+		String newIden = newSelf.getName();
+		if (variableMapping.containsKey(newIden))
+			newIden = variableMapping.get(newIden);
 
+		newSelf = new JNameExpression(self.getTokenReference(), newIden);
+		this.getArrayStack().push(newSelf);
+	}
 
 	private String renameVariable(JLocalVariable variable) {
 		String newIden;

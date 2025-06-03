@@ -90,7 +90,7 @@ public class DynalloyStage implements ITacoStage {
 	public void execute() {
 		dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
 
-		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() ;
 		alloy_filename = output_dir + java.io.File.separator + "output" + OUTPUT_ALLOY_EXTENSION;
 		String dynalloy_filename = output_dir + java.io.File.separator + "output.dals";
 		inputDynalloyModulesFileNames = Collections.singletonList(dynalloy_filename);

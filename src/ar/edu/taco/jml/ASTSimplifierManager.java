@@ -62,7 +62,6 @@ public class ASTSimplifierManager {
 		// order of simplifiers
 		this.simplifiers = new ArrayList<JmlAstClonerStatementVisitor>();
 
-		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new BreakRemoverSimplifier());
 		simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new BlockSimplifier());
@@ -93,7 +92,7 @@ public class ASTSimplifierManager {
 
 
 	private String makeCanonicalPath() {
-		String output_dir = "output_threads/" + TacoConfigurator.getInstance().getOutputDir() + "_" + Thread.currentThread().getName();
+		String output_dir = TacoConfigurator.getInstance().getOutputDir() ;
 		File out_dir_dir = new File(output_dir);
 
 		if (!out_dir_dir.exists()) {

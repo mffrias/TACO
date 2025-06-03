@@ -7,7 +7,7 @@ public class FindFirstZero {
 	   @*/
     	 public static int findFirstZero(int[] x) {
 //         	assert x.length >= 0;  //NOT IMPLEMENTED
-         	if (x.length != 0) {//if (x.length == 0) {
+         	if (x.length == 0) {//if (x.length == 0) {
             		return -1;
         	} else {
             		int index = 0;

@@ -13,6 +13,92 @@ TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++]
 
 ## Installation
 
+### Windows
+#### Setting Up Dependencies
+
+> [!NOTE]
+> Setup within [WSL2](https://ubuntu.com/desktop/wsl)
+
+- GitHub Cli
+  - `sudo apt update`
+  - `sudo apt upgrade`
+  - `sudo apt install gh`
+  - After installation:
+    - `gh auth login -w`
+
+- Setup SSH
+  - Generate SSH Key
+    - `ssh-keygen -t ed25519 -C "your_email@example.com"`
+      - enter for default directory, enter password if
+    - `eval "$(ssh-agent -s)"`
+    - `ssh-add ~/.ssh/id_ed25519`
+
+- Change back to home
+  - `cd ~`
+
+- Install Unzip
+  - `sudo apt-get install unzip`
+
+- Install Zip
+  - `sudo apt-get install zip`
+
+- Install SDKMan
+  - `curl -s "https://get.sdkman.io" | bash`
+
+  - Then run:
+    - `source "$HOME/.sdkman/bin/sdkman-init.sh"`
+
+- Install Java 7
+  - `sdk install java 7.0.352-zulu`
+
+- Copy `java` to `/usr/bin/`
+  - Java is located at: `.sdkman/candidates/java/7.0.352-zulu/bin/java`
+
+  - Copy with:
+    - `cp .sdkman/candidates/java/7.0.352-zulu/bin/java /usr/bin/`
+
+- Install Ant 1.9
+  - `sdk install ant 1.9.15`
+
+- Intellij Installation
+  - `wget https://download.jetbrains.com/idea/ideaIC-2024.2.4.tar.gz`
+
+  - Untar/unzip with:
+    - `tar -xvf ideaIC-2024.2.4.tar.gz`
+
+- Close terminal and open new terminal
+
+#### TACO Setup
+
+- [GitHub](https://github.com/mffrias/TACO):
+  - Go to `Code` and copy link
+
+- In `Terminal` run:
+  - `git clone https://github.com/mffrias/TACO`
+  - `cd TACO`
+  - `./setupTACO.sh`
+
+- Change into Intellij Directory
+- go back to home directory `cd ~`
+  - `cd idea-IC-whatever-numbers`, use tab to autocomplete
+  - `cd bin`
+
+  - Open Intellij:
+    - `./idea`
+
+- Setup Project
+  - Create new project
+
+  - Find the location you would like to create it and give it a name
+
+  - JDK version 1.7
+  - Create project
+
+  - Top Left (Hamburger 4 lines) -> Project Structure ->
+  Modules -> + (Plus Sign) -> Insert Modules -> Import Module ->
+  Create from Existing Sources -> Select TACO directory
+
+### Unix/Linux
 Download this repository and execute `./setupTACO.sh`^. This script will download the following repositories:
 
  * This one if this script was downloaded elsewhere or it can't find TACO's `build.xml` file.

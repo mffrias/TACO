@@ -65,14 +65,14 @@ public class ASTSimplifierManager {
 		// order of simplifiers
 		this.simplifiers = new ArrayList<JmlAstClonerStatementVisitor>();
 
-		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
-		simplifiers.add(new JmlAstDivisionCheckerStatementVisitor());
 		simplifiers.add(new BreakRemoverSimplifier());
 		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
-		simplifiers.add(new JmlAstArrayAccessCheckerStatementVisitor());
 		simplifiers.add(new ThrowEncapsulatorVisitor());
-		simplifiers.add(new BlockSimplifier());
+		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
+		simplifiers.add(new JmlAstDivisionCheckerStatementVisitor());
+		simplifiers.add(new JmlAstArrayAccessCheckerStatementVisitor());
+//		simplifiers.add(new BlockSimplifier());
 		simplifiers.add(new ShortcutRemoverVisitor());
 		simplifiers.add(new GhostFieldsSimplifier());
 		simplifiers.add(new DefaultConstructorSimplifier());

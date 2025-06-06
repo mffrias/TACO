@@ -17,11 +17,11 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
 public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor {
 
-	@Override
-	public void visitReturnStatement(/* @non_null */JReturnStatement self) {
-		JIfStatement newSelf = new JIfStatement(self.getTokenReference(), new JBooleanLiteral(self.getTokenReference(), true), self, null, null);
-		this.getStack().push(newSelf);
-	}
+//	@Override
+//	public void visitReturnStatement(/* @non_null */JReturnStatement self) {
+//		JIfStatement newSelf = new JIfStatement(self.getTokenReference(), new JBooleanLiteral(self.getTokenReference(), true), self, null, null);
+//		this.getStack().push(newSelf);
+//	}
 
 
 	@Override
@@ -43,18 +43,63 @@ public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor 
 		}
 
 		if (!self.returnType().isVoid()){
-			JExpression defaultValueExpre = null;
-			if (self.returnType().isReference())
-				defaultValueExpre = new JNullLiteral(self.getTokenReference());
-			if (self.returnType().isOrdinal())
-				defaultValueExpre = new JOrdinalLiteral(self.getTokenReference(), "0");
-			if (self.returnType().isFloatingPoint())
-				defaultValueExpre = new JRealLiteral(self.getTokenReference(), "0f");
-			if (self.returnType().isBoolean())
-				defaultValueExpre = new JBooleanLiteral(self.getTokenReference(), false);
+			boolean alreadyHasReturn = false;
+			for (JStatement stmt : newBody.body()){
+				if (stmt instanceof JReturnStatement || (stmt instanceof  JIfStatement && ((JIfStatement) stmt).thenClause() instanceof JReturnStatement)) {
+					alreadyHasReturn = true;
+					break;
+				}
+			}
 
-			JReturnStatement returnStatement = new JReturnStatement(self.getTokenReference(), defaultValueExpre, null);
-			newBody = new JBlock(self.getTokenReference(), new JStatement[]{newBody, returnStatement}, null);
+			if (!alreadyHasReturn) {
+
+				JExpression defaultValueExpre = null;
+				if (self.returnType().isReference())
+					defaultValueExpre = new JNullLiteral(self.getTokenReference());
+				if (self.returnType().isOrdinal())
+					defaultValueExpre = new JOrdinalLiteral(self.getTokenReference(), "0");
+				if (self.returnType().isFloatingPoint())
+					defaultValueExpre = new JRealLiteral(self.getTokenReference(), "0f");
+				if (self.returnType().isBoolean())
+					defaultValueExpre = new JBooleanLiteral(self.getTokenReference(), false);
+
+				JReturnStatement returnStatement = new JReturnStatement(self.getTokenReference(), defaultValueExpre, null);
+
+					JStatement[] stmts = newBody.body();
+					JStatement[] extended = new JStatement[stmts.length + 1];
+
+					System.arraycopy(stmts, 0, extended, 0, stmts.length);
+					extended[stmts.length] = returnStatement;
+
+					newBody = new JBlock(self.getTokenReference(), extended, newBody.getComments());
+			}
+
+//		if (!self.returnType().isVoid()){
+//			JExpression defaultValueExpre = null;
+//			if (self.returnType().isReference())
+//				defaultValueExpre = new JNullLiteral(self.getTokenReference());
+//			if (self.returnType().isOrdinal())
+//				defaultValueExpre = new JOrdinalLiteral(self.getTokenReference(), "0");
+//			if (self.returnType().isFloatingPoint())
+//				defaultValueExpre = new JRealLiteral(self.getTokenReference(), "0f");
+//			if (self.returnType().isBoolean())
+//				defaultValueExpre = new JBooleanLiteral(self.getTokenReference(), false);
+//
+//			JReturnStatement returnStatement = new JReturnStatement(self.getTokenReference(), defaultValueExpre, null);
+//			//newBody = new JBlock(self.getTokenReference(), new JStatement[]{newBody, returnStatement}, null);
+//
+//			if (newBody != null){
+//				JStatement[] existingStatements = newBody.body();
+//				JStatement[] newStatements = new JStatement[existingStatements.length + 1];
+//
+//				System.arraycopy(existingStatements, 0, newStatements, 0, existingStatements.length);
+//				newStatements[existingStatements.length] = returnStatement;
+//
+//				newBody = new JBlock(self.getTokenReference(), newStatements, newBody.getComments());
+//
+//			} else{
+//				newBody = new JBlock(self.getTokenReference(), new JStatement[]{returnStatement}, null);
+//			}
 		}
 		self.setBody(newBody);
 

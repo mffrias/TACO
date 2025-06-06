@@ -461,7 +461,12 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 				}
 
 				//				JBlock newMethodBody = new JConstructorBlock(self.getTokenReference(), newBody.toArray(new JStatement[newBody.size()]));
-				JBlock newMethodBody = new JBlock(self.getTokenReference(), newBody.toArray(new JStatement[newBody.size()]), null);
+				JBlock newMethodBody;
+				if (newBody.size() > 1) {
+					newMethodBody = new JBlock(self.getTokenReference(), newBody.toArray(new JStatement[newBody.size()]), null);
+				} else {
+					newMethodBody = (JBlock) newBody.get(0);
+				}
 				JmlMethodDeclaration newSelf = JmlMethodDeclaration.makeInstance(self.getTokenReference(), self.modifiers(), self.typevariables(), self.returnType(), self.ident(), self.parameters(), self.getExceptions(), newMethodBody, self.javadocComment(), new JavaStyleComment[0], theNewSpec);
 				this.getStack().push(newSelf);
 			} else {

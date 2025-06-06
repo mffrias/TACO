@@ -28,6 +28,7 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
+		setConfigKeyParallelTOStep(5, 10, 2, 8);
 		setConfigKeyTypeScopes("forArielGodio.absolute.bug01.Absolute:1");
 		check(GENERIC_PROPERTIES,"absoluteInt(int)",true);
 	}

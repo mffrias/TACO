@@ -33,8 +33,21 @@ import org.multijava.util.compiler.TokenReference;
 public class ASTUtils {
 
     public static JIfStatement createIfStatement(JExpression condition, JStatement thenStatement, JStatement elseStatement, JavaStyleComment[] comments) {
-	JStatement newThenStatement = new JBlock(condition.getTokenReference(), new JStatement[] { thenStatement }, null);
-	JStatement newElseStatement = elseStatement == null ? null : new JBlock(condition.getTokenReference(), new JStatement[] { elseStatement }, null);
+	JStatement newThenStatement;
+	if (thenStatement instanceof JBlock)
+		newThenStatement = thenStatement;
+	else
+		newThenStatement = new JBlock(condition.getTokenReference(), new JStatement[] { thenStatement }, null);
+
+	JStatement newElseStatement = null;
+	if (elseStatement != null) {
+		if (elseStatement instanceof JBlock) {
+			newElseStatement = elseStatement;
+		} else {
+			newElseStatement = new JBlock(condition.getTokenReference(), new JStatement[]{elseStatement}, null);
+		}
+	}
+
 	return new JIfStatement(condition.getTokenReference(), condition, newThenStatement, newElseStatement, null);
     }
 
@@ -65,17 +78,17 @@ public class ASTUtils {
     }
 
     public static JBlock createBlockStatement(JStatement statement) {
-	if (statement == null) {
-	    return null;
-	} else if (statement instanceof JBlock) {
-	    return (JBlock) statement;
-	} else if (statement instanceof JExpressionListStatement) {
-	    return createBlockStatement((JExpressionListStatement) statement);
-	} else if (statement instanceof JCompoundStatement) {
-	    return createBlockStatement((JCompoundStatement) statement);
-	} else {
-	    return createBlockStatement(new JStatement[] { statement });
-	}
+		if (statement == null) {
+	    	return null;
+		} else if (statement instanceof JBlock) {
+	    	return (JBlock) statement;
+		} else if (statement instanceof JExpressionListStatement) {
+	    	return createBlockStatement((JExpressionListStatement) statement);
+		} else if (statement instanceof JCompoundStatement) {
+	    	return createBlockStatement((JCompoundStatement) statement);
+		} else {
+	    	return createBlockStatement(new JStatement[] { statement });
+		}
     }
 
     public static JBlock createBlockStatement(JStatement statement1, JStatement statement2) {

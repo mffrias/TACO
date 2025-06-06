@@ -205,12 +205,6 @@ public class BreakRemoverSimplifier extends JmlAstClonerStatementVisitor {
         this.getStack().push(blockWithForAndAddedVarDecls);
         this.collectedBreaks = oldBreaks;
     }
-
-
-
-
-
-
 }
 
 

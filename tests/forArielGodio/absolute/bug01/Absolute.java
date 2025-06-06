@@ -9,11 +9,15 @@ public class Absolute {
 	  @    signals (Exception e) false;
 	  @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		int[] A = new int[5];
-		if (0 > A[num])//if (0 <= num)
-			return num;
-		else
-			return -num;
+//		int[] A = new int[5];
+//		if (0 > A[num])//if (0 <= num)
+//			return num;
+//		else
+//			return -num;
+		int i = 3/num;
+
+		int j = i++;
+		return i;
 	}
 
 	/*@    ensures (0L <= \old(num) && \old(num) <= Long.MAX_VALUE) ==> \result == num;

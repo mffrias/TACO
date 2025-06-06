@@ -63,16 +63,16 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 			JAssignmentExpression assExpreOldParam = new JAssignmentExpression(e.getTokenReference(), new_e_expre, oldParam);
 			JExpressionStatement jesOldParam = new JExpressionStatement(self.getTokenReference(), assExpreOldParam, null);
 			JmlAssignmentStatement assStOldParam = new JmlAssignmentStatement(jesOldParam);
-			
+
 			newVarDefs.add(new_e_VariableDeclarationStatement);
 			newVarDefs.add(assStOldParam);
 			binding.put(e.ident(), createdParamVar);
 		}
-		
+
 		JVarSubstitutorVisitor visitor = new JVarSubstitutorVisitor(binding);
 		self.body().accept(visitor);
 		JBlock newBody = (JBlock)visitor.getStack().pop();
-		
+
 		JStatement[] newStatements = new JStatement[newVarDefs.size() + 1];
 		for (int idx = 0; idx < newVarDefs.size(); idx++){
 			newStatements[idx] = newVarDefs.get(idx);
@@ -82,19 +82,19 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 		JConstructorBlock extendedBody = new JConstructorBlock(self.getTokenReference(), newStatements);
 		JConstructorDeclaration newSelf = new JConstructorDeclaration(self.getTokenReference(), self.modifiers(), self.ident(), self.parameters(), self.getExceptions(), extendedBody);
 		this.getStack().push(newSelf);
-		
-		
-	
+
+
+
 
 	}
-	
-	
+
+
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self){
 		JFormalParameter[] args = self.parameters();
 		LinkedList<JStatement> newVarDefs = new LinkedList<JStatement>();
 		HashMap<String, String> binding = new HashMap<String, String>();
-		
+
 		for (int idx = 0; idx < args.length; idx++){
 			JFormalParameter e = args[idx];
 
@@ -107,28 +107,38 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 			JAssignmentExpression assExpreOldParam = new JAssignmentExpression(e.getTokenReference(), new_e_expre, oldParam);
 			JExpressionStatement jesOldParam = new JExpressionStatement(self.getTokenReference(), assExpreOldParam, null);
 			JmlAssignmentStatement assStOldParam = new JmlAssignmentStatement(jesOldParam);
-			
+
 			newVarDefs.add(new_e_VariableDeclarationStatement);
 			newVarDefs.add(assStOldParam);
 			binding.put(e.ident(), createdParamVar);
 		}
-		
+
 		JVarSubstitutorVisitor visitor = new JVarSubstitutorVisitor(binding);
 		self.body().accept(visitor);
 		JBlock newBody = (JBlock)visitor.getStack().pop();
-		
-		JStatement[] newStatements = new JStatement[newVarDefs.size() + 1];
+
+		//extract the statements of newBody
+		JStatement[] bodyStatements = newBody.body();
+		JStatement[] newStatements = new JStatement[newVarDefs.size() + bodyStatements.length];
+		//JStatement[] newStatements = new JStatement[newVarDefs.size() + 1];
+
 		for (int idx = 0; idx < newVarDefs.size(); idx++){
 			newStatements[idx] = newVarDefs.get(idx);
 		}
-		newStatements[newVarDefs.size()] = newBody;
+
+		//newStatements[newVarDefs.size()] = newBody;
+
+		//Statements with the original body
+		for (int i = 0; i < bodyStatements.length; i++){
+			newStatements[newVarDefs.size() + i] = bodyStatements[i];
+		}
 
 		JBlock extendedBody = new JBlock(self.body().getTokenReference(), newStatements, self.body().getComments());
 		JmlMethodDeclaration newSelf = JmlMethodDeclaration.makeInstance(self.getTokenReference(), self.modifiers(), self.typevariables(), self.returnType(), self.ident(), self.parameters(), self.getExceptions(), extendedBody, self.javadocComment(), null, self.methodSpecification());
 		this.getStack().push(newSelf);
 
 	}
-	
+
 	private String createNewParameterName(String inputName){
 		return "param_" + inputName + "_" + newParameterIndex++;
 	}
@@ -299,8 +309,8 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 //
 //		this.getStack().push(newIfStatement);
 //	}
-//	
-//	
+//
+//
 //	@Override
 //	public void visitAssertStatement(JAssertStatement self){
 //		VNExpressionVisitor conditionSimplifierVisitor = new VNExpressionVisitor(variableMapping);
@@ -312,29 +322,29 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 //		this.getStack().push(newAssertStatement);
 //
 //	}
-//	
+//
 //	@Override
 //	public void visitJmlLoopStatement(JmlLoopStatement self) {
 //		JmlLoopInvariant[] newJmlLoopInvariants = new JmlLoopInvariant[self.loopInvariants().length];
 //		for (int x = 0; x < self.loopInvariants().length; x++) {
 //			JmlLoopInvariant aJmlLoopInvariant = self.loopInvariants()[x];
 //			VNExpressionVisitor exprSimplifierVisitor = new VNExpressionVisitor(variableMapping);
-//			
+//
 //			aJmlLoopInvariant.predicate().specExpression().expression().accept(exprSimplifierVisitor);
 //			JExpression expr = exprSimplifierVisitor.getArrayStack().pop();
 //			JmlPredicate newJmlPredicate = new JmlPredicate(new JmlSpecExpression(expr));
-//			
+//
 //			JmlLoopInvariant newJmlLoopInvariant = new JmlLoopInvariant(aJmlLoopInvariant.getTokenReference(), aJmlLoopInvariant.isRedundantly(), newJmlPredicate);
 //			newJmlLoopInvariants[x] = newJmlLoopInvariant;
 //		}
-//		
+//
 //		VNBlockVisitor visitor = new VNBlockVisitor(variableMapping);
 //		self.stmt().accept(visitor);
 //
 //		JStatement newStatement = (JStatement) visitor.getStack().pop();
-//		
+//
 //		JmlLoopStatement newJmlLoopStatement = new JmlLoopStatement(self.getTokenReference(), newJmlLoopInvariants, self.variantFunctions(), newStatement, self.getComments());
-//		
+//
 //		this.getStack().push(newJmlLoopStatement);
 //	}
 //
@@ -412,11 +422,11 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 //		 * JExpressionStatement newAssignamentStatement = new
 //		 * JmlAssignmentStatement(self.getTokenReference(), newExpression,
 //		 * self.getComments());
-//		 * 
-//		 * 
-//		 * 
-//		 * 
-//		 * 
+//		 *
+//		 *
+//		 *
+//		 *
+//		 *
 //		 * this.getDeclarationStatements().addAll(visitor.getDeclarationStatements
 //		 * ()); this.getNewStatements().addAll(visitor.getNewStatements());
 //		 * getStack().push(newAssignamentStatement);
@@ -505,18 +515,18 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 //
 //		this.getStack().push(newSelf);
 //	}
-//	
+//
 //	@Override
 //	public void visitJmlLoopInvariant(JmlLoopInvariant self) {
 //		VNExpressionVisitor exprSimplifierVisitor = new VNExpressionVisitor(variableMapping);
 //		JExpression expr = null;
 //
 //		self.predicate().specExpression().expression().accept(exprSimplifierVisitor);
-//		
+//
 //		expr = exprSimplifierVisitor.getArrayStack().pop();
-//		
+//
 //		JmlPredicate jmlPredicate = new JmlPredicate(new JmlSpecExpression(expr));
-//		
+//
 //		JmlLoopInvariant newSelf = new JmlLoopInvariant(self.getTokenReference(), self.isRedundantly(), jmlPredicate);
 //
 //		this.getStack().push(newSelf);

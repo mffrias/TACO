@@ -295,7 +295,4 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
         JBlock newSelf = new JBlock(self.getTokenReference(), theNewArrayOfStatements, self.getComments());
         this.getStack().push(newSelf);
     }
-
-
-
 }

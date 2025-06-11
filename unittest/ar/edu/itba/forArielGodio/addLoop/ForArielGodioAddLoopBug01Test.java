@@ -15,6 +15,7 @@ public class ForArielGodioAddLoopBug01Test extends CollectionTestBase {
 		setConfigKeyRelevantClasses("forArielGodio.addLoop.bug01.AddLoop");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckArithmeticException(false);
 		setConfigKeyUseJavaArithmetic(true);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
@@ -28,6 +29,7 @@ public class ForArielGodioAddLoopBug01Test extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
+		setConfigKeyParallelTOStep(5, 10, 2, 8);
 		setConfigKeyTypeScopes("forArielGodio.addLoop.bug01.AddLoop:1");
 		check(GENERIC_PROPERTIES,"addLoop(int, int)",true);
 	}

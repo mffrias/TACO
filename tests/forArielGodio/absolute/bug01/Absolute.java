@@ -14,10 +14,28 @@ public class Absolute {
 //			return num;
 //		else
 //			return -num;
-		int i = 3/num;
 
+		int i = 3/num;
 		int j = i++;
-		return i;
+		if (i >= 0){
+			if(j >= 0){
+				j = i;
+			}
+		} else {
+			i = j;
+		}
+		return num;
+
+//		int x = 1;
+//		int y = 2;
+//		int sum = x;
+//		if (y <= 0) {
+//			int n = y;
+//		} else {
+//			int n = -y;
+//		}
+//		return sum;
+
 	}
 
 	/*@    ensures (0L <= \old(num) && \old(num) <= Long.MAX_VALUE) ==> \result == num;

@@ -35,16 +35,14 @@ program java_lang_IntArray::int_array_read[
 Implementation 
 {
   throw:=null;
-  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray_length]) {
-    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+
+  if pred_in[index , (thiz.java_lang_IntArray_contents).univ] {
+    return := index.(thiz.java_lang_IntArray_contents);
   } else {
-    if pred_in[index , (thiz.java_lang_IntArray_contents).univ] {
-      return := index.(thiz.java_lang_IntArray_contents);
-    } else {
-      havoc return;
-      assume pred_java_primitive_integer_value_eq_zero[return];
-    };
+    havoc return;
+    assume pred_java_primitive_integer_value_eq_zero[return];
   };
+
   skip;
 }
 
@@ -56,11 +54,7 @@ program java_lang_IntArray::int_array_write[
 Implementation 
 {
   throw:=null;
-  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray_length]) {
-    throw:=java_lang_IndexOutOfBoundsExceptionLit;
-  } else {
-    thiz.java_lang_IntArray_contents := (thiz.java_lang_IntArray_contents) ++ (index->new_value);
-  };
+  thiz.java_lang_IntArray_contents := (thiz.java_lang_IntArray_contents) ++ (index->new_value);
   skip;
 }
 

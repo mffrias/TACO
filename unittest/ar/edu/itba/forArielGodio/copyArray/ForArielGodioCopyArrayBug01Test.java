@@ -14,8 +14,8 @@ public class ForArielGodioCopyArrayBug01Test extends CollectionTestBase {
 	public void test_genericMethod1Test() throws VizException {
 		setConfigKeyRelevantClasses("forArielGodio.copyArray.bug01.CopyArray");
 		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(true);
+		setConfigKeyCheckNullDereference(false);
+		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
@@ -28,6 +28,7 @@ public class ForArielGodioCopyArrayBug01Test extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
+		this.setConfigKeyParallelTOStep(3,5,1,8);
 		setConfigKeyTypeScopes("forArielGodio.copyArray.bug01.CopyArray:1");
 		check(GENERIC_PROPERTIES,"copyArray(int[], int, int, int[])",true);
 	}

@@ -15,9 +15,7 @@ public class CardinalSizeOfPlugin implements AlloyStringPlugin {
 	 */
 	@Override
 	public String transform(String input) {
-
 		if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
-
 			String java_primitive_integer_value_sig_id = JavaPrimitiveIntegerValue.getInstance().getModule().getSignature().getSignatureId();
 			if (input.contains(java_primitive_integer_value_sig_id)) {
 

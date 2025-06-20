@@ -14,7 +14,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
 
 
     public void visitIfStatement(/* @non_null */JIfStatement self) {
-        this.getStack().push(self);
+        this.getStack().push(self); //mfrias4: should this be here?
         JmlAstArrayAccessCheckerExpressionVisitor theExpressionVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
         self.cond().accept(theExpressionVisitor);
         Queue<JArrayAccessExpression> theQueue = theExpressionVisitor.getArrayAccessQueue();
@@ -126,140 +126,221 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
 
         //JAssignmentExpression newSelf = (JAssignmentExpression) assignmentExpression.left(), assignmentExpression.right();
         JExpression left = assignmentExpression.left();
-        if(left instanceof JArrayAccessExpression){
-            JArrayAccessExpression arrayAccessLeft = (JArrayAccessExpression) left;
-            JExpression leftPrefix = arrayAccessLeft.prefix();
-            JExpression leftAccessor = arrayAccessLeft.accessor();
 
-            JmlAstArrayAccessCheckerExpressionVisitor leftVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
-            leftAccessor.accept(leftVisitor);
-            Queue<JArrayAccessExpression> arrayAccessQueueLeft = leftVisitor.getArrayAccessQueue();
+        JmlAstArrayAccessCheckerExpressionVisitor leftVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
+        left.accept(leftVisitor);
+        Queue<JArrayAccessExpression> arrayAccessQueueLeft = leftVisitor.getArrayAccessQueue();
 
-            JStatement[] ifsAndAssignment = new JStatement[arrayAccessQueueLeft.size() + 1];
-            int indexLeft = 0;
-
-            while(!arrayAccessQueueLeft.isEmpty()){
-                JArrayAccessExpression arrayAccess = arrayAccessQueueLeft.poll();
-                JExpression prefix = arrayAccess.prefix();
-                JExpression accessor = arrayAccess.accessor();
-
-                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
-                JExpression leftRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
-                JExpression leftLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
-
-                JConditionalOrExpression leftOr = new JConditionalOrExpression(self.getTokenReference(), leftRelationalCheck, leftLengthCheck);
-                leftOr.setType(CStdType.Boolean);
-
-                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
-
-                try {
-                    exceptionType.checkType(null);
-                } catch (UnpositionedError e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                JThrowStatement leftThrowStatement = new JThrowStatement(
-                        self.getTokenReference(),
-                        new JNewObjectExpression(
-                                self.getTokenReference(),
-                                exceptionType,
-                                new JThisExpression(self.getTokenReference()),
-                                new JExpression[]{}),
-                        new JavaStyleComment[]{});
-
-                JIfStatement leftIf = new JIfStatement(self.getTokenReference(), leftOr, leftThrowStatement, null, null);
-                ifsAndAssignment[indexLeft] = leftIf;
-                indexLeft++;
-            }
-            ifsAndAssignment[indexLeft] = assignmentStatement;
-            JBlock block = new JBlock(self.getTokenReference(), ifsAndAssignment, self.getComments());
-            this.getStack().push(block);
-
-        }else{
-
-            this.getStack().push(new JmlAssignmentStatement(assignmentStatement));
-        }
 
         JExpression right = assignmentExpression.right();
-        if(right instanceof JArrayAccessExpression){
-            JArrayAccessExpression arrayAccessRight = (JArrayAccessExpression) right;
-            JExpression rightPrefix = arrayAccessRight.prefix();
-            JExpression rightAccessor = arrayAccessRight.accessor();
 
-            JmlAstArrayAccessCheckerExpressionVisitor rightVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
-            rightAccessor.accept(rightVisitor);
-            Queue<JArrayAccessExpression> arrayAccessQueueRight = rightVisitor.getArrayAccessQueue();
+        JmlAstArrayAccessCheckerExpressionVisitor rightVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
+        right.accept(rightVisitor);
+        Queue<JArrayAccessExpression> arrayAccessQueueRight = rightVisitor.getArrayAccessQueue();
 
-            JStatement[] ifsAndAssignmentRight = new JStatement[arrayAccessQueueRight.size() + 1];
-            int indexRight = 0;
 
-            while(!arrayAccessQueueRight.isEmpty()){
-                JArrayAccessExpression arrayAccess = arrayAccessQueueRight.poll();
-                JExpression prefix = arrayAccess.prefix();
-                JExpression accessor = arrayAccess.accessor();
+        JStatement[] ifsAndAssignment = new JStatement[arrayAccessQueueLeft.size() + arrayAccessQueueRight.size() + 1];
+        int indexLeft = 0;
 
-                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
-                JExpression rightRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
-                JExpression rightLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
+        while(!arrayAccessQueueLeft.isEmpty()){
+            JArrayAccessExpression arrayAccess = arrayAccessQueueLeft.poll();
+            JExpression prefix = arrayAccess.prefix();
+            JExpression accessor = arrayAccess.accessor();
 
-                JConditionalOrExpression rightOr = new JConditionalOrExpression(self.getTokenReference(), rightRelationalCheck, rightLengthCheck);
-                rightOr.setType(CStdType.Boolean);
+            JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+            JExpression leftRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
+            JExpression leftLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
 
-                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            JConditionalOrExpression leftOr = new JConditionalOrExpression(self.getTokenReference(), leftRelationalCheck, leftLengthCheck);
+            leftOr.setType(CStdType.Boolean);
 
-                try {
-                    exceptionType.checkType(null);
-                } catch (UnpositionedError e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
 
-                JThrowStatement rightThrowStatement = new JThrowStatement(
-                        self.getTokenReference(),
-                        new JNewObjectExpression(
-                                self.getTokenReference(),
-                                exceptionType,
-                                new JThisExpression(self.getTokenReference()),
-                                new JExpression[]{}),
-                        new JavaStyleComment[]{});
-                JIfStatement rightIf = new JIfStatement(self.getTokenReference(), rightOr, rightThrowStatement, null, null);
-                ifsAndAssignmentRight[indexRight] = rightIf;
-                indexRight++;
-
+            try {
+                exceptionType.checkType(null);
+            } catch (UnpositionedError e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-            ifsAndAssignmentRight[indexRight] = assignmentStatement;
-            JBlock block = new JBlock(self.getTokenReference(), ifsAndAssignmentRight, self.getComments());
-            this.getStack().push(block);
+
+            JThrowStatement leftThrowStatement = new JThrowStatement(
+                    self.getTokenReference(),
+                    new JNewObjectExpression(
+                            self.getTokenReference(),
+                            exceptionType,
+                            new JThisExpression(self.getTokenReference()),
+                            new JExpression[]{}),
+                    new JavaStyleComment[]{});
+
+            JIfStatement leftIf = new JIfStatement(self.getTokenReference(), leftOr, leftThrowStatement, null, null);
+            ifsAndAssignment[indexLeft] = leftIf;
+            indexLeft++;
         }
 
-        this.getStack().push(new JmlAssignmentStatement(assignmentStatement));
+        int indexRight = indexLeft;
+
+        while(!arrayAccessQueueRight.isEmpty()){
+            JArrayAccessExpression arrayAccess = arrayAccessQueueRight.poll();
+            JExpression prefix = arrayAccess.prefix();
+            JExpression accessor = arrayAccess.accessor();
+
+            JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+            JExpression rightRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
+            JExpression rightLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
+
+            JConditionalOrExpression rightOr = new JConditionalOrExpression(self.getTokenReference(), rightRelationalCheck, rightLengthCheck);
+            rightOr.setType(CStdType.Boolean);
+
+            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+
+            try {
+                exceptionType.checkType(null);
+            } catch (UnpositionedError e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            JThrowStatement rightThrowStatement = new JThrowStatement(
+                    self.getTokenReference(),
+                    new JNewObjectExpression(
+                            self.getTokenReference(),
+                            exceptionType,
+                            new JThisExpression(self.getTokenReference()),
+                            new JExpression[]{}),
+                    new JavaStyleComment[]{});
+            JIfStatement rightIf = new JIfStatement(self.getTokenReference(), rightOr, rightThrowStatement, null, null);
+            ifsAndAssignment[indexRight] = rightIf;
+            indexRight++;
+
+        }
+
+
+        ifsAndAssignment[indexRight] = new JmlAssignmentStatement(assignmentStatement);
+        JBlock  theBlock = new JBlock(self.getTokenReference(), ifsAndAssignment, self.getComments());
+        this.getStack().push(theBlock);
+
     }
 
-    public void visitBlockStatement(JBlock self){
-        JStatement[] theArrayOfStatements = self.body();
-        Queue<JStatement> cummulativeQueue = new LinkedList<JStatement>();
-        for (JStatement s : theArrayOfStatements){
-            s.accept(this);
-            if (this.getStack().peek() instanceof JBlock){
-                JStatement[] innerSentences = ((JBlock)(this.getStack().pop())).body();
-                for (JStatement inner : innerSentences){
-                    cummulativeQueue.offer(inner);
-                }
-            } else {
-                cummulativeQueue.offer((JStatement)(this.getStack().pop()));
-            }
-        }
 
-        JStatement[] theNewArrayOfStatements = new JStatement[cummulativeQueue.size()];
-        int arrayIndex = 0;
-        for (JStatement finalStatement : cummulativeQueue){
-            theNewArrayOfStatements[arrayIndex] = finalStatement;
-            arrayIndex++;
-        }
+//    public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
+//        self.assignmentStatement().accept(this);
+//
+//        JExpressionStatement assignmentStatement = (JExpressionStatement) this.getStack().pop();
+//        JAssignmentExpression assignmentExpression = (JAssignmentExpression) assignmentStatement.expr();
+//
+//        //JAssignmentExpression newSelf = (JAssignmentExpression) assignmentExpression.left(), assignmentExpression.right();
+//        JExpression left = assignmentExpression.left();
+//        if(left instanceof JArrayAccessExpression){
+//            JArrayAccessExpression arrayAccessLeft = (JArrayAccessExpression) left;
+//            JExpression leftPrefix = arrayAccessLeft.prefix();
+//            JExpression leftAccessor = arrayAccessLeft.accessor();
+//
+//            JmlAstArrayAccessCheckerExpressionVisitor leftVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
+//            leftAccessor.accept(leftVisitor);
+//            Queue<JArrayAccessExpression> arrayAccessQueueLeft = leftVisitor.getArrayAccessQueue();
+//
+//            JStatement[] ifsAndAssignment = new JStatement[arrayAccessQueueLeft.size() + 1];
+//            int indexLeft = 0;
+//
+//            while(!arrayAccessQueueLeft.isEmpty()){
+//                JArrayAccessExpression arrayAccess = arrayAccessQueueLeft.poll();
+//                JExpression prefix = arrayAccess.prefix();
+//                JExpression accessor = arrayAccess.accessor();
+//
+//                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+//                JExpression leftRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
+//                JExpression leftLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
+//
+//                JConditionalOrExpression leftOr = new JConditionalOrExpression(self.getTokenReference(), leftRelationalCheck, leftLengthCheck);
+//                leftOr.setType(CStdType.Boolean);
+//
+//                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+//
+//                try {
+//                    exceptionType.checkType(null);
+//                } catch (UnpositionedError e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//
+//                JThrowStatement leftThrowStatement = new JThrowStatement(
+//                        self.getTokenReference(),
+//                        new JNewObjectExpression(
+//                                self.getTokenReference(),
+//                                exceptionType,
+//                                new JThisExpression(self.getTokenReference()),
+//                                new JExpression[]{}),
+//                        new JavaStyleComment[]{});
+//
+//                JIfStatement leftIf = new JIfStatement(self.getTokenReference(), leftOr, leftThrowStatement, null, null);
+//                ifsAndAssignment[indexLeft] = leftIf;
+//                indexLeft++;
+//            }
+//            ifsAndAssignment[indexLeft] = assignmentStatement;
+//            JBlock block = new JBlock(self.getTokenReference(), ifsAndAssignment, self.getComments());
+//            this.getStack().push(block);
+//
+//        }else{
+//
+//            this.getStack().push(new JmlAssignmentStatement(assignmentStatement));
+//        }
+//
+//        JExpression right = assignmentExpression.right();
+//        if(right instanceof JArrayAccessExpression){
+//            JArrayAccessExpression arrayAccessRight = (JArrayAccessExpression) right;
+//            JExpression rightPrefix = arrayAccessRight.prefix();
+//            JExpression rightAccessor = arrayAccessRight.accessor();
+//
+//            JmlAstArrayAccessCheckerExpressionVisitor rightVisitor = new JmlAstArrayAccessCheckerExpressionVisitor();
+//            rightAccessor.accept(rightVisitor);
+//            Queue<JArrayAccessExpression> arrayAccessQueueRight = rightVisitor.getArrayAccessQueue();
+//
+//            JStatement[] ifsAndAssignmentRight = new JStatement[arrayAccessQueueRight.size() + 1];
+//            int indexRight = 0;
+//
+//            while(!arrayAccessQueueRight.isEmpty()){
+//                JArrayAccessExpression arrayAccess = arrayAccessQueueRight.poll();
+//                JExpression prefix = arrayAccess.prefix();
+//                JExpression accessor = arrayAccess.accessor();
+//
+//                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+//                JExpression rightRelationalCheck = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
+//                JExpression rightLengthCheck = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
+//
+//                JConditionalOrExpression rightOr = new JConditionalOrExpression(self.getTokenReference(), rightRelationalCheck, rightLengthCheck);
+//                rightOr.setType(CStdType.Boolean);
+//
+//                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+//
+//                try {
+//                    exceptionType.checkType(null);
+//                } catch (UnpositionedError e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//
+//                JThrowStatement rightThrowStatement = new JThrowStatement(
+//                        self.getTokenReference(),
+//                        new JNewObjectExpression(
+//                                self.getTokenReference(),
+//                                exceptionType,
+//                                new JThisExpression(self.getTokenReference()),
+//                                new JExpression[]{}),
+//                        new JavaStyleComment[]{});
+//                JIfStatement rightIf = new JIfStatement(self.getTokenReference(), rightOr, rightThrowStatement, null, null);
+//                ifsAndAssignmentRight[indexRight] = rightIf;
+//                indexRight++;
+//
+//            }
+//            ifsAndAssignmentRight[indexRight] = assignmentStatement;
+//            JBlock block = new JBlock(self.getTokenReference(), ifsAndAssignmentRight, self.getComments());
+//            this.getStack().push(block);
+//        }
+//
+//        this.getStack().push(new JmlAssignmentStatement(assignmentStatement));
+//    }
 
-        JBlock newSelf = new JBlock(self.getTokenReference(), theNewArrayOfStatements, self.getComments());
-        this.getStack().push(newSelf);
-    }
+
+
 
 }

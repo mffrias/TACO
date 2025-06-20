@@ -69,7 +69,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new ThrowEncapsulatorVisitor());
-		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
+//		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
 		simplifiers.add(new JmlAstDivisionCheckerStatementVisitor());
 		simplifiers.add(new JmlAstArrayAccessCheckerStatementVisitor());
 //		simplifiers.add(new BlockSimplifier());

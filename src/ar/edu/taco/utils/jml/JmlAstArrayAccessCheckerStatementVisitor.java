@@ -30,7 +30,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
             JExpression rightOfOR = new JRelationalExpression(self.getTokenReference(), 16, theAccessor, new JArrayLengthExpression(self.getTokenReference(), thePrefix));
             JConditionalOrExpression theOr = new JConditionalOrExpression(self.getTokenReference(), leftOfOR, rightOfOR);
             theOr.setType(self.cond().getType());
-            CClassType theExceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType theExceptionType = new CTypeVariable("java.lang.IndexOutOfBoundsException", new CClassType[]{});
 
             try {
                 theExceptionType.checkType(null);

@@ -30,21 +30,22 @@ public class DeleteOutputFiles {
 
     public static void deleteFiles(File directory){
         File[] files = directory.listFiles();
-        boolean isEmpty = false;
+        boolean isEmpty = files == null || files.length == 0;
+        if (! isEmpty) {
+            for (File f : files) {
+                if (f.isDirectory()) isEmpty = f.listFiles().length == 0;
 
-        for(File f: files){
-            if(f.isDirectory()) isEmpty = f.listFiles().length == 0;
+                System.out.println("File location: " + f);
+                System.out.println("Is Directory?: " + f.isDirectory());
+                System.out.println();
 
-            System.out.println("File location: " + f);
-            System.out.println("Is Directory?: " + f.isDirectory());
-            System.out.println();
+                if (f.isDirectory()) {
+                    if (!isEmpty) deleteFiles(f);
+                }
+                if (f.delete()) System.out.println("Deleted " + f.getName() + " successfully!");
+                else System.out.println("Failed to delete" + f.getName() + "!");
 
-            if(f.isDirectory()) {
-                if(!isEmpty) deleteFiles(f);
             }
-            if(f.delete()) System.out.println("Deleted " + f.getName() + " successfully!");
-            else System.out.println("Failed to delete" + f.getName() + "!");
-
         }
         if(directory.delete()) System.out.println("Deleted " + directory.getName() + " successfully!");
         else System.out.println("Failed to delete " + directory.getName());

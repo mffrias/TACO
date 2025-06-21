@@ -75,46 +75,48 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
             returnExpression.accept(expressionVisitor);
             Queue<JArrayAccessExpression> arrayAccessQueue = expressionVisitor.getArrayAccessQueue();
 
-            JStatement[] ifsAndReturn = new JStatement[arrayAccessQueue.size() + 1];
-            int index = 0;
+            if (! arrayAccessQueue.isEmpty()) {
+                JStatement[] ifsAndReturn = new JStatement[arrayAccessQueue.size() + 1];
+                int index = 0;
 
-            while ((!arrayAccessQueue.isEmpty())) {
-                JArrayAccessExpression arrayAccess = arrayAccessQueue.poll();
-                JExpression prefix = arrayAccess.prefix();
-                JExpression accessor = arrayAccess.accessor();
+                while ((!arrayAccessQueue.isEmpty())) {
+                    JArrayAccessExpression arrayAccess = arrayAccessQueue.poll();
+                    JExpression prefix = arrayAccess.prefix();
+                    JExpression accessor = arrayAccess.accessor();
 
-                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
-                JExpression leftOfOr = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
-                JExpression rightOfOr = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
-                JConditionalOrExpression orExpression = new JConditionalOrExpression(self.getTokenReference(), leftOfOr, rightOfOr);
-                orExpression.setType(CStdType.Boolean);
-                System.out.println(orExpression.getType());
-                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+                    JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+                    JExpression leftOfOr = new JRelationalExpression(self.getTokenReference(), 14, accessor, constantZero);
+                    JExpression rightOfOr = new JRelationalExpression(self.getTokenReference(), 16, accessor, new JArrayLengthExpression(self.getTokenReference(), prefix));
+                    JConditionalOrExpression orExpression = new JConditionalOrExpression(self.getTokenReference(), leftOfOr, rightOfOr);
+                    orExpression.setType(CStdType.Boolean);
+                    System.out.println(orExpression.getType());
+                    CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
 
-                try {
-                    exceptionType.checkType(null);
-                } catch (UnpositionedError e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    try {
+                        exceptionType.checkType(null);
+                    } catch (UnpositionedError e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    JThrowStatement throwStatement = new JThrowStatement(
+                            self.getTokenReference(),
+                            new JNewObjectExpression(
+                                    self.getTokenReference(),
+                                    exceptionType,
+                                    new JThisExpression(self.getTokenReference()),
+                                    new JExpression[]{}),
+                            new JavaStyleComment[]{});
+
+                    JIfStatement ifStatement = new JIfStatement(self.getTokenReference(), orExpression, throwStatement, null, self.getComments());
+                    ifsAndReturn[index] = ifStatement;
+                    index++;
+
                 }
-
-                JThrowStatement throwStatement = new JThrowStatement(
-                        self.getTokenReference(),
-                        new JNewObjectExpression(
-                                self.getTokenReference(),
-                                exceptionType,
-                                new JThisExpression(self.getTokenReference()),
-                                new JExpression[]{}),
-                        new JavaStyleComment[]{});
-
-                JIfStatement ifStatement = new JIfStatement(self.getTokenReference(), orExpression, throwStatement, null, self.getComments());
-                ifsAndReturn[index] = ifStatement;
-                index++;
-
+                ifsAndReturn[index] = self;
+                JBlock block = new JBlock(self.getTokenReference(), ifsAndReturn, self.getComments());
+                this.getStack().push(block);
             }
-            ifsAndReturn[index] = self;
-            JBlock block = new JBlock(self.getTokenReference(), ifsAndReturn, self.getComments());
-            this.getStack().push(block);
         }
     }
 

@@ -69,7 +69,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new ThrowEncapsulatorVisitor());
-//		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
+		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());
 		simplifiers.add(new JmlAstDivisionCheckerStatementVisitor());
 		simplifiers.add(new JmlAstArrayAccessCheckerStatementVisitor());
 //		simplifiers.add(new BlockSimplifier());
@@ -89,7 +89,7 @@ public class ASTSimplifierManager {
 		simplifiers.add(new QualifyStaticCallsVisitor());
 		simplifiers.add(new ActualParameterNormalizerVisitor());
 		simplifiers.add(new AssumeSimplifierVisitor());
-		simplifiers.add(new ReturnStatementWrapperVisitor());
+//		simplifiers.add(new ReturnStatementWrapperVisitor());
 	}
 
 	public JmlToSimpleJmlContext getJmlToSimpleJmlContext() {

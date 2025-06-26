@@ -27,7 +27,7 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
             JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
             JExpression rightIsZero = new JRelationalExpression(self.getTokenReference(), 14, right, constantZero);
 
-            CClassType theExceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType theExceptionType = new CTypeVariable("java.lang.ArithmeticException", new CClassType[]{});
             try {
                 theExceptionType.checkType(null);
             } catch (UnpositionedError e) {
@@ -80,7 +80,7 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
             JExpression rightIsZero = new JRelationalExpression(self.getTokenReference(), 14, right, constantZero);
 
             //Throw exception
-            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType exceptionType = new CTypeVariable("java.lang.ArithmeticException", new CClassType[]{});
             JThrowStatement throwStatement = new JThrowStatement(
                     self.getTokenReference(),
                     new JNewObjectExpression(
@@ -134,7 +134,7 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
                 JExpression rightIsZero = new JRelationalExpression(self.getTokenReference(), 14, right, constantZero);
 
                 //Throw statement
-                CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+                CClassType exceptionType = new CTypeVariable("java.lang.ArithmeticException", new CClassType[]{});
                 JThrowStatement throwStatement = new JThrowStatement(
                         self.getTokenReference(),
                         new JNewObjectExpression(
@@ -193,7 +193,7 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
             JExpression rightIsZero = new JRelationalExpression(self.getTokenReference(), 14, rightDivideExpr, constantZero);
 
             //Throw exception
-            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType exceptionType = new CTypeVariable("java.lang.ArithmeticException", new CClassType[]{});
             JThrowStatement rightThrowStatement = new JThrowStatement(
                     self.getTokenReference(),
                     new JNewObjectExpression(
@@ -226,46 +226,50 @@ public class JmlAstDivisionCheckerStatementVisitor extends JmlAstClonerStatement
         JmlAstDivisionCheckerExpressionVisitor theExprVisitor = new JmlAstDivisionCheckerExpressionVisitor();
         JVariableDefinition theVar = self.getVars()[0];
         JExpression theVarExpr = theVar.expr();
-        theVarExpr.accept(theExprVisitor);
-        JExpression theNewExpr = theExprVisitor.getArrayStack().pop();
-        JVariableDefinition theNewVar = new JVariableDefinition(self.getTokenReference(), theVar.modifiers(), theVar.getType(), theVar.ident(), theNewExpr);
-        JVariableDeclarationStatement newSelf = new JVariableDeclarationStatement(self.getTokenReference(), theNewVar, self.getComments());
+        if (theVarExpr != null) {
+            theVarExpr.accept(theExprVisitor);
+            JExpression theNewExpr = theExprVisitor.getArrayStack().pop();
+            JVariableDefinition theNewVar = new JVariableDefinition(self.getTokenReference(), theVar.modifiers(), theVar.getType(), theVar.ident(), theNewExpr);
+            JVariableDeclarationStatement newSelf = new JVariableDeclarationStatement(self.getTokenReference(), theNewVar, self.getComments());
 
-        JStatement[] theControlsAndTheVarDecl = new JStatement[theExprVisitor.getDivideExpressions().size() + 1];
+            JStatement[] theControlsAndTheVarDecl = new JStatement[theExprVisitor.getDivideExpressions().size() + 1];
 
-        boolean isQueueEmpty = theExprVisitor.getDivideExpressions().isEmpty();
+            boolean isQueueEmpty = theExprVisitor.getDivideExpressions().isEmpty();
 
-        int index = 0;
-        while (!theExprVisitor.getDivideExpressions().isEmpty()){
-            JExpression rightDivideExpr = (JExpression) theExprVisitor.getDivideExpressions().poll();
+            int index = 0;
+            while (!theExprVisitor.getDivideExpressions().isEmpty()) {
+                JExpression rightDivideExpr = (JExpression) theExprVisitor.getDivideExpressions().poll();
 
-            //expression to check if the denominator is zero
-            JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
-            JExpression rightIsZero = new JEqualityExpression(self.getTokenReference(), 18, rightDivideExpr, constantZero);
+                //expression to check if the denominator is zero
+                JExpression constantZero = new JOrdinalLiteral(self.getTokenReference(), 0, CStdType.Integer);
+                JExpression rightIsZero = new JEqualityExpression(self.getTokenReference(), 18, rightDivideExpr, constantZero);
 
-            //Throw exception
-            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
-            JThrowStatement rightThrowStatement = new JThrowStatement(
-                    self.getTokenReference(),
-                    new JNewObjectExpression(
-                            self.getTokenReference(),
-                            exceptionType,
-                            new JThisExpression(self.getTokenReference()),
-                            new JExpression[]{}),
-                    new JavaStyleComment[]{});
+                //Throw exception
+                CClassType exceptionType = new CTypeVariable("java.lang.ArithmeticException", new CClassType[]{});
+                JThrowStatement rightThrowStatement = new JThrowStatement(
+                        self.getTokenReference(),
+                        new JNewObjectExpression(
+                                self.getTokenReference(),
+                                exceptionType,
+                                new JThisExpression(self.getTokenReference()),
+                                new JExpression[]{}),
+                        new JavaStyleComment[]{});
 
-            //If statement that contains the throw exception
-            JIfStatement rightIfStatement = new JIfStatement(self.getTokenReference(), rightIsZero, rightThrowStatement, null, self.getComments());
-            theControlsAndTheVarDecl[index] = rightIfStatement;
-            index++;
-        }
+                //If statement that contains the throw exception
+                JIfStatement rightIfStatement = new JIfStatement(self.getTokenReference(), rightIsZero, rightThrowStatement, null, self.getComments());
+                theControlsAndTheVarDecl[index] = rightIfStatement;
+                index++;
+            }
 
-        if (isQueueEmpty){
-            this.getStack().push(newSelf);
+            if (isQueueEmpty) {
+                this.getStack().push(newSelf);
+            } else {
+                theControlsAndTheVarDecl[index] = newSelf;
+                JBlock rightBlock = new JBlock(self.getTokenReference(), theControlsAndTheVarDecl, self.getComments());
+                this.getStack().push(rightBlock);
+            }
         } else {
-            theControlsAndTheVarDecl[index] = newSelf;
-            JBlock rightBlock = new JBlock(self.getTokenReference(), theControlsAndTheVarDecl, self.getComments());
-            this.getStack().push(rightBlock);
+            this.getStack().push(self);
         }
     }
 

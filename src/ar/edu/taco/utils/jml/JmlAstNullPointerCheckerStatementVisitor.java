@@ -8,12 +8,10 @@ import org.multijava.util.compiler.UnpositionedError;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatementVisitor{
-
+public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatementVisitor {
 
     //visit IfStatement and add null checks if any expressions could cause NPE
     public void visitIfStatement(/* @non_null */JIfStatement self) {
-        this.getStack().push(self);
 
         //visitor for expressions to find null-dereferencable expressions
         JmlAstNullPointerCheckerExpressionVisitor theExpressionVisitor = new JmlAstNullPointerCheckerExpressionVisitor();
@@ -25,22 +23,21 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
         JBlock theIFsAndTheIf = new JBlock(self.getTokenReference(), theIFsAndTheIfArray, self.getComments());
 
         int index = 0;
-        while (!theQueue.isEmpty()){
+        //create exception to throw
+        CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
+        try {
+            theExceptionType.checkType(null);
+        } catch (UnpositionedError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        while (!theQueue.isEmpty()) {
             JExpression nullableExpression = theQueue.poll();
 
             //check: if (expression == null)
             JExpression nullLiteral = new JNullLiteral(self.getTokenReference());
             JExpression nullCheck = new JEqualityExpression(self.getTokenReference(), 18, nullableExpression, nullLiteral);
-
-            //create exception to throw
-            CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
-
-            try {
-                theExceptionType.checkType(null);
-            } catch (UnpositionedError e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
 
             //create throw statement
             JThrowStatement theThrow = new JThrowStatement(
@@ -78,7 +75,7 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
         this.getStack().push(self);
         JExpression returnExpression = self.expr();
 
-        if(returnExpression != null){
+        if (returnExpression != null) {
             JmlAstNullPointerCheckerExpressionVisitor expressionVisitor = new JmlAstNullPointerCheckerExpressionVisitor();
             returnExpression.accept(expressionVisitor);
 
@@ -86,21 +83,21 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
             JStatement[] ifsAndReturn = new JStatement[theQueue.size() + 1];
 
             int index = 0;
+            //create exception to throw
+            CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
+            try {
+                theExceptionType.checkType(null);
+            } catch (UnpositionedError e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
             while ((!theQueue.isEmpty())) {
                 JExpression nullableExpression = theQueue.poll();
 
                 //check: if (expression == null)
                 JExpression nullLiteral = new JNullLiteral(self.getTokenReference());
                 JExpression nullCheck = new JEqualityExpression(self.getTokenReference(), 18, nullableExpression, nullLiteral);
-
-                //create exception to throw
-                CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
-                try {
-                    theExceptionType.checkType(null);
-                } catch (UnpositionedError e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
 
                 //create throw statement
                 JThrowStatement theThrow = new JThrowStatement(
@@ -162,23 +159,23 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
         JmlAstNullPointerCheckerExpressionVisitor expressionVisitor = new JmlAstNullPointerCheckerExpressionVisitor();
         expression.accept(expressionVisitor);
 
-
         Queue<JExpression> nullPointerQueue = expressionVisitor.getNullPointerQueue();
-        while(!nullPointerQueue.isEmpty()){
+
+        //create exception to throw
+        CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
+        try {
+            theExceptionType.checkType(null);
+        } catch (UnpositionedError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        while (!nullPointerQueue.isEmpty()) {
             JExpression nullableExpression = nullPointerQueue.poll();
 
             //check: if (nullableExpression == null)
             JExpression nullLiteral = new JNullLiteral(self.getTokenReference());
             JExpression nullCheck = new JEqualityExpression(self.getTokenReference(), 18, nullableExpression, nullLiteral);
-
-            //create exception to throw
-            CClassType theExceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
-            try {
-                theExceptionType.checkType(null);
-            } catch (UnpositionedError e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
 
             //create throw statement
             JThrowStatement theThrow = new JThrowStatement(
@@ -195,25 +192,69 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
             queue.offer(theIf);
         }
     }
+
+    public void visitVariableDeclarationStatement(/* @non_null */JVariableDeclarationStatement self) {
+        assert self.getVars().length == 1;
+
+        //pull out initialized expression
+        JVariableDefinition origVar = self.getVars()[0];
+        JExpression initExpr = origVar.expr();
+
+        //visit expr to collect all subexpressions that might be null
+        JmlAstNullPointerCheckerExpressionVisitor expressionVisitor = new JmlAstNullPointerCheckerExpressionVisitor();
+        if (initExpr != null) {
+            initExpr.accept(expressionVisitor);
+        }
+
+        //rebuilding init expr
+        JExpression theNewExpr = initExpr != null ? expressionVisitor.getArrayStack().pop() : null;
+        JVariableDefinition theNewVar = new JVariableDefinition(self.getTokenReference(), origVar.modifiers(), origVar.getType(), origVar.ident(), theNewExpr);
+        JVariableDeclarationStatement newVarDecl = new JVariableDeclarationStatement(self.getTokenReference(), theNewVar, self.getComments());
+
+        //for each "nullable" subexpression, emit if(null) throw NPE
+        Queue<JExpression> theQueue = expressionVisitor.getNullPointerQueue();
+        boolean isQueueEmpty = theQueue.isEmpty();
+
+        JStatement[] controlsAndDecl = new JStatement[theQueue.size() + 1];
+        int index = 0;
+
+        //build throw exception
+        CClassType exceptionType = new CTypeVariable("java.lang.NullPointerException", new CClassType[]{});
+        try {
+            exceptionType.checkType(null);
+        } catch (UnpositionedError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        while (!theQueue.isEmpty()) {
+            JExpression nullableExpression = theQueue.poll();
+
+            //check: if (expression == null)
+            JExpression nullLiteral = new JNullLiteral(self.getTokenReference());
+            JExpression nullCheck = new JEqualityExpression(self.getTokenReference(), 18, nullableExpression, nullLiteral);
+
+            JThrowStatement throwStmt = new JThrowStatement(
+                    self.getTokenReference(),
+                    new JNewObjectExpression(
+                            self.getTokenReference(),
+                            exceptionType,
+                            null,
+                            new JExpression[]{}
+                    ),
+                    new JavaStyleComment[]{}
+            );
+
+            //if statement that contains the throw exception
+            controlsAndDecl[index++] = new JIfStatement(self.getTokenReference(), nullCheck, throwStmt, null, self.getComments());
+        }
+
+        if (isQueueEmpty) {
+            this.getStack().push(newVarDecl);
+        } else {
+            controlsAndDecl[index] = newVarDecl;
+            JBlock block = new JBlock(self.getTokenReference(), controlsAndDecl, self.getComments());
+            this.getStack().push(block);
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

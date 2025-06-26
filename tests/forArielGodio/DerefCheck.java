@@ -14,8 +14,10 @@ public class DerefCheck {
 
     //@ requires true;
     //@ ensures true;
+    //@ signals (Exception e) false;
     public int accessDerefCheck(){
-        int i = this.atr1.atr2.s;
+        int i;
+        i = this.atr1.atr2.s;
         return i;
     }
 }

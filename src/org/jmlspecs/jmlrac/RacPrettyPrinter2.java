@@ -359,7 +359,7 @@ public class RacPrettyPrinter2 extends MjcPrettyPrinter implements RacVisitor {
 	 * Prints a JML method declaration in Racc. As the Mjcvisitor can't deal
 	 * with \bigint, this method is create.
 	 * 
-	 * @see MjcPrettyPrinter#visitMethodDeclaration()
+	 *
 	 */
 	public void visitRacJmlMethodDeclaration(/* @non_null@ */JmlMethodDeclaration self) {
 		long modifiers = self.modifiers();
@@ -2067,7 +2067,8 @@ public class RacPrettyPrinter2 extends MjcPrettyPrinter implements RacVisitor {
 	public void visitNewObjectExpression(JNewObjectExpression self) {
 		CType type = self.getType();
 		JExpression[] params = self.params();
-		print("new " + toString(type) + "(");
+		String typeString = toString(type);
+		print("new " + typeString + "(");
 
 		visitArgs(params);
 
@@ -2154,8 +2155,9 @@ public class RacPrettyPrinter2 extends MjcPrettyPrinter implements RacVisitor {
 		if (type instanceof JmlNumericType || TransUtils.isBigintArray(type)) {
 			return TransUtils.toString(type);
 		} else {
-			if (!((type.getIdent()).equals("java.lang.RuntimeException"))){
-				return super.toString(type.getErasure());
+			if (!((type.getIdent()).equals("java.lang.RuntimeException")) && !((type.getIdent()).equals("java.lang.IndexOutOfBoundsException")) && !((type.getIdent()).equals("java.lang.NullPointerException")) && !((type.getIdent()).equals("java.lang.ArithmeticException"))){
+				CType theTypeErasure = type.getErasure();
+				return super.toString(theTypeErasure);
 			} else {
 				return type.getIdent();
 			}

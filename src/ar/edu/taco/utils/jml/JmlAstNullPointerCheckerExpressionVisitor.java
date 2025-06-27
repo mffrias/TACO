@@ -18,18 +18,18 @@ public class JmlAstNullPointerCheckerExpressionVisitor extends JmlAstClonerExpre
     }
 
     public void visitFieldExpression(/* @non_null */JClassFieldExpression self) {
-        JExpression prefix;
+        JExpression prefix = self.prefix();
 
         if (self.prefix() == null && !self.getField().isStatic()) {
             prefix = new JThisExpression(self.getTokenReference());
         } else if (self.prefix() == null && self.getField().isStatic()) {
             prefix = new JTypeNameExpression(self.getTokenReference(),self.getField().owner().getType(), new JNameExpression(self.getTokenReference(),self.getField().owner().ident()));
         } else {
-            self.prefix().accept(this);
-            prefix = this.getArrayStack().pop();
-            this.getNullPointerQueue().offer(prefix);
-
-
+            if (!(self.prefix() instanceof JThisExpression)) {
+                self.prefix().accept(this);
+                prefix = this.getArrayStack().pop();
+                this.getNullPointerQueue().offer(prefix);
+            }
         }
 
         JClassFieldExpression newSelf = new JClassFieldExpression(self.getTokenReference(), prefix, self.ident());

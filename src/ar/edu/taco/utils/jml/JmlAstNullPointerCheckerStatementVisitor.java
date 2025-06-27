@@ -143,12 +143,12 @@ public class JmlAstNullPointerCheckerStatementVisitor extends JmlAstClonerStatem
 
         //check left and right expressions of assignment
         JExpression left = assignmentExpression.left();
-        if (left instanceof JClassFieldExpression || left instanceof JMethodCallExpression) {
+        if ((left instanceof JClassFieldExpression && !(((JClassFieldExpression) left).prefix() instanceof JThisExpression)) || left instanceof JMethodCallExpression) {
             checkNullDereference(left, self, exprsToCheckQueue);
         }
 
         JExpression right = assignmentExpression.right();
-        if (right instanceof JClassFieldExpression || right instanceof JMethodCallExpression) {
+        if ((right instanceof JClassFieldExpression && !(((JClassFieldExpression) right).prefix() instanceof JThisExpression)) || right instanceof JMethodCallExpression) {
             checkNullDereference(right, self, exprsToCheckQueue);
         }
 

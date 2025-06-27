@@ -3,9 +3,9 @@ package forArielGodio;
 
 public class DerefCheck {
 
-    public DerefCheck atr1;
+    public /*@ nullable @*/ DerefCheck atr1;
 
-    public DerefCheck atr2;
+    public /*@ nullable @*/ DerefCheck atr2;
 
     public int s;
 

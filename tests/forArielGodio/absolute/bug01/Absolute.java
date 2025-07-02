@@ -12,71 +12,39 @@ public class Absolute extends java.lang.Object {
       @ signals (java.lang.Exception e) false;
       @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		int param_num_0;
+		int[] A = new int[5];
+		if (0 > A[num])//if (0 <= num)
+			return num;
+		else
+			return -num;
 
-		param_num_0 = num;
-		int[] t_1;
+//		int i = 3 / num;
+//		int j = i++;
+//		if (i >= 0) {
+//			if (j >= 0) {
+//				j = i;
+//			} else {
+//				i = j;
+//			}
+//		}
+//		return num;
 
-		t_1 = new int[5];
-		int[] var_1_A = t_1;
-
-		{
-			boolean t_3;
-			boolean t_4;
-			boolean t_5;
-			int t_7;
-			boolean t_8;
-
-			{
-				t_4 = param_num_0 < 0;
-				if (t_4) {
-					t_3 = true;
-				} else {
-					t_5 = param_num_0 > var_1_A.length;
-					if (t_5) {
-						t_3 = true;
-					} else {
-						t_3 = false;
-					}
-				}
-			}
-
-			if (t_3) {
-				java.lang.IndexOutOfBoundsException t_2;
-
-				t_2 = new java.lang.IndexOutOfBoundsException();
-				throw t_2;
-			}
-			t_7 = var_1_A[param_num_0];
-			t_8 = 0  >  t_7;
-			if (t_8) {
-				if (true) return param_num_0;
-			} else {
-				int t_6;
-
-				t_6 = - param_num_0;
-
-				if (true) return t_6;
-			}
-		}
-		return 0;
+//		int x = 1;
+//		int y = 2;
+//		int sum = x;
+//		if (y <= 0) {
+//			int n = y;
+//		} else {
+//			int n = -y;
+//		}
+//		return sum;
 	}
 
 
-	/*@
-      @ ensures (0L  <=  \old(num) && \old(num)  <=  9223372036854775807L) ==> \result  ==  num;
-      @ ensures (-9223372036854775808L  <  \old(num) && \old(num)  <  0L) ==> \result  ==  - num;
+	/*@ ensures (0L <= \old(num) && \old(num) <= Long.MAX_VALUE) ==> \result == num;
+      @ ensures (Long.MIN_VALUE < \old(num) && \old(num) < 0L) ==> \result == -num;
       @*/
 	public /*@ pure @*/ long absoluteLong(long num) {
-		long param_num_1;
-
-		param_num_1 = num;
-
-		return 0L;
+		return 0;
 	}
-
-
-	public Absolute() {
-	}
-
 }

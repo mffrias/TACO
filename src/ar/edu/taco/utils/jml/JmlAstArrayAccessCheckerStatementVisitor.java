@@ -91,7 +91,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
                     JConditionalOrExpression orExpression = new JConditionalOrExpression(self.getTokenReference(), leftOfOr, rightOfOr);
                     orExpression.setType(CStdType.Boolean);
                     System.out.println(orExpression.getType());
-                    CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+                    CClassType exceptionType = new CTypeVariable("java.lang.IndexOutOfBoundsException", new CClassType[]{});
 
                     try {
                         exceptionType.checkType(null);
@@ -157,7 +157,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
             JConditionalOrExpression leftOr = new JConditionalOrExpression(self.getTokenReference(), leftRelationalCheck, leftLengthCheck);
             leftOr.setType(CStdType.Boolean);
 
-            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType exceptionType = new CTypeVariable("java.lang.IndexOutOfBoundsException", new CClassType[]{});
 
             try {
                 exceptionType.checkType(null);
@@ -194,7 +194,7 @@ public class JmlAstArrayAccessCheckerStatementVisitor extends JmlAstClonerStatem
             JConditionalOrExpression rightOr = new JConditionalOrExpression(self.getTokenReference(), rightRelationalCheck, rightLengthCheck);
             rightOr.setType(CStdType.Boolean);
 
-            CClassType exceptionType = new CTypeVariable("java.lang.RuntimeException", new CClassType[]{});
+            CClassType exceptionType = new CTypeVariable("java.lang.IndexOutOfBoundsException", new CClassType[]{});
 
             try {
                 exceptionType.checkType(null);

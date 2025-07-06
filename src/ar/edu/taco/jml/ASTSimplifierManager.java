@@ -31,9 +31,7 @@ import ar.edu.taco.TacoException;
 import ar.edu.taco.jml.loop.*;
 import ar.edu.taco.utils.FileUtils;
 import ar.edu.taco.utils.ThrowEncapsulatorVisitor;
-import ar.edu.taco.utils.jml.JmlAstArrayAccessCheckerStatementVisitor;
-import ar.edu.taco.utils.jml.JmlAstDivisionCheckerStatementVisitor;
-import ar.edu.taco.utils.jml.JmlAstNullPointerCheckerStatementVisitor;
+import ar.edu.taco.utils.jml.*;
 import org.apache.log4j.Logger;
 import org.jmlspecs.jmlrac.JavaAndJmlPrettyPrint2;
 import org.multijava.mjc.JCompilationUnitType;
@@ -51,7 +49,6 @@ import ar.edu.taco.jml.varnames.VNBlockVisitor;
 import ar.edu.taco.simplejml.AssumeSimplifierVisitor;
 import ar.edu.taco.simplejml.GhostFieldsSimplifier;
 import ar.edu.taco.simplejml.ShortcutRemoverVisitor;
-import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 import org.multijava.mjc.JTypeDeclarationType;
 
 public class ASTSimplifierManager {
@@ -67,6 +64,7 @@ public class ASTSimplifierManager {
 
 		simplifiers.add(new BreakRemoverSimplifier());
 		simplifiers.add(new ForRemoverVisitor());
+		simplifiers.add(new JmlAstDoWhileRemoverStatementVisitor());
 		simplifiers.add(new WhileRemoverSimplifier());
 		simplifiers.add(new ThrowEncapsulatorVisitor());
 		simplifiers.add(new JmlAstNullPointerCheckerStatementVisitor());

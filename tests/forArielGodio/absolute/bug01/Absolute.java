@@ -12,11 +12,17 @@ public class Absolute extends java.lang.Object {
       @ signals (java.lang.Exception e) false;
       @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		int[] A = new int[5];
-		if (0 > A[num])//if (0 <= num)
-			return num;
-		else
-			return -num;
+		int i = 0;
+		do {
+			i = i + 1;
+		} while (i < 3);
+		return i;
+
+//		int[] A = new int[5];
+//		if (0 > A[num])//if (0 <= num)
+//			return num;
+//		else
+//			return -num;
 
 //		int i = 3 / num;
 //		int j = i++;

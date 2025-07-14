@@ -26,11 +26,9 @@ import java.io.InputStreamReader;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.jar.Attributes;
@@ -39,12 +37,12 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import ar.edu.taco.utils.*;
-import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
 import ar.edu.taco.utils.JCompilationUnitTypeWrapper;
 import ar.edu.taco.utils.Message;
 import ar.edu.taco.utils.TranslateThread;
 
 import ar.edu.taco.utils.WindowList;
+import ar.edu.taco.utils.jml.JmlAstDeterminizerVisitor;
 import ar.edu.taco.utils.output_manager.DeleteOutputFiles;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -635,9 +633,7 @@ public class TacoMain {
             String space = "   ";
             pendingProblems.add(initialTaskSeq);
             pendingProblems.add(initialTaskPar);
-
             int theRunningThreads = 0;
-
             long initialTime = System.currentTimeMillis();
             long previousTime = initialTime;
             long previousUpdateTime = initialTime;
@@ -897,6 +893,8 @@ public class TacoMain {
 
             dUnitType = (JCompilationUnitType) problems.poll();
             theDeterminizer.setIsSplit(false);
+            dUnitType.accept(cleanUp);
+            dUnitType = (JCompilationUnitType)cleanUp.getStack().pop();
             dUnitType.accept(theDeterminizer);
 
             if (theDeterminizer.isSplit()) {

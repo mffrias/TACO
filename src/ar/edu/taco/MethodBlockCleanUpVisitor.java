@@ -70,21 +70,41 @@ public class MethodBlockCleanUpVisitor extends JmlAstClonerStatementVisitor {
         Queue<Object> cleanStatementsQueue = new LinkedList<Object>();
         int finalArraySize = 0;
 
+        //Marcelo and Johana 2 de julio. Fix. Weird that returns if (1) then the whole block.
+
         while (i < self.body().length && !removeAfterwards){
             if (oldBody[i].getClass().getName().contains("JThrowStatement")){
                 cleanStatementsQueue.offer(oldBody[i]);
                 finalArraySize++;
 
-                JExpression trueExpr = new JOrdinalLiteral(self.getTokenReference(), 1, CStdType.Integer);
+//                JExpression trueExpr = new JBooleanLiteral(self.getTokenReference(), true);
+//
+//                JIfStatement ifStatement = new JIfStatement(
+//                        self.getTokenReference(),
+//                        trueExpr,
+//                        oldBody[i],
+//                        null,
+//                        self.getComments()
+//                );
+//                this.getStack().push(ifStatement);
 
-                JIfStatement ifStatement = new JIfStatement(
-                        self.getTokenReference(),
-                        trueExpr,
-                        self,
-                        null,
-                        self.getComments()
-                );
-                this.getStack().push(ifStatement);
+                removeAfterwards = true;
+                break;
+            }
+            if (oldBody[i].getClass().getName().contains("JReturnStatement")){
+                cleanStatementsQueue.offer(oldBody[i]);
+                finalArraySize++;
+
+//                JExpression trueExpr = new JBooleanLiteral(self.getTokenReference(), true);
+//
+//                JIfStatement ifStatement = new JIfStatement(
+//                        self.getTokenReference(),
+//                        trueExpr,
+//                        oldBody[i],
+//                        null,
+//                        self.getComments()
+//                );
+//                this.getStack().push(ifStatement);
 
                 removeAfterwards = true;
                 break;

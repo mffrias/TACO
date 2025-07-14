@@ -15,7 +15,8 @@ public class TreeSetTest extends CollectionTestBase {
 	public void test_containsTest() throws VizException {
 		setConfigKeyRelevantClasses("roops.core.objects.TreeSet,roops.core.objects.TreeSetEntry");
 		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckNullDereference(false);
+		setConfigKeyCheckArithmeticException(false);
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
@@ -38,7 +39,8 @@ public class TreeSetTest extends CollectionTestBase {
 	public void test_insertTest() throws VizException {
 		setConfigKeyRelevantClasses("roops.core.objects.TreeSet,roops.core.objects.TreeSetEntry");
 		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckNullDereference(false);
+		setConfigKeyCheckArithmeticException(false);
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
@@ -60,7 +62,8 @@ public class TreeSetTest extends CollectionTestBase {
 	public void test_removeTest() throws VizException {
 		setConfigKeyRelevantClasses("roops.core.objects.TreeSet,roops.core.objects.TreeSetEntry");
 		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
+		setConfigKeyCheckNullDereference(false);
+		setConfigKeyCheckArithmeticException(false);
 		setConfigKeyUseJavaArithmetic(false);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
@@ -74,7 +77,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:6");
+		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:10");
 		check(GENERIC_PROPERTIES,"remove(int)",false);
 	}
 

@@ -1524,8 +1524,17 @@ public class JmlAstDeterminizerVisitor extends JmlBaseVisitor {
         this.getQueue().offer(newSelfSecond);
     }
 
+    public void visitCastExpression(JCastExpression arg0) {
+        JCastExpression castFirst = new JCastExpression(arg0.getTokenReference(), arg0.expr(), arg0.getType());
+        this.getQueue().offer(castFirst);
 
-    public void visitThrowStatement(/* @non_null */JThrowStatement self) {
+        JCastExpression castSecond = new JCastExpression(arg0.getTokenReference(), arg0.expr(), arg0.getType());
+        this.getQueue().offer(castSecond);
+
+    }
+
+
+        public void visitThrowStatement(/* @non_null */JThrowStatement self) {
         JmlAstClonerExpressionVisitor theExpreCloner = new JmlAstClonerExpressionVisitor();
         self.expr().accept(theExpreCloner);
         JThrowStatement newThrowFirst = new JThrowStatement(self.getTokenReference(), theExpreCloner.getArrayStack().pop(), self.getComments());

@@ -1,4 +1,4 @@
-# TACO
+# TACO - Final Threading
 ### Translation of Annotated Code
 
 [TACO](https://github.com/mffrias/TACO) is a tool that translates a **Java** program annotated with [JML](https://www.cs.ucf.edu/~leavens/JML/index.shtml) specifications into a [DynAlloy](https://doi.org/10.1007/978-3-540-45236-2_37) model. Properties described by the JML annotations can then be verified using a SAT Solver.
@@ -42,3 +42,40 @@ Follow the same instructions as for Eclipse. Set the `tests` folder as a `Source
 For the moment TACO works by using tests (JUnit tests). Several examples of these can be found in the `unittest` source folder.
 
 In the near future, a usable terminal option will be developed.
+
+## Running Tests via JAR Files
+
+To execute JUnit tests directly from the terminal, you can use the compiled TACO .jar file.
+
+* Step 1: Build the JAR file
+
+  Run the following command to build the JAR file using Apache Ant: `ant dist`
+
+  This will generate the file .jar inside the `dist/` directory. Make sure all required dependencies are in place by running the setup: `./setupTACO.sh`.
+
+* Step 2: Prepare the test runner
+
+  Create a script called `jrunJUnit.sh` with the following contents:
+
+
+   `#!/bin/bash`
+
+    Replace with the fully qualified class name of the test you want to run
+  `fileToRun="your.package.TestClassName"`
+
+   `testToRun="yourTestName"`
+
+
+    Replace the following path with the absolute path to your FinalThreading project directory
+   `PROJECT_DIR="/path/to/your/FinalThreading"`
+
+ `java -cp .:${PROJECT_DIR}/dist/taco.jar:${PROJECT_DIR}/lib/junit-4.8.2.jar:${PROJECT_DIR}/bin:${PROJECT_DIR}/lib/dynalloy4.jar:${PROJECT_DIR}/lib/alloyRunner.jar:${PROJECT_DIR}/lib/antlr-4.3-complete.jar:${PROJECT_DIR}/lib/commons-collections-3.2.1.jar:${PROJECT_DIR}/lib/commons-configuration-1.6.jar:${PROJECT_DIR}/lib/commons-lang-2.4.jar:${PROJECT_DIR}/lib/commons-logging-1.1.1.jar:${PROJECT_DIR}/lib/edu.mit.csail.sdg.annotations_0.2.5.jar:${PROJECT_DIR}/lib/guava-16.0.1.jar:${PROJECT_DIR}/lib/javassist.jar:${PROJECT_DIR}/lib/jdynalloy.jar:${PROJECT_DIR}/lib/jml-release.jar:${PROJECT_DIR}/lib/log4j-1.2.15.jar:${PROJECT_DIR}/lib/mujava++.jar:${PROJECT_DIR}/lib/objenesis-2.6.jar:${PROJECT_DIR}/lib/org.hamcrest.core_1.3.0.v201303031735.jar:${PROJECT_DIR}/lib/recoder.jar:${PROJECT_DIR}/lib/reflections-0.9.9-RC1.jar \
+  org.junit.runner.JUnitCore ${fileToRun} |& tee results${testToRun}.txt`
+
+ * Step 3: Then give the script execution permissions:
+  
+   `chmod +x jrunJUnit.sh`
+
+ * Step 4: Run the test
+ 
+   `./jrunJUnit.sh`

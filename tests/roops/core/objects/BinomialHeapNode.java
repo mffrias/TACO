@@ -67,7 +67,8 @@ public class BinomialHeapNode {
 	  @ ensures true;
 	  @*/
     public BinomialHeapNode findMinNode() {
-        BinomialHeapNode x = this, y = this;
+        BinomialHeapNode x = this;
+        BinomialHeapNode y = this;
         int min = x.key;
 
         while (x != null) {
@@ -83,7 +84,8 @@ public class BinomialHeapNode {
 
     public BinomialHeapNode findANodeWithKey(int value) 
     {
-            BinomialHeapNode temp = this, node = null;
+            BinomialHeapNode temp = this;
+            BinomialHeapNode node = null;
  
             while (temp != null) 
             {

@@ -63,7 +63,8 @@ public class BinomialHeap {
 
 
 	private static BinomialHeapNode findMinNode(BinomialHeapNode arg) {
-		BinomialHeapNode x = arg, y = arg;
+		BinomialHeapNode x = arg;
+		BinomialHeapNode y = arg;
 		int min = x.key;
 
 		while (x != null) {
@@ -92,7 +93,8 @@ public class BinomialHeap {
 		if (Nodes == null) 
 			return null;
 
-		BinomialHeapNode temp = Nodes, prevTemp = null;
+		BinomialHeapNode temp = Nodes;
+		BinomialHeapNode prevTemp = null;
 		BinomialHeapNode minNode = findMinNode(Nodes);
 		while (temp.key != minNode.key) {
 			prevTemp = temp;
@@ -139,7 +141,8 @@ public class BinomialHeap {
 	// helper procedure
 	private void merge( /* @ nullable @ */BinomialHeapNode binHeap ) {
 
-		BinomialHeapNode temp1 = Nodes, temp2 = binHeap;
+		BinomialHeapNode temp1 = Nodes;
+		BinomialHeapNode temp2 = binHeap;
 		while ((temp1 != null) && (temp2 != null)) {
 			if (temp1.degree == temp2.degree) {
 				BinomialHeapNode tmp = temp2;
@@ -185,7 +188,9 @@ public class BinomialHeap {
 	private void unionNodes( /* @ nullable @ */BinomialHeapNode binHeap ) {
 		merge(binHeap);
 
-		BinomialHeapNode prevTemp = null, temp = Nodes , nextTemp = Nodes.sibling;
+		BinomialHeapNode prevTemp = null;
+		BinomialHeapNode temp = Nodes;
+		BinomialHeapNode nextTemp = Nodes.sibling;
 
 		while (nextTemp != null) {
 			if ((temp.degree != nextTemp.degree)

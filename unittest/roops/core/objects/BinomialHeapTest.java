@@ -91,7 +91,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyParallelTOStep(5, 15, 2, 184);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:12");
         check(GENERIC_PROPERTIES,"extractMin()", false);
     }
 

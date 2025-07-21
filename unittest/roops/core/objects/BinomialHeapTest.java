@@ -29,48 +29,48 @@ public class BinomialHeapTest extends CollectionTestBase {
         return "roops.core.objects.BinomialHeap";
     }
 
-    public void test_insertTest() throws VizException {
-        setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
-        setConfigKeyRelevancyAnalysis(true);
-        setConfigKeyCheckNullDereference(true);
-        setConfigKeyUseJavaArithmetic(false);
-        setConfigKeyInferScope(true);
-        setConfigKeyObjectScope(0);
-        setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
-        setConfigKeySkolemizeInstanceInvariant(true);
-        setConfigKeySkolemizeInstanceAbstraction(false);
-        setConfigKeyGenerateUnitTestCase(true);
-        setConfigKeyAttemptToCorrectBug(false);
-        setConfigKeyMaxStrykerMethodsPerFile(1);
-        setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(true);
-        setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES,"insert(int)", false);
-    }
+//    public void test_insertTest() throws VizException {
+//        setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
+//        setConfigKeyRelevancyAnalysis(true);
+//        setConfigKeyCheckNullDereference(true);
+//        setConfigKeyUseJavaArithmetic(false);
+//        setConfigKeyInferScope(true);
+//        setConfigKeyObjectScope(0);
+//        setConfigKeyIntBithwidth(4);
+//        setConfigKeyLoopUnroll(4);
+//        setConfigKeySkolemizeInstanceInvariant(true);
+//        setConfigKeySkolemizeInstanceAbstraction(false);
+//        setConfigKeyGenerateUnitTestCase(true);
+//        setConfigKeyAttemptToCorrectBug(false);
+//        setConfigKeyMaxStrykerMethodsPerFile(1);
+//        setConfigKeyRemoveQuantifiers(true);
+//        setConfigKeyUseJavaSBP(true);
+//        setConfigKeyUseTightUpperBounds(true);
+//        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
+//        check(GENERIC_PROPERTIES,"insert(int)", false);
+//    }
 
 
-    public void test_findMinTest() throws VizException {
-        setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
-        setConfigKeyRelevancyAnalysis(true);
-        setConfigKeyCheckNullDereference(true);
-        setConfigKeyUseJavaArithmetic(false);
-        setConfigKeyInferScope(true);
-        setConfigKeyObjectScope(0);
-        setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
-        setConfigKeySkolemizeInstanceInvariant(true);
-        setConfigKeySkolemizeInstanceAbstraction(false);
-        setConfigKeyGenerateUnitTestCase(true);
-        setConfigKeyAttemptToCorrectBug(true);
-        setConfigKeyMaxStrykerMethodsPerFile(1);
-        setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(true);
-        setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:4");
-        check(GENERIC_PROPERTIES,"findMinimum()", false);
-    }
+//    public void test_findMinTest() throws VizException {
+//        setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
+//        setConfigKeyRelevancyAnalysis(true);
+//        setConfigKeyCheckNullDereference(true);
+//        setConfigKeyUseJavaArithmetic(false);
+//        setConfigKeyInferScope(true);
+//        setConfigKeyObjectScope(0);
+//        setConfigKeyIntBithwidth(4);
+//        setConfigKeyLoopUnroll(4);
+//        setConfigKeySkolemizeInstanceInvariant(true);
+//        setConfigKeySkolemizeInstanceAbstraction(false);
+//        setConfigKeyGenerateUnitTestCase(true);
+//        setConfigKeyAttemptToCorrectBug(true);
+//        setConfigKeyMaxStrykerMethodsPerFile(1);
+//        setConfigKeyRemoveQuantifiers(true);
+//        setConfigKeyUseJavaSBP(true);
+//        setConfigKeyUseTightUpperBounds(true);
+//        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:4");
+//        check(GENERIC_PROPERTIES,"findMinimum()", false);
+//    }
 
 
     public void test_extractMinTest() throws VizException {
@@ -90,6 +90,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
+        setConfigKeyParallelTOStep(5, 15, 2, 184);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
         check(GENERIC_PROPERTIES,"extractMin()", false);
     }

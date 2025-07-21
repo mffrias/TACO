@@ -76,6 +76,6 @@ To execute JUnit tests directly from the terminal, you can use the compiled TACO
   
    `chmod +x jrunJUnit.sh`
 
- * Step 4: Run the test
+ * Step 4: Run the test from the PROJECT_DIR directory
  
    `./jrunJUnit.sh`

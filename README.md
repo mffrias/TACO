@@ -41,7 +41,20 @@ Follow the same instructions as for Eclipse. Set the `tests` folder as a `Source
 
 For the moment TACO works by using tests (JUnit tests). Several examples of these can be found in the `unittest` source folder.
 
-In the near future, a usable terminal option will be developed.
+Each unit test sets specific configuration parameters via helper methods before executing a verification using the `check(...)` method. For example:
+
+    public void test_example() throws VizException {
+       setConfigKeyRelevantClasses("your.package.ClassName");
+       setConfigKeyParallelTOStep(5, 10, 2, 8); //Enables parallel TO strategy
+       check(GENERIC_PROPERTIES, "yourMethodName", true);
+
+This configuration enables TACO to perform multiple verification attempts in parallel, using different Time Out values. This is especially useful when the solver struggles with a fixed Time Out.
+* `initialTime`: initial time-out in seconds (e.g., 5)
+* `maxTime`: maximum time-out limit (e.g., 10)
+* `step`: how much to increase the time-out per parallel thread (e.g., 2)
+* `threads`: how many parallel attempts to run (e.g., 8)
+
+With `setConfigKeyParallelTOStep(5, 10, 2, 8)`, TACO will launch 8 verification attempts in parallel with time-outs ranging from 5s to 10s in 2-second increments.
 
 ## Running Tests via JAR Files
 
@@ -49,7 +62,7 @@ To execute JUnit tests directly from the terminal, you can use the compiled TACO
 
 * Step 1: Build the JAR file
 
-  Run the following command to build the JAR file using Apache Ant: `ant dist`
+  Run the following command to build the JAR file using Apache Ant: `ant build` and `ant jar`
 
   This will generate the file .jar inside the `dist/` directory. Make sure all required dependencies are in place by running the setup: `./setupTACO.sh`.
 
@@ -69,7 +82,7 @@ To execute JUnit tests directly from the terminal, you can use the compiled TACO
     Replace the following path with the absolute path to your FinalThreading project directory
    `PROJECT_DIR="/path/to/your/FinalThreading"`
 
- `java -cp .:${PROJECT_DIR}/dist/taco.jar:${PROJECT_DIR}/lib/junit-4.8.2.jar:${PROJECT_DIR}/bin:${PROJECT_DIR}/lib/dynalloy4.jar:${PROJECT_DIR}/lib/alloyRunner.jar:${PROJECT_DIR}/lib/antlr-4.3-complete.jar:${PROJECT_DIR}/lib/commons-collections-3.2.1.jar:${PROJECT_DIR}/lib/commons-configuration-1.6.jar:${PROJECT_DIR}/lib/commons-lang-2.4.jar:${PROJECT_DIR}/lib/commons-logging-1.1.1.jar:${PROJECT_DIR}/lib/edu.mit.csail.sdg.annotations_0.2.5.jar:${PROJECT_DIR}/lib/guava-16.0.1.jar:${PROJECT_DIR}/lib/javassist.jar:${PROJECT_DIR}/lib/jdynalloy.jar:${PROJECT_DIR}/lib/jml-release.jar:${PROJECT_DIR}/lib/log4j-1.2.15.jar:${PROJECT_DIR}/lib/mujava++.jar:${PROJECT_DIR}/lib/objenesis-2.6.jar:${PROJECT_DIR}/lib/org.hamcrest.core_1.3.0.v201303031735.jar:${PROJECT_DIR}/lib/recoder.jar:${PROJECT_DIR}/lib/reflections-0.9.9-RC1.jar \
+ `java -cp .:${PROJECT_DIR}/dist/taco.jar:${PROJECT_DIR}/lib/junit-4.8.2.jar:${PROJECT_DIR}/bin:${PROJECT_DIR}/lib/dynalloy4.jar:${PROJECT_DIR}/lib/alloyRunner.jar:${PROJECT_DIR}/lib/antlr-4.3-complete.jar:${PROJECT_DIR}/lib/commons-collections-3.2.1.jar:${PROJECT_DIR}/lib/commons-configuration-1.6.jar:${PROJECT_DIR}/lib/commons-lang-2.4.jar:${PROJECT_DIR}/lib/commons-logging-1.1.1.jar:${PROJECT_DIR}/lib/edu.mit.csail.sdg.annotations_0.2.5.jar:${PROJECT_DIR}/lib/guava-16.0.1.jar:${PROJECT_DIR}/lib/javassist.jar:${PROJECT_DIR}/lib/jdynalloy.jar:${PROJECT_DIR}/lib/jml-release.jar:${PROJECT_DIR}/lib/log4j-1.2.15.jar:${PROJECT_DIR}/lib/mujava++.jar:${PROJECT_DIR}/lib/objenesis-2.6.jar:${PROJECT_DIR}/lib/org.hamcrest.core_1.3.0.v201303031735.jar:${PROJECT_DIR}/lib/recoder.jar:${PROJECT_DIR}/lib/reflections-0.9.9-RC1.jar 
   org.junit.runner.JUnitCore ${fileToRun} |& tee results${testToRun}.txt`
 
  * Step 3: Then give the script execution permissions:

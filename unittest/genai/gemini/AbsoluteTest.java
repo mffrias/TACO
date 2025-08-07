@@ -7,12 +7,12 @@ public class AbsoluteTest extends CollectionTestBase {
 
         @Override
         protected String getClassToCheck() {
-            return "genai.chatGPT.Absolute";
+            return "gemini.Absolute";
         }
 
         private void config() throws VizException {
             // To solve imports
-            setConfigKeyRelevantClasses("genai.chatGPT.Absolute");
+            setConfigKeyRelevantClasses("gemini.Absolute");
 
             // Scope
             setConfigKeyUseJavaArithmetic(true);
@@ -20,7 +20,7 @@ public class AbsoluteTest extends CollectionTestBase {
             setConfigKeyInferScope(true);
             setConfigKeyObjectScope(0);
             setConfigKeyLoopUnroll(5);
-            setConfigKeyTypeScopes("genai.chatGPT.Absolute:1");
+            setConfigKeyTypeScopes("gemini.Absolute:1");
 
             // Always true
             setConfigKeyRelevancyAnalysis(true);
@@ -41,7 +41,7 @@ public class AbsoluteTest extends CollectionTestBase {
 
         public void test_genericMethod2Test() throws VizException {
             config();
-            check(GENERIC_PROPERTIES,"absolute(int)",true);
+            check(GENERIC_PROPERTIES,"abs(int)",true);
         }
 
 }

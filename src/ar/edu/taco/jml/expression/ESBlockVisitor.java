@@ -117,8 +117,8 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
                     statementList.add(aStatement);
                 }
                 // reset statements
-                declarationStatements = new ArrayList<JStatement>();
-                newStatements = new ArrayList<JStatement>();
+//                declarationStatements = new ArrayList<JStatement>();
+//                newStatements = new ArrayList<JStatement>();
             }
         }
         JStatement[] statements = new JStatement[declarationList.size() + statementList.size()];

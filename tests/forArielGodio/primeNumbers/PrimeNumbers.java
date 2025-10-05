@@ -55,8 +55,9 @@ public class PrimeNumbers {
     return primeArray;
   }
   
-  public static void main( String[] args) {
-	  PrimeNumbers pn = new PrimeNumbers();
-	  int[] primes = pn.primeList(5);
-  }
+//  public static void main( String[] args) {
+//	  PrimeNumbers pn = new PrimeNumbers();
+//	  int[] primes = pn.primeList(3);
+//      int i = 0;
+//  }
 }

@@ -21,6 +21,7 @@ package ar.edu.taco.jml.loop;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 import org.jmlspecs.checker.JmlAssignmentStatement;
+import org.jmlspecs.checker.JmlLoopStatement;
 import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
 
@@ -176,6 +177,18 @@ public class BreakRemoverSimplifier extends JmlAstClonerStatementVisitor {
         this.getStack().push(self);
     }
 
+
+    public void visitJmlLoopStatement(JmlLoopStatement self){
+        self.loopStmt().accept(this);
+        JBlock nonBreakLoop = (JBlock)this.getStack().pop();
+        JStatement[] arrayWithLoopAtTheEnd = nonBreakLoop.body();
+        int posLoop = arrayWithLoopAtTheEnd.length - 1;
+        JStatement theActualLoop = arrayWithLoopAtTheEnd[posLoop];
+        JmlLoopStatement theNewLoopStatement = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), self.variantFunctions(), theActualLoop, self.getComments());
+        arrayWithLoopAtTheEnd[posLoop] = theNewLoopStatement;
+        JBlock theNewBlock = new JBlock(nonBreakLoop.getTokenReference(), arrayWithLoopAtTheEnd, nonBreakLoop.getComments());
+        this.getStack().push(theNewBlock);
+    }
 
     public void visitForStatement(/* @non_null */JForStatement self) {
         Set<JVariableDefinition> oldBreaks = this.collectedBreaks;

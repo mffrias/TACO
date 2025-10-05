@@ -24,44 +24,7 @@ import java.util.List;
 
 import org.jmlspecs.checker.JmlAddExpression;
 import org.jmlspecs.checker.JmlRelationalExpression;
-import org.multijava.mjc.CStdType;
-import org.multijava.mjc.CType;
-import org.multijava.mjc.CVoidType;
-import org.multijava.mjc.JAddExpression;
-import org.multijava.mjc.JArrayAccessExpression;
-import org.multijava.mjc.JAssignmentExpression;
-import org.multijava.mjc.JBitwiseExpression;
-import org.multijava.mjc.JBooleanLiteral;
-import org.multijava.mjc.JCastExpression;
-import org.multijava.mjc.JClassFieldExpression;
-import org.multijava.mjc.JConditionalAndExpression;
-import org.multijava.mjc.JConditionalExpression;
-import org.multijava.mjc.JConditionalOrExpression;
-import org.multijava.mjc.JDivideExpression;
-import org.multijava.mjc.JEqualityExpression;
-import org.multijava.mjc.JExpression;
-import org.multijava.mjc.JExpressionStatement;
-import org.multijava.mjc.JIfStatement;
-import org.multijava.mjc.JInstanceofExpression;
-import org.multijava.mjc.JLocalVariableExpression;
-import org.multijava.mjc.JMethodCallExpression;
-import org.multijava.mjc.JMinusExpression;
-import org.multijava.mjc.JModuloExpression;
-import org.multijava.mjc.JMultExpression;
-import org.multijava.mjc.JNameExpression;
-import org.multijava.mjc.JNewArrayExpression;
-import org.multijava.mjc.JNewObjectExpression;
-import org.multijava.mjc.JOrdinalLiteral;
-import org.multijava.mjc.JPostfixExpression;
-import org.multijava.mjc.JPrefixExpression;
-import org.multijava.mjc.JRelationalExpression;
-import org.multijava.mjc.JShiftExpression;
-import org.multijava.mjc.JStatement;
-import org.multijava.mjc.JThisExpression;
-import org.multijava.mjc.JTypeNameExpression;
-import org.multijava.mjc.JUnaryExpression;
-import org.multijava.mjc.JVariableDeclarationStatement;
-import org.multijava.mjc.JVariableDefinition;
+import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.TokenReference;
 
@@ -1037,32 +1000,36 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		self.expr().accept(this);		
 		JExpression paramExpr = this.getArrayStack().pop();
 
-
-		String createdVar = createNewVariableName();
-		JVariableDefinition variableDefinition = new JVariableDefinition(self.getTokenReference(), 0, self.expr().getType(), createdVar, null);
-		JVariableDeclarationStatement variableDeclarationStatement = new JVariableDeclarationStatement(self.getTokenReference(), variableDefinition,
-				new JavaStyleComment[0]);
-		getDeclarationStatements().add(variableDeclarationStatement);
-
-		JLocalVariableExpression createVarReference = new JLocalVariableExpression(self.getTokenReference(), variableDefinition);
-
-		String oper;
-		if (self.oper() == org.multijava.mjc.Constants.OPE_POSTINC) {
-			oper = "1";
+		if (expressionDeep == 1 && paramExpr instanceof JLocalVariableExpression) {
+			JPostfixExpression newSelf = new JPostfixExpression(self.getTokenReference(), self.oper(), paramExpr);
+			getArrayStack().push(newSelf);
 		} else {
-			oper = "-1";
+
+			String createdVar = createNewVariableName();
+			JVariableDefinition variableDefinition = new JVariableDefinition(self.getTokenReference(), 0, self.expr().getType(), createdVar, null);
+			JVariableDeclarationStatement variableDeclarationStatement = new JVariableDeclarationStatement(self.getTokenReference(), variableDefinition,
+					new JavaStyleComment[0]);
+			getDeclarationStatements().add(variableDeclarationStatement);
+
+			JLocalVariableExpression createVarReference = new JLocalVariableExpression(self.getTokenReference(), variableDefinition);
+
+			String oper;
+			if (self.oper() == org.multijava.mjc.Constants.OPE_POSTINC) {
+				oper = "1";
+			} else {
+				oper = "-1";
+			}
+
+			JAssignmentExpression newSelf = new JAssignmentExpression(self.getTokenReference(), paramExpr, new JmlAddExpression(self.getTokenReference(), paramExpr, new JOrdinalLiteral(self.getTokenReference(), oper)));
+
+
+			JStatement assignamentStatement = ASTUtils.createAssignamentStatement(createVarReference, paramExpr);
+			this.getNewStatements().add(assignamentStatement);
+			this.getPostfixNewStatements().add(new JExpressionStatement(newSelf.getTokenReference(), newSelf, null));
+
+
+			getArrayStack().push(createVarReference);
 		}
-
-		JAssignmentExpression newSelf = new JAssignmentExpression(self.getTokenReference(), paramExpr, new JmlAddExpression(self.getTokenReference(),paramExpr, new JOrdinalLiteral(self.getTokenReference(), oper))) ;
-
-
-		JStatement assignamentStatement = ASTUtils.createAssignamentStatement(createVarReference, paramExpr);
-		this.getNewStatements().add(assignamentStatement);
-		this.getPostfixNewStatements().add(new JExpressionStatement(newSelf.getTokenReference(), newSelf, null));
-
-
-
-		getArrayStack().push(createVarReference);
 
 		expressionDeep--;
 	}

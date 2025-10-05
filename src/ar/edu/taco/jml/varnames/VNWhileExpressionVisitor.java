@@ -37,8 +37,10 @@ public class VNWhileExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		JLocalVariable localVariable = null;
 
 		if (variable instanceof JFormalParameter) {
-			JFormalParameter jFormalParameter = (JFormalParameter) variable; 
-			localVariable = new JFormalParameter(jFormalParameter.getTokenReference(), jFormalParameter.modifiers(),jFormalParameter.getDescription(), jFormalParameter.specializedType(), newIden);
+			//no need to rename a formal parameter. No chance it is a local variable in a while loop
+//			JFormalParameter jFormalParameter = (JFormalParameter) variable;
+//			localVariable = new JFormalParameter(jFormalParameter.getTokenReference(), jFormalParameter.modifiers(),jFormalParameter.getDescription(), jFormalParameter.specializedType(), newIden);
+			localVariable = variable;
 		} else if (variable instanceof JGeneratedLocalVariable) {
 			JGeneratedLocalVariable jGeneratedLocalVariable = (JGeneratedLocalVariable) variable;
 			localVariable = new JGeneratedLocalVariable(jGeneratedLocalVariable.getTokenReference(), jGeneratedLocalVariable.modifiers(), jGeneratedLocalVariable.getType() , newIden, newExpre);

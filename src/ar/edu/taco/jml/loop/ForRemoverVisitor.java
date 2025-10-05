@@ -10,8 +10,21 @@ public class ForRemoverVisitor extends JmlAstClonerStatementVisitor {
 
     public void visitJmlLoopStatement(JmlLoopStatement self) {
         (self.loopStmt()).accept(this);
-        JStatement unrolledJmlLoop = (JStatement)this.getStack().pop();
-        this.getStack().push(unrolledJmlLoop);
+        JStatement resultingInnerLoop = (JStatement)this.getStack().pop();
+        // In case we are coming from a for, we obtain a while.
+        // Invariant: the returned code has two statements: a variable declaration and a while loop
+        // We need this to add the variant and invariants to the while loop if they existed.
+        JStatement resultingLoop = null;
+        if (self.loopStmt() instanceof JForStatement){
+            JBlock theLoop = (JBlock)resultingInnerLoop;
+            JStatement[] theVarDeclAndTheWhile = theLoop.body();
+            JmlLoopStatement theNewWhile = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), self.variantFunctions(), theVarDeclAndTheWhile[1], self.getComments());
+            theVarDeclAndTheWhile[1] = theNewWhile;
+            resultingLoop = new JBlock(self.getTokenReference(), theVarDeclAndTheWhile, self.getComments());
+        } else {
+            resultingLoop = new JmlLoopStatement(self.getTokenReference(), self.loopInvariants(), self.variantFunctions(), resultingInnerLoop, self.getComments());
+        }
+        this.getStack().push(resultingLoop);
     }
 
 
@@ -24,7 +37,10 @@ public class ForRemoverVisitor extends JmlAstClonerStatementVisitor {
         TokenReference theNewReference = self.getTokenReference();
         JExpression theNewCondition = self.cond();
 
-        int amountIncrements = ((JExpressionListStatement) self.incr()).getExpressions().length;
+        int amountIncrements = 0;
+        if (self.incr() != null) {
+            amountIncrements = ((JExpressionListStatement) self.incr()).getExpressions().length;
+        }
         JStatement[] theNewBodyArray = new JStatement[amountIncrements + 1];
         theNewBodyArray[0] = newBody;
         for (int index = 0; index < amountIncrements; index++) {

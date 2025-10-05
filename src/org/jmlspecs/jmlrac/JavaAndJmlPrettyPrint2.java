@@ -27,12 +27,7 @@ import org.jmlspecs.checker.JmlFieldDeclaration;
 import org.jmlspecs.checker.JmlMethodDeclaration;
 import org.jmlspecs.jmlrac.JmlModifier;
 import org.multijava.javadoc.JavadocComment;
-import org.multijava.mjc.CType;
-import org.multijava.mjc.JClassDeclaration;
-import org.multijava.mjc.JCompilationUnitType;
-import org.multijava.mjc.JExpression;
-import org.multijava.mjc.JFormalParameter;
-import org.multijava.mjc.JVariableDefinition;
+import org.multijava.mjc.*;
 import org.multijava.util.compiler.TabbedPrintWriter;
 
 import ar.edu.taco.TacoException;
@@ -117,9 +112,35 @@ public class JavaAndJmlPrettyPrint2 extends RacPrettyPrinter2 {
 	public void visitFormalParameters(JFormalParameter self) {
 		super.visitFormalParameters(self);
 	}
-	
-	
-	
+
+
+	public void visitUnaryExpression(JUnaryExpression var1) {
+		int var2 = var1.oper();
+		JExpression var3 = var1.expr();
+		switch (var2) {
+			case 1:
+				this.print("+ ");
+				var3.accept(this);
+				break;
+			case 2:
+				this.print("- ");
+				var3.accept(this);
+				break;
+			case 12:
+				this.print("~ ");
+				var3.accept(this);
+				break;
+			case 13:
+				this.print("!( ");
+				var3.accept(this);
+				this.print(" )");
+				break;
+			default:
+				fail();
+		}
+
+	}
+
 
 
 

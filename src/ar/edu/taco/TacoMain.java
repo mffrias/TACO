@@ -120,6 +120,10 @@ public class TacoMain {
 
     private Object inputToFix;
 
+    public String outputJunitFile = "";
+
+    public static boolean isCheckAndRunSpecAssertionSupport = false;
+
     /**
      * @param args
      */
@@ -483,6 +487,7 @@ public class TacoMain {
                     predsComingFromArithmeticConstraintsInContractsByProgram, inputToFix);
 
             dynalloyToAlloy.setSourceJDynAlloy(dynJAlloyToDynAlloyTranslator.getPrunedModules());
+            DynalloyStage.isCheckAndAfterRunSpec = TacoMain.isCheckAndRunSpecAssertionSupport;
             dynalloyToAlloy.execute();
             // DYNALLOY TO ALLOY TRANSLATION
 
@@ -513,10 +518,14 @@ public class TacoMain {
             try {
                 snapshotStage.execute();
                 RecoveredInformation recoveredInformation = snapshotStage.getRecoveredInformation();
+
                 recoveredInformation.setFileNameSuffix(StrykerStage.fileSuffix);
                 JUnitStage jUnitStage = new JUnitStage(recoveredInformation);
                 jUnitStage.execute();
                 junitFile = jUnitStage.getJunitFileName();
+
+                outputJunitFile = junitFile;
+
                 if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())
                     System.out.println("         ... and finished.");
 
@@ -925,7 +934,7 @@ public class TacoMain {
 
     }
 
-    private static final int NOT_PRESENT = -1;
+    public static final int NOT_PRESENT = -1;
 
     public static String obtainClassNameFromFileName(String fileName) {
         int lastBackslash = fileName.lastIndexOf("/");

@@ -3,11 +3,12 @@ public class Absolute {
 
 
 
-	/*@    ensures (0 <= \old(num) && \old(num) <= Integer.MAX_VALUE) ==> \result == num;
+	/*@    requires true;
+	  @    ensures (0 <= \old(num) && \old(num) <= Integer.MAX_VALUE) ==> \result == num;
 	  @    ensures (Integer.MIN_VALUE < \old(num) && \old(num) < 0) ==> \result == -num;
 	  @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		if (0 <= num)
+		if (0 > num)
 			return num;
 		else
 			return -num;

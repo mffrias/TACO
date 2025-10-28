@@ -18,7 +18,6 @@ public interface StrykerAPI {
 	/**
 	 * Attempts to fix a bug
 	 *  
-	 * @param junitFile The file that contains all the statements that will make the class fail.
 	 * @param classToMutate The class to mutate
 	 * @param classNameToMutate the given classNameToMutate should correspond to the class name
 	 *     only; without package information (e.g: BinTree)

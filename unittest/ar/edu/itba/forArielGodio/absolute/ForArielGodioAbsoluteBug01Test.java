@@ -29,7 +29,8 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("forArielGodio.absolute.bug01.Absolute:1");
-		check(GENERIC_PROPERTIES,"absoluteInt(int)",true);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES, "absoluteInt(int)");
+		//check(GENERIC_PROPERTIES,"absoluteInt(int)",true);
 	}
 
 	public void test_genericMethod2Test() throws VizException {

@@ -1,25 +1,25 @@
-package ar.edu.itba.forArielGodio.addLoop;
+package edu.utep.ds2;
 
 
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class ForArielGodioAddLoopBug01Test extends CollectionTestBase {
+public class AverageTest extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
-		return "forArielGodio.addLoop.bug01.AddLoop";
+		return "edu.utep.ds2.AverageMain";
 	}
 
-	public void test_genericMethod1Test() throws VizException {
-		setConfigKeyRelevantClasses("forArielGodio.addLoop.bug01.AddLoop");
+	public void test_genericMethodTest() throws VizException {
+		setConfigKeyRelevantClasses("edu.utep.ds2.AverageMain");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
 		setConfigKeyUseJavaArithmetic(true);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
+		setConfigKeyLoopUnroll(3);
 		setConfigKeySkolemizeInstanceInvariant(true);
 		setConfigKeySkolemizeInstanceAbstraction(false);
 		setConfigKeyGenerateUnitTestCase(true);
@@ -28,8 +28,8 @@ public class ForArielGodioAddLoopBug01Test extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("forArielGodio.addLoop.bug01.AddLoop:1");
-		this.checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"addLoop(int, int)");
-//		check(GENERIC_PROPERTIES,"addLoop(int, int)",true);
+		setConfigKeyTypeScopes("edu.utep.ds2.AverageMain:1");
+//		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"calculateAverage(int, int)",10);
 	}
+
 }

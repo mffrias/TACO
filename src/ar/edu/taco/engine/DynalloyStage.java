@@ -51,6 +51,9 @@ public class DynalloyStage implements ITacoStage {
 
 	private boolean translatingForStryker = false;
 
+	public static boolean  isCheckAndAfterRunSpec = false;
+
+
 //	private AlloyTyping varsEncodingValueOfArithmeticOperationsInContracts;
 
 //	private List<AlloyFormula> predsEncodingValueOfArithmeticOperationsInContracts;
@@ -82,13 +85,19 @@ public class DynalloyStage implements ITacoStage {
 		this.predsComingFromArithmeticConstraintsInObjectInvariantsByModule = predsFromInvPerMod;
 		this.varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram = varsFromContractsPerProg;
 		this.predsComingFromArithmeticConstraintsInContractsByProgram = predsFromContractsPerProg;
-		if (inputToFix != null)
-			translatingForStryker = true;
+
+		//mfrias4-10/17/2025 The following code was commented to generate a contract-
+		//complying i/o instance according to the spec after the program
+		//failed with respect to its contract. If Stryker is going to be used
+		//this needs to be uncommented.
+//		if (inputToFix != null)
+//			translatingForStryker = true;
 	}
 
 	@Override
 	public void execute() {
 		dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
+		DynalloyToAlloyManager.isCheckAndAfterRunSpec = isCheckAndAfterRunSpec;
 
 		String output_dir = TacoConfigurator.getInstance().getOutputDir() ;
 		alloy_filename = output_dir + java.io.File.separator + "output" + OUTPUT_ALLOY_EXTENSION;

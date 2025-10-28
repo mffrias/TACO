@@ -196,7 +196,7 @@ public class JUnitPrettyPrinter {
 		printWriter.println();
 		printWriter.print(" * @param className");
 		printWriter.println();
-		printWriter.print(" * @param constructorName");
+		printWriter.print(" * @param methodName");
 		printWriter.println();
 		printWriter.print(" * @param value");
 		printWriter.println();

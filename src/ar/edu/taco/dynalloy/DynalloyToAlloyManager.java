@@ -56,7 +56,9 @@ public class DynalloyToAlloyManager {
 	private DynAlloyCompiler compiler;
 
 	private boolean translatingForStryker = false;
-	
+
+	public static boolean isCheckAndAfterRunSpec = false;
+
 	public DynalloyToAlloyManager(boolean forStryker){
 		this.translatingForStryker = forStryker;
 	}
@@ -126,6 +128,8 @@ public class DynalloyToAlloyManager {
 			options.setRunAlloyAnalyzer(false);
 			options.setBuildDynAlloyTrace(false);
 			options.setRemoveExitWhileGuard(removeExitWhileGuard);
+
+			DynAlloyCompiler.isCheckAndAfterRunSpec = DynalloyToAlloyManager.isCheckAndAfterRunSpec;
 
 			AlloyModule alloyAST = compiler.compile(inputFilename, outputFilename, options, 
 					varsFromInvPerMod, 

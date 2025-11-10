@@ -18,11 +18,20 @@ JDYNALLOY="jDynAlloy"
 JDYNALLOY_NAME="jdynalloy"
 CURRENT_DIRECTORY=$(pwd)
 
+
+
 if [[ "$1" == "full" ]]; then
     downloadMUJAVA=1
 else
     downloadMUJAVA=0
 fi
+
+if [[ "$2" == "-h" ]]; then
+	URL="https://github.com/"
+else
+	URL="git@github.com:"
+fi
+
 
 function adjustWhereIAm() {
   local isMe=0
@@ -111,10 +120,10 @@ if [ -e "${COMITACO}" ]; then
   fi
   echo "comitaco/TACO will not be downloaded"
 else
-  git clone git@github.com:mffrias/TACO.git
+  git clone ${URL}mffrias/TACO.git
 fi
 if [ ! -e "${DYNALLOY}" ]; then
-  git clone git@github.com:mffrias/dynalloy4.git
+  git clone ${URL}mffrias/dynalloy4.git
 else
   echo "${DYNALLOY} folder found, checking..."
   if [ ! -e "${DYNALLOY_BUILD}" ]; then
@@ -125,7 +134,7 @@ else
   fi
 fi
 if [ ! -e "${JDYNALLOY}" ]; then
-  git clone git@github.com:mffrias/jDynAlloy.git
+  git clone ${URL}mffrias/jDynAlloy.git
 else
   echo "${JDYNALLOY} folder found, checking..."
   if [ ! -e "${JDYNALLOY_BUILD}" ]; then
@@ -137,8 +146,8 @@ else
 fi
 
 if [[ "$downloadMUJAVA" -eq "1" ]]; then
-  git clone git@github.com:saiema/MuJava.git
-  git clone git@github.com:saiema/OJ-with-Java-1.6.git
+  git clone ${URL}saiema/MuJava.git
+  git clone ${URL}saiema/OJ-with-Java-1.6.git
   cd OJ-with-Java-1.6
   git checkout develop
   cd ..

@@ -37,4 +37,61 @@ public class copyArray {
     }
 }
 
+/*store here your opinion about the quality of the generated spec
+Although specifications are longer than usual. They follow a good logic that complies with the parser.  */
+
+    /*store here your opinion about the quality of the generated code
+The code is short and concise, it works  with the JML specifications/*store here the result of the analysis with TACO
+
+00000000  Starting Alloy Analyzer via command line interface
+
+    * Input spec file         : output/output.als
+
+00000001  Parsing and typechecking
+
+Warning #1
+    * Command type            : check
+== is redundant, because the left and right expressions always have the same value.
+    * Command label           : check_gemini_copyArray_CopyArray
+
+Left type = {this/true}
+00003847  Translating Alloy to Kodkod
+Right type = {this/true}
+
+Warning #2
+== is redundant, because the left and right expressions always have the same value.
+Left type = {this/true}
+Right type = {this/true}
+    * Solver                  : sat4j
+    * Bit width               : 2
+    * Max sequence            : 0
+    * Skolem depth            : 0
+    * Symmbreaking            : 20
+
+00004501  Translating Kodkod to CNF
+
+    * Primary vars            : 1250
+    * Total vars              : 69208
+    * Clauses                 : 167909
+
+00006768  Solving
+
+    * Outcome                 : UNSAT: No failures were detected within the given scopes.
+    * Solving time            : 139666
+
+00143864  Analysis finished
+
+
+junit.framework.AssertionFailedError: The method should have counterexample.
+Expected :true
+Actual   :false
+ */
+
+    /*if TACO's outcome was "SAT: A failure has been detected", store here
+    the source code of the method in folder "generated" that describes the
+    counterexample. Otherwise report "UNSAT".
+UNSAT
+     */
+
+
 

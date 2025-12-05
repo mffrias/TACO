@@ -2,7 +2,7 @@ package genai.chatGPT;
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class Find_In_Sorted_Test  extends CollectionTestBase {
+public class FindInSortedTest  extends CollectionTestBase {
 
     @Override
     protected String getClassToCheck() {

@@ -5,26 +5,37 @@ public class Select {
     /*@
        @ requires n >= 0 && r >= 0 && r <= n && n <= 12; // Bound to prevent explosion
        @ ensures \result >= 0;
-       @
-       @ // If flag is true, returns C(n,r)
-       @ // If flag is false, returns P(n,r)
-       @*/
+    @*/
     public static long select(int n, int r, boolean flag) {
+        if (n < 0 || r < 0) {
+            throw new IllegalArgumentException("n and r must be non-negative.");
+        }
+        if (r > n) {
+            throw new IllegalArgumentException("r cannot be greater than n.");
+        }
+
         if (flag) {
-            return factorial(n) / (factorial(r) * factorial(n - r));
+            return fact(n) / (fact(r) * fact(n - r));
         } else {
-            return factorial(n) / factorial(n - r);
+            return fact(n) / fact(n - r);
         }
     }
 
     public static long fact(int num) {
+        if (num < 0) {
+            throw new IllegalArgumentException("Factorial of a negative number is undefined.");
+        }
+
         long result = 1;
         for (int i = 2; i <= num; i++) {
             result *= i;
+
+            if (result < 0) {
+                throw new ArithmeticException("Factorial too large for type long.");
+            }
         }
         return result;
     }
-
 
 }
 /*store here your opinion about the quality of the generated spec
@@ -46,6 +57,8 @@ File "output/genai/chatGPT/Calculator.java", line 59, character 34 error: Variab
 
     /*if TACO's outcome was "SAT: A failure has been detected", store here
     the source code of the method in folder "generated" that describes the
-    counterexample. Otherwise report "UNSAT".
+    counterexample.Otherwise, report "UNSAT".
 UNSAT
      */
+
+

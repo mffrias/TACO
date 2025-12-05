@@ -2,16 +2,16 @@ package genai.chatGPT;
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class Find_First_Sorted_Test  extends CollectionTestBase {
+public class FindInSortedTest2  extends CollectionTestBase {
 
 
     protected String getClassToCheck() {
-        return "genai.chatGPT.Find_First_Sorted";
+        return "genai.chatGPT.Find_in_Sorted_2";
     }
 
     private void config() throws VizException {
         // To solve imports
-        setConfigKeyRelevantClasses("genai.chatGPT.Find_First_Sorted");
+        setConfigKeyRelevantClasses("genai.chatGPT.Find_in_Sorted_2");
 
         // Scope
         setConfigKeyUseJavaArithmetic(true);
@@ -19,7 +19,7 @@ public class Find_First_Sorted_Test  extends CollectionTestBase {
         setConfigKeyInferScope(true);
         setConfigKeyObjectScope(0);
         setConfigKeyLoopUnroll(5);
-        setConfigKeyTypeScopes("genai.chatGPT.Find_First_Sorted:1");
+        setConfigKeyTypeScopes("genai.chatGPT.Find_in_Sorted_2");
 
         // Always true
         setConfigKeyRelevancyAnalysis(true);
@@ -40,7 +40,7 @@ public class Find_First_Sorted_Test  extends CollectionTestBase {
 
     public void test_genericMethod2Test() throws VizException {
         config();
-        check (GENERIC_PROPERTIES, "binarySearchFirst(int[],int)", true);
+        check (GENERIC_PROPERTIES, "find_in_sorted(int[],int)", true);
     }
 
 }

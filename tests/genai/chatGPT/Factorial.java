@@ -5,23 +5,16 @@ package genai.chatGPT;
 //    a formal specification for the factorial computation.
 public class Factorial {
 
-    /*@ public model pure static long spec_factorial(int n);
-      @   requires 0 <= n && n <= 20;
-      @   ensures (n == 0) ==> \result == 1;
-      @   ensures (n > 0)  ==> \result == n * spec_factorial(n - 1);
-      @   ensures 1 <= \result && \result <= Long.MAX_VALUE;
-      @   signals (Exception e) false;
-      @*/
 
-    /*@ public normal_behavior
-      @   requires 0 <= n && n <= 20;
-      @   ensures  \result == spec_factorial(n);
-      @   ensures  1 <= \result && \result <= Long.MAX_VALUE;
-      @ also
-      @ public exceptional_behavior
-      @   requires n < 0 || n > 20;
-      @   signals (IllegalArgumentException e) true;
-      @*/
+    /*@
+          @   ensures 0 <= n && n <= 20;
+          @   ensures  \result == factorial(n);
+          @   ensures  1 <= \result && \result <= Long.MAX_VALUE;
+          @ also
+          @ public exceptional_behavior
+          @   requires n < 0 || n > 20;
+          @   signals (IllegalArgumentException e) true;
+          @*/
     public static long factorial(int n) {
         if (n < 0 || n > 20) {
             throw new IllegalArgumentException("n must be between 0 and 20 inclusive");

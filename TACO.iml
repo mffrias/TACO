@@ -9,12 +9,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="dist1" level="project" />
-    <orderEntry type="library" name="lib1" level="project" />
-    <orderEntry type="library" name="dist" level="project" />
-    <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="module" module-name="dynalloy4" />
-    <orderEntry type="module" module-name="jDynAlloy" />
+    <orderEntry type="library" name="stryker" level="project" />
+    <orderEntry type="library" name="jml4c" level="project" />
   </component>
 </module>

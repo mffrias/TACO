@@ -126,7 +126,8 @@ final public class CTypeAdapter {
 
 	private JType translateArray(CArrayType ctype) {
 //		if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
-			CType base_type = ctype.getBaseType();
+		CType base_type = ctype.getBaseType();
+		if (ctype.getArrayBound() == 1){
 			if (base_type instanceof CNumericType) {
 				switch (base_type.getTypeID()) {
 				case Constants.TID_INT: 
@@ -152,11 +153,27 @@ final public class CTypeAdapter {
 
 				return JType.parse("java_lang_ObjectArray+null");
 			} else {
-				throw new IllegalArgumentException("base type not supported");
+				throw new IllegalArgumentException("base type " + base_type + " not supported");
 			}
-//		} else {
-//			return JType.parse("java_lang_SystemArray+null");
-//		}
+		} else {
+			if (ctype.getArrayBound() == 2) {
+				if (base_type instanceof CNumericType) {
+					switch (base_type.getTypeID()) {
+						case Constants.TID_INT:
+							return JType.parse("java_lang_IntArray2d+null");
+						default:
+							throw new IllegalArgumentException("TypeID: "
+									+ base_type.getTypeID() + " type not supported");
+					}
+				} else {
+					throw new IllegalArgumentException("TypeID: "
+							+ base_type.getTypeID() + " type not supported");
+				}
+			} else {
+				throw new IllegalArgumentException("TypeID: "
+						+ base_type.getTypeID() + " type not supported");
+			}
+		}
 	}
 
 	private JType translateBoolean(CBooleanType ctype) {

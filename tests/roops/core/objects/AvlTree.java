@@ -146,7 +146,7 @@ public class AvlTree {
 		if (n == null){
 			return aux;
 		} else {
-			if (aux.element < n.element) {
+			if (aux.element > n.element) { //should be <
 				n.left = privateInsert(n.left, aux);
 				if (AvlTree.height(n.left) - AvlTree.height(n.right) == 2) {
 					if (aux.element < n.left.element) {

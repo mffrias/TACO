@@ -29,7 +29,7 @@ public class BinarySearchBook extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("edu.utep.ds2.BinarySearch:1");
-		check(GENERIC_PROPERTIES,"binary(int[], int)",true);
+		check(GENERIC_PROPERTIES,"bs(int, int[])",true);
 	}
 
 }

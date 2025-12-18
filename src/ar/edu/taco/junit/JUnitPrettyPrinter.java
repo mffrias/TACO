@@ -86,6 +86,9 @@ public class JUnitPrettyPrinter {
 			printWriter.println();
 
 			for (String statement : ls){
+				if (statement.equals("// Parameter Initialization")){
+					break;
+				}
 				String[] split = statement.split(" ");
 				String complexVarName = "";
 				if (split.length>1){

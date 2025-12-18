@@ -643,6 +643,8 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
             signatureId = JSignatureFactory.CHAR_ARRAY_TYPE.singletonFrom();
         } else if (jtype.equals(JSignatureFactory.OBJECT_ARRAY_TYPE)) {
             signatureId = JSignatureFactory.OBJECT_ARRAY_TYPE.singletonFrom();
+        } else if (jtype.equals(JSignatureFactory.TWODIM_INT_ARRAY_TYPE)) {
+            signatureId = JSignatureFactory.TWODIM_INT_ARRAY_TYPE.singletonFrom();
         } else {
             throw new RuntimeException("unsupported array type");
         }

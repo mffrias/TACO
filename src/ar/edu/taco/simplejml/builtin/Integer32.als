@@ -17,6 +17,7 @@ pred_java_primitive_integer_value_gte_zero
 pred_java_primitive_integer_value_lt
 pred_java_primitive_integer_value_lt_zero
 pred_java_primitive_integer_value_lte_zero
+pred_java_primitive_integer_value_set_has_negative
 pred_java_primitive_integer_value_lte
 pred_java_primitive_integer_value_mul
 pred_java_primitive_integer_value_negate
@@ -26,6 +27,7 @@ pred_cast_char_to_int (cast in char x int)
 pred_java_primitive_char_value_addCharCharToJavaPrimitiveIntegerValue (+ : char x char -> int)
 pred_java_primitive_char_value_addCharIntToJavaPrimitiveIntegerValue (+ : char x int -> int)
 pred_java_primitive_char_value_addIntCharToJavaPrimitiveIntegerValue (+ : int x char -> int)
+
 
 MARKER PREDICATES
 pred_java_primitive_integer_value_add_marker
@@ -2038,6 +2040,10 @@ pred pred_java_primitive_integer_value_lte[a: JavaPrimitiveIntegerValue, b: Java
   not pred_java_primitive_integer_value_gt[a, b]
 }
 
+pred pred_java_primitive_integer_value_set_has_negative[s : set JavaPrimitiveIntegerValue] {
+    true in s.b31
+}
+
 pred pred_java_primitive_integer_value_neq[a: JavaPrimitiveIntegerValue, b: JavaPrimitiveIntegerValue] {
   not pred_java_primitive_integer_value_eq[a, b]
 }
@@ -2331,6 +2337,7 @@ pred pred_java_primitive_integer_value_div_rem[a: JavaPrimitiveIntegerValue,
   and
   (pred_java_primitive_integer_value_lt_zero[a] implies pred_java_primitive_integer_value_lte_zero[rem])
 }
+
 
 
 pred pred_java_primitive_integer_decrement[a: JavaPrimitiveIntegerValue, b: JavaPrimitiveIntegerValue] {

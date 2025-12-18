@@ -113,8 +113,27 @@ public class AvlTreeTest extends CollectionTestBase {
 		check(GENERIC_PROPERTIES, "insert(int)", false);
 	}
 
-	
-	
+
+	public void test_insert2Test() throws VizException {
+		setConfigKeyRelevantClasses("roops.core.objects.AvlTree,roops.core.objects.AvlNode");
+		setConfigKeyRelevancyAnalysis(true);
+		setConfigKeyCheckNullDereference(true);
+		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeyInferScope(true);
+		setConfigKeyObjectScope(0);
+		setConfigKeyIntBithwidth(4);
+		setConfigKeyLoopUnroll(3);
+		setConfigKeySkolemizeInstanceInvariant(true);
+		setConfigKeySkolemizeInstanceAbstraction(false);
+		setConfigKeyGenerateUnitTestCase(true);
+		setConfigKeyAttemptToCorrectBug(false);
+		setConfigKeyMaxStrykerMethodsPerFile(1);
+		setConfigKeyRemoveQuantifiers(true);
+		setConfigKeyUseJavaSBP(true);
+		setConfigKeyUseTightUpperBounds(true);
+		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:5");
+		this.checkAndRunSpecIfFaulty(GENERIC_PROPERTIES, "insert(int)");
+	}
 	
 	public void test_generate20NodesTest() throws VizException {
 		setConfigKeyRelevantClasses("roops.core.objects.AvlTree,roops.core.objects.AvlNode");

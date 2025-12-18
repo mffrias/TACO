@@ -29,7 +29,9 @@ public class ForArielGodioAbsoluteBug01Test extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("forArielGodio.findFirstInSorted.bug01.FindFirstInSorted:1");
-		check(GENERIC_PROPERTIES,"findfirstinsorted(int[], int)",true);
+		//check(GENERIC_PROPERTIES,"findfirstinsorted(int[], int)",true);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"findfirstinsorted(int[], int)");
+
 	}
 
 

@@ -26,10 +26,7 @@ public class JUnitStage implements ITacoStage {
 	String junitFile;
 	
 	/**
-	 * 
-	 * @param asts
-	 * @param classToCheck
-	 * @param methodToCheck
+	 *
 	 */
 //	public JUnitStage(List<JCompilationUnitType> asts, TacoAnalysisResult tacoAnalysisResult, String classToCheck, String methodToCheck,RecoveredInformation recoveredInformation) {
 	public JUnitStage(RecoveredInformation recoveredInformation) {

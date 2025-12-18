@@ -1,35 +1,43 @@
 package edu.utep.ds2;
 public class BinarySearch {
-	//@ requires (\forall int j; 0 <= j && j < arr.length; (\forall int i; 0 <= i && i < j ;arr[i] <= arr[j]));
-	//@ ensures \result == false <==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key);
-	//@ signals (Exception e) false;
-	public static boolean binary(int[] arr, int key) {
-		int lo = 0;
-		int hi = arr.length-1;
-		int middle;
-		//@ decreasing hi - lo;
-		while (lo <= hi) {
-			middle = (lo + hi) / 2;
-			if (arr[middle] == key) {
-				return true;
+
+
+
+
+	/*@
+	@ requires arr != null;
+	@ ensures \result <==> (\exists int i; 0 <= i && i < length(arr); arr[i] == val); @*/
+	public boolean bs(int val, int[] arr) {
+		// 1. Handle edge cases
+		if (arr == null || arr.length == 0) {
+			return false;
+		}
+
+		int left = 0;
+		int right = arr.length - 1;
+
+		// 2. Loop while the search interval is valid
+		while (left <= right) {
+			// Calculate mid to avoid integer overflow
+			int mid = left + (right - left) / 2;
+
+			if (arr[mid] == val) {
+				return true; // Target found
+			} else if (arr[mid] < val) {
+				left = mid + 1; // Target is in the right half
 			} else {
-				if (arr[middle] > key) {
-					hi = middle - 1;
-				} else 
-					lo = middle + 1;
+				right = mid - 1; // Target is in the left half
 			}
 		}
+
+		// 3. Target was not found
 		return false;
 	}
 
-
-	public static void main(String[] args) {
-	    int[] arr = new int[1074999999];
-	    int key = 1009668096;
-	    // Parameter Initialization
-	    arr[0] = -1939075073;
-	    arr[1] = -1939075073;
-	    arr[2] = -969537536;
-	    binary(arr, key);
+	//@ requires true;
+	//@ pure
+	public int length(int[] arr ){
+		return arr.length;
 	}
+
 }

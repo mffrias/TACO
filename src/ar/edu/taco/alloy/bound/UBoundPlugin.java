@@ -60,6 +60,8 @@ public class UBoundPlugin implements AlloyASTPlugin {
 			Set<Integer> int_literals = new HashSet<Integer>();
 			StringBuffer buff = new StringBuffer();
 
+			buff.append("//-----UPPER BOUND -----//" + "\n");
+			buff.append("fact {" + "\n");
 			for (UBound upper_bound : upper_bounds) {
 				ExprConstant field_constant = (ExprConstant) upper_bound.getField().getRight();
 
@@ -69,10 +71,11 @@ public class UBoundPlugin implements AlloyASTPlugin {
 					int_literals.addAll(collect_java_primitive_integer_literals(upper_bound));
 					String upper_bound_str = pretty_print_upper_bound(upper_bound);
 					buff.append(upper_bound_str);
-
+					buff.append("\n");
 				}
 
 			}
+			buff.append("}\n");
 			String ubounds_str = buff.toString();
 			if (!ubounds_str.isEmpty()) {
 				UBoundMutator mutator = new UBoundMutator(int_literals);
@@ -114,15 +117,15 @@ public class UBoundPlugin implements AlloyASTPlugin {
 
 	private String pretty_print_upper_bound(UBound upper_bound) {
 		StringBuffer buff = new StringBuffer();
-		buff.append("//-----UPPER BOUND -----//" + "\n");
-		buff.append("fact {" + "\n");
+//		buff.append("//-----UPPER BOUND -----//" + "\n");
+//		buff.append("fact {" + "\n");
 		buff.append("  " + upper_bound.getField().toString() + " in " + "\n");
 
 		AlloyExpression upper_bound_expr = upper_bound.getUpperBoundExpression();
 		String upper_bound_expr_str = (String) upper_bound_expr.accept(new UBoundPrettyPrinter());
 
 		buff.append(upper_bound_expr_str + "\n");
-		buff.append("}\n");
+//		buff.append("}\n");
 		return buff.toString();
 	}
 

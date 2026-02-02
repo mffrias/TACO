@@ -40,7 +40,7 @@ public class FactorialTest  extends CollectionTestBase {
 
     public void test_genericMethod2Test() throws VizException {
         config();
-        check (GENERIC_PROPERTIES, "factorial(int)", true);
+        check (GENERIC_PROPERTIES, "specFactorial(int)", true);
     }
 
 }

@@ -1,2 +1,8 @@
-During 15 tests of different methods where the prompts varied, when the /forall paramter was presented
-the Kodkod to CNF translation was slowed.
+ 02/02/2026
+ During testing, parameters such as:
+@ public pure
+      @   requires n >= 0;
+      @   ensures (n == 0 ==> \result == 1)
+      @        && (n > 0 ==> \result == n * specFactorial(n - 1));
+      @*/
+in Factorial cause the method to not compile.

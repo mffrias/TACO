@@ -1,27 +1,52 @@
 package genai.chatGPT;
 //Prompt
-//    //Generate a JML specification for the Factorial class and its methods, specifically the factorial(int n) method, and the spec factorial(int n) method. The factorial(int n)
-//    method ensures that the result is within the valid range for a long and correctly computes the factorial, while the model function spec factorial(int n) provides
-//    a formal specification for the factorial computation.
+//    //Generate a JML specification for the Factorial class and its methods,
+//    specifically the factorial(int n) method, and the spec factorial(int n) method.
 public class Factorial {
 
+    /*@
+      @ public normal_behavior
+      @   requires n >= 0;
+      @   ensures \result == specFactorial(n);
+      @*/
+    public static int factorial(int n) {
+        int result = 1;
+        for (int i = 1; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
 
     /*@
-          @   ensures 0 <= n && n <= 20;
-          @   ensures  \result == factorial(n);
-          @   ensures  1 <= \result && \result <= Long.MAX_VALUE;
-          @ also
-          @ public exceptional_behavior
-          @   requires n < 0 || n > 20;
-          @   signals (IllegalArgumentException e) true;
-          @*/
-    public static long factorial(int n) {
-        if (n < 0 || n > 20) {
-            throw new IllegalArgumentException("n must be between 0 and 20 inclusive");
-        }
-        if (n == 0) {
-            return 1;
-        }
-        return n * factorial(n - 1);
+      @ public pure
+      @ model int specFactorial(int n);
+      @*/
+
+    /*@
+      @ public pure
+      @   requires n >= 0;
+      @   ensures (n == 0 ==> \result == 1)
+      @        && (n > 0 ==> \result == n * specFactorial(n - 1));
+      @*/
+    private static int specFactorial(int n) {
+        // specification-only method (no implementation needed)
+        return 0;
     }
 }
+/*store here your opinion about the quality of the generated spec
+The specifications and combination of code generated  by chatGPT do not compile
+    /*store here your opinion about the quality of the generated code
+The generated code seems to follow a correct logic */
+
+
+
+/*store here the result of the analysis with TACO:
+File "tests/genai/chatGPT/Factorial.java", line 27, character 19 error: An generic-spec-case may not be preceded by any modifiers [JML]
+
+
+ */
+    /*if TACO's outcome was "SAT: A failure has been detected", store here
+    the source code of the method in folder "generated" that describes the
+    counterexample. Otherwise report "UNSAT".
+
+     */

@@ -17,3 +17,5 @@ java.lang.ClassCastException: org.multijava.mjc.JForStatement cannot be cast to 
           @ loop_invariant (\forall int j; 0 <= j && j < i; x[j] != 0);
           @ decreases x.length - i;
           @*/
+
+- FindInArray Implemented, reviewing how to test the methods.

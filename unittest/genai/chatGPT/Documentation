@@ -6,3 +6,4 @@
       @        && (n > 0 ==> \result == n * specFactorial(n - 1));
       @*/
 in Factorial cause the method to not compile.
+

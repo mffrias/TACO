@@ -1,0 +1,50 @@
+package genai.chatGPT;
+import ar.edu.taco.regresion.CollectionTestBase;
+import ar.uba.dc.rfm.dynalloy.visualization.VizException;
+
+public class GCDdivTest extends CollectionTestBase {
+
+    @Override
+    protected String getClassToCheck() {
+        return "genai.chatGPT.GCD";
+    }
+
+    private void config() throws VizException {
+        // To solve imports
+        setConfigKeyRelevantClasses("genai.chatGPT.GCD");
+
+        // Scope
+        setConfigKeyUseJavaArithmetic(true);
+        setConfigKeyIntBithwidth(2);
+        setConfigKeyInferScope(true);
+        setConfigKeyObjectScope(0);
+        setConfigKeyLoopUnroll(5);
+        setConfigKeyTypeScopes("genai.chatGPT.GCD:1");
+
+        // Always true
+        setConfigKeyRelevancyAnalysis(true);
+        setConfigKeyCheckNullDereference(true);
+        setConfigKeyGenerateUnitTestCase(true);
+        setConfigKeyRemoveQuantifiers(true);
+
+        // Always false
+        setConfigKeyUseJavaSBP(false);
+        setConfigKeyUseTightUpperBounds(false);
+        setConfigKeyAttemptToCorrectBug(false);
+
+        // Ignored
+        setConfigKeySkolemizeInstanceInvariant(true);
+        setConfigKeySkolemizeInstanceAbstraction(false);
+        setConfigKeyMaxStrykerMethodsPerFile(1);
+    }
+
+    public void test_genericMethod2Test() throws VizException {
+        config();
+        check (GENERIC_PROPERTIES, "div(int,int)", true);
+    }
+
+}
+
+
+
+

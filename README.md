@@ -128,3 +128,4 @@ Follow the same instructions as for Eclipse. Set the `tests` folder as a `Source
 For the moment TACO works by using tests (JUnit tests). Several examples of these can be found in the `unittest` source folder.
 
 In the near future, a usable terminal option will be developed.
+# Adv-Obj-Lab6

@@ -6,6 +6,13 @@ public class GCD {
     public static int div(int n, int d) {
         return n % d;
     }
+
+
+    //Prompt: div(int n, int d):
+
+    public static int div2(int n, int d){
+        return n%d;
+    }
 }
 
 // Test Results:

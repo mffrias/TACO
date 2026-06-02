@@ -40,7 +40,7 @@ public class GCDdivTest extends CollectionTestBase {
 
     public void test_genericMethod2Test() throws VizException {
         config();
-        check (GENERIC_PROPERTIES, "div(int,int)", true);
+        check (GENERIC_PROPERTIES, "div2(int,int)", true);
     }
 
 }

@@ -19,6 +19,8 @@ java.lang.ClassCastException: org.multijava.mjc.JForStatement cannot be cast to 
           @*/
 
 - FindInArray Implemented, reviewing how to test the methods.
+- Genertae a specification pating from this code, if the code has a big the specification will be bug
+Excel - method and tool - bug detected or not
 
 March 3 2026:
 Find_inSorted
@@ -40,3 +42,8 @@ Null pointer exception generated because of an exisiting quantifier that is remo
 ensures (\exists int q; n == q * d + \result);
 
 Error: java.lang.ClassCastException: ar.edu.jdynalloy.ast.JBlock cannot be cast to ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression
+
+Metrica de comparacion de OpenAI vs Gemini (abierto a otros modelos)
+
+- Replicar GCD
+

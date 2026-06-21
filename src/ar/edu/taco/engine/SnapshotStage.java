@@ -1,5 +1,6 @@
 package ar.edu.taco.engine;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.tools.JavaCompiler;
@@ -23,7 +24,7 @@ public class SnapshotStage implements ITacoStage {
 	private String methodToCheck;
 	private List<JCompilationUnitType> asts;
 	private TacoAnalysisResult tacoAnalysisResult;
-
+	private Object inputToFix = null;
 	//	private Map<String, Object> snapshot;
 	private RecoveredInformation recoveredInformation;
 
@@ -96,9 +97,13 @@ public class SnapshotStage implements ITacoStage {
 
 				} else {			
 					SnapshotBuilder snapshotBuilder = new SnapshotBuilder(
-							recoveredInformation, this.tacoAnalysisResult);
+							recoveredInformation, this.tacoAnalysisResult, this.inputToFix);
 					snapshotBuilder.setLoader(loader);
-					snapshotBuilder.createSnapshot();				
+					if (this.inputToFix == null) {
+						snapshotBuilder.createSnapshot();
+					} else {
+						snapshotBuilder.createSnapshotFinalState();
+					}
 				}
 			}
 
@@ -112,4 +117,7 @@ public class SnapshotStage implements ITacoStage {
 		return recoveredInformation;
 	}
 
+	public void setInputToFix(Object inputToFix) {
+		this.inputToFix = inputToFix;
+	}
 }

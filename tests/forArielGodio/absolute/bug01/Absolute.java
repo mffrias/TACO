@@ -1,4 +1,7 @@
 package forArielGodio.absolute.bug01;
+
+import escj.test20B.A;
+
 public class Absolute {
 
 
@@ -21,6 +24,11 @@ public class Absolute {
 		if (0 <= num)
 			return num;
 		else
-			return -num;	
+			return -num;
+	}
+
+	public static void main(String[] args){
+		Absolute a = new Absolute();
+		System.out.println(a.absoluteInt(-127));
 	}
 }

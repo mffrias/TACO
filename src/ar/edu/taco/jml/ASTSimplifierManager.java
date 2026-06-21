@@ -28,6 +28,7 @@ import java.util.List;
 
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
+import ar.edu.taco.jml.block.methodBodySimplifier;
 import ar.edu.taco.jml.loop.*;
 import ar.edu.taco.utils.FileUtils;
 import org.apache.log4j.Logger;
@@ -52,6 +53,7 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 import org.multijava.mjc.JTypeDeclarationType;
 
 public class ASTSimplifierManager {
+	public static boolean isCheckAndAfterRunSpec = false;
 	private static Logger log = Logger.getLogger(ASTSimplifierManager.class);
 	private List<JmlAstClonerStatementVisitor> simplifiers;
 
@@ -61,6 +63,7 @@ public class ASTSimplifierManager {
 		this.jmlToSimpleJmlContext = new JmlToSimpleJmlContext();
 		// order of simplifiers
 		this.simplifiers = new ArrayList<JmlAstClonerStatementVisitor>();
+
 
 		simplifiers.add(new ForRemoverVisitor());
 		simplifiers.add(new BreakRemoverSimplifier());
@@ -83,6 +86,9 @@ public class ASTSimplifierManager {
 		simplifiers.add(new ActualParameterNormalizerVisitor());
 		simplifiers.add(new AssumeSimplifierVisitor());
 		simplifiers.add(new ReturnStatementWrapperVisitor());
+		if (isCheckAndAfterRunSpec){
+			simplifiers.add(new methodBodySimplifier());
+		}
 	}
 
 	public JmlToSimpleJmlContext getJmlToSimpleJmlContext() {

@@ -14,11 +14,11 @@ public class LandingTest extends CollectionTestBase {
 
 	@Override
 	protected String getClassToCheck() {
-		return "ar.edu.taco.arithmetic.DerefCheck";
+		return "ar.edu.taco.skunk.Landing";
 	}
 
 	public void test_LandingTest1() throws VizException {
-		setConfigKeyRelevantClasses("ar.edu.taco.arithmetic.DerefCheck");
+		setConfigKeyRelevantClasses("ar.edu.taco.skunk.Landing");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
 		setConfigKeyCheckArithmeticException(false);
@@ -28,14 +28,14 @@ public class LandingTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		// Infer-Scope
 		setConfigKeyInferScope(true);
-		setConfigKeyTypeScopes("ar.edu.taco.arithmetic.DerefCheck:1");
+		setConfigKeyTypeScopes("ar.edu.taco.skunk.Landing:1");
 		setConfigKeyLoopUnroll(1);
 		// SBP+BOUND
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		// JUNIT
 		setConfigKeyGenerateUnitTestCase(true);
-		check(GENERIC_PROPERTIES,"acessDerefCheck()", false);
+		check(GENERIC_PROPERTIES,"initLandingOK(float)", false);
 	}
 
 }

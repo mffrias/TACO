@@ -10,6 +10,7 @@ public class IntegerOpCounter {
 	private int java_primitive_integer_value_div_rem = 0;
 	private int java_primitive_integer_value_cast_from_char = 0;
 	private int java_primitive_integer_value_narrowing_cast = 0;
+	private int java_primitive_integer_value_num_sizeof = 0;
 
 	public void inc_add() {
 		java_primitive_integer_value_add++;
@@ -25,12 +26,14 @@ public class IntegerOpCounter {
 
 	public void inc_sshr() {
 		java_primitive_integer_value_sshr++;
-
 	}
 
 	public void inc_mul() {
 		java_primitive_integer_value_mul++;
+	}
 
+	public void inc_sizeof() {
+		java_primitive_integer_value_num_sizeof++;
 	}
 
 	public void inc_div_rem() {
@@ -40,7 +43,6 @@ public class IntegerOpCounter {
 	public void inc_cast_from_char() {
 		java_primitive_integer_value_cast_from_char++;
 	}
-
 
 	public int add_count() {
 		return java_primitive_integer_value_add;
@@ -70,5 +72,6 @@ public class IntegerOpCounter {
 		return java_primitive_integer_value_narrowing_cast;
 	}
 
+    public int num_of_sizeof() { return java_primitive_integer_value_num_sizeof;}
 
 }

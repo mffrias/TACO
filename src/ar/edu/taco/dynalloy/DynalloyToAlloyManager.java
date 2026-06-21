@@ -30,9 +30,7 @@ import java.util.Set;
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 
-import ar.edu.jdynalloy.ast.JDynAlloyModule;
-import ar.edu.jdynalloy.ast.JField;
-import ar.edu.jdynalloy.ast.JProgramDeclaration;
+import ar.edu.jdynalloy.ast.*;
 import ar.edu.jdynalloy.xlator.JType;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
@@ -67,7 +65,7 @@ public class DynalloyToAlloyManager {
 			HashMap<String, AlloyTyping> varsFromInvPerMod, 
 			HashMap<String, List<AlloyFormula>> predsFromInvPerMod,
 			HashMap<String, AlloyTyping> varsFromContractsPerProg,
-			HashMap<String, List<AlloyFormula>> predsFromContractsPerProg) {
+			HashMap<String, List<AlloyFormula>> predsFromContractsPerProg, Object inputToFix) {
 		SpecContext result = null;
 
 		// optional fields
@@ -84,9 +82,46 @@ public class DynalloyToAlloyManager {
 		try {
 			compiler = new DynAlloyCompiler();
 
+			DynAlloyOptions options = new DynAlloyOptions();
+			options.setModuleUnderAnalysis(this.src_jdynalloy_modules.get(0).getModuleId());
+//			Set<AlloyFormula> specFormulas = new HashSet<AlloyFormula>();
+			JDynAlloyModule theModule = this.src_jdynalloy_modules.get(0);
+			Set<JProgramDeclaration> thePrograms = theModule.getPrograms();
+			Set<AlloyFormula> specFormulas = new HashSet<AlloyFormula>();
+			for (JObjectInvariant oi : theModule.getObjectInvariants()){
+				specFormulas.add(oi.getFormula()); //once for the invariant in the precondition
+//				specFormulas.add(oi.getFormula()); //once for the invariant in the postcondition
+			}
+			for (JProgramDeclaration progDecl : thePrograms) {
+				String fullyQualifiedMethodName = progDecl.getSignatureId() + "_" + progDecl.getProgramId();
+				if (assertionId.substring(6).equals(fullyQualifiedMethodName)) {
+					List<JSpecCase> theSpecCases = progDecl.getSpecCases();
+					for (JSpecCase specCase : theSpecCases) {
+						List<JPrecondition> preconds = specCase.getRequires();
+						for (JPrecondition pre : preconds) {
+							specFormulas.add(pre.getFormula());
+						}
+						List<JPostcondition> postconds = specCase.getEnsures();
+						for (JPostcondition post : postconds) {
+							specFormulas.add(post.getFormula());
+						}
+					}
+				}
+			}
+
+
+			options.setProgramSpecs(specFormulas);
+			options.setAssertionToCheck(assertionId);
+			options.setStrictUnroll(strictUnrolling);
+			options.setRemoveQuantifier(removeQuantifiers);
+			options.setLoopUnroll(unroll);
+			options.setRunAlloyAnalyzer(false);
+			options.setBuildDynAlloyTrace(false);
+			options.setRemoveExitWhileGuard(removeExitWhileGuard);
+
 			if (TacoConfigurator.getInstance().getInferScope() == true) {
 
-				DynAlloyProgramScopeInferencePlugin program_scope_inference_plugin = new DynAlloyProgramScopeInferencePlugin();
+				DynAlloyProgramScopeInferencePlugin program_scope_inference_plugin = new DynAlloyProgramScopeInferencePlugin(options.getProgramSpecs());
 				compiler.addDynAlloyASTPlugin(program_scope_inference_plugin);
 
 				DynAlloyScopeInferencePlugin final_scope_inference_plugin = new DynAlloyScopeInferencePlugin();
@@ -97,7 +132,6 @@ public class DynalloyToAlloyManager {
 			}
 
 			compiler.addDynAlloyASTPlugin(new DynAlloyAppendCommandPlugin());		
-
 
 			if (TacoConfigurator.getInstance().getUseJavaSBP() == true) {
 				SymmBreakPredPlugin plugin = new SymmBreakPredPlugin();
@@ -119,15 +153,6 @@ public class DynalloyToAlloyManager {
 				compiler.addAlloyStringPlugin(cardinal_plugin);
 			}
 			
-			DynAlloyOptions options = new DynAlloyOptions();
-			options.setModuleUnderAnalysis(this.src_jdynalloy_modules.get(0).getModuleId());
-			options.setAssertionToCheck(assertionId);
-			options.setStrictUnroll(strictUnrolling);
-			options.setRemoveQuantifier(removeQuantifiers);
-			options.setLoopUnroll(unroll);
-			options.setRunAlloyAnalyzer(false);
-			options.setBuildDynAlloyTrace(false);
-			options.setRemoveExitWhileGuard(removeExitWhileGuard);
 
 			DynAlloyCompiler.isCheckAndAfterRunSpec = DynalloyToAlloyManager.isCheckAndAfterRunSpec;
 
@@ -136,7 +161,8 @@ public class DynalloyToAlloyManager {
 					predsFromInvPerMod,
 					varsFromContractsPerProg,
 					predsFromContractsPerProg, 
-					this.translatingForStryker);
+					this.translatingForStryker,
+					inputToFix);
 
 			result = compiler.getSpecContext();
 

@@ -77,7 +77,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRelevantClasses("roops.core.objects.BinomialHeap,roops.core.objects.BinomialHeapNode");
         setConfigKeyRelevancyAnalysis(true);
         setConfigKeyCheckNullDereference(true);
-        setConfigKeyUseJavaArithmetic(false);
+        setConfigKeyUseJavaArithmetic(true);
         setConfigKeyInferScope(true);
         setConfigKeyObjectScope(0);
         setConfigKeyIntBithwidth(5);

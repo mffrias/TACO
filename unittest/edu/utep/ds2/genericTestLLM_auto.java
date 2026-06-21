@@ -4,13 +4,13 @@ package edu.utep.ds2;
 import ar.edu.taco.regresion.CollectionTestBase;
 import ar.uba.dc.rfm.dynalloy.visualization.VizException;
 
-public class genericTestLLM extends CollectionTestBase {
+public class genericTestLLM_auto extends CollectionTestBase {
 
 	@Override
-	protected String getClassToCheck() { return "edu.utep.ds2.genericLLM"; }
+	protected String getClassToCheck() { return "edu.utep.ds2.Func"; }
 
 	public void test_genericMethodTest() throws VizException {
-		setConfigKeyRelevantClasses("edu.utep.ds2.genericLLM");
+		setConfigKeyRelevantClasses("edu.utep.ds2.Func");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
 		setConfigKeyUseJavaArithmetic(true);
@@ -26,8 +26,10 @@ public class genericTestLLM extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("edu.utep.ds2.genericLLM:1");
-		check(GENERIC_PROPERTIES,"average(int, int)",true);
+		setConfigKeyTypeScopes("edu.utep.ds2.Func:1");
+		check(GENERIC_PROPERTIES,"func(float, float)",true);
+
 	}
+
 
 }

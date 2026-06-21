@@ -53,6 +53,8 @@ public class DynalloyStage implements ITacoStage {
 
 	public static boolean  isCheckAndAfterRunSpec = false;
 
+	public Object inputToFix = null;
+
 
 //	private AlloyTyping varsEncodingValueOfArithmeticOperationsInContracts;
 
@@ -85,6 +87,7 @@ public class DynalloyStage implements ITacoStage {
 		this.predsComingFromArithmeticConstraintsInObjectInvariantsByModule = predsFromInvPerMod;
 		this.varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram = varsFromContractsPerProg;
 		this.predsComingFromArithmeticConstraintsInContractsByProgram = predsFromContractsPerProg;
+		this.inputToFix = inputToFix;
 
 		//mfrias4-10/17/2025 The following code was commented to generate a contract-
 		//complying i/o instance according to the spec after the program
@@ -116,7 +119,7 @@ public class DynalloyStage implements ITacoStage {
 				varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule,
 				predsComingFromArithmeticConstraintsInObjectInvariantsByModule,
 				varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram,
-				predsComingFromArithmeticConstraintsInContractsByProgram);
+				predsComingFromArithmeticConstraintsInContractsByProgram, inputToFix);
 	}
 
 	public String get_alloy_filename() {

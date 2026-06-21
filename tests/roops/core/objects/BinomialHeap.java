@@ -27,6 +27,7 @@ public class BinomialHeap {
     @ invariant ( \forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, sibling).has(n) == true; n.key >= 0 );
     @
     @*/
+
 	public /*@ nullable @*/BinomialHeapNode Nodes;
 
 	public int size;
@@ -116,7 +117,6 @@ public class BinomialHeap {
 		} else {
 			if ((Nodes == null) && (fakeNode != null)) {
 				Nodes = fakeNode.reverse(null);
-//				cover = false;
 				size--;
 			} else {
 				if ((Nodes != null) && (fakeNode == null)) {
@@ -180,6 +180,36 @@ public class BinomialHeap {
 		} 
 
 	}
+
+
+
+	private void mergeGodio(/* @ nullable @ */ BinomialHeapNode binHeap) {
+		BinomialHeapNode l1 = Nodes;
+		BinomialHeapNode l2 = binHeap;
+
+		BinomialHeapNode curr = new BinomialHeapNode();
+		BinomialHeapNode head = curr;
+
+		while (l1 != null && l2 != null){
+			if (l1.degree <= l2.degree) {
+				curr.sibling = l1;
+				l1 = l1.sibling;
+			} else {
+				curr.sibling = l2;
+				l2 = l2.sibling;
+			}
+			curr = curr.sibling;
+		}
+
+		if (l1 == null)
+			curr.sibling = l2;
+		else
+			curr.sibling = l1;
+
+		Nodes = head.sibling;
+	}
+
+
 
 	// another helper procedure
 	private void unionNodes( /* @ nullable @ */BinomialHeapNode binHeap ) {
@@ -266,12 +296,9 @@ public class BinomialHeap {
 //}
 
 
-	public static void main(String[] args){
-		BinomialHeap bh1 = new BinomialHeap();
-		bh1.insert(3);
-		bh1.insert(3);
-		int s = bh1.size;
-		System.out.println(s);
-	}
+//
+
+
+
 
 }

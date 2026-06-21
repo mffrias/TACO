@@ -378,7 +378,7 @@ public class RegresionTestBase extends TestCase {
         overridingProperties.put("methodToCheck", methodToCheck);
         TacoMain main1 = new TacoMain(null);
         TacoAnalysisResult analysis_result = main1.run(configFile, overridingProperties);
-        if (analysis_result != null) {
+        if (analysis_result.get_alloy_analysis_result().isSAT()) {
             String junitFile = main1.outputJunitFile;
             methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
             String sourceRootDir = TacoConfigurator.getInstance().getString(
@@ -432,9 +432,9 @@ public class RegresionTestBase extends TestCase {
 					return analysis_result_2.get_alloy_analysis_result();
 
                 } catch (IllegalArgumentException e) {
-                    //							e.printStackTrace();
+					e.printStackTrace();
                 } catch (Exception e) {
-                    //							e.printStackTrace();
+                    e.printStackTrace();
                 }
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
@@ -444,9 +444,7 @@ public class RegresionTestBase extends TestCase {
                 throw new RuntimeException(e);
             }
 
-        } else {
-			throw new TacoException("The TACO analysis of the provided code did not report any bugs.");
-		}
+        }
 
 
 
@@ -468,7 +466,7 @@ public class RegresionTestBase extends TestCase {
 //		else
 //			analysisResult = null;
 
-        return null;// analysisResult;
+        return null;// the formula was UNSAT
     }
 
 

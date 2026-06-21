@@ -15,5 +15,7 @@
     <orderEntry type="library" name="alloy4" level="project" />
     <orderEntry type="library" name="log4j-1.2.15" level="project" />
     <orderEntry type="library" name="antlr-4.3-complete1" level="project" />
+    <orderEntry type="library" name="mjc-1_3_2" level="project" />
+    <orderEntry type="library" name="jml-release" level="project" />
   </component>
 </module>

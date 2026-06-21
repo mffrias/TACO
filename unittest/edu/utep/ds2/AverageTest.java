@@ -29,8 +29,8 @@ public class AverageTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("edu.utep.ds2.AverageMain:1");
-		check(GENERIC_PROPERTIES,"calculateAverage()",false);
-//		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"calculateAverage()",10);
+//		check(GENERIC_PROPERTIES,"calculateAverage(int, int)",false);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"calculateAverage(int, int)");
 	}
 
 	public void test_absMethodTest() throws VizException {
@@ -50,19 +50,19 @@ public class AverageTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("edu.utep.ds2.AverageMain:1");
-		check(GENERIC_PROPERTIES,"abs(int)",false);
-//		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"calculateAverage(int, int)",10);
+		setConfigKeyTypeScopes("edu.utep.ds2.AverageMain:5");
+//		check(GENERIC_PROPERTIES,"abs(int)",false);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"calculateAverage(int, int)");
 	}
 
-	public static void main(String[] args){
-		int[] x = new int[3];
-		int[][] a = {{1,2,3}, {23}, {1,2,3}};
-		int[] b = a[0];
-		int[][] c = new int[3][5];
-		c[0] = new int[1];
-		int[] d = c[0];
-		int e = c[2][2];
-	}
+//	public static void main(String[] args){
+//		int[] x = new int[3];
+//		int[][] a = {{1,2,3}, {23}, {1,2,3}};
+//		int[] b = a[0];
+//		int[][] c = new int[3][5];
+//		c[0] = new int[1];
+//		int[] d = c[0];
+//		int e = c[2][2];
+//	}
 
 }

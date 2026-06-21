@@ -45,6 +45,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import ar.edu.taco.engine.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -60,18 +61,6 @@ import org.multijava.mjc.JCompilationUnitType;
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.MethodToCheckNotFoundException;
 import ar.edu.jdynalloy.ast.JDynAlloyModule;
-import ar.edu.taco.engine.AlloyStage;
-import ar.edu.taco.engine.DynalloyStage;
-import ar.edu.taco.engine.JDynAlloyParsingStage;
-import ar.edu.taco.engine.JDynAlloyPrinterStage;
-import ar.edu.taco.engine.JDynAlloyStage;
-import ar.edu.taco.engine.JUnitStage;
-import ar.edu.taco.engine.JavaTraceStage;
-import ar.edu.taco.engine.JmlStage;
-import ar.edu.taco.engine.PrecompiledModules;
-import ar.edu.taco.engine.SimpleJmlStage;
-import ar.edu.taco.engine.SnapshotStage;
-import ar.edu.taco.engine.StrykerStage;
 import ar.edu.taco.jfsl.JfslStage;
 import ar.edu.taco.jml.JmlToSimpleJmlContext;
 import ar.edu.taco.jml.parser.JmlParser;
@@ -383,6 +372,7 @@ public class TacoMain {
 
             // BEGIN SIMPLIFICATION
             JmlStage aJavaCodeSimplifier = new JmlStage(compilation_units);
+            JmlStage.isCheckAndAfterRunSpec = isCheckAndRunSpecAssertionSupport;
             aJavaCodeSimplifier.execute();
             JmlToSimpleJmlContext jmlToSimpleJmlContext = aJavaCodeSimplifier.getJmlToSimpleJmlContext();
             List<JCompilationUnitType> simplified_compilation_units = aJavaCodeSimplifier.get_simplified_compilation_units();
@@ -393,7 +383,11 @@ public class TacoMain {
             // JDynAlloy modules have Alloy contracts and dynAlloy programs
             SimpleJmlStage aJavaToJDynAlloyTranslator = new SimpleJmlStage(simplified_compilation_units);
             //HERE IS WHERE THE PREDS AND VARS ARE PRODUCED
+            if (isCheckAndRunSpecAssertionSupport && inputToFix != null){
+                aJavaToJDynAlloyTranslator.setInputToFix(inputToFix);
+            }
             aJavaToJDynAlloyTranslator.execute();
+            //inputToFix = null;
             // END JAVA TO JDYNALLOY TRANSLATION
 
             simpleJmlToJDynAlloyContext = aJavaToJDynAlloyTranslator.getSimpleJmlToJDynAlloyContext();
@@ -420,11 +414,11 @@ public class TacoMain {
 
         // JDYNALLOY BUILT-IN MODULES
         PrecompiledModules precompiledModules = null;
-        if (this.inputToFix != null){
-            precompiledModules = new PrecompiledModules((HashMap<String, Object>)inputToFix);
-        } else {
-            precompiledModules = new PrecompiledModules();
-        }
+//        if (this.inputToFix != null){
+//            precompiledModules = new PrecompiledModules((HashMap<String, Object>)inputToFix);
+//        } else {
+        precompiledModules = new PrecompiledModules();
+//        }
         precompiledModules.execute();
         jdynalloy_modules.addAll(precompiledModules.getModules());
         // END JDYNALLOY BUILT-IN MODULES
@@ -511,28 +505,52 @@ public class TacoMain {
 
         if (TacoConfigurator.getInstance().getGenerateUnitTestCase() || TacoConfigurator.getInstance().getAttemptToCorrectBug()) {
             // Begin JUNIT Generation Stage
-            if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())
-                System.out.println("JUnit generation: started");
+            if (tacoAnalysisResult.get_alloy_analysis_result().isSAT() && inputToFix == null) {
+                System.out.println("JUnit input generation: started");
+                try {
+                    SnapshotStage snapshotStage = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
+                    snapshotStage.setInputToFix(null);
+                    snapshotStage.execute();
+                    RecoveredInformation recoveredInformation = snapshotStage.getRecoveredInformation();
 
-            SnapshotStage snapshotStage = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
-            try {
-                snapshotStage.execute();
-                RecoveredInformation recoveredInformation = snapshotStage.getRecoveredInformation();
+                    recoveredInformation.setFileNameSuffix(StrykerStage.fileSuffix);
+                    JUnitStage jUnitStage = new JUnitStage(recoveredInformation);
+                    jUnitStage.execute();
+                    junitFile = jUnitStage.getJunitFileName();
 
-                recoveredInformation.setFileNameSuffix(StrykerStage.fileSuffix);
-                JUnitStage jUnitStage = new JUnitStage(recoveredInformation);
-                jUnitStage.execute();
-                junitFile = jUnitStage.getJunitFileName();
+                    outputJunitFile = junitFile;
 
-                outputJunitFile = junitFile;
+                    if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())
+                        System.out.println("         ... and finished.");
 
-                if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())
-                    System.out.println("         ... and finished.");
+                } catch (TacoException e){
+                    System.out.println("");
+                    System.out.println(e.getMessage());
+                }
+            } else if (inputToFix != null) {
+                System.out.println("JUnit spec output generation: started");
+                try {
+                    SnapshotStage snapshotStage = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
+                    snapshotStage.setInputToFix(inputToFix);
+                    snapshotStage.execute();
+                    RecoveredInformation recoveredInformation = snapshotStage.getRecoveredInformation();
 
-            } catch (TacoException e){
-                System.out.println("");
-                System.out.println(e.getMessage());
+                    recoveredInformation.setFileNameSuffix(StrykerStage.fileSuffix);
+                    JUnitStageFinalState jUnitStage = new JUnitStageFinalState(recoveredInformation);
+                    jUnitStage.execute();
+                    junitFile = jUnitStage.getJunitFileName();
+
+                    outputJunitFile = junitFile;
+
+                    if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())
+                        System.out.println("         ... and finished.");
+
+                } catch (TacoException e){
+                    System.out.println("");
+                    System.out.println(e.getMessage());
+                }
             }
+
             // End JUNIT Generation Stage
         } else {
             log.info("****** JUnit with counterexample values will not be generated. ******* ");

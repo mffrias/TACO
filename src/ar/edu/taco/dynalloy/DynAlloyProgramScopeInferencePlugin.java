@@ -1,18 +1,19 @@
 package ar.edu.taco.dynalloy;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 import ar.edu.jdynalloy.xlator.ObjectCreationCollector;
 import ar.edu.jdynalloy.xlator.ObjectCreationCounter;
 import ar.edu.taco.TacoConfigurator;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
+import ar.uba.dc.rfm.alloy.ast.formulas.FormulaVisitor;
 import ar.uba.dc.rfm.da2a.prepare.ClosureRemover;
 import ar.uba.dc.rfm.dynalloy.ast.DynalloyModule;
 import ar.uba.dc.rfm.dynalloy.ast.ProgramDeclaration;
 import ar.uba.dc.rfm.dynalloy.ast.programs.DynalloyProgram;
 import ar.uba.dc.rfm.dynalloy.plugin.DynAlloyASTPlugin;
+import ar.uba.dc.rfm.dynalloy.util.DfsProgramVisitor;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyMutator;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyVisitor;
 
@@ -20,6 +21,11 @@ public class DynAlloyProgramScopeInferencePlugin implements DynAlloyASTPlugin {
 
 	private ArithmeticOpCollector arithmetic_op_collector = new ArithmeticOpCollector();
 	private ObjectCreationCollector object_creation_collector = new ObjectCreationCollector();
+	private Set<AlloyFormula> programSpecs = new HashSet();
+
+	public DynAlloyProgramScopeInferencePlugin(Set<AlloyFormula> theprogramSpecs) {
+		programSpecs = theprogramSpecs;
+	}
 
 	@Override
 	public DynalloyModule transform(DynalloyModule input) {
@@ -31,9 +37,20 @@ public class DynAlloyProgramScopeInferencePlugin implements DynAlloyASTPlugin {
 
 		collect_object_allocations(inlined_unrolled_dynalloy);
 
+		//Here is where the actual arithmetic operator counting happens
 		collect_arithmetic_operations(inlined_unrolled_dynalloy);
 
+		collect_arithmetic_operations_from_specs(programSpecs);
+
+
+
 		return input;
+	}
+
+	private void collect_arithmetic_operations_from_specs(Set<AlloyFormula> programSpecs) {
+		for (AlloyFormula f : programSpecs){
+			f.accept(arithmetic_op_collector.getDfsFormulaVisitor());
+		}
 	}
 
 	private void collect_object_allocations(DynalloyModule module) {

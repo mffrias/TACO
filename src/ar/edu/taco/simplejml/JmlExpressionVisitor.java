@@ -19,6 +19,8 @@
  */
 package ar.edu.taco.simplejml;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import ar.edu.jdynalloy.ast.*;
+import ar.edu.taco.simplejml.builtin.*;
 import org.apache.log4j.Logger;
 import org.jmlspecs.checker.JmlAssertStatement;
 import org.jmlspecs.checker.JmlAssignableClause;
@@ -90,12 +94,6 @@ import org.multijava.mjc.JVariableDefinition;
 
 import ar.edu.jdynalloy.JDynAlloyConfig;
 import ar.edu.jdynalloy.JDynAlloyException;
-import ar.edu.jdynalloy.ast.AlloyIntArrayFactory;
-import ar.edu.jdynalloy.ast.JModifies;
-import ar.edu.jdynalloy.ast.JPostcondition;
-import ar.edu.jdynalloy.ast.JPrecondition;
-import ar.edu.jdynalloy.ast.JSpecCase;
-import ar.edu.jdynalloy.ast.JavaPrimitiveIntValueArrayFactory;
 import ar.edu.jdynalloy.factory.JExpressionFactory;
 import ar.edu.jdynalloy.factory.JPredicateFactory;
 import ar.edu.jdynalloy.factory.JSignatureFactory;
@@ -104,10 +102,6 @@ import ar.edu.jdynalloy.xlator.JTypeHelper;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 import ar.edu.taco.TacoNotImplementedYetException;
-import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory;
-import ar.edu.taco.simplejml.builtin.JavaPrimitiveFloatValue;
-import ar.edu.taco.simplejml.builtin.JavaPrimitiveIntegerValue;
-import ar.edu.taco.simplejml.builtin.JavaPrimitiveLongValue;
 import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory.JMLAddAuxiliaryConstants;
 import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory.JMLDivAuxiliaryConstants;
 import ar.edu.taco.simplejml.builtin.JMLAuxiliaryConstantsFactory.JMLMinusAuxiliaryConstants;
@@ -160,7 +154,7 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	private List<JCompilationUnitType> compilationUnits = new ArrayList<JCompilationUnitType>();
 
-
+	private Object inputToFix = null;
 
 
 	/**
@@ -1466,6 +1460,12 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 				JPrecondition jPrecondition = new JPrecondition(alloyFormula);
 				requires.add(jPrecondition);
 			}
+			// Here we hardcode inputToFix as an AlloyFormula which is added as a requires clause.
+			if (inputToFix != null){
+				AlloyFormula outcome = processInputToFix((HashMap<String, Object>) inputToFix, TacoConfigurator.getInstance().getUseJavaArithmetic());
+				JPrecondition jPrecondition = new JPrecondition(outcome);
+				requires.add(jPrecondition);
+			}
 		}
 
 		if (jmlGenericSpecCase.hasSpecBody()) {
@@ -1509,7 +1509,7 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		JmlPredicate jmlPredicate = jmlInvariant.predicate();
 		JmlSpecExpression jmlSpecExpression = jmlPredicate.specExpression();
 		JExpression jExpression = jmlSpecExpression.expression();
-		this.isContractTranslation = true;
+		this.isContractTranslation = false; //this is importante because if set to true will store the collected variables as coming from pre and postcondtions.
 		jExpression.accept(this);
 		AlloyFormula invariant = this.getAlloyFormula();
 
@@ -1762,6 +1762,357 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		super.getStack().push(requireFormula);
 
 	}
+
+
+
+
+
+
+	private AlloyFormula processInputToFix(HashMap<String, Object> inputToFix, boolean isJavaArithmetic) {
+
+		HashMap<Object, AlloyExpression> mapConcreteToExpre = new HashMap<Object, AlloyExpression>();
+		HashMap<Object, AlloyExpression> mapConcreteToActualName = new HashMap<Object, AlloyExpression>();
+
+//	    AlloyFormula fixedInputFormula = null;
+
+		for (String s : inputToFix.keySet()){
+			if (!s.equals("throw") && !s.equals("return") && !s.startsWith("customvar")){
+				if (isJavaArithmetic) {
+					if (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int")) {
+						processIntegerToFix((Integer) inputToFix.get(s), mapConcreteToExpre);
+					} else {
+						if (inputToFix.get(s).getClass().getName().equals("java.lang.Long") || (inputToFix.get(s).getClass().getName().equals("long"))) {
+							processLongToFix((Long) inputToFix.get(s), mapConcreteToExpre);
+						} else {
+							if (inputToFix.get(s).getClass().getName().equals("java.lang.Float") || inputToFix.get(s).getClass().getName().equals("float")) {
+								processFloatToFix((Float) inputToFix.get(s), mapConcreteToExpre);
+							} else {
+								if (!inputToFix.get(s).getClass().isPrimitive()) {
+									ExprVariable var = new ExprVariable(new AlloyVariable(s));
+									processObjectToFix((Object) inputToFix.get(s), mapConcreteToExpre);
+								}
+							}
+						}
+					}
+				} else {
+					if (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int")) {
+						processAlloyIntegerToFix((Integer) inputToFix.get(s), mapConcreteToExpre);
+					}
+				}
+
+			}
+
+		}
+
+		for (String s : inputToFix.keySet()){
+			Object o = inputToFix.get(s);
+			if (o != null && !mapConcreteToActualName.keySet().contains(o)) {
+				ExprVariable e = new ExprVariable(new AlloyVariable(s));
+				mapConcreteToActualName.put(inputToFix.get(s), e);
+				if (inputToFix.get(s) != null && isNotNumericType(inputToFix.get(s).getClass())) {
+					processObjectToFixActualName(inputToFix.get(s), e, mapConcreteToActualName);
+				}
+			}
+		}
+
+
+		AlloyFormula theOutcomeFormula = null;
+
+		Set<Object> alreadyVisited = new HashSet<>();
+		for (String s : inputToFix.keySet()){
+			Object o = inputToFix.get(s);
+			AlloyExpression name = mapConcreteToActualName.get(o);
+			AlloyExpression alloyValue = mapConcreteToExpre.get(o);
+			if (!alloyValue.toString().contains("/null")) {
+				AlloyFormula af = new EqualsFormula(name, alloyValue);
+				if (theOutcomeFormula == null) {
+					theOutcomeFormula = af;
+				} else {
+					theOutcomeFormula = new AndFormula(theOutcomeFormula, af);
+				}
+			} else {
+				alreadyVisited.add(o);
+				AlloyFormula af = processObjectToFormula(o, mapConcreteToExpre, mapConcreteToActualName, alreadyVisited);
+				if (theOutcomeFormula == null) {
+					theOutcomeFormula = af;
+				} else {
+					theOutcomeFormula = new AndFormula(theOutcomeFormula, af);
+				}
+			}
+		}
+
+		return theOutcomeFormula;
+
+//		HashMap<Object, AlloyExpression> mapConcreteToExpre = new HashMap<Object, AlloyExpression>();
+//		String[] metSplit = this.specFromMethod.split("_");
+//		String methodName = metSplit[metSplit.length - 1];
+//		if (inputToFix2.get("thiz") != null) {
+//			Method[] methods = inputToFix2.get("thiz").getClass().getDeclaredMethods();
+//			int numPars = 0;
+//			Method theMethod = null;
+//			for (Method m : methods) {
+//				if (m.getName().equals(methodName)) {
+//					numPars = m.getParameterTypes().length;
+//					theMethod = m;
+//					break;
+//				}
+//			}
+//		}
+//
+//		AlloyFormula fixedInputFormula = null;
+//		int index = 0;
+//		for (JVariableDeclaration vd : formalParameterNames){
+//			if (!vd.getVariable().getVariableId().getString().equals("throw")
+//					&& !vd.getVariable().getVariableId().getString().equals("return")
+//					&& !vd.getVariable().getVariableId().getString().startsWith("customvar")){
+//
+//				if (isJavaArithmetic) {
+//					if (vd.getType().toString().equals("JavaPrimitiveIntegerValue")) {
+//						AlloyFormula af = new EqualsFormula(
+//								new ExprVariable(vd.getVariable()),
+//								new ExprConstant("JavaPrimitiveIntegerValue",
+//										JavaPrimitiveIntegerValue.getInstance().toJavaPrimitiveIntegerLiteral(((Integer)(inputToFix2.get(vd.getVariable().getVariableId().getString()))).intValue(), true).getConstantId()
+//								)
+//						);
+//						if (fixedInputFormula == null)
+//							fixedInputFormula = af;
+//						else
+//							fixedInputFormula = new AndFormula(fixedInputFormula, af);
+//					}
+//					if (vd.getType().toString().equals("JavaPrimitiveLongValue")) {
+//						AlloyFormula af = new EqualsFormula(
+//								new ExprVariable(vd.getVariable()),
+//								new ExprConstant("JavaPrimitiveLongValue",
+//										JavaPrimitiveLongValue.getInstance().toJavaPrimitiveLongLiteral(((Long)(inputToFix2.get(vd.getVariable().getVariableId().getString()))).longValue(), true).getConstantId()
+//								)
+//						);
+//						if (fixedInputFormula == null)
+//							fixedInputFormula = af;
+//						else
+//							fixedInputFormula = new AndFormula(fixedInputFormula, af);
+//
+//					}
+//					if (vd.getType().toString().equals("JavaPrimitiveFloatValue")) {
+//						AlloyFormula af = new EqualsFormula(
+//								new ExprVariable(vd.getVariable()),
+//								new ExprConstant("JavaPrimitiveFloatValue",
+//										JavaPrimitiveFloatValue.getInstance().toJavaPrimitiveFloatLiteral(((Float)(inputToFix2.get(vd.getVariable().getVariableId().getString()))).floatValue(), true).getConstantId()
+//								)
+//						);
+//						if (fixedInputFormula == null)
+//							fixedInputFormula = af;
+//						else
+//							fixedInputFormula = new AndFormula(fixedInputFormula, af);
+//
+//					}
+//					if (vd.getType().toString().equals("JavaPrimitiveCharValue")) {
+//						AlloyFormula af = new EqualsFormula(
+//								new ExprVariable(vd.getVariable()),
+//								new ExprConstant("JavaPrimitiveCharValue",
+//										JavaPrimitiveCharValue.getInstance().toJavaPrimitiveCharLiteral(((Character)(inputToFix2.get(vd.getVariable().getVariableId().getString()))).charValue(), true).getConstantId()
+//								)
+//						);
+//						if (fixedInputFormula == null)
+//							fixedInputFormula = af;
+//						else
+//							fixedInputFormula = new AndFormula(fixedInputFormula, af);
+//
+//					}
+//
+//				} else {
+//					if (vd.getType().toString().equals("Int")){
+//						AlloyFormula af = new EqualsFormula(
+//								new ExprVariable(vd.getVariable()),
+//								new ExprConstant("Int", inputToFix2.get(vd.getVariable().getVariableId().getString()).toString())
+//						);
+//						if (fixedInputFormula == null)
+//							fixedInputFormula = af;
+//						else
+//							fixedInputFormula = new AndFormula(fixedInputFormula, af);
+//					}
+//
+//				}
+//
+//				if (!mapConcreteToExpre.containsKey(inputToFix2.get(vd.getVariable().getVariableId().getString()))) {
+//					AlloyFormula f = null;
+//					if (inputToFix2.get(vd.getVariable().getVariableId().getString()) != null){
+//						mapConcreteToExpre.put(inputToFix2.get(vd.getVariable().getVariableId().getString()), new ExprVariable(vd.getVariable()));
+//						f = processInputToFixToFormula(inputToFix2.get(vd.getVariable().getVariableId().getString()), mapConcreteToExpre, isJavaArithmetic);
+//					} else {
+//						f = new EqualsFormula(new ExprVariable(vd.getVariable()), new ExprConstant(vd.getType().toString(), "null"));
+//					}
+//					if (fixedInputFormula == null)
+//						fixedInputFormula = f;
+//					else
+//						fixedInputFormula = new AndFormula(fixedInputFormula, f);
+//				} else {
+//					AlloyFormula aff = new EqualsFormula(new ExprVariable(vd.getVariable()), mapConcreteToExpre.get(inputToFix2.get(vd.getVariable().getVariableId().getString())));
+//					if (fixedInputFormula == null)
+//						fixedInputFormula = aff;
+//					else
+//						fixedInputFormula = new AndFormula(fixedInputFormula, aff);
+//				}
+//
+//				index++;
+//
+//			}
+//		}
+//
+//		Object[] obs = mapConcreteToExpre.keySet().toArray();
+//
+//		for (int index1 = 0; index1 < obs.length; index1++){
+//			for (int index2 = index1+1; index2 < obs.length; index2++){
+//				if (obs[index1] == obs[index2]){
+//					AlloyFormula f = new EqualsFormula(mapConcreteToExpre.get(obs[index1]), mapConcreteToExpre.get(obs[index2]));
+//					if (fixedInputFormula == null)
+//						fixedInputFormula = f;
+//					else
+//						fixedInputFormula = new AndFormula(fixedInputFormula, f);
+//				} else {
+//					AlloyFormula f = new NotFormula(new EqualsFormula(mapConcreteToExpre.get(obs[index1]), mapConcreteToExpre.get(obs[index2])));
+//					if (fixedInputFormula == null)
+//						fixedInputFormula = f;
+//					else
+//						fixedInputFormula = new AndFormula(fixedInputFormula, f);
+//				}
+//			}
+//		}
+//		Vector<Object> resultVec = new Vector<Object>();
+//		resultVec.add(fixedInputFormula);
+//		return resultVec;
+
+	}
+
+	private AlloyFormula processObjectToFormula(Object o, HashMap<Object, AlloyExpression> mapConcreteToExpre, HashMap<Object, AlloyExpression> mapConcreteToActualName, Set<Object> alreadyVisited) {
+		AlloyFormula af = null;
+		for (Field f : o.getClass().getDeclaredFields()){
+			Object dest = null;
+			try {
+				f.setAccessible(true);
+				dest = f.get(o);
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			if (!alreadyVisited.contains(dest)) {
+				alreadyVisited.add(dest);
+				if (dest != null && isNotNumericType(dest.getClass())) {
+					AlloyFormula theFormula = processObjectToFormula(dest, mapConcreteToExpre, mapConcreteToActualName, alreadyVisited);
+					if (af == null) {
+						af = theFormula;
+					} else {
+						af = new AndFormula(af, theFormula);
+					}
+				} else {
+					if (dest == null) {
+						AlloyFormula equals = new EqualsFormula(mapConcreteToActualName.get(dest), mapConcreteToExpre.get(dest));
+						if (af == null) {
+							af = equals;
+						} else {
+							af = new AndFormula(equals, af);
+						}
+					} else {
+						AlloyFormula equals = new EqualsFormula(mapConcreteToActualName.get(dest), mapConcreteToExpre.get(dest));
+						if (af == null) {
+							af = equals;
+						} else {
+							af = new AndFormula(equals, af);
+						}
+					}
+				}
+			}
+		}
+		return af;
+	}
+
+	private boolean isNotNumericType(Class<?> aClass) {
+		return !aClass.isPrimitive() && !Number.class.isAssignableFrom(aClass);
+	}
+
+	private void processObjectToFixActualName(Object o, AlloyExpression e, HashMap<Object, AlloyExpression> mapConcreteToActualName) {
+		//We know o is Object
+		for (Field f : o.getClass().getDeclaredFields()){
+			try {
+				f.setAccessible(true);
+				Object newO = f.get(o);
+				if (o != null && !mapConcreteToActualName.keySet().contains(newO)) {
+					String fullyqualifiedfieldname = (f.getDeclaringClass().getName() + "_" +  f.getName()).replace('.', '_');
+					AlloyExpression theName = new ExprJoin(e, new ExprVariable(new AlloyVariable(fullyqualifiedfieldname)));
+					mapConcreteToActualName.put(newO, theName);
+					if (newO != null && isNotNumericType(newO.getClass())) {
+						processObjectToFixActualName(newO, theName, mapConcreteToActualName);
+					}
+				}
+			} catch (IllegalAccessException ae){
+				ae.printStackTrace();
+			}
+		}
+	}
+
+	private void processAlloyIntegerToFix(Integer i, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
+		if (!mapConcreteToExpre.keySet().contains(i)) {
+			ExprConstant alloyInt = new ExprConstant("Int", i.toString());
+			mapConcreteToExpre.put(i, alloyInt);
+		}
+	}
+
+	private void processObjectToFix(Object o, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
+		if (!mapConcreteToExpre.keySet().contains(o)) {
+			if (o == null){
+				mapConcreteToExpre.put(o, new ExprConstant("null", "null"));
+				return;
+			}
+			mapConcreteToExpre.put(o, new ExprConstant(o.getClass().getName(), "null"));
+			for (Field f : o.getClass().getDeclaredFields()){
+				try {
+					f.setAccessible(true);
+					if (f.getType().getName().equals("int") || f.getType().getName().equals("java.lang.Integer")){
+						processIntegerToFix((Integer)f.get(o), mapConcreteToExpre);
+					} else {
+						if (f.getType().getName().equals("float") || f.getType().getName().equals("java.lang.Float")){
+							processFloatToFix((Float)f.get(o), mapConcreteToExpre);
+						} else {
+							if (f.getType().getName().equals("long") || f.getType().getName().equals("java.lang.Long")){
+								processLongToFix((Long)f.get(o), mapConcreteToExpre);
+							} else {
+								if (!f.getType().isPrimitive()) {
+									processObjectToFix(f.get(o), mapConcreteToExpre);
+								}
+							}
+						}
+					}
+					//add others
+				} catch (IllegalAccessException e){
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private String getModuleId(Object o) {
+		return o.getClass().getName();
+	}
+
+	private void processFloatToFix(Float aFloat, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
+		if (!mapConcreteToExpre.keySet().contains(aFloat)) {
+			ExprConstant alloyFloat = new ExprConstant("JavaPrimitiveFloatValue", JavaPrimitiveFloatValue.getInstance().toJavaPrimitiveFloatLiteral((Float) aFloat, false).getConstantId());
+			mapConcreteToExpre.put(aFloat, alloyFloat);
+		}
+	}
+
+	private void processLongToFix(Long aLong, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
+		if (!mapConcreteToExpre.keySet().contains(aLong)) {
+			ExprConstant alloyLong = new ExprConstant("JavaPrimitiveLongValue", JavaPrimitiveLongValue.getInstance().toJavaPrimitiveLongLiteral((Long) aLong, false).getConstantId());
+			mapConcreteToExpre.put(aLong, alloyLong);
+		}
+	}
+
+	private void processIntegerToFix(Integer i, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
+		if (!mapConcreteToExpre.keySet().contains(i)) {
+			ExprConstant alloyInteger = new ExprConstant("JavaPrimitiveIntegerValue", JavaPrimitiveIntegerValue.getInstance().toJavaPrimitiveIntegerLiteral((Integer) i, false).getConstantId());
+			mapConcreteToExpre.put(i, alloyInteger);
+		}
+	}
+
 
 	@Override
 	public void visitJmlResultExpression(JmlResultExpression jmlResultExpression) {
@@ -2392,9 +2743,7 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
-
-
-
-
-
+	public void setInputToFix(Object inputToFix) {
+		this.inputToFix = inputToFix;
+	}
 }

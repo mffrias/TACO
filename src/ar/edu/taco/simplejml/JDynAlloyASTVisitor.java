@@ -22,13 +22,9 @@ package ar.edu.taco.simplejml;
 import static ar.uba.dc.rfm.alloy.AlloyVariable.buildAlloyVariable;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -66,7 +62,6 @@ import ar.edu.jdynalloy.factory.JExpressionFactory;
 import ar.edu.jdynalloy.xlator.JDynAlloyTyping;
 import ar.edu.jdynalloy.xlator.JType;
 import ar.edu.taco.TacoConfigurator;
-import ar.edu.taco.TacoException;
 import ar.edu.taco.simplejml.JmlBaseExpressionVisitor.Instant;
 import ar.edu.taco.simplejml.JmlBaseExpressionVisitor.JmlClassDeclarationResult;
 import ar.edu.taco.simplejml.JmlBaseExpressionVisitor.JmlRepresentsData;
@@ -85,7 +80,6 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
-import ar.uba.dc.rfm.alloy.util.VarSubstitutor;
 
 public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
@@ -93,6 +87,7 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 	protected static final String OBJECT_STATE_STRING = "objectState";
 	protected static final String WIDLCARD_STRING = "*";
+	private Object inputToFix = null;
 
 	protected JavaAndJmlPrettyPrint2 prettyPrint = new JavaAndJmlPrettyPrint2();
 
@@ -116,6 +111,11 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 	public JDynAlloyASTVisitor(){
 		this.simpleJmlToJDynAlloyContext = null;
+	}
+
+
+	public void setInputToFix(Object inputToFix){
+		this.inputToFix = inputToFix;
 	}
 
 
@@ -276,11 +276,11 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		log.debug("Visiting: " + jmlConstructorDeclaration.getClass().getName());
 		log.debug("Constructor: \n" + this.prettyPrint.getPrettyPrint());
 
-		this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
-		this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
+	//	this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
+	//	this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
 		JProgramDeclaration programDeclaration = MethodDeclarationSolver.getConstructorDeclaration(jmlConstructorDeclaration, this.buffer, 
 				this.modulesObjectState, this.modulesNoStaticFields, this.varsEncodingValueOfArithmeticOperationsInObjectInvariants, 
-				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits);
+				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits, inputToFix);
 
 		
 //		JProgramDeclaration programDeclaration = MethodDeclarationSolver.getConstructorDeclaration(jmlConstructorDeclaration, this.buffer,
@@ -417,11 +417,11 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 			/* @non_null */JmlMethodDeclaration jmlMethodDeclaration) {
 
 		
-		this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
-		this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
+		//this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
+		//this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
 		JProgramDeclaration programDeclaration = MethodDeclarationSolver.getMethodDeclaration(jmlMethodDeclaration, this.buffer, this.modulesObjectState,
 				this.modulesNoStaticFields, this.varsEncodingValueOfArithmeticOperationsInObjectInvariants, 
-				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits);
+				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits, inputToFix);
 
 		JStatement initializeThrow = JDynAlloyFactory.initializeThrow();
 
@@ -610,7 +610,7 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 		this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
 		this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
-		jmlExpressionVisitor.setContractTranslation(true);
+		jmlExpressionVisitor.setContractTranslation(true); //mfrias4-place to fix so that variables and operations are saved when traversing object invariant
 		if (jmlTypeDeclaration.invariants() != null) {
 			for (JmlInvariant jmlInvariant : jmlTypeDeclaration.invariants()) {
 

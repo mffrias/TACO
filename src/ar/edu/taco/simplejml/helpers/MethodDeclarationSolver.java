@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import ar.edu.taco.TacoConfigurator;
 import org.jmlspecs.checker.JmlConstructorDeclaration;
 import org.jmlspecs.checker.JmlFormalParameter;
 import org.jmlspecs.checker.JmlMethodDeclaration;
@@ -69,26 +70,25 @@ public class MethodDeclarationSolver {
 	
 	/**
 	 *
-	 * @param methodDeclaration
-	 * @param scope
-	 * @param buffer
-	 * @return
 	 */
 	public static JProgramDeclaration getMethodDeclaration(JmlMethodDeclaration methodDeclaration, DynJMLAlloyModuleBuffer buffer, 
 			Map<String, List<String>> modulesObjectState, Map<String, 
 			List<String>> modulesNoStaticFields,
 			AlloyTyping varsResultOfArithmeticOperationsInObjectInvariants,
 			List<AlloyFormula> predsResultOfArithmeticOperationsInObjectInvariants,
-			List<JCompilationUnitType> compilationUnits) {
+			List<JCompilationUnitType> compilationUnits, Object inputToFix) {
 		CTypeAdapter typeAdapter = new CTypeAdapter();
 
 		List<JSpecCase> jSpecCases = new ArrayList<JSpecCase>();
 		AlloyTyping varsResultOfArithmeticOperationsInRequiresAndEnsures = new AlloyTyping();
 		ArrayList<AlloyFormula> predsResultOfArithmeticOperationsInRequiresAndEnsures = new ArrayList<AlloyFormula>();
 
+		if (!TacoConfigurator.getInstance().getMethodToCheck().contains(methodDeclaration.ident())){
+			inputToFix = null;
+		}
 		translateJmlAnnotations(methodDeclaration, jSpecCases, buffer, modulesObjectState, modulesNoStaticFields, 
 				varsResultOfArithmeticOperationsInRequiresAndEnsures, predsResultOfArithmeticOperationsInRequiresAndEnsures,
-				compilationUnits);
+				compilationUnits, inputToFix);
 
 		List<JPrecondition> nullityRequires = new ArrayList<JPrecondition>();
 		List<JPostcondition> nullityEnsures = new ArrayList<JPostcondition>();
@@ -160,7 +160,7 @@ public class MethodDeclarationSolver {
 			List<String>> modulesNoStaticFields,
 			AlloyTyping varsResultOfArithmeticOperationsInObjectInvariants,
 			List<AlloyFormula> predsResultOfArithmeticOperationsInObjectInvariants,
-			List<JCompilationUnitType> compilationUnits) {
+			List<JCompilationUnitType> compilationUnits, Object inputToFix) {
 		CTypeAdapter typeAdapter = new CTypeAdapter();
 
 		List<JSpecCase> jSpecCases = new ArrayList<JSpecCase>();
@@ -169,7 +169,7 @@ public class MethodDeclarationSolver {
 
 		translateJmlAnnotations(methodDeclaration, jSpecCases, buffer, modulesObjectState, modulesNoStaticFields, 
 				varsResultOfArithmeticOperationsInRequiresAndEnsures, predsResultOfArithmeticOperationsInRequiresAndEnsures,
-				compilationUnits);
+				compilationUnits, inputToFix);
 
 		List<JPrecondition> nullityRequires = new ArrayList<JPrecondition>();
 		List<JPostcondition> nullityEnsures = new ArrayList<JPostcondition>();
@@ -248,7 +248,7 @@ public class MethodDeclarationSolver {
 			Map<String, List<String>> modulesNoStaticFields, 
 			AlloyTyping varsResultOfArithmeticOperationsInObjectInvariants,
 			List<AlloyFormula> predsResultOfArithmeticOperationsInObjectInvariants,
-			List<JCompilationUnitType> compilationUnits) {
+			List<JCompilationUnitType> compilationUnits, Object inputToFix) {
 
 		List<JSpecCase> jSpecCases = new ArrayList<JSpecCase>();
 
@@ -258,7 +258,7 @@ public class MethodDeclarationSolver {
 		translateJmlAnnotations(constructorDeclaration, jSpecCases, buffer, modulesObjectState, modulesNoStaticFields,
 				varsResultOfArithmeticOperationsInRequiresAndEnsures, 
 				predsResultOfArithmeticOperationsInRequiresAndEnsures,
-				compilationUnits);
+				compilationUnits, inputToFix);
 
 		List<JPrecondition> nullityRequires = new ArrayList<JPrecondition>();
 		List<JPostcondition> nullityEnsures = new ArrayList<JPostcondition>();
@@ -327,8 +327,6 @@ public class MethodDeclarationSolver {
 
 	/**
 	 * 
-	 * @param methodDeclaration
-	 * @return
 	 */
 	private static List<JVariableDeclaration> getMethodArguments(JFormalParameter[] parameters, List<JPrecondition> nullityRequires, List<JPostcondition> nullityEnsures) {
 		List<JVariableDeclaration> processedArguments = null;
@@ -369,9 +367,10 @@ public class MethodDeclarationSolver {
 			Map<String, List<String>> modulesObjectState, Map<String, List<String>> modulesNoStaticFields, 
 			AlloyTyping varsAndTheirTypesFromMathOperatorsInRequiresAndEnsures,
 			List<AlloyFormula> predsFromMathOperatorsInRequiresAndEnsures, 
-			List<JCompilationUnitType> compilationUnits) {
+			List<JCompilationUnitType> compilationUnits, Object inputToFix) {
 
 		JmlExpressionVisitor jmlExpressionVisitor = new JmlExpressionVisitor(compilationUnits);
+		jmlExpressionVisitor.setInputToFix(inputToFix);
 		jmlExpressionVisitor.setBuffer(buffer);
 		jmlExpressionVisitor.setContractTranslation(true);
 		jmlExpressionVisitor.setModulesObjectState(modulesObjectState);

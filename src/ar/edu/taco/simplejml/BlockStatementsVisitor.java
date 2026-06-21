@@ -24,7 +24,6 @@ import static ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable.buildExprVariable
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
@@ -95,7 +94,6 @@ import ar.edu.jdynalloy.factory.JSignatureFactory;
 import ar.edu.jdynalloy.xlator.JType;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
-import ar.edu.taco.TacoNotImplementedYetException;
 import ar.edu.taco.jml.loop.HasBreakStatementVisitor;
 import ar.edu.taco.jml.utils.LabelUtils;
 import ar.edu.taco.simplejml.JmlBaseExpressionVisitor.Instant;
@@ -140,7 +138,10 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	private static int variantFunctionIndex = 0;
 
-	/**
+    public BlockStatementsVisitor() {
+    }
+
+    /**
 	 * @return the varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures
 	 */
 	public AlloyTyping getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures() {

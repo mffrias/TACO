@@ -47,6 +47,8 @@ class ArithmeticOpCollector extends DfsProgramVisitor {
                 arithmetic_op_counter.integerOpCounter.inc_sub();
             } else if (n.getFunctionId().equals("fun_java_primitive_char_value_subIntCharToJavaPrimitiveIntegerValue")) {
                 arithmetic_op_counter.integerOpCounter.inc_sub();
+            } else if (n.getFunctionId().equals("fun_java_primitive_integer_value_size_of")){
+                arithmetic_op_counter.integerOpCounter.inc_sizeof();
             }
 
             // long operations

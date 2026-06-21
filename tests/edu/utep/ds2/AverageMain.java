@@ -2,17 +2,26 @@ package edu.utep.ds2;
 
 public class AverageMain {
 
-    int stateToTestPure;
+    public int stateToTestPure;
+    public /*@ nullable @*/ AverageMain next;
 
 
+    /*@ invariant stateToTestPure + 1 >= 4; @*/
 
-    //@ requires true;
-    //@ ensures \result >= 0;
-    public int calculateAverage()
+
+    //@ requires this.stateToTestPure + 2  > 0;
+    //@ ensures this.stateToTestPure == \old(stateToTestPure) + 1;
+    //@ ensures a == \old(a) - 1;
+    //@ ensures this.next != null;
+    //@ signals (Throwable t) false;
+    public int calculateAverage(int a, int b)
     {
-        int[][] bidim = new int[3][4];
-        int a = bidim[2][2];
-        return 1;
+        a = a + 1;
+        stateToTestPure++;
+        stateToTestPure++;
+        stateToTestPure++;
+
+        return (stateToTestPure + b)/2;
     }
 
     //@ requires n != Integer.MIN_VALUE;
@@ -27,14 +36,7 @@ public class AverageMain {
 
     private void decreaseAttr() {
         this.stateToTestPure--;
+        return;
     }
 
-//    // @requires args != null;
-//    public static void main(String[] args)
-//    {
-//        double number1 = 10.5
-//        double number2 = 20.2;
-//        double average = calculateAverage(number1, number2);
-//        System.out.println(average);
-//    }
 }

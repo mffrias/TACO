@@ -54,9 +54,9 @@ public class SimpleJmlStage implements ITacoStage {
 	private SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext = null;
 	private AlloyTyping varsEncodingValueOfArithmeticOperationsInInvariants = new AlloyTyping();
 	private List<AlloyFormula> predsEncodingValueOfArithmeticOperationsInInvariants = new ArrayList<AlloyFormula>();
-	
-	
-	
+	private Object inputToFix = null;
+
+
 	public AlloyTyping getVarsEncodingValueOfArithmeticOperationsInInvariants(){
 		return varsEncodingValueOfArithmeticOperationsInInvariants;
 	}
@@ -78,7 +78,7 @@ public class SimpleJmlStage implements ITacoStage {
 	@Override
 	public void execute() {
 		// parse java modules
-		JavaToJDynAlloyManager aJavaToDynJAlloyManager = new JavaToJDynAlloyManager(this.compilation_units);
+		JavaToJDynAlloyManager aJavaToDynJAlloyManager = new JavaToJDynAlloyManager(this.compilation_units, this.inputToFix);
 		for (JCompilationUnitType unit : this.compilation_units) {
 			List<JDynAlloyModule> result = aJavaToDynJAlloyManager.processCompilationUnit(unit);
 			for (JDynAlloyModule aDynJAlloyModule : result) {
@@ -155,4 +155,7 @@ public class SimpleJmlStage implements ITacoStage {
 		return this.simpleJmlToJDynAlloyContext;
 	}
 
+	public void setInputToFix(Object inputToFix) {
+		this.inputToFix = inputToFix;
+	}
 }

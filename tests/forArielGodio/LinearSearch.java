@@ -9,7 +9,7 @@ public class LinearSearch {
 	//@ signals (Exception e) false;
 	public static int linearSearch(int search, int array[]) {
 		int c;
-		for (c = 0; c < array.length; c++) { // for (c = 0; c < array.length; c++)
+		for (c = 0; c > array.length; c++) { // for (c = 0; c < array.length; c++)
 			if (array[c] == search) {
 				location = c;
 				break;

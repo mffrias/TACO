@@ -76,7 +76,6 @@ public class JUnitPrettyPrinter {
 				printWriter.print(statement);
 				printWriter.println();
 				ls.add(statement);
-
 			}
 
 			printWriter.println();

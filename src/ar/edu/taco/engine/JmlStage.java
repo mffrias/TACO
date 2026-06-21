@@ -53,6 +53,8 @@ public class JmlStage implements ITacoStage {
 	private JmlToSimpleJmlContext jmlToSimpleJmlContext;
 	private List<JCompilationUnitType> simplified_compilation_units;
 
+	public static boolean  isCheckAndAfterRunSpec = false;
+
 	public JmlStage(List<JCompilationUnitType> compilation_units) {
 		this.asts = null;
 		this.compilation_units = compilation_units;
@@ -61,6 +63,8 @@ public class JmlStage implements ITacoStage {
 
 	@Override
 	public void execute() {
+		ASTSimplifierManager.isCheckAndAfterRunSpec = isCheckAndAfterRunSpec;
+
 		ASTSimplifierManager aAstSimplifierManager = new ASTSimplifierManager();
 
 		List<JCompilationUnitType> newAsts = simplify_compilation_units(aAstSimplifierManager);
@@ -115,6 +119,10 @@ public class JmlStage implements ITacoStage {
 	}
 
 	private List<JCompilationUnitType> simplify_compilation_units(ASTSimplifierManager aAstSimplifierManager) {
+
+		if (JmlStage.isCheckAndAfterRunSpec)
+			ASTSimplifierManager.isCheckAndAfterRunSpec = true;
+
 		List<JCompilationUnitType> newAsts = new LinkedList<JCompilationUnitType>();
 
 		for (JCompilationUnitType compilation_unit : this.compilation_units) {

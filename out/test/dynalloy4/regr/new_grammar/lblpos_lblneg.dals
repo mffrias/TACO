@@ -1,0 +1,77 @@
+module new_grammar
+
+one sig null {}
+one sig A {}
+
+pred TruePred[] {}
+
+pred equ[l,r:univ] {
+  l=r
+}
+
+pred nequ[l,r:univ] {
+  l!=r
+}
+
+program P[a:A+null] {
+  assume equ[a,null];
+  a := A;
+  a := null ;
+  assume equ[a,null] lblpos branch_label_1 ;
+  skip ;
+  skip ;
+  assume nequ[a,A] lblneg branch_label_1 
+}
+
+run P
+
+program Q[b:A+null] {
+  b:=A;
+
+  if equ[b,null] lblpos branch_label_2 {
+    if equ[b,A] lblpos branch_label_3 {
+      b:=A
+    } else {
+      skip
+    };
+    b:=A
+  } else {
+    b:=null
+  }
+}
+
+run Q
+
+program R[c: A+ null, d: A+null] {
+
+  if equ[c,null] {
+    c := A 
+  } else {
+    c := null
+  };
+  if equ[d,null] {
+    skip 
+  } else {
+    skip
+  }
+
+}
+
+run R -- 4 traces
+
+program RwithLabels[c: A+ null, d: A+null] {
+
+  if equ[c,null] lblpos label_id_1 {
+    c := A 
+  } else {
+    c := null
+  };
+  if equ[d,null] {
+    skip 
+  } else {
+    skip
+  }
+
+}
+
+run RwithLabels -- 2 traces

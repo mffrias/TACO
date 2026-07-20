@@ -1,0 +1,1 @@
+method remove | affected line: 12 | (AORB, this.current.next, this.current.next.next)

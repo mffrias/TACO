@@ -1,0 +1,55 @@
+module swap
+
+sig A {}
+sig B {}
+
+// ---- updateVar ---- //
+
+pred TruePred[] {}
+pred equ[a,b: univ] {
+  a = b 
+}
+action updateVar[l:univ, r:univ] {
+  pre { TruePred[] } 
+  post { equ[l',r] } 
+}
+
+// ---- swap ---- //
+
+program swap[a: univ,b: univ]
+  var [ temp: univ ] {
+
+updateVar[temp,a]; 
+updateVar[a,b]; 
+updateVar[b,temp] 
+}
+
+// ---- checkSwap ---- //
+
+pred checkSwapPre[a0: univ,b0: univ]{ 
+  not equ[a0,b0] 
+}
+
+pred checkSwapPost[a0: univ,b0: univ, a1:univ, b1: univ] {
+  a1 = b0
+  b1 = a0
+}
+
+assertCorrectness checkSwap[a: univ, b: univ] { 
+  pre = {checkSwapPre[a,b]} 
+  program = { call swap[a,b] } 
+  post = { checkSwapPost[a,b,a',b'] } 
+}
+
+check checkSwap
+
+assertCorrectness checkBuggySwap[a: univ, b: univ] { 
+  pre = {checkSwapPre[a,b]} 
+  program = { call swap[a,b] } 
+  post = { equ[a',b'] } 
+}
+
+check checkBuggySwap
+check checkBuggySwap for 5
+check checkBuggySwap for 7
+

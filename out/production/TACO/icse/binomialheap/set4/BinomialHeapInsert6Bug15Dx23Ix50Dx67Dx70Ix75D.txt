@@ -1,0 +1,6 @@
+method insert | affected line: 75 | (PRVOR_REFINED, size, this.size)
+method insert | affected line: 70 | (PRVOL_SMART, temp, insertTemp)
+method insert | affected line: 15 | (PRVOR_REFINED, tmp, tmp.parent)
+method insert | affected line: 23 | (PRVOL_SMART, temp1.sibling, temp1.child)
+method insert | affected line: 67 | (PRVOR_REFINED, nextTemp.child, nextTemp.findMinNode().child)
+method insert | affected line: 50 | (PRVOU_REFINED, nextTemp.sibling.degree, insertTemp.sibling.degree)

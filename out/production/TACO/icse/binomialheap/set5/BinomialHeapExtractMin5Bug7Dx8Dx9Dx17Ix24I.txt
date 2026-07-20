@@ -1,0 +1,5 @@
+method extractMin | affected line: 24 | (PRVOL_SMART, size, this.size)
+method extractMin | affected line: 8 | (ROR, temp.key != minNode.key, temp.key < minNode.key)
+method extractMin | affected line: 17 | (PRVOL_SMART, temp, prevTemp)
+method extractMin | affected line: 7 | (PRVOR_REFINED, Nodes.findMinNode(), Nodes.child)
+method extractMin | affected line: 9 | (PRVOR_REFINED, temp, this.extractMin())

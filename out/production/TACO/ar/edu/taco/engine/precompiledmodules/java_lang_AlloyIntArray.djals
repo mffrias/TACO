@@ -1,0 +1,76 @@
+module java_lang_IntArray
+
+sig java_lang_IntArray extends java_lang_Object {} {}
+
+field java_lang_IntArray_length:(java_lang_IntArray)->one (Int) {}
+field java_lang_IntArray_contents:(java_lang_IntArray->(Int set -> lone Int) {}
+
+
+object_invariant all oa : java_lang_IntArray | {gte[oa.java_lang_IntArray_length,0]}
+
+
+program java_lang_IntArray::Constructor[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var new_length: Int]
+Implementation 
+{
+  throw:=null;
+  if lt[new_length,0] {
+    throw:=java_lang_NegativeArraySizeExceptionLit;
+  } else {
+    assume thiz.java_lang_IntArray_length=new_length;
+    assume thiz.java_lang_IntArray_contents=(none->none);
+  };
+  skip;
+}
+
+
+program java_lang_IntArray::int_array_read[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var return:Int,  
+  var index:Int]
+Implementation 
+{
+  throw:=null;
+  if (lt[index,0] or gte[index,thiz.java_lang_IntArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index , (thiz.java_lang_IntArray_contents).univ] {
+      return := index.(thiz.java_lang_IntArray_contents);
+    } else {
+      return := 0;
+    };
+  };
+  skip;
+}
+
+program java_lang_IntArray::int_array_write[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var new_value:Int,  
+  var index:Int]
+Implementation 
+{
+  throw:=null;
+  if (lt[index,0] or gte[index,thiz.java_lang_IntArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    thiz.java_lang_IntArray_contents := (thiz.java_lang_IntArray_contents) ++ (index->new_value);
+  };
+  skip;
+}
+
+program java_lang_IntArray::int_array_clone[
+  var thiz:      java_lang_IntArray,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_IntArray]
+Implementation 
+{
+  throw:=null;
+  new_value.java_lang_IntArray_contents := thiz.java_lang_IntArray_contents;
+  new_value.java_lang_IntArray_length := thiz.java_lang_IntArray_length;
+  skip;
+}
+

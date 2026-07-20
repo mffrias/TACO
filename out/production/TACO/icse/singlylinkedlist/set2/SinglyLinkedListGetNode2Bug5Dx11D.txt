@@ -1,0 +1,2 @@
+method getNode | affected line: 11 | (PRVOU_REFINED, result, this.header)
+method getNode | affected line: 5 | (ROR, index == current_index, index > current_index)

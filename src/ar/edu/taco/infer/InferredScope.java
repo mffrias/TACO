@@ -4,11 +4,11 @@ import java.util.Set;
 
 public class InferredScope {
 
-	private final Scope inferred_scope;
-	private final Scope inferred_concrete_input_scope;
-	private final Scope bounded_concrete_input_scope;
-	private final Scope inferred_concrete_program_scope;
-	private final int inferred_alloy_bitwidth;
+	private Scope inferred_scope;
+	private Scope inferred_concrete_input_scope;
+	private Scope bounded_concrete_input_scope;
+	private Scope inferred_concrete_program_scope;
+	private int inferred_alloy_bitwidth;
 
 	private InferredScope(Scope inferred_scope, int inferred_alloy_bitwidth, Scope inferred_concrete_input_scope, Scope bounded_concrete_input_scope,
 			Scope inferred_concrete_program_scope) {
@@ -20,6 +20,10 @@ public class InferredScope {
 	}
 
 	private static InferredScope instance = null;
+
+	public InferredScope() {
+
+	}
 
 	public static InferredScope getInstance() {
 		if (instance == null)

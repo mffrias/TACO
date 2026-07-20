@@ -1,0 +1,59 @@
+//
+// TACO: Translation of Annotated COde
+// Copyright (c) 2010 Universidad de Buenos Aires
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA,
+// 02110-1301, USA
+
+//-------------- java_util_Date --------------//
+module java_util_Date
+sig java_util_Date extends java_lang_Object {} {}
+
+field dateHashCode:(java_util_Date)->one(Int) {}
+
+program java_util_Date::toString[var thiz:java_util_Date,var throw:java_lang_Throwable+null, var return:java_lang_String]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[return'.stringHashCode',thiz'.dateHashCode']) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc return;
+	   assume return.stringHashCode = thiz.dateHashCode;     
+}
+
+
+
+program java_util_Date::Constructor[var thiz:java_util_Date, var throw:java_lang_Throwable+null, var i:Int]
+Specification 
+{
+	SpecCase #0 {
+		ensures {
+      		(throw'=null) and (equ[thiz'.dateHashCode',i]) 
+		}
+	}
+}
+Implementation
+{
+	   throw:=null;
+  	   havoc thiz;
+	   assume thiz.dateHashCode = i;     
+}
+

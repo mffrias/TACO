@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="mjc-1_3_2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/mjc-1_3_2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

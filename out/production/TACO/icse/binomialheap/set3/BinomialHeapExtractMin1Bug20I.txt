@@ -1,0 +1,1 @@
+method extractMin | affected line: 20 | (PRVOL_SMART, temp.parent, fakeNode.parent)

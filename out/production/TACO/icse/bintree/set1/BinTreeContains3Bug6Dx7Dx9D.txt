@@ -1,0 +1,3 @@
+method contains | affected line: 9 | (PRVOU_REFINED, true, false)
+method contains | affected line: 7 | (PRVOR_REFINED, current.right, current.left.right)
+method contains | affected line: 6 | (AOIS, k, k--)

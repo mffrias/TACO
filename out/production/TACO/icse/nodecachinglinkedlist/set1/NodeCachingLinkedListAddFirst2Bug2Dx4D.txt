@@ -1,0 +1,2 @@
+method addFirst | affected line: 2 | (PRVOR_REFINED, o, new java.lang.Boolean( false ))
+method addFirst | affected line: 4 | (PRVOR_REFINED, insertBeforeNode, insertBeforeNode.next)

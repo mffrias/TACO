@@ -1,0 +1,3 @@
+method findMinimum | affected line: 4 | (PRVOU_REFINED, null, this.Nodes)
+method findMinimum | affected line: 11 | (AOIS, y.key, --y.key)
+method findMinimum | affected line: 7 | (AOIS, x.key, --x.key)

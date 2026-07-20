@@ -1,0 +1,2 @@
+method insertBack | affected line: 4 | (PRVOU_REFINED, null, freshNode)
+method insertBack | affected line: 9 | (COI, current.next != null, !(current.next != null))

@@ -1,0 +1,3 @@
+method contains | affected line: 3 | (PRVOU_REFINED, node, null)
+method contains | affected line: 7 | (PRVOU_REFINED, arg, new java.lang.Integer( this.maximumCacheSize ))
+method contains | affected line: 4 | (PRVOL_SMART, node, node.previous)

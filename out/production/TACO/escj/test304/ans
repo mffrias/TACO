@@ -1,0 +1,19 @@
+G.java:5: Warning: Possible null dereference (Null)
+  /*@ requires a.length >= 0;  // null(a) warning
+                ^
+G.java:16: Warning: Possible negative array index (IndexNegative)
+    this.a[i]+=v; // idxNeg(i), idx2Large(i)
+          ^
+G.java:16: Warning: Array index possibly too large (IndexTooBig)
+    this.a[i]+=v; // idxNeg(i), idx2Large(i)
+          ^
+H.jml:5: Warning: Possible null dereference (Null)
+  /*@ requires a.length >= 0;  // null(a) warning
+                ^
+H.jml:11: Warning: Possible negative array index (IndexNegative)
+    @ ensures this.a[i] == \old(this.a[i]+v); // idxNeg(i), idx2Large( ...
+                    ^
+H.jml:11: Warning: Array index possibly too large (IndexTooBig)
+    @ ensures this.a[i] == \old(this.a[i]+v); // idxNeg(i), idx2Large( ...
+                    ^
+6 warnings

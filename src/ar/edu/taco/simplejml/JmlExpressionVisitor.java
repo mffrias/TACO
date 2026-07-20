@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import ar.edu.jdynalloy.ast.*;
 import ar.edu.taco.simplejml.builtin.*;
+import ar.uba.dc.rfm.alloy.util.VarCollector;
 import org.apache.log4j.Logger;
 import org.jmlspecs.checker.JmlAssertStatement;
 import org.jmlspecs.checker.JmlAssignableClause;
@@ -334,141 +335,167 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 			AlloyExpression right_add_expr = this.getAlloyExpression();
 			//recover new right subexpression
 
-			CType left_type = getType(jAddExpression.left());
-			CType right_type = getType(jAddExpression.right());
+			//Here we need to check that the variables involved in the expressions being added
+			//were not quantified. For this, the visitor keeps a field "notAllowsPrimedState" that
+			//contains the names of the quantified variables.
+			//So we need to use an expression visitor to collect the variable names in the left and right
+			//expressions, and we need to check these names do not intersect notAllowsPrimedState.
+			//If they do, we just return the function call from the corresponding type rather than abstracting
+			//the addition out of the specification.
 
-			CTypeAdapter type_Adapter = new CTypeAdapter();
-			JType left_alloy_type = type_Adapter.translate(left_type);
-			JType right_alloy_type = type_Adapter.translate(right_type);
+			VarCollector varsInExpression = new VarCollector();
+			right_add_expr.accept(varsInExpression);
+			left_add_expr.accept(varsInExpression);
 
-			
-			if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_add_auxiliary_constants(left_add_expr, right_add_expr);
-				rvalue = addAuxiliaryConstants.result_variable;
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+			boolean expressionsInvolveQuantifiedVariables = false;
+			for (AlloyVariable theVar : varsInExpression.getVariables()){
+				if (this.notAllowsPrimedState.contains(theVar.getVariableId().getString())){
+					expressionsInvolveQuantifiedVariables = true;
 				}
+			}
 
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_add_auxiliary_constants(left_add_expr, right_add_expr);
-				rvalue = addAuxiliaryConstants.result_variable;
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+			if (!expressionsInvolveQuantifiedVariables) {
 
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+				CType left_type = getType(jAddExpression.left());
+				CType right_type = getType(jAddExpression.right());
+
+				CTypeAdapter type_Adapter = new CTypeAdapter();
+				JType left_alloy_type = type_Adapter.translate(left_type);
+				JType right_alloy_type = type_Adapter.translate(right_type);
+
+
+				if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_add_auxiliary_constants(left_add_expr, right_add_expr);
+					rvalue = addAuxiliaryConstants.result_variable;
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_add_auxiliary_constants(left_add_expr, right_add_expr);
+					rvalue = addAuxiliaryConstants.result_variable;
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_add_auxiliary_constants(left_add_expr, right_add_expr);
+					rvalue = addAuxiliaryConstants.result_variable;
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_char_add_auxiliary_constants(left_add_expr, right_add_expr);
+					rvalue = addAuxiliaryConstants.result_variable;
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_integer_add_auxiliary_constants(left_add_expr, right_add_expr);
+					//assemble new expression
+
+					rvalue = addAuxiliaryConstants.result_variable;
+					//assemble new expression
+
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
+
+					JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_char_add_auxiliary_constants(left_add_expr, right_add_expr);
+					//assemble new expression
+
+					rvalue = addAuxiliaryConstants.result_variable;
+					//assemble new expression
+
+					AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+
 				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					throw new TacoException("Cannot add elements from types " + left_alloy_type + " and " + right_alloy_type);
 				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_add_auxiliary_constants(left_add_expr, right_add_expr);
-				rvalue = addAuxiliaryConstants.result_variable;
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_char_add_auxiliary_constants(left_add_expr, right_add_expr);
-				rvalue = addAuxiliaryConstants.result_variable;
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_integer_add_auxiliary_constants(left_add_expr, right_add_expr);
-				//assemble new expression
-
-				rvalue = addAuxiliaryConstants.result_variable;
-				//assemble new expression
-
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
-
-				JMLAddAuxiliaryConstants addAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_char_add_auxiliary_constants(left_add_expr, right_add_expr);
-				//assemble new expression
-
-				rvalue = addAuxiliaryConstants.result_variable;
-				//assemble new expression
-
-				AlloyVariable res = addAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = addAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(addAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(addAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-
 			} else {
-				throw new TacoException("Cannot add elements from types " + left_alloy_type + " and " + right_alloy_type);
+				Object binaryExpression = ExpressionSolver.getBinaryExpression(this, jAddExpression, Constants.OPE_PLUS );
+				rvalue = (AlloyExpression) binaryExpression;
 			}
 
 		} else {
@@ -501,147 +528,163 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 			AlloyExpression right_minus_expr = this.getAlloyExpression();
 			//recover new right subexpression
 
-			CType left_type = getType(jMinusExpression.left());
-			CType right_type = getType(jMinusExpression.right());
+			VarCollector varsInExpression = new VarCollector();
+			right_minus_expr.accept(varsInExpression);
+			left_minus_expr.accept(varsInExpression);
 
-			CTypeAdapter type_Adapter = new CTypeAdapter();
-			JType left_alloy_type = type_Adapter.translate(left_type);
-			JType right_alloy_type = type_Adapter.translate(right_type);
-
-			if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				rvalue = minusAuxiliaryConstants.result_variable;
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+			boolean expressionsInvolveQuantifiedVariables = false;
+			for (AlloyVariable theVar : varsInExpression.getVariables()){
+				if (this.notAllowsPrimedState.contains(theVar.getVariableId().getString())){
+					expressionsInvolveQuantifiedVariables = true;
 				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				//assemble new expression
-
-				rvalue = minusAuxiliaryConstants.result_variable;
-				//assemble new expression
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-				this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-				this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				//assemble new expression
-
-				rvalue = minusAuxiliaryConstants.result_variable;
-				//assemble new expression
-
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_integer_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				rvalue = minusAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_char_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				rvalue = minusAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
-
-				JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_char_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
-				rvalue = minusAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-
-				} else {
-					this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else {
-				throw new TacoException("Cannot subtract elements from types " + left_alloy_type + " and " + right_alloy_type);
 			}
 
+			if (!expressionsInvolveQuantifiedVariables) {
+
+				CType left_type = getType(jMinusExpression.left());
+				CType right_type = getType(jMinusExpression.right());
+
+				CTypeAdapter type_Adapter = new CTypeAdapter();
+				JType left_alloy_type = type_Adapter.translate(left_type);
+				JType right_alloy_type = type_Adapter.translate(right_type);
+
+				if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					rvalue = minusAuxiliaryConstants.result_variable;
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					//assemble new expression
+
+					rvalue = minusAuxiliaryConstants.result_variable;
+					//assemble new expression
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					//assemble new expression
+
+					rvalue = minusAuxiliaryConstants.result_variable;
+					//assemble new expression
+
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_integer_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					rvalue = minusAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_char_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					rvalue = minusAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))) {
+
+					JMLMinusAuxiliaryConstants minusAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_char_minus_auxiliary_constants(left_minus_expr, right_minus_expr);
+					rvalue = minusAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = minusAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = minusAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(minusAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+					} else {
+						this.predsFromMathOperations.add(minusAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else {
+					throw new TacoException("Cannot subtract elements from types " + left_alloy_type + " and " + right_alloy_type);
+				}
+			} else {
+				Object binaryExpression = ExpressionSolver.getBinaryExpression(this, jMinusExpression, Constants.OPE_MINUS );
+				rvalue = (AlloyExpression) binaryExpression;
+			}
 		} else {
 
 			Object binaryExpression;
@@ -674,111 +717,131 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 			AlloyExpression right_mul_expr = this.getAlloyExpression();
 			//recover new right subexpression
 
-			CType left_type = getType(jMultExpression.left());
-			CType right_type = getType(jMultExpression.right());
 
-			CTypeAdapter type_Adapter = new CTypeAdapter();
-			JType left_alloy_type = type_Adapter.translate(left_type);
-			JType right_alloy_type = type_Adapter.translate(right_type);
+			VarCollector varsInExpression = new VarCollector();
+			right_mul_expr.accept(varsInExpression);
+			left_mul_expr.accept(varsInExpression);
 
-			if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
-				rvalue = mulAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+			boolean expressionsInvolveQuantifiedVariables = false;
+			for (AlloyVariable theVar : varsInExpression.getVariables()){
+				if (this.notAllowsPrimedState.contains(theVar.getVariableId().getString())){
+					expressionsInvolveQuantifiedVariables = true;
 				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+			}
 
-				JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
-				rvalue = mulAuxiliaryConstants.result_variable;
+			if (!expressionsInvolveQuantifiedVariables) {
 
-				AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+
+				CType left_type = getType(jMultExpression.left());
+				CType right_type = getType(jMultExpression.right());
+
+				CTypeAdapter type_Adapter = new CTypeAdapter();
+				JType left_alloy_type = type_Adapter.translate(left_type);
+				JType right_alloy_type = type_Adapter.translate(right_type);
+
+				if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
+					rvalue = mulAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+
+					JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
+					rvalue = mulAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_int_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
+					rvalue = mulAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+
+					JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_long_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
+					rvalue = mulAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
+
+					JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
+					rvalue = mulAuxiliaryConstants.result_variable;
+
+					AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
+					if (this.isContractTranslation) {
+						res.setIsVariableFromContract();
+						over.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					} else {
+						this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					}
 				} else {
-					this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_int_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
-				rvalue = mulAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
-
-				JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_long_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
-				rvalue = mulAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
-
-				JMLMultAuxiliaryConstants mulAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_mult_auxiliary_constants(left_mul_expr, right_mul_expr);
-				rvalue = mulAuxiliaryConstants.result_variable;
-
-				AlloyVariable res = mulAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable over = mulAuxiliaryConstants.overflow_or_compatibility_variable.getVariable();
-				if (this.isContractTranslation){
-					res.setIsVariableFromContract();
-					over.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(mulAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(res, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
-				} else {
-					this.predsFromMathOperations.add(mulAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(res, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(over, JSignatureFactory.BOOLEAN_TYPE.toString());
+					throw new TacoException("Cannot multiply elements from types " + left_alloy_type + " and " + right_alloy_type);
 				}
 			} else {
-				throw new TacoException("Cannot multiply elements from types " + left_alloy_type + " and " + right_alloy_type);
+				Object binaryExpression;
+				binaryExpression = ExpressionSolver.getBinaryExpression(this, jMultExpression, Constants.OPE_STAR);
+				rvalue = (AlloyExpression) binaryExpression;
 			}
 
 		} else {
@@ -814,112 +877,129 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 			AlloyExpression right_div_expr = this.getAlloyExpression();
 			//recover new right subexpression
 
-			CType left_type = getType(jDivideExpression.left());
-			CType right_type = getType(jDivideExpression.right());
+			VarCollector varsInExpression = new VarCollector();
+			right_div_expr.accept(varsInExpression);
+			left_div_expr.accept(varsInExpression);
 
-			CTypeAdapter type_Adapter = new CTypeAdapter();
-			JType left_alloy_type = type_Adapter.translate(left_type);
-			JType right_alloy_type = type_Adapter.translate(right_type);
-
-			if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_divide_auxiliary_constants(left_div_expr, right_div_expr);
-				rvalue = divAuxiliaryConstants.result_variable;
-
-				AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
-				if (this.isContractTranslation){
-					quotient.setIsVariableFromContract();
-					remainder.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-				} else {
-					this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+			boolean expressionsInvolveQuantifiedVariables = false;
+			for (AlloyVariable theVar : varsInExpression.getVariables()){
+				if (this.notAllowsPrimedState.contains(theVar.getVariableId().getString())){
+					expressionsInvolveQuantifiedVariables = true;
 				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
-
-				JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_divide_auxiliary_constants(left_div_expr, right_div_expr);
-				rvalue = divAuxiliaryConstants.result_variable;
-
-				AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
-				if (this.isContractTranslation){
-					quotient.setIsVariableFromContract();
-					remainder.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-				} else {
-					this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
-
-				JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_int_divide_auxiliary_constants(left_div_expr, right_div_expr);
-				rvalue = divAuxiliaryConstants.result_variable;
-
-				AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
-				if (this.isContractTranslation){
-					quotient.setIsVariableFromContract();
-					remainder.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-				} else {
-					this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
-
-				JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_long_divide_auxiliary_constants(left_div_expr, right_div_expr);
-				rvalue = divAuxiliaryConstants.result_variable;
-
-				AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
-				if (this.isContractTranslation){
-					quotient.setIsVariableFromContract();
-					remainder.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
-				} else {
-					this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
-				}
-			} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
-					&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
-
-				JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_divide_auxiliary_constants(left_div_expr, right_div_expr);
-				rvalue = divAuxiliaryConstants.result_variable;
-
-				AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
-				AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
-				if (this.isContractTranslation){
-					quotient.setIsVariableFromContract();
-					remainder.setIsVariableFromContract();
-					this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-				} else {
-					this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
-					this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-					this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
-				}
-			} else {
-				throw new TacoException("Cannot divide elements from types " + left_alloy_type + " and " + right_alloy_type);
 			}
 
+			if (!expressionsInvolveQuantifiedVariables) {
+
+				CType left_type = getType(jDivideExpression.left());
+				CType right_type = getType(jDivideExpression.right());
+
+				CTypeAdapter type_Adapter = new CTypeAdapter();
+				JType left_alloy_type = type_Adapter.translate(left_type);
+				JType right_alloy_type = type_Adapter.translate(right_type);
+
+				if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_integer_divide_auxiliary_constants(left_div_expr, right_div_expr);
+					rvalue = divAuxiliaryConstants.result_variable;
+
+					AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
+					if (this.isContractTranslation) {
+						quotient.setIsVariableFromContract();
+						remainder.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+					} else {
+						this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+
+					JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_long_divide_auxiliary_constants(left_div_expr, right_div_expr);
+					rvalue = divAuxiliaryConstants.result_variable;
+
+					AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
+					if (this.isContractTranslation) {
+						quotient.setIsVariableFromContract();
+						remainder.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+					} else {
+						this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE))) {
+
+					JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_int_divide_auxiliary_constants(left_div_expr, right_div_expr);
+					rvalue = divAuxiliaryConstants.result_variable;
+
+					AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
+					if (this.isContractTranslation) {
+						quotient.setIsVariableFromContract();
+						remainder.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+					} else {
+						this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_CHAR_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE))) {
+
+					JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_char_long_divide_auxiliary_constants(left_div_expr, right_div_expr);
+					rvalue = divAuxiliaryConstants.result_variable;
+
+					AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
+					if (this.isContractTranslation) {
+						quotient.setIsVariableFromContract();
+						remainder.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE.toString());
+					} else {
+						this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_LONG_VALUE.toString());
+					}
+				} else if ((left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))
+						&& (right_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE))) {
+
+					JMLDivAuxiliaryConstants divAuxiliaryConstants = JMLAuxiliaryConstantsFactory.build_float_divide_auxiliary_constants(left_div_expr, right_div_expr);
+					rvalue = divAuxiliaryConstants.result_variable;
+
+					AlloyVariable quotient = divAuxiliaryConstants.result_variable.getVariable();
+					AlloyVariable remainder = divAuxiliaryConstants.remainder.getVariable();
+					if (this.isContractTranslation) {
+						quotient.setIsVariableFromContract();
+						remainder.setIsVariableFromContract();
+						this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().add(divAuxiliaryConstants.pred);
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(quotient, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().put(remainder, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+					} else {
+						this.predsFromMathOperations.add(divAuxiliaryConstants.pred);
+						this.varsAndTheirTypeFromMathOperations.put(quotient, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+						this.varsAndTheirTypeFromMathOperations.put(remainder, JSignatureFactory.JAVA_PRIMITIVE_FLOAT_VALUE.toString());
+					}
+				} else {
+					throw new TacoException("Cannot divide elements from types " + left_alloy_type + " and " + right_alloy_type);
+				}
+			} else {
+				Object binaryExpression;
+				binaryExpression = ExpressionSolver.getBinaryExpression(this, jDivideExpression, Constants.OPE_SLASH);
+				rvalue = (AlloyExpression) binaryExpression;
+			}
 		} else {
 
 			Object binaryExpression;
@@ -1778,24 +1858,33 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		for (String s : inputToFix.keySet()){
 			if (!s.equals("throw") && !s.equals("return") && !s.startsWith("customvar")){
 				if (isJavaArithmetic) {
-					if (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int")) {
+
+					if (inputToFix.get(s) != null && (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int"))) {
 						processIntegerToFix((Integer) inputToFix.get(s), mapConcreteToExpre);
 					} else {
-						if (inputToFix.get(s).getClass().getName().equals("java.lang.Long") || (inputToFix.get(s).getClass().getName().equals("long"))) {
+						if (inputToFix.get(s) != null && (inputToFix.get(s).getClass().getName().equals("java.lang.Long") || inputToFix.get(s).getClass().getName().equals("long"))) {
 							processLongToFix((Long) inputToFix.get(s), mapConcreteToExpre);
 						} else {
-							if (inputToFix.get(s).getClass().getName().equals("java.lang.Float") || inputToFix.get(s).getClass().getName().equals("float")) {
+							if (inputToFix.get(s) != null && (inputToFix.get(s).getClass().getName().equals("java.lang.Float") || inputToFix.get(s).getClass().getName().equals("float"))) {
 								processFloatToFix((Float) inputToFix.get(s), mapConcreteToExpre);
 							} else {
-								if (!inputToFix.get(s).getClass().isPrimitive()) {
-									ExprVariable var = new ExprVariable(new AlloyVariable(s));
-									processObjectToFix((Object) inputToFix.get(s), mapConcreteToExpre);
+								if ((inputToFix.get(s) == null) || !inputToFix.get(s).getClass().isPrimitive()) {
+									if (inputToFix.get(s) == null) {
+										if (s.equals("thiz")){
+											AlloyExpression exp = new ExprConstant("null", "null");
+											mapConcreteToExpre.put(null, exp);
+										}
+//										AlloyExpression exp = new ExprConstant("null", "null");
+//										mapConcreteToExpre.put(null, exp);
+									} else {
+										processObjectToFix((Object) inputToFix.get(s), mapConcreteToExpre);
+									}
 								}
 							}
 						}
 					}
 				} else {
-					if (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int")) {
+					if (inputToFix.get(s) != null && (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int"))) {
 						processAlloyIntegerToFix((Integer) inputToFix.get(s), mapConcreteToExpre);
 					}
 				}
@@ -1812,6 +1901,10 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 				if (inputToFix.get(s) != null && isNotNumericType(inputToFix.get(s).getClass())) {
 					processObjectToFixActualName(inputToFix.get(s), e, mapConcreteToActualName);
 				}
+			} else {
+				if (o == null && s.equals("thiz")){
+					mapConcreteToActualName.put(null, new ExprConstant("null", "null"));
+				}
 			}
 		}
 
@@ -1823,20 +1916,28 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 			Object o = inputToFix.get(s);
 			AlloyExpression name = mapConcreteToActualName.get(o);
 			AlloyExpression alloyValue = mapConcreteToExpre.get(o);
+			alreadyVisited.add(o);
 			if (!alloyValue.toString().contains("/null")) {
-				AlloyFormula af = new EqualsFormula(name, alloyValue);
+				AlloyFormula af;
+				if (name.toString().equals(s)) {
+					af = new EqualsFormula(name, alloyValue);
+				} else {
+					ExprVariable ev = new ExprVariable(new AlloyVariable(s));
+					af = new EqualsFormula(name, ev);
+				}
 				if (theOutcomeFormula == null) {
 					theOutcomeFormula = af;
 				} else {
 					theOutcomeFormula = new AndFormula(theOutcomeFormula, af);
 				}
 			} else {
-				alreadyVisited.add(o);
-				AlloyFormula af = processObjectToFormula(o, mapConcreteToExpre, mapConcreteToActualName, alreadyVisited);
-				if (theOutcomeFormula == null) {
-					theOutcomeFormula = af;
-				} else {
-					theOutcomeFormula = new AndFormula(theOutcomeFormula, af);
+				if (o != null) {
+					AlloyFormula af = processObjectToFormula(o, mapConcreteToExpre, mapConcreteToActualName, alreadyVisited);
+					if (theOutcomeFormula == null) {
+						theOutcomeFormula = af;
+					} else {
+						theOutcomeFormula = new AndFormula(theOutcomeFormula, af);
+					}
 				}
 			}
 		}

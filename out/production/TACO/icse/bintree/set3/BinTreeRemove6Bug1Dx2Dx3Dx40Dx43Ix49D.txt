@@ -1,0 +1,6 @@
+method remove | affected line: 1 | (PRVOU_REFINED, root, root.left)
+method remove | affected line: 2 | (PRVOU_REFINED, node.key, root.key)
+method remove | affected line: 3 | (PRVOU_REFINED, element, 0)
+method remove | affected line: 40 | (PRVOR_REFINED, node.parent, node)
+method remove | affected line: 43 | (PRVOL_SMART, node.parent.right, node.parent.parent)
+method remove | affected line: 49 | (AORS, size--, size++)

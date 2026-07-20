@@ -74,8 +74,10 @@ public class FieldInitializerSimplifier extends JmlAstClonerStatementVisitor {
 		if (!self.getField().isStatic()) {
 
 			JClassFieldExpression initializationExpression = new JClassFieldExpression(self.getTokenReference(), jmlFieldDeclaration.ident());
+			initializationExpression.setType(jmlFieldDeclaration.getType());
 			JmlSourceField jmlSourceField = new JmlSourceField(jmlFieldDeclaration.jmlAccess(), jmlFieldDeclaration.ident(), jmlFieldDeclaration.getType(), false);
 			initializationExpression.setField(jmlSourceField);
+			initializationExpression.setType(jmlSourceField.getType());
 			
 			JExpression value = null;
 			if (!self.isModel()) {

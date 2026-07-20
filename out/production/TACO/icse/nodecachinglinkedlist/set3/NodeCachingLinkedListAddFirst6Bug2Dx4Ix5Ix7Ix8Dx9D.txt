@@ -1,0 +1,6 @@
+method addFirst | affected line: 5 | (PRVOL_SMART, newNode.previous, insertBeforeNode.previous)
+method addFirst | affected line: 8 | (AORS, this.size++, this.size--)
+method addFirst | affected line: 7 | (PRVOL_SMART, insertBeforeNode.previous, insertBeforeNode.previous.next)
+method addFirst | affected line: 9 | (PRVOR_REFINED, this.modCount, this.DEFAULT_MAXIMUM_CACHE_SIZE)
+method addFirst | affected line: 4 | (PRVOL_SMART, newNode.next, this.firstCachedNode.next)
+method addFirst | affected line: 2 | (PRVOR_REFINED, o, newNode)

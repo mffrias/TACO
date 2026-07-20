@@ -1,0 +1,4 @@
+method remove | affected line: 15 | (PRVOR_REFINED, node.next, node.next.previous)
+method remove | affected line: 23 | (PRVOR_REFINED, currentIndex, this.size)
+method remove | affected line: 34 | (PRVOR_REFINED, this.firstCachedNode, this.header)
+method remove | affected line: 21 | (PRVOU_REFINED, currentIndex, index)

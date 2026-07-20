@@ -1,0 +1,5 @@
+method insert | affected line: 9 | (PRVOL_SMART, x, x.left)
+method insert | affected line: 20 | (AOIS, y.key, ++y.key)
+method insert | affected line: 21 | (PRVOL_SMART, y.left, y.left.left)
+method insert | affected line: 5 | (PRVOU_REFINED, k, this.size)
+method insert | affected line: 8 | (PRVOU_REFINED, x.key, x.right.key)

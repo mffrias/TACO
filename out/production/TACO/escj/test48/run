@@ -1,0 +1,21 @@
+#!/bin/sh
+# usage: run FLAGS
+
+ARGS=`echo $* | sed -e 's/-notrace//g'`
+
+${ESCJ} ${ARGS} and.java
+${ESCJ} ${ARGS} break.java
+${ESCJ} ${ARGS} condExpr.java
+${ESCJ} ${ARGS} constructor.java
+${ESCJ} ${ARGS} continue.java
+${ESCJ} ${ARGS} if.java
+${ESCJ} ${ARGS} initializer.java
+${ESCJ} ${ARGS} methodCall.java
+${ESCJ} ${ARGS} or.java
+${ESCJ} ${ARGS} return.java
+${ESCJ} ${ARGS} switch.java
+${ESCJ} ${ARGS} throw.java
+${ESCJ} ${ARGS} -notrace verbose.java
+${ESCJ} ${ARGS} verbose.java
+${ESCJ} ${ARGS} -verboseTrace verbose.java
+${ESCJ} ${ARGS} tryfinally.java

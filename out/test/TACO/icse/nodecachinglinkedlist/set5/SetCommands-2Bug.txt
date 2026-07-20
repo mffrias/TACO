@@ -1,0 +1,3 @@
+icse.nodecachinglinkedlist.set5.StrykerNodeCachingLinkedListAddFirst2Bug7Ix8DTest
+icse.nodecachinglinkedlist.set5.StrykerNodeCachingLinkedListContains2Bug3Dx7DTest
+icse.nodecachinglinkedlist.set5.StrykerNodeCachingLinkedListRemove2Bug11Dx30DTest

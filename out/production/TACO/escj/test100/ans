@@ -1,0 +1,72 @@
+C1.java:12: Warning: Possible null dereference (Null)
+        for (int i = 0; i < b.length; i++) {
+                             ^
+C1.java:15: Warning: Field declared non_null possibly not initialized (NonNullInit)
+    }
+    ^
+Associated declaration is "C1.java", line 2, col 8:
+    /*@ non_null */ int [] a; // = new int[10];
+        ^
+C1.java:25: Warning: Possible violation of object invariant (Invariant)
+    }
+    ^
+Associated declaration is "C1.java", line 4, col 8:
+    /*@ invariant (\forall int i; 0 <= i && i < b.length ==> b[i] != 0 ...
+        ^
+C1.java:30: Warning: Possible negative array index (IndexNegative)
+            a[i] = 0;   // warning expected 
+             ^
+C1.java:32: Warning: Postcondition possibly not established (Post)
+    } // warning expected 
+    ^
+Associated declaration is "C1.java", line 27, col 8:
+    /*@ ensures (\forall int i; 0 <= i && i < a.length ==> a[i] == 0); ...
+        ^
+C2.java:28: Warning: Possible negative array index (IndexNegative)
+            a[i] = 0;   // warning expected 
+             ^
+C2.java:30: Warning: Postcondition possibly not established (Post)
+    } // warning expected 
+    ^
+Associated declaration is "C2.java", line 25, col 8:
+    /*@ ensures (\forall int i; 0 <= i && i < a.length ==> a[i] == 0); ...
+        ^
+C2.java:36: Warning: Array index possibly too large (IndexTooBig)
+            a[i] = b[i];        
+                    ^
+C2.java:40: Warning: Possible violation of object invariant (Invariant)
+    } // warning expected
+    ^
+Associated declaration is "C2.java", line 4, col 8:
+    /*@ invariant (\forall int i; 0 <= i && i < b.length ==> b[i] != 0 ...
+        ^
+C3.java:14: Warning: Loop invariant possibly does not hold (LoopInv)
+        while (true) {
+              ^
+Associated declaration is "C3.java", line 12, col 3:
+          loop_invariant (\forall C3 o; o.z == \old(o.z)); 
+          ^
+10 warnings
+C1.java:12: Warning: Possible null dereference (Null)
+        for (int i = 0; i < b.length; i++) {
+                             ^
+C1.java:15: Warning: Field declared non_null possibly not initialized (NonNullInit)
+    }
+    ^
+Associated declaration is "C1.java", line 2, col 8:
+    /*@ non_null */ int [] a; // = new int[10];
+        ^
+C1.java:25: Warning: Possible violation of object invariant (Invariant)
+    }
+    ^
+Associated declaration is "C1.java", line 4, col 8:
+    /*@ invariant (\forall int i; 0 <= i && i < b.length ==> b[i] != 0 ...
+        ^
+3 warnings
+C3.java:14: Warning: Loop invariant possibly does not hold (LoopInv)
+        while (true) {
+              ^
+Associated declaration is "C3.java", line 12, col 3:
+          loop_invariant (\forall C3 o; o.z == \old(o.z)); 
+          ^
+1 warning

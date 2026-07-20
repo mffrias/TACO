@@ -1,0 +1,4 @@
+method getNode | affected line: 9 | (PRVOR_REFINED, current.next, current)
+method getNode | affected line: 5 | (ROR, index == current_index, index >= current_index)
+method getNode | affected line: 4 | (COI, result == null && current != null, !(result == null && current != null))
+method getNode | affected line: 8 | (PRVOR_REFINED, 1, 0)

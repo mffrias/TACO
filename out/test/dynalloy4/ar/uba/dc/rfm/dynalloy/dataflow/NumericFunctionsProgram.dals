@@ -1,0 +1,7 @@
+module NumericFunctionsProgram
+
+program numericFunctionsProgram[a, b : univ] {
+  (a := sub[a,1] + a := add[a, 1]);
+  (b := 3 + b := 4 + b := 5);
+  b := add[b, 2]
+}

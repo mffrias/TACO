@@ -1,0 +1,15 @@
+icse.bintree.set1.StrykerBinTreeContains2Bug3Dx4ITest
+icse.bintree.set1.StrykerBinTreeInsert2Bug4Ix6DTest
+icse.bintree.set1.StrykerBinTreeRemove2Bug2Dx26DTest
+icse.bintree.set2.StrykerBinTreeContains2Bug4Dx6DTest
+icse.bintree.set2.StrykerBinTreeInsert2Bug8Dx20DTest
+icse.bintree.set2.StrykerBinTreeRemove2Bug3Dx50DTest
+icse.bintree.set3.StrykerBinTreeContains2Bug4Dx7DTest
+icse.bintree.set3.StrykerBinTreeInsert2Bug21Dx26ITest
+icse.bintree.set3.StrykerBinTreeRemove2Bug18Ix40ITest
+icse.bintree.set4.StrykerBinTreeContains2Bug3Dx4DTest
+icse.bintree.set4.StrykerBinTreeInsert2Bug8Dx26DTest
+icse.bintree.set4.StrykerBinTreeRemove2Bug15Dx31DTest
+icse.bintree.set5.StrykerBinTreeContains2Bug3Dx6DTest
+icse.bintree.set5.StrykerBinTreeInsert2Bug6Dx20DTest
+icse.bintree.set5.StrykerBinTreeRemove2Bug7Dx43ITest

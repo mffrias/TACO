@@ -1,0 +1,29 @@
+module bug
+
+pred TruePred[] {}
+
+pred UpdateVarPost[l:univ,r:univ] { l = r }
+
+act UpdateVar[a, b: univ]
+{
+	pre { TruePred[] }
+	post { UpdateVarPost[a',b] }
+}
+
+program S[a, b : univ]
+{
+	UpdateVar[b, a];
+	UpdateVar[b, a];
+	UpdateVar[b, a];
+	UpdateVar[a, b]
+}
+
+pred C_post[r0:univ,r1:univ] { r0 = r1 }
+
+assertCorrectness C[e: univ] {
+	pre = { TruePred[] }
+	program = { call S[e, e] }
+	post = { C_post[e, e']  }
+}
+ 
+check C for 2

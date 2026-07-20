@@ -1,0 +1,8 @@
+public class B {
+    //@ requires i > 0 && (\forall int j; j >= i; i/(j-i) == i/(j-i));
+    //@ requires i > 0 && (\forall int j; j > i;  i/(j-i) == i/(j-i));
+    private static void testPre1(int i) { }
+
+    //@ instance model int si;
+    //@ instance invariant (\exists Object o; o.getClass() == o.getClass()) || si >= 0;
+}

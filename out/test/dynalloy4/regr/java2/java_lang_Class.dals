@@ -1,0 +1,10 @@
+module java_lang_Class
+open prelude as prelude
+sig Class extends Object {}
+{}
+
+one sig ClassClass extends Class {}
+{}
+
+fact {(Class).class=ClassClass}
+

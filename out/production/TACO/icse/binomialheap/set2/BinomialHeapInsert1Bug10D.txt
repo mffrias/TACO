@@ -1,0 +1,1 @@
+method insert | affected line: 10 | (COI, temp2 != null, !(temp2 != null))

@@ -1,0 +1,5 @@
+method remove | affected line: 14 | (PRVOU_REFINED, currentIndex, this.modCount)
+method remove | affected line: 21 | (AOIS, currentIndex, currentIndex++)
+method remove | affected line: 11 | (PRVOU_REFINED, 2, this.DEFAULT_MAXIMUM_CACHE_SIZE)
+method remove | affected line: 22 | (PRVOR_REFINED, node.previous, node.next.previous)
+method remove | affected line: 31 | (PRVOR_REFINED, 1, 0)

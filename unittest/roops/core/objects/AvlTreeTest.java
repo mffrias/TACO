@@ -46,7 +46,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:7");
+		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:4");
 		check(GENERIC_PROPERTIES, "find(int)", false);
 	}
 
@@ -54,7 +54,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyRelevantClasses("roops.core.objects.AvlTree,roops.core.objects.AvlNode");
 		setConfigKeyRelevancyAnalysis(true);
 		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(false);
+		setConfigKeyUseJavaArithmetic(true);
 		setConfigKeyInferScope(true);
 		setConfigKeyObjectScope(0);
 		setConfigKeyIntBithwidth(4);

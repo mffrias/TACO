@@ -1,0 +1,5 @@
+dalsFile=/home/jgaleotti/workspace/dynalloy4/test/regr/viz/bugfix_viz_2.dals,
+assertionId= null,
+loopUnroll= 3,
+removeQuantifiers= false,
+strictUnrolling= false,

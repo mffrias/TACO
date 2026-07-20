@@ -1,0 +1,28 @@
+shift.java:40: Warning: Possible assertion failure (Assert)
+//@ assert (l >> k) == (m >> k);
+    ^
+shift.java:45: Warning: Possible assertion failure (Assert)
+//@ assert (l >>> k) == (m >>> k);
+    ^
+shift.java:50: Warning: Possible assertion failure (Assert)
+//@ assert (l << k) == (m << k);
+    ^
+shift.java:55: Warning: Possible assertion failure (Assert)
+    //@ assert (l << k) == (m << k);
+        ^
+shift.java:62: Warning: Possible assertion failure (Assert)
+    //@ assert (l << k) == (m << k);
+        ^
+shift.java:68: Warning: Postcondition possibly not established (Post)
+  }
+  ^
+Associated declaration is "shift.java", line 65, col 6:
+  //@ ensures 1 <= \result;
+      ^
+shift.java:73: Warning: Postcondition possibly not established (Post)
+  }
+  ^
+Associated declaration is "shift.java", line 70, col 6:
+  //@ ensures 1 <= \result;
+      ^
+7 warnings

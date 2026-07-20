@@ -1,0 +1,2 @@
+method insert | affected line: 30 | (PRVOR_REFINED, temp2, temp2.child)
+method insert | affected line: 50 | (PRVOU_REFINED, nextTemp.degree, this.extractMin().degree)

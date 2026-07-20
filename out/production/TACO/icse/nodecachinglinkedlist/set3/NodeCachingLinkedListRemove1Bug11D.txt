@@ -1,0 +1,1 @@
+method remove | affected line: 11 | (AORB, this.size / 2, this.size + 2)

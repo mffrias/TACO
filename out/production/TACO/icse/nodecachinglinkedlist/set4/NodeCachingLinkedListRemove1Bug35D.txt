@@ -1,0 +1,1 @@
+method remove | affected line: 35 | (PRVOR_REFINED, null, nextCachedNode)

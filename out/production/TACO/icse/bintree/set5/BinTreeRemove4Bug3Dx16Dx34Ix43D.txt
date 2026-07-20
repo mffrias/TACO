@@ -1,0 +1,4 @@
+method remove | affected line: 34 | (PRVOL_SMART, pullUp.parent, pullUp.parent.parent)
+method remove | affected line: 43 | (PRVOR_REFINED, pullUp, pullUp.right)
+method remove | affected line: 3 | (PRVOU_REFINED, node.key, node.right.key)
+method remove | affected line: 16 | (ROR, predecessor != null, predecessor == null)

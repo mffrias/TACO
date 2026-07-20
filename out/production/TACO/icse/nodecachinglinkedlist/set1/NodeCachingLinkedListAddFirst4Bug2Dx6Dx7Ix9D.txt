@@ -1,0 +1,4 @@
+method addFirst | affected line: 6 | (PRVOR_REFINED, newNode, newNode.next)
+method addFirst | affected line: 2 | (PRVOR_REFINED, o, new java.lang.Integer( 0 ))
+method addFirst | affected line: 7 | (PRVOL_SMART, insertBeforeNode.previous, insertBeforeNode.next)
+method addFirst | affected line: 9 | (PRVOR_REFINED, this.modCount, this.maximumCacheSize)

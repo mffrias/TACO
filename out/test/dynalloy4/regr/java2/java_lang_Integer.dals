@@ -1,0 +1,62 @@
+module java_lang_Integer
+open prelude as prelude
+sig Integer extends Object {intValue:Int}
+{}
+
+one sig IntegerClass extends Class {}
+{}
+
+fact {(Integer).class=IntegerClass}
+
+pred IntegerCondition3[obj:univ]{not (equ[obj.class,IntegerClass])}
+
+pred IntegerCondition2[obj:univ]{equ[obj.class,IntegerClass]}
+
+pred IntegerCondition0[intValue:univ,obj:univ,thiz:univ]{equ[thiz.intValue,obj.intValue]}
+
+pred IntegerCondition5[obj:univ]{not (equ[obj,null])}
+
+pred IntegerCondition4[obj:univ]{equ[obj,null]}
+
+pred IntegerCondition1[intValue:univ,obj:univ,thiz:univ]{not (equ[thiz.intValue,obj.intValue])}
+
+program Integer_equals_0[thiz:Integer,throw:Exception,return:boolean,obj:Object]
+var [
+]{
+      (([IntegerCondition4[obj]]?);
+      (prelude/updateVariable[return,false]))
+   
+   +
+      (([IntegerCondition5[obj]]?);
+      (   (([IntegerCondition2[obj]]?);
+         (prelude/updateVariable[return,false]))
+      
+      +
+         (([IntegerCondition3[obj]]?);
+         (   (([IntegerCondition0[intValue,obj,thiz]]?);
+            (prelude/updateVariable[return,true]))
+         
+         +
+            (([IntegerCondition1[intValue,obj,thiz]]?);
+            (prelude/updateVariable[return,false]))
+         
+         ))
+      
+      ))
+
+}
+
+program Integer_intValue_0[thiz:Integer,throw:Exception,return:Int]
+var [
+]{
+   prelude/updateVariable[return,thiz.intValue]
+
+}
+
+program Integer_Constructor_0[thiz:Integer,throw:Exception]
+var [
+]{
+   prelude/updateField[thiz,intValue,value]
+
+}
+

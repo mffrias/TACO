@@ -1,0 +1,43 @@
+module new_grammar
+
+one sig null {}
+one sig A {}
+
+pred TruePred[] {}
+
+pred equ[l,r:univ] {
+  l=r
+}
+
+action clear[b:A+null] {
+  pre {TruePred[]}
+  post {equ[b',null]}
+}
+
+action fill[b:A+null] {
+  pre {TruePred[]}
+  post {equ[b',A]}
+}
+
+fun someA[]: A {
+  A
+}
+
+program grammarExt[a:A+null, f:A->one(A+null)] {
+  a := a & null;
+  a := (A+null) & a;
+  a := (A+null) & A;
+  a := ((A+null) & A) & (A+null);
+  skip
+}
+run grammarExt
+
+assertCorrectness grammarExtAssert[b: A+null, f:A->one(A+null)] { 
+  pre = { TruePred[] } 
+  program = { call grammarExt[b,f] } 
+  post = { equ[b,A] } 
+}
+
+check grammarExtAssert
+
+

@@ -1,0 +1,2 @@
+method insert | affected line: 8 | (ROR, k > x.key, k == x.key)
+method insert | affected line: 20 | (PRVOU_REFINED, k, 0)

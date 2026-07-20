@@ -1,0 +1,28 @@
+module viz6
+
+abstract sig Data {}
+
+one sig A extends Data {}
+
+one sig B extends Data {}
+
+pred equ[l,r: univ] {
+  l = r
+}
+
+pred TruePred[] {}
+
+program setAB[d: Data] {
+  
+  d := A;
+  d := B;
+  repeat {
+    assume equ[d,B];
+    d:= A
+  };
+  assume equ[d,A];
+  skip
+}
+
+run setAB
+

@@ -1,0 +1,62 @@
+bag.java:6: Warning: Possible null dereference (Null)
+    n = input.length;
+             ^
+bag.java:15: Warning: Array index possibly too large (IndexTooBig)
+      if (a[i] < m) {
+           ^
+bag.java:21: Warning: Possible negative array index (IndexNegative)
+    a[mindex] = a[n];
+                 ^
+3 warnings
+flags.java:6: Warning: Possible null dereference (Null)
+        int q = l.intValue();
+                 ^
+flags.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+2 warnings
+flags.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+1 warning
+flags.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+1 warning
+helper.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+1 warning
+helper.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+1 warning
+helper.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+1 warning
+flags.java:6: Warning: Possible null dereference (Null)
+        int q = l.intValue();
+                 ^
+flags.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+2 warnings
+flags.java:6: Warning: Possible null dereference (Null)
+        int q = l.intValue();
+                 ^
+flags.java:15: Warning: Possible null dereference (Null)
+        i = j.intValue();
+             ^
+2 warnings
+postcondition2.java:9: Warning: Postcondition possibly not established (Post)
+    }
+    ^
+Associated declaration is "postcondition2.java", line 6, col 8:
+    //@ ensures \result > 0
+        ^
+1 warning
+skip.java:22: Warning: Possible null dereference (Null)
+        i = c.i;
+             ^
+1 warning

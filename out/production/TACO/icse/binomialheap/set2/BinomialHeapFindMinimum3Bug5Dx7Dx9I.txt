@@ -1,0 +1,3 @@
+method findMinimum | affected line: 9 | (PRVOL_SMART, x, x.child)
+method findMinimum | affected line: 7 | (PRVOR_REFINED, x.key, x.findMinNode().key)
+method findMinimum | affected line: 5 | (ROR, x.key < min, x.key > min)

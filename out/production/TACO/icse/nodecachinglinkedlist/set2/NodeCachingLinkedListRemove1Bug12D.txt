@@ -1,0 +1,1 @@
+method remove | affected line: 12 | (PRVOR_REFINED, this.header.next, this.header.previous)

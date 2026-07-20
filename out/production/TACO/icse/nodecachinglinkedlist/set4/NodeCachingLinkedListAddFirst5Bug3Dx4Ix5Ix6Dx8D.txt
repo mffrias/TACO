@@ -1,0 +1,5 @@
+method addFirst | affected line: 3 | (PRVOU_REFINED, this.header.next, this.header.previous)
+method addFirst | affected line: 4 | (PRVOL_SMART, newNode.next, newNode)
+method addFirst | affected line: 5 | (PRVOL_SMART, newNode.previous, newNode.next)
+method addFirst | affected line: 6 | (PRVOR_REFINED, newNode, insertBeforeNode)
+method addFirst | affected line: 8 | (PRVOR_REFINED, this.size, this.modCount)

@@ -1,0 +1,7 @@
+InnerClassTest.java:18: Warning: Possible null dereference (Null)
+                this.blankChar = inputChars.charAt(0);
+                                           ^
+InnerClassTest.java:19: Warning: Possible unexpected exception (Exception)
+        }
+        ^
+2 warnings

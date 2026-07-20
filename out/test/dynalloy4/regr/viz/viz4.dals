@@ -1,0 +1,101 @@
+module viz4
+
+abstract sig Lock {}
+
+one sig Locked extends Lock {}
+one sig Unlocked extends Lock {}
+one sig Error extends Lock {}
+
+pred TruePred[] {}
+
+pred isLocked[lock: Lock] {
+  lock = Locked
+}
+
+pred isUnlocked[lock: Lock] {
+  lock = Unlocked
+}
+
+pred isNotError[lock: Lock] {
+  lock != Error
+}
+
+pred isError[lock: Lock] {
+  lock = Error
+}
+
+pred kUnlockPost[lock0: Lock, lock1: Lock] {
+   isLocked[lock0] => isUnlocked[lock1]
+                   else isError[lock1]
+}
+
+action kUnlock[lock: Lock] {
+  pre  { TruePred[] }
+  post { kUnlockPost[lock, lock'] }
+}
+
+pred kLockPost[lock0: Lock, lock1: Lock] {
+   isUnlocked[lock0] => isLocked[lock1]
+                   else isError[lock1]
+}
+
+action kLock[lock: Lock] {
+  pre  { TruePred[] }
+  post { kLockPost[lock, lock'] }
+}
+
+program tryLock[lock: Lock] {
+  if isUnlocked[lock] {
+    kLock[lock] 
+  } else {
+    skip
+  };
+  skip 
+}
+
+program tryUnlock[lock: Lock] {
+  if isLocked[lock] {
+    kUnlock[lock]
+  } else {
+    skip
+  }
+}
+
+
+assertCorrectness checkLockCorrectness[lock: Lock] {
+  pre = { isNotError[lock] }
+  program = {
+               
+                repeat {
+                    call tryLock[lock]
+                    +
+                    call tryUnlock[lock]
+                }
+
+            }
+
+  post = { isNotError[lock'] }
+}
+
+check checkLockCorrectness
+
+run tryLock
+
+run tryUnlock
+
+assertCorrectness checkBuggyProtocol[lock: Lock] {
+  pre = { isNotError[lock] }
+  program = {
+               
+                repeat {
+                    call tryLock[lock]
+                    +
+                    kUnlock[lock]
+                }
+
+            }
+
+  post = { isNotError[lock'] }
+}
+
+check checkBuggyProtocol

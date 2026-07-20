@@ -1,0 +1,3 @@
+method addFirst | affected line: 4 | (PRVOL_SMART, newNode.next, newNode.previous)
+method addFirst | affected line: 6 | (PRVOL_SMART, insertBeforeNode.previous.next, this.header.previous.next)
+method addFirst | affected line: 2 | (PRVOR_REFINED, o, new java.lang.Integer( this.size ))

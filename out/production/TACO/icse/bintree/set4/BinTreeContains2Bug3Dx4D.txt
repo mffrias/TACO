@@ -1,0 +1,2 @@
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, this.root.left)
+method contains | affected line: 3 | (AOIS, k, --k)

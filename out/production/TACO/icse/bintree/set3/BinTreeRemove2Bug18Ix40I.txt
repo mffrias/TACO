@@ -1,0 +1,2 @@
+method remove | affected line: 40 | (PRVOL_SMART, pullUp.parent, pullUp.right.parent)
+method remove | affected line: 18 | (PRVOL_SMART, predecessor, predecessor.right)

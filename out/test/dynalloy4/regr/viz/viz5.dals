@@ -1,0 +1,38 @@
+module viz5
+
+abstract sig Data {}
+
+one sig A extends Data {}
+
+one sig B extends Data {}
+
+pred equ[l,r: univ] {
+  l = r
+}
+
+pred TruePred[] {}
+
+action setA[d: Data] {
+  pre { TruePred[] }
+  post { equ[d', A] }
+}
+
+action setB[d: Data] {
+  pre { TruePred[] }
+  post { equ[d', B] }
+}
+
+program setAB[d: Data] {
+
+  assume equ[d,A];
+  setA[d];
+  setB[d];
+  skip;
+  setA[d];
+  setB[d];
+  skip
+}
+
+run setAB
+
+run setAB for 5 Data

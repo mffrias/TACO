@@ -73,6 +73,8 @@ public class JmlStage implements ITacoStage {
 
 		parse_simplified_compilation_units(files);
 
+//		this.simplified_compilation_units = newAsts;
+
 		jmlToSimpleJmlContext = aAstSimplifierManager.getJmlToSimpleJmlContext();
 	}
 
@@ -87,16 +89,20 @@ public class JmlStage implements ITacoStage {
 			throw new TacoException("canonical path couldn't be computed " + e.getMessage());
 		}
 
-
-		JmlParser theParserInstance = new JmlParser().getInstance();
-		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
-				files);
-
+		simplified_compilation_units = new LinkedList<>();
+		for (String file : files) {
+			LinkedList<String> theEncapsulatedFileName = new LinkedList<>();
+			theEncapsulatedFileName.add(file);
+			JmlParser theParserInstance = new JmlParser().getInstance();
+			theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
+					theEncapsulatedFileName);
+			simplified_compilation_units.addAll(theParserInstance.getCompilationUnits());
+		}
 //		JmlParser theParserInstance = ((TacoThread)(Thread.currentThread())).threadParserInstance.getInstance();
 //		theParserInstance.initialize(canonical_outdir_path, System.getProperty("user.dir") + System.getProperty("file.separator") + "bin" /* Unused */,
 //				files);
 
-		simplified_compilation_units = theParserInstance.getCompilationUnits();
+		//simplified_compilation_units = theParserInstance.getCompilationUnits();
 
 	}
 

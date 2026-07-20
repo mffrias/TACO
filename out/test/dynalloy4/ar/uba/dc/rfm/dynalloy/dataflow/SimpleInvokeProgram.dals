@@ -1,0 +1,22 @@
+module example1
+
+open util/integer
+
+pred TruePred[] {}
+
+program P1[x:Int] {
+	x := add[x,1];
+	call P2[x];
+	call P2[add[x,1]]
+}
+
+program P2[a:Int] var [foo:Int] {
+	foo := a;
+	foo := add[foo,1];
+	call P3[foo]
+}
+
+program P3[z:Int] var [bar:Int] {
+	bar := z;
+	z := add[z,1]
+}

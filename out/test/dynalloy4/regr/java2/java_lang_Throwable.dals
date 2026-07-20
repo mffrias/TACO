@@ -1,0 +1,17 @@
+module java_lang_Throwable
+open prelude as prelude
+sig Throwable extends Object {}
+{}
+
+one sig ThrowableClass extends Class {}
+{}
+
+fact {(Throwable-(Exception+RuntimeException+NullPointerException)).class=ThrowableClass}
+
+program Throwable_Constructor_0[]
+var [
+]{
+   skip
+
+}
+

@@ -1,0 +1,6 @@
+method contains | affected line: 1 | (PRVOU_REFINED, root, this.root.parent)
+method contains | affected line: 2 | (PRVOU_REFINED, current, this.root)
+method contains | affected line: 3 | (AOIS, k < current.key, k >= current.key)
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, current.right)
+method contains | affected line: 6 | (PRVOU_REFINED, current.key, root.key)
+method contains | affected line: 7 | (PRVOL_SMART, current, current.parent)

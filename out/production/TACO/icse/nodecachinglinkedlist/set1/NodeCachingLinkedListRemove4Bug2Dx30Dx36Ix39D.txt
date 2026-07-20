@@ -1,0 +1,4 @@
+method remove | affected line: 36 | (PRVOL_SMART, node.next, node)
+method remove | affected line: 2 | (ROR, index < 0, index != 0)
+method remove | affected line: 39 | (PRVOR_REFINED, this.cacheSize, this.modCount)
+method remove | affected line: 30 | (AORB, this.size - 1, this.size * 1)

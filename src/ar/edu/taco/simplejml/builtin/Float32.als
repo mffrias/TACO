@@ -183,7 +183,10 @@ pred pred_java_primitive_float_value_is_NaN[f : JavaPrimitiveFloatValue]{
 	isBitNaN[f.b31,f.b30,f.b29,f.b28,f.b27,f.b26,f.b25,f.b24,f.b23,f.b22,f.b21,f.b20,f.b19,f.b18,f.b17,f.b16,f.b15,f.b14,f.b13,f.b12,f.b11,f.b10,f.b09,f.b08,f.b07,f.b06,f.b05,f.b04,f.b03,f.b02,f.b01,f.b00]
 }
 
-
+//The next function implements "isNaN from java.lang.Float".
+fun fun_java_lang_float_isNaN[f : JavaPrimitiveFloatValue] : boolean {
+	pred_java_primitive_float_value_is_NaN[f] implies true else false
+}
 
 pred pred_java_primitive_float_value_add[n1,n2,r : JavaPrimitiveFloatValue, compatibility_argument: boolean]{
 		floatAdd[	n1.b31,n1.b30,n1.b29,n1.b28,n1.b27,n1.b26,n1.b25,n1.b24,n1.b23,n1.b22,n1.b21,n1.b20,n1.b19,n1.b18,n1.b17,n1.b16,n1.b15,n1.b14,n1.b13,n1.b12,n1.b11,n1.b10,n1.b09,n1.b08,n1.b07,n1.b06,n1.b05,n1.b04,n1.b03,n1.b02,n1.b01,n1.b00, 
@@ -762,7 +765,9 @@ some 	i30, i29, i28, i27, i26, i25, i24, i23 : boolean,
 									and
 									(
 										(e30=true and e29=true and e28=true and e27=true and e26=true and e25=true and e24=true and e23=true) implies
-										(	r22 = false and r21 = false and r20 = false and r19 = false and r18 = false and r17 = false and r16 = false and r15 = false and r14 = false and 
+										(
+										    r30 = true and r29 = true and r28 = true and r27 = true and r26 = true and r25 = true and r24 = true and r23 = true and
+										    r22 = false and r21 = false and r20 = false and r19 = false and r18 = false and r17 = false and r16 = false and r15 = false and r14 = false and
 											r13 = false and r12 = false and r11 = false and r10 = false and r09 = false and r08 = false and r07 = false and r06 = false and r05 = false and 
 											r04 = false and r03 = false and r02 = false and r01 = false and r00 = false 
 										)

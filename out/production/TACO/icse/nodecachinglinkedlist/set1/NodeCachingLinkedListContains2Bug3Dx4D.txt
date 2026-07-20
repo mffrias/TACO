@@ -1,0 +1,2 @@
+method contains | affected line: 4 | (PRVOR_REFINED, node.next, node)
+method contains | affected line: 3 | (COI, node != header && node.value != arg, !(node != header && node.value != arg))

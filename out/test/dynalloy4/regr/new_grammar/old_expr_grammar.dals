@@ -1,0 +1,46 @@
+module new_grammar
+
+one sig null {}
+one sig A {}
+
+pred TruePred[] {}
+
+pred equ[l,r:univ] {
+  l=r
+}
+
+fun mi_fun[a:A]: A {
+  a
+}
+
+program old_expr[a:A+null] {
+  assume equ[a,null];
+  a := A;
+  a := \pre[a] ;
+  skip
+}
+
+program program_union[a:A+null]
+var [b: A+null, pre_a: A+null] {
+  assume equ[a,null];
+  a := null;
+  pre_a := a;
+  a := A;
+  if equ[a,A] {
+    b := \pre[a]
+  } else {
+    skip
+  };
+  skip;
+  assume equ[b,pre_a]
+}
+run program_union
+
+assertCorrectness old_expr_assert[b: A+null] { 
+  pre = { TruePred[] } 
+  program = { call old_expr[b] } 
+  post = { equ[b',A] } 
+}
+
+check old_expr_assert
+

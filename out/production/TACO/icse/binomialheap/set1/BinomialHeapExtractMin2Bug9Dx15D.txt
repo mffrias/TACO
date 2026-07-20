@@ -1,0 +1,2 @@
+method extractMin | affected line: 9 | (PRVOR_REFINED, temp, null)
+method extractMin | affected line: 15 | (PRVOR_REFINED, temp.sibling, temp.parent)

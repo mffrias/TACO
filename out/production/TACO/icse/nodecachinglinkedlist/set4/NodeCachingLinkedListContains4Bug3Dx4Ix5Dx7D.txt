@@ -1,0 +1,4 @@
+method contains | affected line: 5 | (PRVOR_REFINED, counter, this.modCount)
+method contains | affected line: 3 | (PRVOU_REFINED, arg, node)
+method contains | affected line: 7 | (PRVOU_REFINED, node, this.firstCachedNode)
+method contains | affected line: 4 | (PRVOL_SMART, node, node.next)

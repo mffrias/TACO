@@ -1,0 +1,8 @@
+module constantPropagationProgram
+
+program constantPropagationProgram[a, b : univ] {
+  (a := c + a := d);
+  (b := d + b := e + skip);
+  b := 1
+}
+

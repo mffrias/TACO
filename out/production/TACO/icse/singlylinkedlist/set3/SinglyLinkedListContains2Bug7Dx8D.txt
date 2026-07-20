@@ -1,0 +1,2 @@
+method contains | affected line: 7 | (PRVOU_REFINED, current.value, current.next.value)
+method contains | affected line: 8 | (PRVOR_REFINED, true, false)

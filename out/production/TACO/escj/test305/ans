@@ -1,0 +1,40 @@
+I.java:17: Warning: Possible null dereference (Null)
+    this.i = this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1),null(o2),nu ...
+                          ^
+I.java:17: Warning: Possible null dereference (Null)
+    this.i = this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1),null(o2),nu ...
+                                ^
+I.java:17: Warning: Possible null dereference (Null)
+    this.i = this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1),null(o2),nu ...
+                                      ^
+I.java:17: Warning: Possible division by zero (ZeroDiv)
+    this.i = this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1),null(o2),nu ...
+                                        ^
+I.java:14: Warning: Possible division by zero (ZeroDiv)
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i));
+                                                        ^
+J.jml:12: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i)); //nul ...
+                                          ^
+J.jml:12: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i)); //nul ...
+                                                ^
+J.jml:12: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i)); //nul ...
+                                                      ^
+J.jml:12: Warning: Possible division by zero (ZeroDiv)
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i)); //nul ...
+                                                        ^
+J.jml:16: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1), ...
+                                     ^
+J.jml:16: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1), ...
+                                           ^
+J.jml:16: Warning: Possible null dereference (Null)
+  /*@ ensures this.i == this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1), ...
+                                                 ^
+J.jml:16: Warning: Possible division by zero (ZeroDiv)
+  /*@ ensures this.i == this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1), ...
+                                                   ^
+13 warnings

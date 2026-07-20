@@ -1,0 +1,4 @@
+method remove | affected line: 31 | (PRVOU_REFINED, root, pullUp)
+method remove | affected line: 14 | (PRVOU_REFINED, null, node)
+method remove | affected line: 43 | (PRVOR_REFINED, pullUp, pullUp.left)
+method remove | affected line: 4 | (PRVOR_REFINED, node.left, this.root.left)

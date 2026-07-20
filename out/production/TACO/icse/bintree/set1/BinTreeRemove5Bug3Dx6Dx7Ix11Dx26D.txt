@@ -1,0 +1,5 @@
+method remove | affected line: 7 | (PRVOL_SMART, node, node.parent)
+method remove | affected line: 3 | (ROR, element < node.key, element > node.key)
+method remove | affected line: 26 | (PRVOU_REFINED, null, node)
+method remove | affected line: 6 | (PRVOU_REFINED, element, this.size)
+method remove | affected line: 11 | (COI, node == null, !(node == null))

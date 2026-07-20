@@ -1,0 +1,21 @@
+public class J {
+
+  //@ invariant this.i >= 0;
+  public int i;
+
+  /*@ normal_behavior
+    @  requires i >= 0 && j >= 0 && k >= 0;
+    @  ensures \result == i+j+k;
+    @*/
+  public /*@ pure */ int test0(int i, int j, int k);
+
+  /*@ ensures this.i == \old(this.test0(o1.i, o2.i, o3.i/o3.i)); //null(o1),null(o2),null(o3),divZero warnings
+    @*/
+  public void test1(J o1, J o2, J o3);
+
+  /*@ ensures this.i == this.test0(o1.i, o2.i, o3.i/o3.i); //null(o1),null(o2),null(o3),divZero warnings
+    @*/
+  public void test2(J o1, J o2, J o3);
+
+
+}

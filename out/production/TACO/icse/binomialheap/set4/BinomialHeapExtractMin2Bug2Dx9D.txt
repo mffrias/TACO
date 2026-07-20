@@ -1,0 +1,2 @@
+method extractMin | affected line: 9 | (PRVOR_REFINED, temp, prevTemp)
+method extractMin | affected line: 2 | (PRVOU_REFINED, null, this.Nodes)

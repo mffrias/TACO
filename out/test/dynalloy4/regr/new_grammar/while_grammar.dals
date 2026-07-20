@@ -1,0 +1,34 @@
+module while_grammar
+
+open util/integer
+
+one sig null {}
+one sig A {}
+
+pred TruePred[] {}
+
+pred equ[l,r:univ] {
+  l=r
+}
+
+pred not_equ[l,r:univ] {
+  l!=r
+}
+
+program while_program[a:A+null, 
+                      f:A->one(A+null)
+] var [
+  curr: A+null,
+  counter: Int
+]{
+  counter := 0;
+  curr := a ;
+  while not_equ[curr,null] 
+  do {
+    curr := curr.f ;
+    counter := add[counter , 1]
+  };
+  assume equ[a,a]
+}
+
+run while_program

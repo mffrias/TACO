@@ -1,0 +1,4 @@
+method remove | affected line: 17 | (PRVOU_REFINED, null, predecessor)
+method remove | affected line: 6 | (PRVOU_REFINED, element, 0)
+method remove | affected line: 3 | (PRVOU_REFINED, element, 1)
+method remove | affected line: 43 | (PRVOL_SMART, node.parent.right, node.parent.right.right)

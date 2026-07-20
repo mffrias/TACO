@@ -1,0 +1,78 @@
+module java_lang_LongArray
+
+sig java_lang_LongArray extends java_lang_Object {} {}
+
+field java_lang_LongArray_length:(java_lang_LongArray)->one (JavaPrimitiveIntegerValue) {}
+field java_lang_LongArray_contents:java_lang_LongArray->(JavaPrimitiveIntegerValue set -> lone JavaPrimitiveLongValue) {}
+
+
+object_invariant all oa : java_lang_LongArray | {pred_java_primitive_integer_value_gte_zero[oa.java_lang_LongArray_length]}
+
+
+program java_lang_LongArray::Constructor[
+  var thiz:java_lang_LongArray,
+  var throw:java_lang_Throwable+null,
+  var new_length: JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if pred_java_primitive_integer_value_lt_zero[new_length] {
+    throw:=java_lang_NegativeArraySizeExceptionLit;
+  } else {
+    assume thiz.java_lang_LongArray_length=new_length;
+    assume thiz.java_lang_LongArray_contents=(none->none);
+  };
+  skip;
+}
+
+
+program java_lang_LongArray::long_array_read[
+  var thiz:java_lang_LongArray,
+  var throw:java_lang_Throwable+null,
+  var return:JavaPrimitiveLongValue,  
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_LongArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index , (thiz.java_lang_LongArray_contents).univ] {
+      return := index.(thiz.java_lang_LongArray_contents);
+    } else {
+      havoc return;
+      assume pred_java_primitive_long_value_eq_zero[return];
+    };
+  };
+  skip;
+}
+
+program java_lang_LongArray::long_array_write[
+  var thiz:java_lang_LongArray,
+  var throw:java_lang_Throwable+null,
+  var new_value:JavaPrimitiveLongValue,  
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_LongArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    thiz.java_lang_LongArray_contents := (thiz.java_lang_LongArray_contents) ++ (index->new_value);
+  };
+  skip;
+}
+
+
+program java_lang_LongArray::long_array_clone[
+  var thiz:      java_lang_LongArray,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_LongArray]
+Implementation 
+{
+  throw:=null;
+  new_value.java_lang_LongArray_contents := thiz.java_lang_LongArray_contents;
+  new_value.java_lang_LongArray_length := thiz.java_lang_LongArray_length;
+  skip;
+}
+

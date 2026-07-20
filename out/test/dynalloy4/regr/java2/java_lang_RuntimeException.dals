@@ -1,0 +1,17 @@
+module java_lang_RuntimeException
+open prelude as prelude
+sig RuntimeException extends Exception {}
+{}
+
+one sig RuntimeExceptionClass extends Class {}
+{}
+
+fact {(RuntimeException-(NullPointerException)).class=RuntimeExceptionClass}
+
+program RuntimeException_Constructor_0[]
+var [
+]{
+   skip
+
+}
+

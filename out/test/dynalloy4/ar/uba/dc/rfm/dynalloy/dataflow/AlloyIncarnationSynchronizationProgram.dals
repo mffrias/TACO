@@ -1,0 +1,18 @@
+module alloyIncarnationSynchronizationProgram
+
+open util/integer
+
+pred TruePred[] {}
+
+program AlloyIncarnationSynchronizationProgram[arg : Int] var [y : Int, z : Int] {
+  y := arg;
+  if TruePred[] {
+    y := add[y, 1];
+	y := add[y, 1];
+	y := add[y, 1]
+  }
+  else {
+    skip
+  };
+  z := y
+}

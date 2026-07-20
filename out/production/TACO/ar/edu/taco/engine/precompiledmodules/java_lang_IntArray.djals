@@ -1,0 +1,80 @@
+module java_lang_IntArray
+
+sig java_lang_IntArray extends java_lang_Object {} {}
+
+field java_lang_IntArray_length:(java_lang_IntArray)->one (JavaPrimitiveIntegerValue) {}
+field java_lang_IntArray_contents:java_lang_IntArray->(JavaPrimitiveIntegerValue set -> lone JavaPrimitiveIntegerValue) {}
+
+
+object_invariant all oa : java_lang_IntArray | {pred_java_primitive_integer_value_gte_zero[oa.java_lang_IntArray_length]}
+
+
+program java_lang_IntArray::Constructor[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var new_length: JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if pred_java_primitive_integer_value_lt_zero[new_length] {
+    throw:=java_lang_NegativeArraySizeExceptionLit;
+  } else {
+    assume thiz.java_lang_IntArray_length=new_length;
+    assume thiz.java_lang_IntArray_contents=(none->none);
+  };
+  skip;
+}
+
+
+  
+program java_lang_IntArray::int_array_read[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var return:JavaPrimitiveIntegerValue,  
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index , (thiz.java_lang_IntArray_contents).univ] {
+      return := index.(thiz.java_lang_IntArray_contents);
+    } else {
+      havoc return;
+      assume pred_java_primitive_integer_value_eq_zero[return];
+    };
+  };
+  skip;
+}
+
+program java_lang_IntArray::int_array_write[
+  var thiz:java_lang_IntArray,
+  var throw:java_lang_Throwable+null,
+  var new_value:JavaPrimitiveIntegerValue,  
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray_length]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    thiz.java_lang_IntArray_contents := (thiz.java_lang_IntArray_contents) ++ (index->new_value);
+  };
+  skip;
+}
+
+
+program java_lang_IntArray::int_array_clone[
+  var thiz:      java_lang_IntArray,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_IntArray]
+Implementation 
+{
+  throw:=null;
+  new_value.java_lang_IntArray_contents := thiz.java_lang_IntArray_contents;
+  new_value.java_lang_IntArray_length := thiz.java_lang_IntArray_length;
+  skip;
+}
+
+

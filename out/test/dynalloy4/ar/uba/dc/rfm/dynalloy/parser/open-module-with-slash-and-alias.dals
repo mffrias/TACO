@@ -1,0 +1,14 @@
+module baz
+
+open foo/bar as lorem
+open foobar/bar
+
+pred K[] { }
+
+assert SwapSwapInvariant {
+   assertCorrectness[] {
+       pre = { K[] }
+       program = { skip }
+       post = { K[]}
+   }
+}

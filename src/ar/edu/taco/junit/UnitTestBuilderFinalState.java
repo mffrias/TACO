@@ -29,6 +29,7 @@ public class UnitTestBuilderFinalState {
 
     private static final String THIZ_0 = "thiz_0";
     private static final String THIZ_1 = "thiz_1";
+    private static final String RESULT_1 = "return_1";
     private static Logger log = Logger.getLogger(UnitTestBuilder.class);
     static final private String FILE_SEPARATOR = File.separator;
     static final private String OUTPUT_DIR = "generated" + FILE_SEPARATOR;
@@ -112,8 +113,8 @@ public class UnitTestBuilderFinalState {
                 Object[] concretePars = null;
 //				try {
 //					thizInstance = clazz.newInstance();
-                SnapshotBuilder s = new SnapshotBuilder(recoveredInformation, null);
-                thizInstance = s.createNewInstance(clazz);
+                    SnapshotBuilder s = new SnapshotBuilder(recoveredInformation, null);
+                    thizInstance = s.createNewInstance(clazz);
 //				} catch (InstantiationException e) {
 
                 //          In this case the class under analysis did not export a parameterless constructor. Therefore,
@@ -187,6 +188,8 @@ public class UnitTestBuilderFinalState {
                                 instanceCreation += "f";
                             if (parTypes[parindex].getSimpleName().equals("double"))
                                 instanceCreation += "d";
+                            if (parTypes[parindex].getSimpleName().equals("long"))
+                                instanceCreation += "L";
                         } else
                             instanceCreation += "null";
                         if (parindex < concretePars.length - 1)
@@ -223,6 +226,166 @@ public class UnitTestBuilderFinalState {
         // Parameters Initialization
         List<String> paramsNames = getParametersInitializationStatements(clazz, objectDefinitionStatements, objectInitializationStatements);
 
+        //Return Initialization
+        if (methodToCheck != null) { //it is not a constructor and therefore we need to generate the return value (if any)
+            if (recoveredInformation.getSnapshot().get(RESULT_1) != null){ //the method is not void
+                String returnCreation = "";
+                Object returnValue = recoveredInformation.getSnapshot().get(RESULT_1);
+                if (returnValue.getClass().isPrimitive() || this.isAutoboxingClass(returnValue.getClass())) {
+                    if (returnValue.getClass().getSimpleName().equals("Float"))
+                        returnCreation += "float result = " + returnValue + "f;";
+                    if (returnValue.getClass().getSimpleName().equals("Double"))
+                        returnCreation += "double result = " + returnValue + "d;";
+                    if (returnValue.getClass().getSimpleName().equals("Integer"))
+                        returnCreation += "int result = " + returnValue  + ";";
+                    if (returnValue.getClass().getSimpleName().equals("Long"))
+                        returnCreation += "long result = " + returnValue  + "L;";
+                    if (returnValue.getClass().getSimpleName().equals("Char"))
+                        returnCreation += "char result = " + returnValue  + ";";
+                    if (returnValue.getClass().getSimpleName().equals("Boolean"))
+                        returnCreation += "boolean result = " + returnValue  + ";";
+
+                    objectDefinitionStatements.add(returnCreation);
+
+                } else {
+                    Class<?> returnClass = returnValue.getClass();
+                    String returnClassName = returnClass.toString();
+
+                    //We need to create a new instance that has the same attributes as returnValue
+                    Constructor<?>[] cons = returnClass.getConstructors();
+                    if (cons.length == 0)
+                        cons = returnClass.getDeclaredConstructors();
+                    Constructor<?> c = cons[0];
+
+                    Class<?>[] parTypes = c.getParameterTypes();
+                    Object[] concretePars = new Object[parTypes.length];
+                    int index = 0;
+                    for (Class<?> cl : parTypes) {
+                        if (cl.isPrimitive()) {
+                            if (cl.getName().equals("byte"))
+                                concretePars[index] = 0;
+                            if (cl.getName().equals("short"))
+                                concretePars[index] = 0;
+                            if (cl.getName().equals("int"))
+                                concretePars[index] = 0;
+                            if (cl.getName().equals("long"))
+                                concretePars[index] = 0L;
+                            if (cl.getName().equals("float"))
+                                concretePars[index] = 0.0f;
+                            if (cl.getName().equals("double"))
+                                concretePars[index] = 0.0d;
+                            if (cl.getName().equals("char"))
+                                concretePars[index] = '\u0000';
+                            if (cl.getName().equals("boolean"))
+                                concretePars[index] = false;
+                        } else {
+                            concretePars[index] = null;
+                        }
+                        index++;
+                    }
+
+                    //we now build the actual string to add in the JUnit file Type return = new Type(default param values);
+                    String instanceCreation = returnClassName + " return = new " + returnClassName + "(";
+                    if (concretePars != null) {
+                        for (int parindex = 0; parindex < concretePars.length; parindex++) {
+                            if (parTypes[parindex].isPrimitive() || this.isAutoboxingClass(parTypes[parindex])) {
+                                instanceCreation += concretePars[parindex].toString();
+                                if (parTypes[parindex].getSimpleName().equals("float"))
+                                    instanceCreation += "f";
+                                if (parTypes[parindex].getSimpleName().equals("double"))
+                                    instanceCreation += "d";
+                                if (parTypes[parindex].getSimpleName().equals("long"))
+                                    instanceCreation += "L";
+                            } else
+                                instanceCreation += "null";
+                            if (parindex < concretePars.length - 1)
+                                instanceCreation += ",";
+                        }
+                    }
+                    instanceCreation += ");";
+                    objectDefinitionStatements.add(instanceCreation);
+
+                    //We now set the values of the attributes
+
+                    // relate the Object got from return_1 to the variable instance;
+                    this.createdInstances.put(System.identityHashCode(returnValue), "result");
+
+                    // Fields initialization
+                    if (returnValue != null) {
+                        getFieldsInitializationStatements(returnClass, returnValue/*, "instance"*/, objectDefinitionStatements, objectInitializationStatements);
+                        //          objectDefinitionStatements.addAll(fieldsInitializationStatements);
+                    }
+
+                }
+
+
+
+
+//                List<String> returnStatements = getReturnInitializationStatements(returnValue);
+//                if (!returnValue.getClass().isPrimitive() && !this.isAutoboxingClass(returnValue.getClass())){
+//                    Constructor<?>[] cons = clazz.getConstructors();
+//                    if (cons.length == 0)
+//                        cons = clazz.getDeclaredConstructors();
+//                    Constructor<?> c = cons[0];
+//                    Class<?>[] parTypes = null;
+//                    Class<?>[] parameterTypes = null;
+//                    parTypes = c.getParameterTypes();
+//                    Object[] concretePars = new Object[parTypes.length];
+//                    int index = 0;
+//                    for (Class<?> cl : parTypes) {
+//                        if (cl.isPrimitive()) {
+//                            if (cl.getName().equals("byte"))
+//                                concretePars[index] = 0;
+//                            if (cl.getName().equals("short"))
+//                                concretePars[index] = 0;
+//                            if (cl.getName().equals("int"))
+//                                concretePars[index] = 0;
+//                            if (cl.getName().equals("long"))
+//                                concretePars[index] = 0L;
+//                            if (cl.getName().equals("float"))
+//                                concretePars[index] = 0.0f;
+//                            if (cl.getName().equals("double"))
+//                                concretePars[index] = 0.0d;
+//                            if (cl.getName().equals("char"))
+//                                concretePars[index] = '\u0000';
+//                            if (cl.getName().equals("boolean"))
+//                                concretePars[index] = false;
+//                        } else {
+//                            concretePars[index] = null;
+//                        }
+//                        index++;
+//                    }
+//                    String instanceCreation = recoveredInformation.getClassToCheck() + " instance = new " + recoveredInformation.getClassToCheck() + "(";
+//                    if (concretePars != null) {
+//                        for (int parindex = 0; parindex < concretePars.length; parindex++) {
+//                            if (parTypes[parindex].isPrimitive() || this.isAutoboxingClass(parTypes[parindex])) {
+//                                instanceCreation += concretePars[parindex].toString();
+//                                if (parTypes[parindex].getSimpleName().equals("float"))
+//                                    instanceCreation += "f";
+//                                if (parTypes[parindex].getSimpleName().equals("double"))
+//                                    instanceCreation += "d";
+//                            } else
+//                                instanceCreation += "null";
+//                            if (parindex < concretePars.length - 1)
+//                                instanceCreation += ",";
+//                        }
+//                    }
+//                    instanceCreation += ");";
+//                    objectDefinitionStatements.add(instanceCreation);
+//
+//                    // relate the Object got from Thiz_0 to the variable instance;
+//                    this.createdInstances.put(System.identityHashCode(returnValue), "returnValue");
+//
+//                    // Fields initialization
+//                    if (returnValue != null) {
+//                        getFieldsInitializationStatements(clazz, returnValue/*, "instance"*/, objectDefinitionStatements, objectInitializationStatements);
+//                        //          objectDefinitionStatements.addAll(fieldsInitializationStatements);
+//                    }
+//
+//                }
+            }
+        }
+
         // Method invocation
         objectDefinitionStatements.addAll(objectInitializationStatements);
         List<String> methodInvocationStatements = new ArrayList<String>();
@@ -239,6 +402,11 @@ public class UnitTestBuilderFinalState {
             writeToFile(outputClassName, methodName, imports, objectDefinitionStatements, constructorToCheck.isAccessible());
         StrykerStage.fileSuffix++;
         log.info("****** JUnit generation finished. Produced JUnit: '" + PACKAGE_NAME + "." + outputClassName + "' on 'generated' source folder ******");
+    }
+
+    private List<String> getReturnInitializationStatements(Object returnValue) {
+        List<String> theStatements = new LinkedList<String>();
+        return theStatements;
     }
 
     public void setLoader(ClassLoader loader) {

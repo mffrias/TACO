@@ -1,0 +1,26 @@
+module Object
+
+sig null {}
+sig Object {}
+
+pred TruePred[] {} 
+pred equ[l,r:univ] {l=r} 
+
+pred updateFieldPost[f1:univ->univ,f0:univ->univ,l:univ,r:univ] { f1 = f0 ++ (l->r) } 
+action updateField[l:univ,f:univ->univ,r:univ]{
+  pre{TruePred[]}
+  post{updateFieldPost[f',f,l,r]}
+}
+
+action updateVariable[l:univ,r:univ]{
+pre{TruePred[]}
+post{equ[l',r]}
+}
+
+program Object_Constructor_0[thiz:Object]
+var [
+] {
+   skip
+}
+
+run Object_Constructor_0

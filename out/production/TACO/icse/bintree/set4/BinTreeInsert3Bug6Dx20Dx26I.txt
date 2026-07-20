@@ -1,0 +1,3 @@
+method insert | affected line: 6 | (PRVOR_REFINED, x.left, x.left.right)
+method insert | affected line: 26 | (PRVOL_SMART, x.parent, this.root.parent)
+method insert | affected line: 20 | (ROR, k < y.key, k <= y.key)

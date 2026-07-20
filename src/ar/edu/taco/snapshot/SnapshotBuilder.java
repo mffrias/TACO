@@ -65,6 +65,8 @@ public class SnapshotBuilder {
 	private static final String OUTPUT_COUNTEREXAMPLE_INSTANCES_XML = "output/counterexample-instances.xml";
 	private static final String NULL0 = "null$0";
 	private static final String THIZ_VAR = "thiz";
+	private static final String RESULT_VAR = "return";
+	final String RESULT_SNAPSHOT_KEY_Final = "return_1";
 	private static final String THIZ_SNAPSHOT_KEY = "thiz_0";
 	private static final String THIZ_SNAPSHOT_KEY_Final = "thiz_1";
 
@@ -301,7 +303,7 @@ public class SnapshotBuilder {
 				a4Solution.writeXML(OUTPUT_COUNTEREXAMPLE_INSTANCES_XML);
 			}
 
-		} catch (Err e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 
@@ -350,6 +352,7 @@ public class SnapshotBuilder {
 
 			}
 
+
 		} else {
 
 			Method methodToCheck = obtainMethodToCheckMethod(clazzToCheck);
@@ -383,10 +386,11 @@ public class SnapshotBuilder {
 				}
 
 			}
-
-			for (Field aField : obtainAllFields(thizInstance.getClass())) {
-				if (!isStatic(aField.getModifiers())) {
-					setFieldValueSupportFinalState(thizExpression, thizInstance, aField);
+			if (!isStaticMethod) {
+				for (Field aField : obtainAllFields(thizInstance.getClass())) {
+					if (!isStatic(aField.getModifiers())) {
+						setFieldValueSupportFinalState(thizExpression, thizInstance, aField);
+					}
 				}
 			}
 
@@ -408,6 +412,20 @@ public class SnapshotBuilder {
 
 				}
 			}
+
+			//build return value
+			Class<?> returnClass = methodToCheck.getReturnType();
+			Object returnValue = null;
+			AlloyExpression returnExpression = null;
+			returnExpression = prefixExprVariableFinalState(RESULT_VAR);
+			try {
+				returnValue = evaluate(returnExpression, returnClass);
+				this.recoveredInformation.getSnapshot().put(RESULT_SNAPSHOT_KEY_Final, returnValue);
+			} catch (Exception e) {
+				returnValue = null;
+			}
+
+
 
 		}
 

@@ -1,0 +1,3 @@
+method contains | affected line: 6 | (ROR, k > current.key, k < current.key)
+method contains | affected line: 7 | (PRVOR_REFINED, current.right, current.right.right)
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, current.parent.left)

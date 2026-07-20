@@ -1,0 +1,5 @@
+method insert | affected line: 42 | (PRVOR_REFINED, temp1.sibling, temp1.child)
+method insert | affected line: 11 | (COI, temp1.degree == temp2.degree, !(temp1.degree == temp2.degree))
+method insert | affected line: 64 | (PRVOR_REFINED, nextTemp, temp1)
+method insert | affected line: 50 | (PRVOU_REFINED, nextTemp.degree, this.Nodes.degree)
+method insert | affected line: 16 | (PRVOR_REFINED, tmp.sibling, temp2.sibling)

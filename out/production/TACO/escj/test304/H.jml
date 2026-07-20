@@ -1,0 +1,21 @@
+public class H {
+
+  /*@non_null */public int [] a;
+  
+  /*@ requires a.length >= 0;  // null(a) warning
+    @ ensures this.a == a;
+    @*/
+  public H(int [] a);
+
+  /*@ requires a.length == this.a.length;
+    @ ensures this.a[i] == \old(this.a[i]+v); // idxNeg(i), idx2Large(i)
+    @*/
+  public void test0(int i, int v);
+
+  /*@ requires a.length == this.a.length;
+    @ requires i>=0 && i<this.a.length;
+    @ ensures this.a[i] == \old(this.a[i]+v);
+    @*/
+  public void test1(int i, int v);
+
+}

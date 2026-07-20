@@ -1,0 +1,21 @@
+module bug
+
+pred TruePred[] {}
+
+pred a_post[o0:univ,o1:univ] { o0 != o1 }
+
+action a[o : univ]
+{
+	pre { TruePred[] }
+	post { a_post[o, o'] }
+}
+
+pred C_post[r0:univ -> one univ,r1:univ -> one univ] { r0 = r1 }
+
+assertCorrectness C[e: univ, r : univ -> one univ] {
+	pre = { TruePred[] }
+	program = { a[e.r] }
+	post = { C_post[r, r']  }
+}
+ 
+check C for 2

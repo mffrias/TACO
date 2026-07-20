@@ -1,0 +1,2 @@
+method insertBack | affected line: 9 | (ROR, current.next != null, current.next == null)
+method insertBack | affected line: 2 | (PRVOR_REFINED, arg, null)

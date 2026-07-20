@@ -1,9 +1,13 @@
 package ar.edu.taco.dynalloy;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import ar.edu.jdynalloy.ast.JDynAlloyModule;
 import ar.edu.jdynalloy.xlator.ObjectCreationCounter;
+import ar.edu.taco.infer.InferredScope;
 import ar.edu.taco.infer.ScopeInference;
 import ar.uba.dc.rfm.dynalloy.ast.DynalloyModule;
 import ar.uba.dc.rfm.dynalloy.plugin.DynAlloyASTPlugin;
@@ -15,8 +19,13 @@ public class DynAlloyScopeInferencePlugin implements DynAlloyASTPlugin {
 	@Override
 	public DynalloyModule transform(DynalloyModule input) {
 
-		scope_inference_engine.inferScope();
-		
+		InferredScope theInferredScope = scope_inference_engine.inferScope();
+		Map<String, Integer> inferredAllocsPerType = new HashMap<>();
+		Set<String> theTypes = this.scope_inference_engine.object_alloc_counter.getAllocations().keySet();
+		for (String aTypeName : theTypes){
+			this.scope_inference_engine.object_alloc_counter.setAllocations(aTypeName, theInferredScope.getInferredScope(aTypeName));
+		}
+
 		return input;
 	}
 

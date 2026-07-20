@@ -1,0 +1,2 @@
+method remove | affected line: 2 | (ROR, node.key != element, node.key > element)
+method remove | affected line: 26 | (PRVOU_REFINED, node.left, node.right.left)

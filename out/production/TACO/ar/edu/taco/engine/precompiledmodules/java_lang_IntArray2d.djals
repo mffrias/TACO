@@ -1,0 +1,138 @@
+module java_lang_IntArray2d
+
+sig java_lang_IntArray2d extends java_lang_Object {} {}
+
+field java_lang_IntArray2d_numDim1:(java_lang_IntArray2d)->one (JavaPrimitiveIntegerValue) {}
+field java_lang_IntArray2d_numDim2:(java_lang_IntArray2d)->one (java_lang_IntArray) {}
+
+field java_lang_IntArray2d_contents:java_lang_IntArray2d->(JavaPrimitiveIntegerValue set -> java_lang_IntArray) {}
+
+
+object_invariant all oa : java_lang_IntArray2d | {pred_java_primitive_integer_value_gte_zero[oa.java_lang_IntArray2d_numDim1]}
+object_invariant all oa : java_lang_IntArray2d | all dim : (oa.java_lang_IntArray2d_numDim2.java_lang_IntArray_contents)[JavaPrimitiveIntegerValue] | {pred_java_primitive_integer_value_gte_zero[dim]}
+
+
+program java_lang_IntArray2d::Constructor[
+  var thiz:java_lang_IntArray2d,
+  var throw:java_lang_Throwable+null,
+  var new_length_dim1: JavaPrimitiveIntegerValue,
+  var new_length_dim2: java_lang_IntArray]
+Implementation 
+{
+  throw:=null;
+  if pred_java_primitive_integer_value_lt_zero[new_length_dim1] or pred_java_primitive_integer_value_set_has_negative[new_length_dim2.java_lang_IntArray_contents] {
+    throw:=java_lang_NegativeArraySizeExceptionLit;
+  } else {
+    assume thiz.java_lang_IntArray2d_numDim1=new_length_dim1;
+    assume thiz.java_lang_IntArray2d_numDim2=new_length_dim2;
+    assume thiz.java_lang_IntArray2d_contents=(none->none);
+  };
+  skip;
+}
+
+
+  
+program java_lang_IntArray2d::int_array_read_dim1[
+  var thiz:java_lang_IntArray2d,
+  var throw:java_lang_Throwable+null,
+  var return:java_lang_IntArray,
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray2d_numDim1]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index, (thiz.java_lang_IntArray2d_contents).univ] {
+      return := index.(thiz.java_lang_IntArray2d_contents);
+    } else {
+      call java_lang_IntArray[return, throw, thiz.java_lang_IntArray2d_numDim2.java_lang_IntArray_length];
+      thiz.java_lang_IntArray2d_contents := thiz.java_lang_IntArray2d_contents ++ (index -> return);
+    };
+  };
+  skip;
+}
+
+
+program java_lang_IntArray2d::int_array_read_dim1_dim2[
+  var thiz:java_lang_IntArray2d,
+  var throw:java_lang_Throwable+null,
+  var return:JavaPrimitiveIntegerValue,
+  var index1:JavaPrimitiveIntegerValue,
+  var index2:JavaPrimitiveIntegerValue]
+Implementation
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index1] or pred_java_primitive_integer_value_gte[index1,thiz.java_lang_IntArray2d_numDim1] or pred_java_primitive_integer_value_lt_zero[index2] or pred_java_primitive_integer_value_gte[index2,(thiz.java_lang_IntArray2d_numDim2.java_lang_IntArray_contents)[index1]]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    if pred_in[index1, (thiz.java_lang_IntArray2d_contents).univ]{
+      if pred_in[index2, ((thiz.java_lang_IntArray2d_contents)[index1].java_lang_IntArray_contents).univ]{
+         return := (((thiz.java_lang_IntArray2d_contents)[index1]).java_lang_IntArray_contents)[index2];
+      } else {
+         havoc return;
+         assume pred_java_primitive_integer_value_eq_zero[return];
+      }
+    } else {
+      havoc return;
+      assume pred_java_primitive_integer_value_eq_zero[return];
+    };
+  };
+  skip;
+}
+
+
+
+
+program java_lang_IntArray2d::int_array_write_dim1[
+  var thiz:java_lang_IntArray2d,
+  var throw:java_lang_Throwable+null,
+  var new_value:java_lang_IntArray,
+  var index:JavaPrimitiveIntegerValue]
+Implementation 
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index] or pred_java_primitive_integer_value_gte[index,thiz.java_lang_IntArray2d_numDim1]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    thiz.java_lang_IntArray2d_contents := (thiz.java_lang_IntArray2d_contents) ++ (index->new_value);
+    thiz.java_lang_IntArray2d_numDim2.java_lang_IntArray_contents := thiz.java_lang_IntArray2d_numDim2.java_lang_IntArray_contents ++ (index -> newValue.java_lang_IntArray_length);
+  };
+  skip;
+}
+
+
+
+program java_lang_IntArray2d::int_array_write_dim1_dim2[
+  var thiz:java_lang_IntArray2d,
+  var throw:java_lang_Throwable+null,
+  var new_value:JavaPrimitiveIntegerValue,
+  var index1:JavaPrimitiveIntegerValue,
+  var index2:JavaPrimitiveIntegerValue]
+Implementation
+{
+  throw:=null;
+  if (pred_java_primitive_integer_value_lt_zero[index1] or pred_java_primitive_integer_value_gte[index1,thiz.java_lang_IntArray2d_numDim1] or pred_java_primitive_integer_value_lt_zero[index2] or pred_java_primitive_integer_value_gte[index2,(thiz.java_lang_IntArray2d_numDim2.java_lang_IntArray_contents)[index1]) {
+    throw:=java_lang_IndexOutOfBoundsExceptionLit;
+  } else {
+    ((thiz.java_lang_IntArray2d_contents)[index1]).java_lang_IntArray_contents := ((thiz.java_lang_IntArray2d_contents)[index1]).java_lang_IntArray_contents ++ (index->new_value);
+  };
+  skip;
+}
+
+
+
+program java_lang_IntArray2d::int_array_clone[
+  var thiz:      java_lang_IntArray2d,
+  var throw:     java_lang_Throwable+null,
+  var new_value: java_lang_IntArray2d]
+Implementation 
+{
+  throw:=null;
+  new_value.java_lang_IntArray2d_contents := thiz.java_lang_IntArray2d_contents;
+  new_value.java_lang_IntArray2d_numDim1 := thiz.java_lang_IntArray2d_numDim1;
+  new_value.java_lang_IntArray2d_numDim2 := thiz.java_lang_IntArray2d_numDim2;
+  skip;
+}
+
+

@@ -1,0 +1,51 @@
+module java_lang_Object
+open prelude as prelude
+sig Object {class:Class}
+{}
+
+one sig ObjectClass extends Class {}
+{}
+
+fact {(Object-(Exception+C+Class+RuntimeException+Integer+Throwable+NullPointerException)).class=ObjectClass}
+
+pred ObjectCondition2[o:univ]{neq[o,null]}
+
+pred ObjectCondition3[o:univ]{not (neq[o,null])}
+
+pred ObjectCondition0[o:univ,thiz:univ]{equ[thiz,o]}
+
+pred ObjectCondition1[o:univ,thiz:univ]{not (equ[thiz,o])}
+
+program Object_equals_0[thiz:Object,throw:Exception,return:boolean,o:Object]
+var [
+]{
+      (([ObjectCondition2[o]]?);
+      (   (([ObjectCondition0[o,thiz]]?);
+         (prelude/updateVariable[return,true]))
+      
+      +
+         (([ObjectCondition1[o,thiz]]?);
+         (prelude/updateVariable[return,false]))
+      
+      ))
+   
+   +
+      (([ObjectCondition3[o]]?);
+      (prelude/updateVariable[return,false]))
+
+}
+
+program Object_Constructor_0[thiz:Object,throw:Exception]
+var [
+]{
+   skip
+
+}
+
+program Object_getClass_0[thiz:Object,throw:Exception,return:Class]
+var [
+]{
+   prelude/updateVariable[return,thiz.class]
+
+}
+

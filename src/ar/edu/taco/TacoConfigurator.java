@@ -539,7 +539,7 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 					result.append(",");
 				}
 				int scope_of;
-				if (alloyScope.getCustomAlloyTypes().contains(signature_id)) {
+				if (alloyScope.getCustomAlloyTypes().contains(signature_id) && !TacoConfigurator.getInstance().getInferScope()) {
 					scope_of = alloyScope.getScopeForAlloySig(signature_id);
 				} else {
 					scope_of = inferred_scope.getInferredScope(signature_id);

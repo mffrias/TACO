@@ -276,8 +276,8 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		log.debug("Visiting: " + jmlConstructorDeclaration.getClass().getName());
 		log.debug("Constructor: \n" + this.prettyPrint.getPrettyPrint());
 
-	//	this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
-	//	this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
+//		this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
+//		this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
 		JProgramDeclaration programDeclaration = MethodDeclarationSolver.getConstructorDeclaration(jmlConstructorDeclaration, this.buffer, 
 				this.modulesObjectState, this.modulesNoStaticFields, this.varsEncodingValueOfArithmeticOperationsInObjectInvariants, 
 				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits, inputToFix);
@@ -310,10 +310,10 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 			stmtList.add(nullDeRefTail);
 
 			program = new JBlock(stmtList);
-			programDeclaration.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().addAll(this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures());
-			for (AlloyVariable av : this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()){
-				programDeclaration.getVarsResultOfArithmeticOperationsInRequiresAndEnsures().put(av, this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().get(av));
-			}
+//			programDeclaration.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().addAll(this.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures());
+//			for (AlloyVariable av : this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()){
+//				programDeclaration.getVarsResultOfArithmeticOperationsInRequiresAndEnsures().put(av, this.getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures().get(av));
+//			}
 
 		}
 
@@ -417,8 +417,8 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 			/* @non_null */JmlMethodDeclaration jmlMethodDeclaration) {
 
 		
-		//this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
-		//this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
+//		this.varsEncodingValueOfArithmeticOperationsInObjectInvariants = new AlloyTyping();
+//		this.predsEncodingValueOfArithmeticOperationsInObjectInvariants = new ArrayList<AlloyFormula>();
 		JProgramDeclaration programDeclaration = MethodDeclarationSolver.getMethodDeclaration(jmlMethodDeclaration, this.buffer, this.modulesObjectState,
 				this.modulesNoStaticFields, this.varsEncodingValueOfArithmeticOperationsInObjectInvariants, 
 				this.predsEncodingValueOfArithmeticOperationsInObjectInvariants, this.compilationUnits, inputToFix);

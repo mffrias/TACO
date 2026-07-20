@@ -1,0 +1,4 @@
+method getNode | affected line: 11 | (PRVOU_REFINED, result, current)
+method getNode | affected line: 5 | (COI, index == current_index, !(index == current_index))
+method getNode | affected line: 6 | (PRVOL_SMART, result, result.value)
+method getNode | affected line: 8 | (PRVOR_REFINED, current_index, 1)

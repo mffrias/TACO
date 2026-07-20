@@ -1,0 +1,5 @@
+method remove | affected line: 32 | (COI, this.cacheSize < this.maximumCacheSize, !(this.cacheSize < this.maximumCacheSize))
+method remove | affected line: 30 | (AORB, this.size - 1, this.size / 1)
+method remove | affected line: 21 | (PRVOU_REFINED, currentIndex, this.maximumCacheSize)
+method remove | affected line: 39 | (PRVOL_SMART, this.cacheSize, this.maximumCacheSize)
+method remove | affected line: 22 | (PRVOR_REFINED, node.previous, node.previous.previous)

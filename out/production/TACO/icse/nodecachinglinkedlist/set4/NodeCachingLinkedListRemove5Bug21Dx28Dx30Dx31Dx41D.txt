@@ -1,0 +1,5 @@
+method remove | affected line: 21 | (ROR, currentIndex > index, currentIndex == index)
+method remove | affected line: 28 | (PRVOR_REFINED, node.next, this.firstCachedNode.next)
+method remove | affected line: 30 | (PRVOR_REFINED, 1, 0)
+method remove | affected line: 31 | (PRVOR_REFINED, 1, this.cacheSize)
+method remove | affected line: 41 | (PRVOU_REFINED, oldValue, node.value)

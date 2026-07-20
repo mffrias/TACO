@@ -1,0 +1,50 @@
+module new_grammar
+
+one sig null {}
+one sig A {}
+
+pred TruePred[] {}
+
+pred equ[l,r:univ] {
+  l=r
+}
+
+action clear[b:A+null] {
+  pre {TruePred[]}
+  post {equ[b',null]}
+}
+
+action fill[b:A+null] {
+  pre {TruePred[]}
+  post {equ[b',A]}
+}
+
+
+
+program newGrammar[a:A+null, f:A->one(A+null)] {
+  assume equ[a,null] ;
+  repeat {
+    assume equ[a,A] ;
+    clear[a]
+  };
+  assume equ[a,null];
+  if equ[a,null] {
+    a:=null;
+    fill[a]
+  } else {
+    clear[a];
+    a:=A;
+    clear[a]
+  };
+  f:=(f)++((a)->(null))
+}
+
+assertCorrectness newGrammarAssert[b: A+null, f:A->one(A+null)] { 
+  pre = { TruePred[] } 
+  program = { call newGrammar[b,f] } 
+  post = { equ[b,A] } 
+}
+
+check newGrammarAssert
+
+

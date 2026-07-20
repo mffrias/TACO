@@ -1,0 +1,21 @@
+module complexProgram
+
+pred TruePred[] {}
+
+act DoNothing[a : univ] {
+  pre { TruePred[] }
+  post { TruePred[] }
+}
+
+pred DummyPred[a : univ] {
+   gt[a, 0]
+}
+
+program ComplexProgram[a, b : univ, f : univ -> univ] {
+  (a := b + (b := a; skip; (a := a + b := b)) + a := b.f);
+  (assume DummyPred[a] + f := f ++ (a -> b));
+  [DummyPred[a]]?;
+  f := (f)++((a)->(sub[b, 1]));
+  (DoNothing[a] + skip)
+}
+

@@ -1,0 +1,3 @@
+method remove | affected line: 32 | (ROR, this.cacheSize < this.maximumCacheSize, this.cacheSize <= this.maximumCacheSize)
+method remove | affected line: 2 | (ROR, index < 0, index > 0)
+method remove | affected line: 31 | (PRVOL_SMART, this.modCount, this.maximumCacheSize)

@@ -1,0 +1,25 @@
+module main
+
+open util/integer as integer
+
+pred SomePred[x:Int] {
+	x = x
+}
+
+action NullAction[x:Int] {
+	pre { SomePred[x] }
+	post { TruePred[] }
+}
+
+sig Prueba {
+	x : one Int
+}
+
+assertCorrectness parentesis[t:Prueba] {
+	pre = { TruePred[] }
+	program = { NullAction[t.x] }
+	post = { TruePred[] }
+}
+
+check parentesis
+

@@ -1,0 +1,4 @@
+method contains | affected line: 2 | (PRVOU_REFINED, 0, this.size)
+method contains | affected line: 1 | (PRVOU_REFINED, header.next, this.header.next.previous)
+method contains | affected line: 4 | (PRVOL_SMART, node, this.firstCachedNode)
+method contains | affected line: 7 | (PRVOU_REFINED, arg, new java.lang.Boolean( false ))

@@ -1,0 +1,4 @@
+method contains | affected line: 13 | (COI, false, !false)
+method contains | affected line: 4 | (PRVOR_REFINED, current.left, current.left.right)
+method contains | affected line: 6 | (ROR, k > current.key, k >= current.key)
+method contains | affected line: 2 | (PRVOU_REFINED, current != null, current == null)

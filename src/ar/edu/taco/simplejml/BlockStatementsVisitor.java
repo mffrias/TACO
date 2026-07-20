@@ -277,7 +277,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 				CType rightSideType = getType(jAssignmentExpression.right());
 				JType left_alloy_type = type_Adapter.translate(leftSideType);
 				JType right_alloy_type = type_Adapter.translate(rightSideType);
-				if (leftSideType != rightSideType){
+				if (!leftSideType.equals(rightSideType)){
 					AlloyExpression newRightSide = ExpressionSolver.getCastingExpression(left_alloy_type, right_alloy_type, (AlloyExpression)rightSide);
 					jStatement = new JAssignment(leftSide, newRightSide);
 				} else {

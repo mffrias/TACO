@@ -1,0 +1,5 @@
+method contains | affected line: 25 | (PRVOU_REFINED, result, true)
+method contains | affected line: 21 | (PRVOR_REFINED, true, equalVal)
+method contains | affected line: 4 | (COI, false, !false)
+method contains | affected line: 5 | (COI, false, !false)
+method contains | affected line: 23 | (PRVOL_SMART, current, valueParam)

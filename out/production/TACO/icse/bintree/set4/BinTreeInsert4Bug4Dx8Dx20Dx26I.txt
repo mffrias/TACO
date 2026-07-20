@@ -1,0 +1,4 @@
+method insert | affected line: 26 | (PRVOL_SMART, x.parent, x.left)
+method insert | affected line: 8 | (AOIS, k, ++k)
+method insert | affected line: 20 | (ROR, k < y.key, k == y.key)
+method insert | affected line: 4 | (PRVOR_REFINED, x, y)

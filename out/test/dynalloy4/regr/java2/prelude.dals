@@ -1,0 +1,33 @@
+module prelude 
+open util/integer 
+one sig null {} 
+abstract sig boolean {} 
+one sig true extends boolean {} 
+one sig false extends boolean {} 
+abstract sig char {} 
+pred TruePred[] {} 
+pred FalsePred[] { not TruePred[] } 
+pred equ[l,r:univ] {l=r} 
+pred neq[l,r:univ] {l!=r} 
+fun shl[l,r: Int]: Int { l << r } 
+fun sshr[l,r: Int]: Int { l >> r } 
+fun ushr[l,r: Int]: Int { l >>> r } 
+pred updateFieldPost[f1:univ->univ,f0:univ->univ,l:univ,r:univ] { f1 = f0 ++ (l->r) } 
+pred instanceOf[n: Object, t: set Object] { n in t } 
+one sig Heap { usedObjects: Object } 
+pred getUnusedObjectPost[usedObjects1:Heap -> set Object, usedObjects0: Heap -> set Object,n1: Object+null] { n1 !in Heap.usedObjects0 usedObjects1 = usedObjects0 + (Heap->n1)} 
+action getUnusedObject[n:Object+null,usedObjects:Heap -> Object]{
+pre{TruePred[]}
+post{getUnusedObjectPost[usedObjects',usedObjects,n']}
+}
+
+action updateField[l:univ,f:univ->univ,r:univ]{
+pre{TruePred[]}
+post{updateFieldPost[f',f,l,r]}
+}
+
+action updateVariable[l:univ,r:univ]{
+pre{TruePred[]}
+post{equ[l',r]}
+}
+

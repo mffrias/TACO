@@ -1,0 +1,6 @@
+method contains | affected line: 7 | (ROR, valueParam == null, valueParam != null)
+method contains | affected line: 10 | (PRVOU_REFINED, valueParam != null, valueParam == null)
+method contains | affected line: 11 | (PRVOU_REFINED, valueParam, 0)
+method contains | affected line: 12 | (PRVOR_REFINED, true, false)
+method contains | affected line: 20 | (COI, equalVal == true, !(equalVal == true))
+method contains | affected line: 21 | (COI, true, !true)

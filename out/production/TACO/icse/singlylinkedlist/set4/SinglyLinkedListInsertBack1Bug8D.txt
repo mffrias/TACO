@@ -1,0 +1,1 @@
+method insertBack | affected line: 8 | (PRVOR_REFINED, this.header, this.header.next)

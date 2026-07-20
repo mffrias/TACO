@@ -792,7 +792,7 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
-		if (!self.ident().equals("int_size") && !self.ident().equals("has")){
+		if (!self.ident().equals("int_size") && !self.ident().equals("has") && !self.ident().equals("isNaN")){
 			String theVarName = this.generateNewReturnParameterName();
 			CSpecializedType theReturnType = new CSpecializedType(self.method().returnType());
 			JmlFormalParameter theExpre = new JmlFormalParameter(self.getTokenReference(), 0L, 0, theReturnType, theVarName);

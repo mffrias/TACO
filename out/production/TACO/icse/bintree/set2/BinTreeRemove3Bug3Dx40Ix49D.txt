@@ -1,0 +1,3 @@
+method remove | affected line: 49 | (PRVOR_REFINED, size, element)
+method remove | affected line: 40 | (PRVOL_SMART, pullUp.parent, pullUp.parent.parent)
+method remove | affected line: 3 | (PRVOU_REFINED, node.key, this.root.key)

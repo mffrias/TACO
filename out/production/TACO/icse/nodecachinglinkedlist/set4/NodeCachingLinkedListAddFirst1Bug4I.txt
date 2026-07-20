@@ -1,0 +1,1 @@
+method addFirst | affected line: 4 | (PRVOL_SMART, newNode.next, this.firstCachedNode.next)

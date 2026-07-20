@@ -1,0 +1,36 @@
+module Boolean
+
+open Object as Object 
+open Integer as Integer
+
+abstract sig boolean {} 
+one sig true extends boolean {} 
+one sig false extends boolean {} 
+
+sig Boolean extends Object { }
+
+program Boolean_Constructor_0[thiz:Boolean,value:boolean, booleanValue:Boolean-> one boolean]
+var [
+]{
+   call Object/Object_Constructor_0[thiz];
+   Object/updateField[thiz,booleanValue,value]
+}
+run Boolean_Constructor_0
+
+program Boolean_ToInteger[thiz:Boolean,r: Integer, intValue:Integer->one Int] {
+  call Integer/Integer_Constructor_0[r,0,intValue]
+}
+run Boolean_ToInteger
+
+pred AssertToIntegerPost[r:Integer,intValue:Integer->one Int] {
+  r.intValue=0
+}
+
+assert AssertToInteger {
+  assertCorrectness [thiz:Boolean,r: Integer, intValue:Integer->one Int] {
+    pre     = { Object/TruePred[] }
+    program = { call Boolean_ToInteger[thiz,r,intValue] }
+    post    = { AssertToIntegerPost[r',intValue'] }
+  }
+}
+check AssertToInteger

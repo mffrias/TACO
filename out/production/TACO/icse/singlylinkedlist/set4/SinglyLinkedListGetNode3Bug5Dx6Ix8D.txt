@@ -1,0 +1,3 @@
+method getNode | affected line: 5 | (ROR, index == current_index, index > current_index)
+method getNode | affected line: 8 | (AOIS, current_index, current_index--)
+method getNode | affected line: 6 | (PRVOL_SMART, result, this.header)

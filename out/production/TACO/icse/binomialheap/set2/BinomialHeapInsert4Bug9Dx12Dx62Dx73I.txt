@@ -1,0 +1,4 @@
+method insert | affected line: 9 | (PRVOU_REFINED, insertTemp, insertTemp.parent)
+method insert | affected line: 62 | (PRVOR_REFINED, nextTemp, temp2)
+method insert | affected line: 73 | (PRVOL_SMART, nextTemp, insertTemp)
+method insert | affected line: 12 | (PRVOU_REFINED, temp2, insertTemp)

@@ -1,0 +1,2 @@
+method remove | affected line: 32 | (AOIS, this.maximumCacheSize, this.maximumCacheSize++)
+method remove | affected line: 37 | (PRVOR_REFINED, null, new java.lang.Boolean( false ))

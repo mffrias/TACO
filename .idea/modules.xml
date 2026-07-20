@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/TACO.iml" filepath="$PROJECT_DIR$/TACO.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../dynalloy4/dynalloy4.iml" filepath="$PROJECT_DIR$/../dynalloy4/dynalloy4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../jDynAlloy/jDynAlloy.iml" filepath="$PROJECT_DIR$/../jDynAlloy/jDynAlloy.iml" />
+    </modules>
+  </component>
+</project>

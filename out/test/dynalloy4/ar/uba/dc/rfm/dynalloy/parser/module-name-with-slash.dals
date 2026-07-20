@@ -1,0 +1,11 @@
+module foo/bar
+
+pred K[] { }
+
+assert SwapSwapInvariant {
+   assertCorrectness[] {
+       pre = { K[] }
+       program = { skip }
+       post = { K[]}
+   }
+}

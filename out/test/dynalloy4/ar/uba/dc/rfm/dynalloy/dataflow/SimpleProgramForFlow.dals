@@ -1,0 +1,13 @@
+module simpleProgramForFlow
+
+pred TruePred[] {}
+
+act DoNothing[a : univ] {
+  pre { TruePred[] }
+  post { TruePred[] }
+}
+
+program SimpleProgramForFlow[a, b : univ] {
+  c := a; c := b
+}
+

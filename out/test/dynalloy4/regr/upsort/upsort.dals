@@ -1,0 +1,172 @@
+// Pruebas cambiando los pred de pre y post para que la prueba sea mas generica.
+
+module main
+
+open util/integer as integer
+
+/////////////////////////////////////////////////////////////////
+// DynAlloy, pred y action genericas para poder expresar el resto
+pred TruePred[] {
+}
+
+pred equ[a,b: univ] {
+	a = b
+}
+
+pred nequ[a,b: univ] {
+	a != b
+}
+
+action updateVar[l:univ, r:univ] {
+ pre { TruePred[] }
+ post { equ[l',r] }
+}
+//
+/////////////////////////////////////////////////////////////////
+
+pred upsort_whileTrue[n:Int]
+{
+	gt[n, 0]
+}
+
+pred upsort_whileFalse[n:Int]
+{
+	!upsort_whileTrue[n]
+}
+
+program upsort[a:seq Int, n:Int]
+var[m:Int, actual:Int]
+{
+	updateVar[actual, sub[n, 1]];
+
+	(((
+		[upsort_whileTrue[actual]]?;
+
+		call maxPos[m, a, 0, actual];
+		swap[a, m, actual];
+
+		updateVar[actual, sub[actual, 1]]
+	)+
+	(
+		[upsort_whileFalse[actual]]?
+	))*);
+	[upsort_whileFalse[actual]]?
+}
+
+pred swap_Post[ao:seq Int, an:seq Int, i:Int, j:Int]
+{
+	 (an = ao ++ (i->ao[j]) ++ (j->ao[i])) &&
+	 #an = #ao
+}
+
+action swap[a:seq Int, i:Int, j:Int]
+{
+       pre { TruePred[] }
+       post { swap_Post[a, a', i, j] }
+}
+
+pred maxPos_whileTrue[i:Int, hasta:Int]
+{
+	lt[i, hasta]
+}
+
+pred maxPos_whileFalse[i:Int, hasta:Int]
+{
+	!maxPos_whileTrue[i, hasta]
+}
+
+pred maxPos_ifTrue[a:seq Int, i:Int, mp:Int]
+{
+	gt[a[i], a[mp]]
+}
+
+pred maxPos_ifFalse[a:seq Int, i:Int, mp:Int]
+{
+	!maxPos_ifTrue[a, i, mp]
+}
+
+program maxPos[mp:Int, a:seq Int, desde:Int, hasta:Int]
+var[i:Int]
+{
+	updateVar[mp, desde];
+	updateVar[i, desde];
+
+	(((
+		[maxPos_whileTrue[i, hasta]]?;
+
+		updateVar[i, add[i, 1]];
+
+		((
+			[maxPos_ifTrue[a, i, mp]]?; updateVar[mp, i]
+		)+
+		(
+			[maxPos_ifFalse[a, i, mp]]?
+		))
+	)+
+	(
+		[maxPos_whileFalse[i, hasta]]?
+	))*);
+	[maxPos_whileFalse[i, hasta]]?
+}
+
+pred initial[a:seq Int]
+{
+	#a = 4 && a[0] = 2 && a[1] = 3 && a[2] = 4 && a[3] = 1
+}
+
+pred final[a:seq Int]
+{
+	#a = 4 && a[0] = 1 && a[1] = 2 && a[2] = 3 && a[3] = 4
+}
+
+pred diferentes[a:seq Int, n:Int]
+{
+	#a = n &&
+	all j:Int | (gte[j, 0] && lt[j, #a]) implies
+		(
+			all k:Int | (gte[j, 0] && lt[j, #a] && j != k) implies a[j] != a[k]
+		)
+}
+
+pred ordenado[a:seq Int]
+{
+	all j:Int | (gte[j, 0] && lt[j, sub[#a,1]]) implies lte[a[j],add[a[j],1]]
+}
+
+pred mismos[a:seq Int, pre_a:seq Int]
+{
+	#a = #pre_a &&
+	(
+		all i:Int | (gte[i, 0] && lt[i, #a]) implies (
+			some j:Int | (gte[j, 0] && lt[j, #a]) && (
+				a[i] = pre_a[j]
+			)
+		)
+	) &&
+	(
+		all i:Int | (gte[i, 0] && lt[i, #a]) implies (
+			some j:Int | (gte[j, 0] && lt[j, #a]) && (
+				pre_a[i] = a[j]
+			)
+		)
+	)
+}
+
+pred sort_post[a:seq Int, pre_a:seq Int]
+{
+	1 = 2
+/*
+	ordenado[a] &&
+	mismos[a, pre_a]
+*/
+}
+
+assert sort {
+	assertCorrectness[a:seq Int] {
+		pre = { diferentes[a, 5] }
+		program = { call upsort[a, 5] }
+		post = { sort_post[a', a] }
+	}
+}
+
+check sort

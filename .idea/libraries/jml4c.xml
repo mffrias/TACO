@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jml4c">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/stryker/jml4c.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

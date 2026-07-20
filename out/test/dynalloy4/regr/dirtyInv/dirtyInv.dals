@@ -1,0 +1,57 @@
+module CS
+sig Addr { }
+fact { some a: Addr | a = a }
+
+pred TruePred [] {}
+pred FalsePred [] { not TruePred[] } 
+
+sig Data { }
+fact { some d: Data | d = d }
+
+sig Memory { 
+  map: Addr -> lone Data 
+}
+
+sig MainMemory extends Memory { }
+
+sig Cache extends Memory { dirty: set Addr }
+
+sig System { cache: Cache, main: MainMemory }
+
+pred DirtyInv [s: System] {
+  all a: Addr | not (a in s.cache.dirty) => s.cache.map [a] in s.main.map [a]
+}
+
+pred SysWritePost[s0, s1:System] {
+  some a: Addr, d: Data |
+     s1.cache.dirty = s0.cache.dirty + a and
+     s1.cache.map = s0.cache.map - (a -> Data) + (a -> d) and
+     s1.main.map = s0.main.map 
+}
+
+pred SysFlushPost[s0,s1:System] {
+  some x: /*set*/ s0.cache.dirty {
+     s1.cache.dirty = s0.cache.dirty - x and
+     s1.cache.map = s0.cache.map and 
+     s1.main.map = s0.main.map ++ {a: x, d: Data | d = s0.cache.map [a]}
+  }
+}
+
+act SysWrite [s: System] {
+  pre { TruePred[] }
+  post { SysWritePost[s,s'] }
+}
+
+act SysFlush [s: System] {
+  pre { TruePred[] }
+  post { SysFlushPost[s,s'] }
+}
+
+
+assertCorrectness DirtyInvAssertion[s:System] {
+    pre = { DirtyInv[s] }
+    program = { (SysWrite[s]+SysFlush[s])* }
+    post = { DirtyInv[s'] }
+}
+
+check DirtyInvAssertion for 3

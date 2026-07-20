@@ -1,0 +1,37 @@
+<component name="libraryTable">
+  <library name="antlr-4.3-complete">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/antlr-4.3-complete.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-collections-3.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-configuration-1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang-2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang3-3.3.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/edu.mit.csail.sdg.annotations_0.2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/guava-16.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javassist.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jml-release.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit-4.8.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.15.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mujava++.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/objenesis-2.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.contenttype_3.4.200.v20120523-2004.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.resources_3.8.0.v20120522-2034.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.runtime_3.8.0.v20120521-2346.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.equinox.preferences_3.5.0.v20120522-1841.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.jdt.core_3.8.1.v20120531-0637.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.osgi_3.8.0.v20120529-1548.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.eclipse.text_3.5.200.v20120523-1310.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/org.hamcrest.core_1.3.0.v201303031735.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/recoder.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/reflections-0.9.9-RC1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/mujava++.jar!/" />
+    </SOURCES>
+  </library>
+</component>

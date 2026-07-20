@@ -1,0 +1,46 @@
+module viz3
+
+open util/integer
+
+one sig null {}
+
+sig Object {}
+
+sig List {}
+
+sig Node {}
+
+pred isNull[u: univ] {
+  u = null
+}
+
+pred isNotNull[u: univ] {
+  u != null
+}
+
+pred neq[l,r: univ] {
+  l!=r
+}
+
+pred eq[l,r: univ] {
+ l=r
+}
+
+program clearList[thiz: List,
+                head: List -> one (Node+null),
+                size: List -> one Int,
+                next: Node -> one (Node+null),
+                node: Node+null
+                ] {
+
+   assume isNotNull[node];
+   assume isNull[node.next];
+   assume neq[thiz.head, node];
+   assume gt[thiz.size, 1];
+   head := head ++ (thiz->node) ;
+   size := size ++ (thiz->1);
+   assume eq[thiz,thiz]
+
+}
+
+run clearList

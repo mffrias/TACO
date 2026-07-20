@@ -1,0 +1,3 @@
+method insert | affected line: 4 | (PRVOR_REFINED, x, this.root)
+method insert | affected line: 17 | (ROR, y == null, y != null)
+method insert | affected line: 6 | (PRVOR_REFINED, x.left, this.root.left)

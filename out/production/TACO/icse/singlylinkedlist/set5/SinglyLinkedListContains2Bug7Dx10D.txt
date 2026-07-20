@@ -1,0 +1,2 @@
+method contains | affected line: 10 | (ROR, valueParam != null, valueParam == null)
+method contains | affected line: 7 | (COI, current.value == null, !(current.value == null))

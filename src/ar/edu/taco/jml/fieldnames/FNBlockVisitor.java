@@ -80,13 +80,12 @@ public class FNBlockVisitor extends SpecSimplifierClassBaseVisitor {
 	
 	@Override
 	public void visitMethodDeclaration(JMethodDeclaration arg0) {
-	    super.visitMethodDeclaration(arg0);
+		super.visitMethodDeclaration(arg0);
 	}
 	
 	@Override
 	public void visitJmlClassDeclaration(JmlClassDeclaration self) {
-	    currentClassName = FieldRenameUtil
-	            .extractClassNameForFieldRenameSupport(self.getCClass());
+	    currentClassName = FieldRenameUtil.extractClassNameForFieldRenameSupport(self.getCClass());
 	    super.visitJmlClassDeclaration(self);
 	}
 	

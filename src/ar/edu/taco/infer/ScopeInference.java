@@ -28,10 +28,10 @@ import ar.uba.dc.rfm.alloy.ast.formulas.FormulaVisitor;
 
 public class ScopeInference {
 
-    private static final int DEFAULT_ALLOY_BITWDITH = 1;
-    private List<JDynAlloyModule> src_jdynalloy_modules = null;
-    private ArithmeticOpCounter arithmetic_op_counter = null;
-    private ObjectCreationCounter object_alloc_counter = null;
+    public static final int DEFAULT_ALLOY_BITWDITH = 1;
+    public List<JDynAlloyModule> src_jdynalloy_modules = null;
+    public ArithmeticOpCounter arithmetic_op_counter = null;
+    public ObjectCreationCounter object_alloc_counter = null;
 
     /**
      * <p>Infer all the scopes and the bitwidth to be used in the analysis.</p>
@@ -47,9 +47,36 @@ public class ScopeInference {
         Graph class_graph = ClassGraphBuilder.buildClassGraph(this.src_jdynalloy_modules);
         Scope inferred_concrete_input_scope = infer_input_scope(class_graph);
 
+        // determine if method is static to add "this" to the scope
+        boolean methodIsStatic = true;
+        for (JDynAlloyModule mod : this.src_jdynalloy_modules){
+            String theType = TacoConfigurator.getInstance().getClassToCheck();
+            if (mod.getModuleId().equals(theType)){
+                for (JProgramDeclaration prog : mod.getPrograms()){
+                    String theMethodName = TacoConfigurator.getInstance().getMethodToCheck();
+                    String theCurrProgramFullName = getFullTypedname(prog);
+                    theCurrProgramFullName = theType + "_" + theCurrProgramFullName;
+                    if (theCurrProgramFullName.equals(theMethodName)){
+                        for (JVariableDeclaration var : prog.getParameters()){
+                            if (var.getVariable().getVariableId().getString().equals("thiz")){
+                                methodIsStatic = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // bound input-scope
         int object_limit = TacoConfigurator.getInstance().getObjectScope();
         Scope bounded_concrete_input_scope = inferred_concrete_input_scope.bound(object_limit);
+        if (!methodIsStatic){
+            String theType = TacoConfigurator.getInstance().getClassToCheck();
+            int theCurrScope = bounded_concrete_input_scope.getInferredScopeOf(theType).int_value;
+            theCurrScope = Math.max(1, theCurrScope); //In case the scope for type was 0 and the method was not static we guarantee at least one object
+            bounded_concrete_input_scope.setInputScopeInteger(theType, theCurrScope);
+        }
+
 
         // infer program-scope
         Scope inferred_concrete_program_scope = infer_program_scope();
@@ -457,7 +484,7 @@ public class ScopeInference {
                     types += "int";
                 if (jvType.equals("JavaPrimitiveLongValue"))
                     types += "long";
-                if (jvType.equals("JavaPrimitiveFLoatValue"))
+                if (jvType.equals("JavaPrimitiveFloatValue"))
                     types += "float";
                 if (jvType.equals("JavaPrimitiveCharValue"))
                     types += "char";

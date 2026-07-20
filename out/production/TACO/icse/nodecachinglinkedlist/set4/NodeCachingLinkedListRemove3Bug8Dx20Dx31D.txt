@@ -1,0 +1,3 @@
+method remove | affected line: 8 | (PRVOU_REFINED, index, 2)
+method remove | affected line: 31 | (AOIS, this.modCount, this.modCount++)
+method remove | affected line: 20 | (AOIS, this.size, this.size--)

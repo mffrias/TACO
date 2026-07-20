@@ -1,0 +1,538 @@
+----- Loop 0.0 -----
+----- Loop 0.5 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+1 warning
+----- Loop 1.0 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+2 warnings
+----- Loop 1.5 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+3 warnings
+----- Loop 2.0 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+4 warnings
+----- Loop 2.5 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+5 warnings
+----- Loop 3.0 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+6 warnings
+----- Loop 3.5 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+7 warnings
+----- Loop 4.0 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+LoopX.java:66: Warning: Possible assertion failure (Assert)
+    /*@ assert i < 4; */  // fails only with loop >= 4.0
+        ^
+8 warnings
+----- Loop 4.5 -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+LoopX.java:66: Warning: Possible assertion failure (Assert)
+    /*@ assert i < 4; */  // fails only with loop >= 4.0
+        ^
+LoopX.java:75: Warning: Array index possibly too large (IndexTooBig)
+    int y = a[i];  // fails only with loop >= 4.5
+             ^
+9 warnings
+----- Loop 0.0 traceinfo -----
+----- Loop 0.5 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+1 warning
+----- Loop 1.0 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+2 warnings
+----- Loop 1.5 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+3 warnings
+----- Loop 2.0 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+4 warnings
+----- Loop 2.5 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 34, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 34, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 34, col 4.
+
+5 warnings
+----- Loop 3.0 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 34, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 34, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 34, col 4.
+
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+
+6 warnings
+----- Loop 3.5 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 34, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 34, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 34, col 4.
+
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 3 iterations in "LoopX.java", line 53, col 4.
+
+7 warnings
+----- Loop 4.0 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 34, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 34, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 34, col 4.
+
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 3 iterations in "LoopX.java", line 53, col 4.
+
+LoopX.java:66: Warning: Possible assertion failure (Assert)
+    /*@ assert i < 4; */  // fails only with loop >= 4.0
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 63, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 63, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 63, col 4.
+    Reached top of loop after 3 iterations in "LoopX.java", line 63, col 4.
+
+8 warnings
+----- Loop 4.5 traceinfo -----
+LoopX.java:5: Warning: Possible null dereference (Null)
+         i < a.length;  // fails only with loop >= 0.5
+              ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 4, col 4.
+
+LoopX.java:12: Warning: Code marked as unreachable may possibly be reached (Reachable)
+      /*@ unreachable; */  // fails only with loop >= 1.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 11, col 4.
+
+LoopX.java:22: Warning: Possible assertion failure (Assert)
+    /*@ assert b; */  // fails only with loop >= 1.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 18, col 4.
+    Executed then branch in "LoopX.java", line 20, col 1.
+    Reached top of loop after 1 iteration in "LoopX.java", line 18, col 4.
+
+LoopX.java:27: Warning: Possible assertion failure (Assert)
+      /*@ assert i != 1; */  // fails only with loop >= 2.0
+          ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 26, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 26, col 4.
+
+LoopX.java:38: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 10 */  // fails only with loop >= 2.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 34, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 34, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 34, col 4.
+
+LoopX.java:46: Warning: Possible assertion failure (Assert)
+        /*@ assert s < 6; */  // fails only with loop >= 3.0
+            ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 43, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 44, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 44, col 6.
+
+LoopX.java:58: Warning: Possible assertion failure (Assert)
+    /*@ assert s <= 5; */  // fails only with loop >= 3.5
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 53, col 4.
+    Reached top of loop after 0 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 1 iteration in "LoopX.java", line 54, col 6.
+    Reached top of loop after 2 iterations in "LoopX.java", line 54, col 6.
+    Reached top of loop after 3 iterations in "LoopX.java", line 53, col 4.
+
+LoopX.java:66: Warning: Possible assertion failure (Assert)
+    /*@ assert i < 4; */  // fails only with loop >= 4.0
+        ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 63, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 63, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 63, col 4.
+    Reached top of loop after 3 iterations in "LoopX.java", line 63, col 4.
+
+LoopX.java:75: Warning: Array index possibly too large (IndexTooBig)
+    int y = a[i];  // fails only with loop >= 4.5
+             ^
+Execution trace information:
+    Reached top of loop after 0 iterations in "LoopX.java", line 72, col 4.
+    Reached top of loop after 1 iteration in "LoopX.java", line 72, col 4.
+    Reached top of loop after 2 iterations in "LoopX.java", line 72, col 4.
+    Reached top of loop after 3 iterations in "LoopX.java", line 72, col 4.
+    Reached top of loop after 4 iterations in "LoopX.java", line 72, col 4.
+
+9 warnings

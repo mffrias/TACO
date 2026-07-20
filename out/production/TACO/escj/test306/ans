@@ -1,0 +1,7 @@
+Test306.java:8: Warning: Possible null dereference (Null)
+        //@ requires s555.length() > 556;
+                         ^
+Test306.java:18: Warning: Possible null dereference (Null)
+        //@ invariant (\forall int i; s555.length() == s555.length());
+                                          ^
+2 warnings

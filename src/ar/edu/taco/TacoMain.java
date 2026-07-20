@@ -46,6 +46,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import ar.edu.taco.engine.*;
+import escj.test20B.A;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -336,7 +337,7 @@ public class TacoMain {
             throw new IllegalArgumentException("Config file not found, please verify option -cf");
         }
 
-        List<JCompilationUnitType> compilation_units = null;
+        List<JCompilationUnitType> compilation_units = new ArrayList<>();
         String classToCheck = null;
         String methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
 
@@ -359,15 +360,19 @@ public class TacoMain {
                 files.add(classToCheck);
             }
 
+            //BEGIN JAVA PARSING (one file at a time)
+            for (String fileName : files) {
+                ArrayList<String> aFile = new ArrayList<String>();
+                aFile.add(fileName);
+                String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
+                boolean compilationSuccess = JmlParser.getInstance().initialize(sourceRootDir, userDir /* Unused */, aFile);
 
-            String userDir = System.getProperty("user.dir") + System.getProperty("file.separator") + "bin";
-            boolean compilationSuccess = JmlParser.getInstance().initialize(sourceRootDir, userDir /* Unused */, files);
+                if (!compilationSuccess) {
+                    return null; //this means compilation failed;
+                }
 
-            if (!compilationSuccess){
-                return null; //this means compilation failed;
+                compilation_units.addAll(JmlParser.getInstance().getCompilationUnits());
             }
-
-            compilation_units = JmlParser.getInstance().getCompilationUnits();
             // END JAVA PARSING
 
             // BEGIN SIMPLIFICATION

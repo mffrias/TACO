@@ -1,0 +1,53 @@
+module M
+
+sig A {}
+sig B {}
+sig Array{}
+
+pred TruePred[]{}
+
+pred updateArrayPost[
+     Object_Array1: Array -> one (seq univ),
+     Object_Array0: Array -> one (seq univ),
+     array: Array,
+     index:Int,
+     elem:univ] { 
+
+  Object_Array1 = Object_Array0 ++ 
+                  (array->(array.Object_Array0++(index->elem))) 
+} 
+
+pred equ[l,r:univ] {
+ l=r
+}
+
+action updateArray[
+       Object_Array:Array -> one (seq univ), 
+       array:Array,
+       index:Int,
+       elem:univ]{
+
+  pre{TruePred[]}
+  post{updateArrayPost[Object_Array',
+                       Object_Array,
+                       array,
+                       index,
+                       elem]}
+}
+
+fun arrayAccess[Object_Array:Array->one(seq univ), array: Array, index: Int]: univ {
+  (array.Object_Array)[index]
+}
+
+program useArray[A_array:A->one Array, 
+                 a: A, 
+                 b:B, 
+                 Object_Array:Array-> one (seq univ)] {
+
+  updateArray[Object_Array,a.A_array,0,b];  
+  [equ[arrayAccess[Object_Array,a.A_array,0],b]]?
+}
+
+run useArray
+
+

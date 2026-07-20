@@ -1,0 +1,2 @@
+method remove | affected line: 21 | (PRVOU_REFINED, index, this.size)
+method remove | affected line: 32 | (AOIS, this.cacheSize, --this.cacheSize)

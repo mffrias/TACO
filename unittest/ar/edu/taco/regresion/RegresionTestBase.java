@@ -193,7 +193,7 @@ public class RegresionTestBase extends TestCase {
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 					str = "           Constructor<?>[] c = clazz.getDeclaredConstructors();";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-					str = "           Object instance = null;";
+					str = "           " + sourceClassName + " instance = null;";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 					str = "           	Class<?>[] parameterTypes = null;";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
@@ -269,7 +269,7 @@ public class RegresionTestBase extends TestCase {
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 					str = "             	System.out.println(dataCall);";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-					str = "           	    instance = co.newInstance(paramValues);";
+					str = "           	    instance = (" + sourceClassName + ")co.newInstance(paramValues);";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 					str = "           	} catch (InstantiationException e) {";
 					fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));

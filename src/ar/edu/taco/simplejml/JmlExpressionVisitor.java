@@ -1886,6 +1886,19 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 				} else {
 					if (inputToFix.get(s) != null && (inputToFix.get(s).getClass().getName().equals("java.lang.Integer") || inputToFix.get(s).getClass().getName().equals("int"))) {
 						processAlloyIntegerToFix((Integer) inputToFix.get(s), mapConcreteToExpre);
+					} else {
+						if ((inputToFix.get(s) == null) || !inputToFix.get(s).getClass().isPrimitive()) {
+							if (inputToFix.get(s) == null) {
+								if (s.equals("thiz")){
+									AlloyExpression exp = new ExprConstant("null", "null");
+									mapConcreteToExpre.put(null, exp);
+								}
+//										AlloyExpression exp = new ExprConstant("null", "null");
+//										mapConcreteToExpre.put(null, exp);
+							} else {
+								processObjectToFix((Object) inputToFix.get(s), mapConcreteToExpre);
+							}
+						}
 					}
 				}
 
@@ -2098,10 +2111,12 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 				alreadyVisited.add(dest);
 				if (dest != null && isNotNumericType(dest.getClass())) {
 					AlloyFormula theFormula = processObjectToFormula(dest, mapConcreteToExpre, mapConcreteToActualName, alreadyVisited);
-					if (af == null) {
-						af = theFormula;
-					} else {
-						af = new AndFormula(af, theFormula);
+					if (theFormula != null) {
+						if (af == null) {
+							af = theFormula;
+						} else {
+							af = new AndFormula(af, theFormula);
+						}
 					}
 				} else {
 					if (dest == null) {
@@ -2151,7 +2166,8 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	private void processAlloyIntegerToFix(Integer i, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
 		if (!mapConcreteToExpre.keySet().contains(i)) {
-			ExprConstant alloyInt = new ExprConstant("Int", i.toString());
+			ExprIntLiteral alloyInt = new ExprIntLiteral(i);
+//			ExprConstant alloyInt = new ExprConstant("Int", i.toString());
 			mapConcreteToExpre.put(i, alloyInt);
 		}
 	}
@@ -2209,8 +2225,13 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	private void processIntegerToFix(Integer i, HashMap<Object, AlloyExpression> mapConcreteToExpre) {
 		if (!mapConcreteToExpre.keySet().contains(i)) {
-			ExprConstant alloyInteger = new ExprConstant("JavaPrimitiveIntegerValue", JavaPrimitiveIntegerValue.getInstance().toJavaPrimitiveIntegerLiteral((Integer) i, false).getConstantId());
-			mapConcreteToExpre.put(i, alloyInteger);
+			if (TacoConfigurator.getInstance().getUseJavaArithmetic()) {
+				ExprConstant alloyInteger = new ExprConstant("JavaPrimitiveIntegerValue", JavaPrimitiveIntegerValue.getInstance().toJavaPrimitiveIntegerLiteral((Integer) i, false).getConstantId());
+				mapConcreteToExpre.put(i, alloyInteger);
+			} else {
+				ExprIntLiteral alloyInteger = new ExprIntLiteral(i);
+				mapConcreteToExpre.put(i, alloyInteger);
+			}
 		}
 	}
 

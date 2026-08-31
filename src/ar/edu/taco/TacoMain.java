@@ -776,7 +776,7 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           Constructor<?>[] c = clazz.getDeclaredConstructors();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           Object instance = null;";
+                    str = "           " + sourceClassName + " instance = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	Class<?>[] parameterTypes = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));

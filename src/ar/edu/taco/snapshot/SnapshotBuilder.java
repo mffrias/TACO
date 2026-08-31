@@ -68,7 +68,6 @@ public class SnapshotBuilder {
 	private static final String RESULT_VAR = "return";
 	final String RESULT_SNAPSHOT_KEY_Final = "return_1";
 	private static final String THIZ_SNAPSHOT_KEY = "thiz_0";
-	private static final String THIZ_SNAPSHOT_KEY_Final = "thiz_1";
 
 	private Object inputToFix = null;
 
@@ -319,7 +318,7 @@ public class SnapshotBuilder {
 			AlloyExpression thizExpression = prefixExprVariable(THIZ_VAR);
 			if (!isPruned(THIZ_VAR)) {
 				Object thizInstance = evaluate(thizExpression, clazzToCheck);
-				this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY_Final, thizInstance);
+				this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY, thizInstance);
 			}
 
 			// build static fields
@@ -344,7 +343,7 @@ public class SnapshotBuilder {
 			for (int i = 0; i < constructorToCheck.getParameterTypes().length; i++) {
 				Class<?> parameterType = constructorToCheck.getParameterTypes()[i];
 				String parameterName = this.recoveredInformation.getMethodParametersNames().get(i);
-				AlloyExpression parameterExpr = prefixExprVariableFinalState(parameterName);
+				AlloyExpression parameterExpr = prefixExprVariable(parameterName); //Notice that parameters are not evaluated in the final state because parameter passing in java is by value.
 				if (!isPruned(parameterName)) {
 					Object value = evaluate(parameterExpr, parameterType);
 					this.recoveredInformation.getSnapshot().put(parameterName + "_0", value);
@@ -362,10 +361,10 @@ public class SnapshotBuilder {
 			AlloyExpression thizExpression = null;
 			boolean isStaticMethod = isStatic(methodToCheck.getModifiers());
 			if (!isStaticMethod) {
-				thizExpression = prefixExprVariableFinalState(THIZ_VAR);
-				if (!isPruned(THIZ_VAR)) {
-					thizInstance = evaluate(thizExpression, clazzToCheck);
-					this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY_Final, thizInstance);
+				thizExpression = prefixExprVariableInFinalState(THIZ_VAR);
+				if (!isPrunedInFinalState(THIZ_VAR)) {
+					thizInstance = evaluateInFinalState(thizExpression, clazzToCheck);
+					this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY, thizInstance);
 				}
 			}
 
@@ -389,7 +388,7 @@ public class SnapshotBuilder {
 			if (!isStaticMethod) {
 				for (Field aField : obtainAllFields(thizInstance.getClass())) {
 					if (!isStatic(aField.getModifiers())) {
-						setFieldValueSupportFinalState(thizExpression, thizInstance, aField);
+						setFieldValueSupportInFinalState(thizExpression, thizInstance, aField);
 					}
 				}
 			}
@@ -398,12 +397,12 @@ public class SnapshotBuilder {
 			for (int i = 0; i < methodToCheck.getParameterTypes().length; i++) {
 				Class<?> parameterType = methodToCheck.getParameterTypes()[i];
 				String parameterName = this.recoveredInformation.getMethodParametersNames().get(i);
-				AlloyExpression parameterExpr = prefixExprVariableFinalState(parameterName);
+				AlloyExpression parameterExpr = prefixExprVariable(parameterName); //In the initial state due to value-passing parameters
 				Object value = null;
 				if (!isPruned(parameterName)) {
 					try {
 					 	value = evaluate(parameterExpr, parameterType);
-						this.recoveredInformation.getSnapshot().put(parameterName + "_1", value);
+						this.recoveredInformation.getSnapshot().put(parameterName + "_0", value);
 					} catch (Exception e){
 						parameterExpr = prefixExprVariable(parameterName);
 						value = evaluate(parameterExpr, parameterType);
@@ -417,7 +416,7 @@ public class SnapshotBuilder {
 			Class<?> returnClass = methodToCheck.getReturnType();
 			Object returnValue = null;
 			AlloyExpression returnExpression = null;
-			returnExpression = prefixExprVariableFinalState(RESULT_VAR);
+			returnExpression = prefixExprVariableInFinalState(RESULT_VAR);
 			try {
 				returnValue = evaluate(returnExpression, returnClass);
 				this.recoveredInformation.getSnapshot().put(RESULT_SNAPSHOT_KEY_Final, returnValue);
@@ -430,6 +429,114 @@ public class SnapshotBuilder {
 		}
 
 
+	}
+
+
+	private Object evaluateInFinalState(AlloyExpression expression, Class<?> clazz) {
+		Object evlResult = null;
+		try {
+			evlResult = alloyEvaluateSupport(expression);
+		} catch (Err e) {
+			throw new TacoException(e);
+		}
+
+		if (evlResult != null) {
+			String value = null;
+			if (evlResult instanceof Integer) {
+				return value;
+			}
+			if (evlResult instanceof Boolean) {
+				return value;
+			} else if (evlResult instanceof A4TupleSet) {
+				A4TupleSet result = (A4TupleSet) evlResult;
+				switch (result.arity()) {
+					case 1:
+						value = result.iterator().next().atom(0);
+						break;
+
+					case 2:
+						value = result.iterator().next().atom(1);
+						break;
+
+					default:
+						break;
+				}
+			} else {
+				throw new IllegalArgumentException();
+			}
+
+			Object returnValue;
+			// convert String to Type instance
+			if (clazz.isPrimitive() || isAutoboxingClass(clazz)) {
+				String typeSimpleName = clazz.getSimpleName();
+				if (typeSimpleName.equals("boolean") || typeSimpleName.equals("Boolean")) {
+
+					Boolean b;
+					if (value.equals("false$0")) {
+						b = false;
+					} else if (value.equals("true$0")) {
+						b = true;
+					} else if (value.startsWith("java_lang_Boolean$")) {
+						// DPD: I assume that specific boolean value isn't
+						// important
+						b = true;
+					} else {
+						throw new TacoException("Invalid value: " + value);
+					}
+					returnValue = b;
+				} else if (typeSimpleName.endsWith("byte") || typeSimpleName.endsWith("Byte")) {
+					Byte b = Byte.valueOf((String) value);
+					returnValue = b;
+				} else if (typeSimpleName.endsWith("char") || typeSimpleName.endsWith("Character")) {
+					Character c;
+					if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
+						c = create_character(expression);
+					} else {
+						c = Character.valueOf(((String) value).charAt(0));
+					}
+					returnValue = c;
+				} else if (typeSimpleName.endsWith("double") || typeSimpleName.endsWith("Double")) {
+					Double d = Double.valueOf((String) value);
+					returnValue = d;
+				} else if (typeSimpleName.endsWith("float") || typeSimpleName.endsWith("Float")) {
+					Float f;
+					if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
+						f = create_float(expression);
+					} else {
+						f = Float.valueOf((String) value);
+					}
+					returnValue = f;
+				} else if (typeSimpleName.endsWith("int") || typeSimpleName.endsWith("Integer")) {
+					Integer i;
+					if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
+						i = create_integer(expression);
+					} else {
+						i = Integer.valueOf((String) value);
+					}
+					returnValue = i;
+				} else if (typeSimpleName.endsWith("long") || typeSimpleName.endsWith("Long")) {
+					Long l;
+					if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
+						l = create_long(expression);
+					} else {
+						l = Long.valueOf((String) value);
+					}
+					returnValue = l;
+				} else if (typeSimpleName.endsWith("short") || typeSimpleName.endsWith("Short")) {
+					Short s = Short.valueOf((String) value);
+					returnValue = s;
+				} else {
+					throw new TacoNotImplementedYetException();
+				}
+			} else {
+				Class<?> instanceClass = inferTypeOfExpression(value);
+				returnValue = instantiate(value, expression, instanceClass);
+			}
+
+			return returnValue;
+		} else {
+			throw new TacoNotImplementedYetException();
+		}
 	}
 
 	private Field getField(@SuppressWarnings("rawtypes") Class clazz, String fieldName) {
@@ -638,9 +745,22 @@ public class SnapshotBuilder {
 	}
 
 
-	private AlloyExpression prefixExprVariableFinalState(String variable) {
+	private AlloyExpression prefixExprVariableInFinalState(String variable) {
 		AlloyExpression prefixExpression = ExprConstant.buildExprConstant("QF");
-		AlloyExpression exprVariable = new ExprVariable(new AlloyVariable(variable + "_1"));
+		boolean wasDeprecated = false;
+		Object evlResult = null;
+		AlloyExpression exprVariable = null;
+		try {
+			exprVariable = new ExprVariable(new AlloyVariable(variable + "_1"));
+			evlResult = alloyEvaluateSupport(exprVariable);
+		} catch (Err e) {
+			wasDeprecated = true;
+		}
+
+
+		if (wasDeprecated){
+			exprVariable = new ExprVariable(new AlloyVariable(variable + "_0"));
+		}
 
 		if (TacoConfigurator.getInstance().getRemoveQuantifiers()){
 			return new ExprJoin(prefixExpression, exprVariable);
@@ -834,7 +954,7 @@ public class SnapshotBuilder {
 				for (Field aField : obtainAllFields(clazz)) {
 
 					if (!isStatic(aField.getModifiers())) {
-						setFieldValueSupportFinalState(instanceExpr, instance, aField);
+						setFieldValueSupportInFinalState(instanceExpr, instance, aField);
 					}
 				}
 
@@ -1132,19 +1252,21 @@ public class SnapshotBuilder {
 	}
 
 
-	private Object setFieldValueSupportFinalState(AlloyExpression expression, Object instance, Field aField) {
+
+
+	private Object setFieldValueSupportInFinalState(AlloyExpression expression, Object instance, Field aField) {
 		String fieldSimplifiedName = simplifyFieldName(aField);
 		// skip pruned fields
 
 		if (!isSBPPruned(fieldSimplifiedName)) {
 			AlloyExpression fieldExpression;
 			if (isStatic(aField.getModifiers())) {
-				fieldExpression = prefixStaticField(fieldSimplifiedName);
+				fieldExpression = prefixStaticFieldInFinalState(fieldSimplifiedName);
 			} else {
 				if (isSBPField(fieldSimplifiedName)) {
-					fieldExpression = prefixSBPField(expression, fieldSimplifiedName);
+					fieldExpression = prefixSBPFieldInFinalState(expression, fieldSimplifiedName);
 				} else {
-					fieldExpression = prefixFieldFinalState(expression, fieldSimplifiedName);
+					fieldExpression = prefixFieldInFinalState(expression, fieldSimplifiedName);
 				}
 			}
 
@@ -1152,19 +1274,21 @@ public class SnapshotBuilder {
 			log.debug("field: " + aField.getName());
 			log.debug("type: " + aField.getType().getName());
 
-			Object fieldValue = null;
-			try {
-				fieldValue = evaluate(fieldExpression, aField.getType());
-			} catch (Exception e){
-				fieldExpression = prefixField(expression, fieldSimplifiedName);
-				fieldValue = evaluate(fieldExpression, aField.getType());
-			}
+			Object fieldValue = evaluateInFinalState(fieldExpression, aField.getType());
+
 			log.debug("instance: " + instance);
 			Object returnValue = updateValue(instance, aField, fieldValue);
 			return returnValue;
 		}
 		return null;
 	}
+
+	private AlloyExpression prefixStaticFieldInFinalState(String field) {
+		AlloyExpression fieldExpression = prefixExprVariable(field);
+
+		return new ExprJoin(JExpressionFactory.CLASS_FIELDS, fieldExpression);
+	}
+
 
 	private boolean isSBPField(String fieldSimplifiedName) {
 		return (isPruned(fieldSimplifiedName)) && (!isPruned("b" + fieldSimplifiedName) || !isPruned("f" + fieldSimplifiedName)); 
@@ -1195,13 +1319,20 @@ public class SnapshotBuilder {
 		return new ExprJoin(prefixExpression, complete_field);
 	}
 
+	private AlloyExpression prefixSBPFieldInFinalState(AlloyExpression prefixExpression, String fieldSimplifiedName) {
+		AlloyExpression backwardFieldExpression = prefixExprVariable("b" + fieldSimplifiedName);
+		AlloyExpression forwardFieldExpression = prefixExprVariable("f" + fieldSimplifiedName);
+		AlloyExpression complete_field = ExprUnion.buildExprUnion(backwardFieldExpression, forwardFieldExpression);
+		return new ExprJoin(prefixExpression, complete_field);
+	}
+
 	private AlloyExpression prefixField(AlloyExpression prefixExpression, String fieldSimplifiedName) {
 		AlloyExpression fieldExpression = prefixExprVariable(fieldSimplifiedName);
 		return new ExprJoin(prefixExpression, fieldExpression);
 	}
 
-	private AlloyExpression prefixFieldFinalState(AlloyExpression prefixExpression, String fieldSimplifiedName) {
-		AlloyExpression fieldExpression = prefixExprVariableFinalState(fieldSimplifiedName);
+	private AlloyExpression prefixFieldInFinalState(AlloyExpression prefixExpression, String fieldSimplifiedName) {
+		AlloyExpression fieldExpression = prefixExprVariableInFinalState(fieldSimplifiedName);
 		return new ExprJoin(prefixExpression, fieldExpression);
 	}
 
@@ -1352,6 +1483,18 @@ public class SnapshotBuilder {
 		Object evlResult = null;
 		try {
 			AlloyExpression fieldExpr = prefixExprVariable(fieldName);
+			evlResult = alloyEvaluateSupport(fieldExpr);
+		} catch (Err e) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isPrunedInFinalState(String fieldName) {
+		@SuppressWarnings("unused")
+		Object evlResult = null;
+		try {
+			AlloyExpression fieldExpr = prefixExprVariableInFinalState(fieldName);
 			evlResult = alloyEvaluateSupport(fieldExpr);
 		} catch (Err e) {
 			return true;
@@ -1546,8 +1689,8 @@ public class SnapshotBuilder {
 	private Object evaluateFinalState(AlloyExpression expression, Class<?> clazz) {
 		Object evlResult = null;
 		try {
-			evlResult = alloyEvaluateSupport(expression);
-		} catch (Err e) {
+			evlResult = alloyEvaluateSupportInFinalState(expression);
+		} catch (Exception e) {
 			throw new TacoException(e);
 		}
 
@@ -1648,6 +1791,27 @@ public class SnapshotBuilder {
 		} else {
 			throw new TacoNotImplementedYetException();
 		}
+	}
+
+	private Object alloyEvaluateSupportInFinalState(AlloyExpression expression) {
+		Object evlResult = null;
+
+		ExpressionPrinter expressionPrinter = new ExpressionPrinter();
+
+		String expressionStr = (String) expression.accept(expressionPrinter);
+
+		A4Solution a4Solution = tacoAnalysisResult.get_alloy_analysis_result().getAlloy_solution();
+
+		Expr expr = null;
+
+		try {
+			expr = CompUtil.parseOneExpression_fromString(tacoAnalysisResult.get_alloy_analysis_result().getWorld(), expressionStr);
+			evlResult = a4Solution.eval(expr);
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+
+		return evlResult;
 	}
 
 

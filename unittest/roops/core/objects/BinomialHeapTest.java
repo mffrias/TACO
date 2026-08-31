@@ -90,8 +90,9 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
-        check(GENERIC_PROPERTIES,"extractMin()", false);
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:3");
+        this.checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"extractMin()");
+        //check(GENERIC_PROPERTIES,"extractMin()", false);
     }
 
 

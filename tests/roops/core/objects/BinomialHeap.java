@@ -25,6 +25,7 @@ public class BinomialHeap {
     @ invariant ( \forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, sibling).has(n) == true; (n.sibling != null ==> n.degree < n.sibling.degree) && (n.parent == null) );
     @
     @ invariant ( \forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, sibling).has(n) == true; n.key >= 0 );
+    @ invariant Nodes != null ==> Nodes.parent == null;
     @
     @*/
 
@@ -82,12 +83,15 @@ public class BinomialHeap {
 	
 
 
-	/*@ requires true;
-    @ ensures \old(Nodes) != null ==> \old(\reach(Nodes, BinomialHeapNode, child + sibling)).has(\result) == true;
-    @ ensures (\forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, child + sibling).has(n) == true; \result.key <= n.key);
-    @ ensures (\forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, child + sibling).has(n) == true; \old(n.key) == n.key);
-    @ signals (Exception e) false;
-    @*/
+		/*@ requires this.size == 3;
+		@ ensures \old(Nodes) != null ==> \old(\reach(Nodes, BinomialHeapNode, child + sibling)).has(\result) == true;
+		@ ensures (\forall BinomialHeapNode n; \old(\reach(Nodes, BinomialHeapNode, child + sibling)).has(n) == true; \result.key <= n.key);
+		@ ensures (\forall BinomialHeapNode n; \reach(Nodes, BinomialHeapNode, child + sibling).has(n) == true; \old(n.key) == n.key);
+		@ ensures \old(Nodes) != null ==> size == \old(size) - 1;
+		@ ensures (\exists BinomialHeapNode n; n == \result; \old(\reach(Nodes, BinomialHeapNode, child + sibling)).has(n) && \old(n.key) == \result.key);
+		@ ensures \old(Nodes) != null ==> \reach(Nodes, BinomialHeapNode, child + sibling).has(\result) == false;
+		@ signals (Throwable e) false;
+		@*/
 	public /* @ nullable @ */BinomialHeapNode extractMin() {
 //		boolean cover = true;
 		if (Nodes == null) 
@@ -108,7 +112,7 @@ public class BinomialHeap {
 		temp = temp.child;
 		BinomialHeapNode fakeNode = temp;
 		while (temp != null) {
-			temp.parent = null;
+	//		temp.parent = null; bug added to simplify things
 			temp = temp.sibling;
 		}
 

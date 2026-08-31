@@ -1,26 +1,17 @@
 package llm.iter0;
 public class GenericFunc {
 
-    public float att;
-    public /*@ nullable @*/ GenericFunc next;
 
     public GenericFunc(){}
 
-    public /*@pure@*/ boolean isTrue(float f){
-        return true;
-    }
 
-    public /*@pure@*/ boolean isFalse(float f){
-        return false;
-    }
+    //@   requires num1 == 1;
+    //@   ensures \result == (num1 + num2) / 3;
+    //@   signals (Throwable e) false;
+    public int func(int num1, int num2, GenericFunc g) {
 
-    //@   requires (\forall GenericFunc x; x.next == null; !Float.isNaN(x.att)) && \reach(this.next, GenericFunc, next).int_size() == 0;
-    //@   ensures this.isFalse(num1) == true;
-    //@   signals (Exception e) false;
-    public float func(float num1, float num2) {
+        return (num1 + num2) / 2;
 
-        return 0.0f;
-        // (num1 + num2) / 3.0f;
 
     }
 

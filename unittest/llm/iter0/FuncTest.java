@@ -32,9 +32,9 @@ public class FuncTest extends CollectionTestBase {
 		setConfigKeyRemoveQuantifiers(true);
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
-		setConfigKeyTypeScopes("llm.iter0.GenericFunc:3");
-//		check(GENERIC_PROPERTIES,"func(float, float)",true);
-		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"func(float, float)");
-//		iterativeCheckWithLLM(GENERIC_PROPERTIES,"func(float, float)");
+		setConfigKeyTypeScopes("llm.iter0.GenericFunc:1");
+//		check(GENERIC_PROPERTIES,"func(int, int, llm.iter0.GenericFunc)",true);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"func(int, int, llm.iter0.GenericFunc)");
+//		iterativeCheckWithLLM(GENERIC_PROPERTIES,"func(float, float, llm.iter0.GenericFunc)");
 	}
 }

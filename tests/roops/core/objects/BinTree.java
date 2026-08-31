@@ -1,7 +1,5 @@
 package roops.core.objects;
 
-import roops.core.objects.BinTreeNode;
-
 public class BinTree {
 
 

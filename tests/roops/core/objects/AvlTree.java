@@ -59,7 +59,7 @@ public class AvlTree {
 		AvlNode n = root;
 		while (n != null) {
 			if (x < n.element) {
-				n = n.left;
+				n = n.right;//
 			} else {
 				if (x > n.element) {
 					n = n.right;

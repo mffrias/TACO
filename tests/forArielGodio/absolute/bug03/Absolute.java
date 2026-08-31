@@ -12,13 +12,11 @@ public class Absolute {
 //			return (short)-num;	
 //	}
 
-	/*@    requires 0 <= num && num <= Integer.MAX_VALUE;
-	  @    ensures \result == num;
-	  @ also
-	  @    requires Integer.MIN_VALUE < num && num < 0;
-	  @    ensures \result == -num; @*/
+	/*@    requires num != Integer.MIN_VALUE;
+	  @    ensures \result >=0;
+	  @*/
 	public /*@ pure @*/ int absoluteInt(int num) {
-		if (0 > num)//if (0 <= num)
+		if (0 <= num)
 			return num;
 		else
 			return -num;
@@ -35,4 +33,11 @@ public class Absolute {
 		else
 			return -num;	
 	}
+
+//	public static void main(String[] args){
+//		Absolute a = new Absolute();
+//		int i = 2147483647 + 1;
+//		System.out.println(a.absoluteInt(i));
+//	}
+
 }

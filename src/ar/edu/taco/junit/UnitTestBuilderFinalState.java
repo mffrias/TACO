@@ -249,7 +249,7 @@ public class UnitTestBuilderFinalState {
 
                 } else {
                     Class<?> returnClass = returnValue.getClass();
-                    String returnClassName = returnClass.toString();
+                    String returnClassName = returnClass.getName();
 
                     //We need to create a new instance that has the same attributes as returnValue
                     Constructor<?>[] cons = returnClass.getConstructors();
@@ -285,7 +285,7 @@ public class UnitTestBuilderFinalState {
                     }
 
                     //we now build the actual string to add in the JUnit file Type return = new Type(default param values);
-                    String instanceCreation = returnClassName + " return = new " + returnClassName + "(";
+                    String instanceCreation = returnClassName + " result = new " + returnClassName + "(";
                     if (concretePars != null) {
                         for (int parindex = 0; parindex < concretePars.length; parindex++) {
                             if (parTypes[parindex].isPrimitive() || this.isAutoboxingClass(parTypes[parindex])) {

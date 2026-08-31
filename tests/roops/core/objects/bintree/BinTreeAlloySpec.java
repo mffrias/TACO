@@ -21,23 +21,25 @@ package roops.core.objects.bintree;
 
 /**
  * 
- * @Invariant all n : BinTreeNode | n in this.root.*(left @+ right ) => ( 
+ * @Invariant all n : BinTreeNode | n in this.root.*(left @+ right ) => (
  *            ( n !in n.^(left @+ right) ) && 
- *            ( all m: BinTreeNode | m in n.left.*(left @+right) => m.key < n.key ) && 
- *            ( all m: BinTreeNode | m in n.right.*(left @+right) => n.key < m.key ) && 
+ *            ( all m: BinTreeNode | m in n.left.*(left @+right) => m.key < n.key ) &&
+ *            ( all m: BinTreeNode | m in n.right.*(left @+right) => n.key < m.key ) &&
  *            ( n.left!=null => n.left.parent=n ) &&
  *            ( n.right!=null=> n.right.parent=n ) && 
  *            ( n=this.root => n.parent=null ) ) ;
  * 
  */
-public class BinTree {
+public class BinTreeAlloySpec {
+
+	private /*@ nullable @*/ BinTreeNode root;
 
 	/**
 	 * @Modifies_Everything;
 	 * 
 	 * @Ensures false;
 	 */
-	static public void addTest(/*@ nullable @*/ BinTree tree, int x) {
+	static public void addTest(/*@ nullable @*/ BinTreeAlloySpec tree, int x) {
 		if (tree!=null) {
 		  tree.add(x);
 		}
@@ -48,7 +50,7 @@ public class BinTree {
 	 * 
 	 * @Ensures false;
 	 */
-	static public void findTest(/*@ nullable @*/ BinTree tree, int x) {
+	static public void findTest(/*@ nullable @*/ BinTreeAlloySpec tree, int x) {
 		boolean ret_val;
 		if (tree!=null) {
 		  ret_val = tree.find(x);
@@ -60,7 +62,7 @@ public class BinTree {
 	 * 
 	 * @Ensures false;
 	 */
-	static public void removeTest(/*@ nullable @*/ BinTree tree, /*@ nullable @*/ BinTreeNode z) {
+	static public void removeTest(/*@ nullable @*/ BinTreeAlloySpec tree, /*@ nullable @*/ BinTreeNode z) {
 		BinTreeNode ret_val;
 		if (tree!=null && z!=null) {
 		  ret_val = tree.remove(z);
@@ -68,7 +70,6 @@ public class BinTree {
 	}	
 
 	
-	private /*@ nullable @*/ BinTreeNode root;
 
 
 	public void add(int x) {

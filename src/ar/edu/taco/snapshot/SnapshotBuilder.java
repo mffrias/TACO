@@ -68,6 +68,8 @@ public class SnapshotBuilder {
 	private static final String RESULT_VAR = "return";
 	final String RESULT_SNAPSHOT_KEY_Final = "return_1";
 	private static final String THIZ_SNAPSHOT_KEY = "thiz_0";
+	private static final String THIZ_SNAPSHOT_KEY_FINAL_STATE = "thiz_1";
+
 
 	private Object inputToFix = null;
 
@@ -318,7 +320,7 @@ public class SnapshotBuilder {
 			AlloyExpression thizExpression = prefixExprVariable(THIZ_VAR);
 			if (!isPruned(THIZ_VAR)) {
 				Object thizInstance = evaluate(thizExpression, clazzToCheck);
-				this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY, thizInstance);
+				this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY_FINAL_STATE, thizInstance);
 			}
 
 			// build static fields
@@ -326,7 +328,7 @@ public class SnapshotBuilder {
 				try {
 					Class<?> clazz = Class.forName(staticFieldInfo.getClassName(), true, loader);
 					Field field = getField(clazz, staticFieldInfo.getFieldName());
-					Object fieldValue = setFieldValueSupport(null, null, field);
+					Object fieldValue = setFieldValueSupportInFinalState(null, null, field);
 					if (fieldValue != null) {
 						setStaticFieldvalue(staticFieldInfo.getClassName(), staticFieldInfo.getFieldName(), fieldValue);
 					}
@@ -364,7 +366,7 @@ public class SnapshotBuilder {
 				thizExpression = prefixExprVariableInFinalState(THIZ_VAR);
 				if (!isPrunedInFinalState(THIZ_VAR)) {
 					thizInstance = evaluateInFinalState(thizExpression, clazzToCheck);
-					this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY, thizInstance);
+					this.recoveredInformation.getSnapshot().put(THIZ_SNAPSHOT_KEY_FINAL_STATE, thizInstance);
 				}
 			}
 
@@ -530,7 +532,7 @@ public class SnapshotBuilder {
 				}
 			} else {
 				Class<?> instanceClass = inferTypeOfExpression(value);
-				returnValue = instantiate(value, expression, instanceClass);
+				returnValue = instantiateFinalState(value, expression, instanceClass);
 			}
 
 			return returnValue;
@@ -538,6 +540,8 @@ public class SnapshotBuilder {
 			throw new TacoNotImplementedYetException();
 		}
 	}
+
+
 
 	private Field getField(@SuppressWarnings("rawtypes") Class clazz, String fieldName) {
 		Set<Field> set = collectAllFieldSet(clazz);
@@ -563,6 +567,15 @@ public class SnapshotBuilder {
 		// this.snapshot.put(className + "|" + fieldName, fieldValue);
 	}
 
+	private void setStaticFieldvalueInFinalState(String className, String fieldName, Object fieldValue) {
+		Map<String, Object> secondLevelMap = this.recoveredInformation.getStaticFieldsValues().get(className);
+		if (secondLevelMap == null) {
+			secondLevelMap = new HashMap<String, Object>();
+			this.recoveredInformation.getStaticFieldsValues().put(className, secondLevelMap);
+		}
+		secondLevelMap.put(fieldName, fieldValue);
+		// this.snapshot.put(className + "|" + fieldName, fieldValue);
+	}
 
 
 
@@ -1263,11 +1276,12 @@ public class SnapshotBuilder {
 			if (isStatic(aField.getModifiers())) {
 				fieldExpression = prefixStaticFieldInFinalState(fieldSimplifiedName);
 			} else {
-				if (isSBPField(fieldSimplifiedName)) {
-					fieldExpression = prefixSBPFieldInFinalState(expression, fieldSimplifiedName);
-				} else {
-					fieldExpression = prefixFieldInFinalState(expression, fieldSimplifiedName);
-				}
+//				if (isSBPField(fieldSimplifiedName)) {
+//					fieldExpression = prefixSBPFieldInFinalState(expression, fieldSimplifiedName);
+//				} else {
+//					fieldExpression = prefixFieldInFinalState(expression, fieldSimplifiedName);
+//				}
+				fieldExpression = prefixFieldInFinalState(expression, fieldSimplifiedName);
 			}
 
 			log.debug("expression: " + expression);
@@ -1319,12 +1333,12 @@ public class SnapshotBuilder {
 		return new ExprJoin(prefixExpression, complete_field);
 	}
 
-	private AlloyExpression prefixSBPFieldInFinalState(AlloyExpression prefixExpression, String fieldSimplifiedName) {
-		AlloyExpression backwardFieldExpression = prefixExprVariable("b" + fieldSimplifiedName);
-		AlloyExpression forwardFieldExpression = prefixExprVariable("f" + fieldSimplifiedName);
-		AlloyExpression complete_field = ExprUnion.buildExprUnion(backwardFieldExpression, forwardFieldExpression);
-		return new ExprJoin(prefixExpression, complete_field);
-	}
+//	private AlloyExpression prefixSBPFieldInFinalState(AlloyExpression prefixExpression, String fieldSimplifiedName) {
+//		AlloyExpression backwardFieldExpression = prefixExprVariableInFinalState("b" + fieldSimplifiedName);
+//		AlloyExpression forwardFieldExpression = prefixExprVariableInFinalState("f" + fieldSimplifiedName);
+//		AlloyExpression complete_field = ExprUnion.buildExprUnion(backwardFieldExpression, forwardFieldExpression);
+//		return new ExprJoin(prefixExpression, complete_field);
+//	}
 
 	private AlloyExpression prefixField(AlloyExpression prefixExpression, String fieldSimplifiedName) {
 		AlloyExpression fieldExpression = prefixExprVariable(fieldSimplifiedName);

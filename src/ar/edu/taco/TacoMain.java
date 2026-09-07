@@ -535,16 +535,25 @@ public class TacoMain {
             } else if (inputToFix != null) {
                 System.out.println("JUnit spec output generation: started");
                 try {
-                    SnapshotStage snapshotStage = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
-                    snapshotStage.setInputToFix(inputToFix);
-                    snapshotStage.execute();
-                    RecoveredInformation recoveredInformation = snapshotStage.getRecoveredInformation();
 
-                    recoveredInformation.setFileNameSuffix(StrykerStage.fileSuffix);
-                    JUnitStageFinalState jUnitStage = new JUnitStageFinalState(recoveredInformation);
+                    SnapshotStage snapshotStageIni = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
+                    snapshotStageIni.setInputToFix(null);
+                    snapshotStageIni.execute();
+                    RecoveredInformation recoveredInformationIni = snapshotStageIni.getRecoveredInformation();
+                    recoveredInformationIni.setFileNameSuffix(StrykerStage.fileSuffix);
+                    JUnitStage jUnitStage = new JUnitStage(recoveredInformationIni);
                     jUnitStage.execute();
                     junitFile = jUnitStage.getJunitFileName();
+                    outputJunitFile = junitFile;
 
+                    SnapshotStage snapshotStageFin = new SnapshotStage(compilation_units, tacoAnalysisResult, classToCheck, methodToCheck);
+                    snapshotStageFin.setInputToFix(inputToFix);
+                    snapshotStageFin.execute();
+                    RecoveredInformation recoveredInformationFin = snapshotStageFin.getRecoveredInformation();
+                    recoveredInformationFin.setFileNameSuffix(StrykerStage.fileSuffix);
+                    JUnitStageFinalState jUnitStageFinalState = new JUnitStageFinalState(recoveredInformationFin);
+                    jUnitStageFinalState.execute();
+                    junitFile = jUnitStageFinalState.getJunitFileName();
                     outputJunitFile = junitFile;
 
                     if (tacoAnalysisResult.get_alloy_analysis_result().isSAT())

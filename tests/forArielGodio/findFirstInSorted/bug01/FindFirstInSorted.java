@@ -6,7 +6,6 @@ public class FindFirstInSorted {
 	//@ ensures 0 <= \result && \result < arr.length ==> arr[\result] == x && (\forall int i; 0 <= i && i < \result; arr[i] != x);
 	//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != x);
 	//@ signals (Exception e) false;
-	//@ signals (AssertionError) true;
 	public static int findfirstinsorted(int[] arr, int x) {
 		int lo = 0;
 		int hi = arr.length;

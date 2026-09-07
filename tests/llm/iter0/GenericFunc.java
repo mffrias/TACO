@@ -1,7 +1,7 @@
 package llm.iter0;
 public class GenericFunc {
 
-
+    int field;
     public GenericFunc(){}
 
 
@@ -9,10 +9,7 @@ public class GenericFunc {
     //@   ensures \result == (num1 + num2) / 3;
     //@   signals (Throwable e) false;
     public int func(int num1, int num2, GenericFunc g) {
-
         return (num1 + num2) / 2;
-
-
     }
 
     //@ requires num1 > 0;

@@ -43,7 +43,7 @@ public class JUnitStageFinalState implements ITacoStage {
      * @see ar.edu.taco.engine.ITacoStage#execute()
      */
     @Override
-    public void execute() throws TacoException {
+    public void  execute() throws TacoException {
         try {
 //			RecoveredInformation recoveredInformation = new RecoveredInformation();
 //			recoveredInformation.setClassToCheck(classToCheck);
@@ -74,10 +74,15 @@ public class JUnitStageFinalState implements ITacoStage {
 
                 } else {
                     log.info("****** Generating Junit test with counterexample ******");
-                    UnitTestBuilderFinalState unitTestBuilder = new UnitTestBuilderFinalState (recoveredInformation/*, this.tacoAnalysisResult*/);
-                    unitTestBuilder.deleteFile(unitTestBuilder.getOutputClassName());
-                    unitTestBuilder.createUnitTest();
-                    junitFile = unitTestBuilder.getOutputClassFilename();
+//                    UnitTestBuilder unitTestBuilder = new UnitTestBuilder(recoveredInformation);
+//                    unitTestBuilder.deleteFile(unitTestBuilder.getOutputClassName());
+//                    unitTestBuilder.createUnitTest();
+//                    unitTestBuilder.increaseSuffix();
+
+                    UnitTestBuilderFinalState unitTestBuilderFinalState = new UnitTestBuilderFinalState (recoveredInformation/*, this.tacoAnalysisResult*/);
+                    unitTestBuilderFinalState.deleteFile(unitTestBuilderFinalState.getOutputClassName());
+                    unitTestBuilderFinalState.createUnitTest();
+                    junitFile = unitTestBuilderFinalState .getOutputClassFilename();
                 }
 
 

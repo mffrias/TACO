@@ -1874,4 +1874,7 @@ public class UnitTestBuilder {
     }
 
 
+    public void increaseSuffix() {
+        this.recoveredInformation.setFileNameSuffix(this.recoveredInformation.getFileNameSuffix() + 1);
+    }
 }

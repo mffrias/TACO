@@ -98,8 +98,8 @@ public class UnitTestBuilderFinalState {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("DYNJALLOY ERROR! " + e.getMessage());
         }
-        List<String> objectDefinitionStatements = new ArrayList<String>();
-        List<String> objectInitializationStatements = new ArrayList<String>();
+        List<String> objectDefinitionStatementsFinalState = new ArrayList<String>();
+        List<String> objectInitializationStatementsFinalState = new ArrayList<String>();
         imports = new HashSet<String>();
         imports.add("org.junit.Test");
         imports.add("java.lang.reflect.Field");
@@ -197,14 +197,14 @@ public class UnitTestBuilderFinalState {
                     }
                 }
                 instanceCreation += ");";
-                objectDefinitionStatements.add(instanceCreation);
+                objectDefinitionStatementsFinalState.add(instanceCreation);
 
                 // relate the Object got from Thiz_0 to the variable instance;
                 this.createdInstances.put(System.identityHashCode(thizInstance), "instance");
 
                 // Fields initialization
                 if (thizInstance != null) {
-                    getFieldsInitializationStatements(clazz, thizInstance/*, "instance"*/, objectDefinitionStatements, objectInitializationStatements);
+                    getFieldsInitializationStatements(clazz, thizInstance/*, "instance"*/, objectDefinitionStatementsFinalState, objectInitializationStatementsFinalState);
                     //          objectDefinitionStatements.addAll(fieldsInitializationStatements);
                 }
 
@@ -213,18 +213,18 @@ public class UnitTestBuilderFinalState {
                 //      objectDefinitionStatements.addAll(staticFieldsInitializationStatements);
             } else { //it is a static method
                 String instanceCreation = recoveredInformation.getClassToCheck() + " instance = null;";
-                objectDefinitionStatements.add(instanceCreation);
+                objectDefinitionStatementsFinalState.add(instanceCreation);
                 this.createdInstances.put(System.identityHashCode(null), "instance");
             }
         } else { //it is a constructor
             assert (constructorToCheck != null);
             String instanceCreation = recoveredInformation.getClassToCheck() + " instance = null;";
-            objectDefinitionStatements.add(instanceCreation);
+            objectDefinitionStatementsFinalState.add(instanceCreation);
             this.createdInstances.put(System.identityHashCode(null), "instance");
         }
 
         // Parameters Initialization
-        List<String> paramsNames = getParametersInitializationStatements(clazz, objectDefinitionStatements, objectInitializationStatements);
+        List<String> paramsNames = getParametersInitializationStatements(clazz, objectDefinitionStatementsFinalState, objectInitializationStatementsFinalState);
 
         //Return Initialization
         if (methodToCheck != null) { //it is not a constructor and therefore we need to generate the return value (if any)
@@ -245,7 +245,7 @@ public class UnitTestBuilderFinalState {
                     if (returnValue.getClass().getSimpleName().equals("Boolean"))
                         returnCreation += "boolean result = " + returnValue  + ";";
 
-                    objectDefinitionStatements.add(returnCreation);
+                    objectDefinitionStatementsFinalState.add(returnCreation);
 
                 } else {
                     Class<?> returnClass = returnValue.getClass();
@@ -303,7 +303,7 @@ public class UnitTestBuilderFinalState {
                         }
                     }
                     instanceCreation += ");";
-                    objectDefinitionStatements.add(instanceCreation);
+                    objectDefinitionStatementsFinalState.add(instanceCreation);
 
                     //We now set the values of the attributes
 
@@ -312,7 +312,7 @@ public class UnitTestBuilderFinalState {
 
                     // Fields initialization
                     if (returnValue != null) {
-                        getFieldsInitializationStatements(returnClass, returnValue/*, "instance"*/, objectDefinitionStatements, objectInitializationStatements);
+                        getFieldsInitializationStatements(returnClass, returnValue/*, "instance"*/, objectDefinitionStatementsFinalState, objectInitializationStatementsFinalState);
                         //          objectDefinitionStatements.addAll(fieldsInitializationStatements);
                     }
 
@@ -387,19 +387,19 @@ public class UnitTestBuilderFinalState {
         }
 
         // Method invocation
-        objectDefinitionStatements.addAll(objectInitializationStatements);
+        objectDefinitionStatementsFinalState.addAll(objectInitializationStatementsFinalState);
         List<String> methodInvocationStatements = new ArrayList<String>();
         if (methodToCheck != null) {
             methodInvocationStatements = getMethodInvocationStatements(clazz, methodToCheck, paramsNames);
-            objectDefinitionStatements.addAll(methodInvocationStatements);
+            objectDefinitionStatementsFinalState.addAll(methodInvocationStatements);
         }
 
         // Write JUnit to File
         String outputClassName = className + "_" + methodName + "_" + suffix;
         if (methodToCheck != null)
-            writeToFile(outputClassName, methodName, imports, objectDefinitionStatements, methodToCheck.isAccessible());
+            writeToFile(outputClassName, methodName, imports, objectDefinitionStatementsFinalState, methodToCheck.isAccessible());
         else
-            writeToFile(outputClassName, methodName, imports, objectDefinitionStatements, constructorToCheck.isAccessible());
+            writeToFile(outputClassName, methodName, imports, objectDefinitionStatementsFinalState, constructorToCheck.isAccessible());
         StrykerStage.fileSuffix++;
         log.info("****** JUnit generation finished. Produced JUnit: '" + PACKAGE_NAME + "." + outputClassName + "' on 'generated' source folder ******");
     }

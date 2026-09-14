@@ -10,12 +10,11 @@ public class GenericFunc {
 //        return ff[i];
 //    }
 
-    //@ requires ff != null && ff.length == 3;
-    //@ requires ff[0] != null && ff[1] != null && ff[2] != null;
-    //@ ensures \result == null;
+    //@ requires true;
+    //@ ensures \result != null;
 
-    public Object check(int i){
-        return ff[0];
+    public static Object check(int i){
+        return null;
     }
 
 

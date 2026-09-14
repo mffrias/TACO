@@ -107,7 +107,9 @@ public class MethodDeclarationSolver {
 		int argumentsLength = methodDeclaration.parameters().length + varsResultOfArithmeticOperationsInRequiresAndEnsures.varSet().size()
 				+ varsResultOfArithmeticOperationsInObjectInvariants.varSet().size();
 
-		ArgEncoder call = new ArgEncoder(methodDeclaration.isStatic(), methodDeclaration.isConstructor(), !isVoidType(methodDeclaration.returnType()),
+		//Here the first parameter "methodDeclaration.isStatic()" indicated if the method was static. In general I will treat all methods as non static. The parser prevents static
+		//methods from using the receiver object or object attributes.
+		ArgEncoder call = new ArgEncoder(false, methodDeclaration.isConstructor(), !isVoidType(methodDeclaration.returnType()),
 				argumentsLength);
 
 		JVariableDeclaration leftDeclaration = new JVariableDeclaration(JExpressionFactory.THIS_VARIABLE, buffer.getThisType());

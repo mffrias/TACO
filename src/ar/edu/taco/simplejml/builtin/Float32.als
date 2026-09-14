@@ -57,16 +57,20 @@ pred pred_java_primitive_float_value_integrity_check[] {
 
 
 pred pred_java_primitive_float_value_eq[f1, f2 : JavaPrimitiveFloatValue]{ --This predicate models ==
-	(isNormalized[f1] and isNormalized[f2] and sameBits[f1,f2])
+	((isNormalized[f1] and isNormalized[f2] and sameBits[f1,f2])
 	or
 	(pred_java_primitive_float_value_is_infinite[f1] and pred_java_primitive_float_value_is_infinite[f2] and f1.b31 = f2.b31)
 	or 
 	isZero[f1] and isZero[f2]
+	) and
+	(!pred_java_primitive_float_value_is_NaN[f1])
+	and
+	(!pred_java_primitive_float_value_is_NaN[f2])
 }
 
 
 pred pred_java_primitive_float_value_neq[f1, f2 : JavaPrimitiveFloatValue]{ --This predicate models !=
-	(isNormalized[f1] and isNormalized[f2] and !sameBits[f1,f2])
+	((isNormalized[f1] and isNormalized[f2] and !sameBits[f1,f2])
 	or
 	(isNormalized[f1] and isZero[f2])
 	or 
@@ -81,10 +85,10 @@ pred pred_java_primitive_float_value_neq[f1, f2 : JavaPrimitiveFloatValue]{ --Th
 	(pred_java_primitive_float_value_is_infinite[f1] and isZero[f2])
 	or
 	(pred_java_primitive_float_value_is_infinite[f1] and pred_java_primitive_float_value_is_infinite[f2] and f1.b31!=f2.b31)
-	or	
-	pred_java_primitive_float_value_is_NaN[f1]
-	or
-	pred_java_primitive_float_value_is_NaN[f2]
+	) and
+	(!pred_java_primitive_float_value_is_NaN[f1])
+	and
+	(!pred_java_primitive_float_value_is_NaN[f2])
 }
 
 

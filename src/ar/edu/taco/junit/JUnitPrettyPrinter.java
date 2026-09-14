@@ -91,7 +91,11 @@ public class JUnitPrettyPrinter {
 				String[] split = statement.split(" ");
 				String complexVarName = "";
 				if (split.length>1){
-					complexVarName = split[1];
+					if (split.length == 3){ // case var/arrayPos = value;
+						continue;
+					} else {
+						complexVarName = split[1];
+					}
 				}
 				String[] splitOnUnderscore = complexVarName.split("_");
 				String theVarName = "";

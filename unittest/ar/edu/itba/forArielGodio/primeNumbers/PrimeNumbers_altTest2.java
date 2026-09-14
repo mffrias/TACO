@@ -19,7 +19,7 @@ public class PrimeNumbers_altTest2 extends CollectionTestBase {
     setConfigKeyIntBithwidth(5);
     setConfigKeyInferScope(true);
     setConfigKeyObjectScope(0);
-    setConfigKeyLoopUnroll(6);
+    setConfigKeyLoopUnroll(10);
     setConfigKeyTypeScopes("forArielGodio.primeNumbers.PrimeNumbers:1");
 
     // Always true
@@ -43,4 +43,11 @@ public class PrimeNumbers_altTest2 extends CollectionTestBase {
     config();
     check(GENERIC_PROPERTIES,"primeList(int)",true);
   }
+
+
+  public void test_genericMethod2Test() throws VizException {
+    config();
+    check(GENERIC_PROPERTIES,"generatePrimes(int)",true);
+  }
+
 }

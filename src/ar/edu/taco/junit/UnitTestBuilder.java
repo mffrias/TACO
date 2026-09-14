@@ -298,9 +298,10 @@ public class UnitTestBuilder {
                                 String statement = field.getType().getCanonicalName() + " " + arrayObjectVariableName + " = new " + componentType.getName() + "[" + instanceLength + "];";
                                 objectDefinitionStatements.add(statement);
                                 objectInitializationStatements.add("updateValue(" + storedVariableName + ", \"" + shortFieldName + "\", " + arrayObjectVariableName + ");");
-                                getValueForArray(componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
+                                getValueForArray(arrayObjectVariableName, componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
                             }
                         }
+//                        getStatementsForArray(storedVariableName, fieldValue, objectDefinitionStatements, objectInitializationStatements);
                     } else if (List.class.isAssignableFrom(field.getType())) {
                         imports.add("java.util.List");
                         imports.add("java.util.ArrayList");
@@ -400,6 +401,22 @@ public class UnitTestBuilder {
         }
     }
 
+//    private void getStatementsForArray(String storedVariableName, Object fieldValue, List<String> objectDefinitionStatements, List<String> objectInitializationStatements) throws TacoException {
+//        if (!(fieldValue instanceof Object[])){
+//            throw new TacoException("Argument should be an Object[] but it is " + fieldValue.getClass().toString());
+//        } else {
+//            if (fieldValue == null){
+//                throw new TacoException("Array expected not to be null, but it is.");
+//            } else {
+//                for (int index = 0; index < ((Object[]) fieldValue).length; index++){
+//                    System.out.println("Here I am");
+//                }
+//            }
+//        }
+//
+//
+//    }
+
     /**
      * @param value
      * @return
@@ -498,14 +515,16 @@ public class UnitTestBuilder {
 								String statement = field.getType().getCanonicalName() + " " + arrayObjectVariableName + " = new " + componentType.getName() + "[" + instanceLength + "];";
 								objectDefinitionStatements.add(statement);
 								objectInitializationStatements.add("updateValue(" + objectGeneratedVariableName + ", \"" + shortFieldName + "\", " + arrayObjectVariableName + ");");
-								getValueForArray(componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
+								getValueForArray(arrayObjectVariableName, componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
 								//                              String arrayObjectVariableName = generateVariableName(fieldValue);
 								//                              this.createdInstances.put(System.identityHashCode(fieldValue), arrayObjectVariableName);
 								//                              objectDefinitionStatements.add(field.getType().getCanonicalName() + " " + arrayObjectVariableName + " = new " + field.getType().getCanonicalName() + ";");
 								//
 								//                              getValueForArray(componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
 								//                              objectInitializationStatements.add("updateValue(" + instanceGeneratedVariableName + ", \"" + shortFieldName + "\", " + arrayObjectVariableName + ");");
-							}
+//                                getStatementsForArray(objectGeneratedVariableName, fieldValue, objectDefinitionStatements, objectInitializationStatements);
+
+                            }
 						}
 					} else if (List.class.isAssignableFrom(field.getType())) {
 						imports.add("java.util.List");
@@ -698,7 +717,7 @@ public class UnitTestBuilder {
                             String statement = field.getType().getCanonicalName() + " " + arrayObjectVariableName + " = new " + componentType.getName() + "[" + instanceLength + "];";
                             objectDefinitionStatements.add(statement);
                             objectInitializationStatements.add("updateValue(" + instanceGeneratedVariableName + ", \"" + shortFieldName + "\", " + arrayObjectVariableName + ");");
-                            getValueForArray(componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
+                            getValueForArray(arrayObjectVariableName, componentType, fieldValue, objectDefinitionStatements, objectInitializationStatements/*, buildName*/);
                             //                              String arrayObjectVariableName = generateVariableName(fieldValue);
                             //                              this.createdInstances.put(System.identityHashCode(fieldValue), arrayObjectVariableName);
                             //                              objectDefinitionStatements.add(field.getType().getCanonicalName() + " " + arrayObjectVariableName + " = new " + field.getType().getCanonicalName() + ";");
@@ -1024,7 +1043,7 @@ public class UnitTestBuilder {
 
                 this.createdInstances.put(System.identityHashCode(instance), generatedVariableName);
                 //                              List<String> pendingStatements = new ArrayList<String>();
-                getValueForArray(componentType, parameterValue, objectDefinitionStatements, objectInitializationStatements);
+                getValueForArray(generatedVariableName, componentType, parameterValue, objectDefinitionStatements, objectInitializationStatements);
 
                 //DPD VAR NAME fix
                 //String statement = clazz.getCanonicalName() + " " + parameterName + " = new " + clazz.getCanonicalName() + values + ";";
@@ -1195,115 +1214,6 @@ public class UnitTestBuilder {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      */
-    private void getStatementsForCollection(String variableName, Object fieldValue,
-                                            List<String> objectDefinitionStatements, List<String> objectInitializationStatements) throws IllegalArgumentException, IllegalAccessException {
-        Collection<?> listFieldValue = (Collection<?>) fieldValue;
-        @SuppressWarnings("unused")
-        int index = 0;
-        for (Object value : listFieldValue) {
-            //Class<?> clazz = value.getClass();
-            Class<?> clazz;
-            if (value == null) {
-                clazz = null;
-            } else {
-                clazz = value.getClass();
-            }
-            if (value == null) {
-                objectInitializationStatements.add(variableName + ".add(null);");
-            } else if (isAutoboxingClass(clazz)) {
-                String contentValue;
-                if (Character.class.isAssignableFrom(value.getClass())) {
-                    contentValue = "'" + String.valueOf(value) + "'";
-                } else {
-                    contentValue = String.valueOf(value);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + contentValue + ");");
-            } else if (clazz.isArray()) {
-                Class<?> componentType = clazz.getComponentType();
-                //DPD VAR NAME fix;
-                //String variableToCreate = variableName + "_" + index;
-                String variableToCreate = generateVariableName(value);
-                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
-                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
-                    String statement = clazz.getCanonicalName() + " " + variableToCreate + " = new " + clazz.getCanonicalName() + ";";
-                    objectDefinitionStatements.add(statement);
-                    getValueForArray(componentType, value, objectDefinitionStatements, objectInitializationStatements);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
-            } else if (List.class.isAssignableFrom(clazz)) {
-                imports.add("java.util.List");
-                imports.add("java.util.ArrayList");
-                //DPD VAR NAME fix;
-                //String variableToCreate = variableName + "_" + index;
-                String variableToCreate = generateVariableName(value);
-                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
-                    String buildStatement = clazz.getCanonicalName() + " " + variableToCreate + " = new java.util.ArrayList();";
-                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
-                    objectDefinitionStatements.add(buildStatement);
-                    getStatementsForCollection(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
-            } else if (Set.class.isAssignableFrom(clazz)) {
-                imports.add("java.util.Set");
-                imports.add("kodkod.util.collections.IdentityHashSet");
-                //DPD VAR NAME fix;
-                //String variableToCreate = variableName + "_" + index;
-                String variableToCreate = generateVariableName(value);
-                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
-                    String buildStatement = value.getClass().getCanonicalName() + " " + variableToCreate + " = new kodkod.util.collections.IdentityHashSet();";
-                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
-                    objectDefinitionStatements.add(buildStatement);
-                    getStatementsForCollection(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
-            } else if (Map.class.isAssignableFrom(clazz)) {
-                imports.add("java.util.Map");
-                imports.add("java.util.IdentityHashMap");
-                //DPD VAR NAME fix;
-                //String variableToCreate = variableName + "_" + index;
-                String variableToCreate = generateVariableName(value);
-                if (this.createdInstances.containsKey(System.identityHashCode(value))) {
-                    //String createdVariable = this.createdInstances.get(System.identityHashCode(value));
-                    //                  String buildStatement = clazz.getCanonicalName() + " " + variableToCreate + " = (" + clazz.getCanonicalName() + ") " + createdVariable + ";";
-                    //                  statements.add(buildStatement);
-                } else {
-                    String buildStatement = /*clazz.getCanonicalName() +*/ "Map " + variableToCreate + " = new java.util.IdentityHashMap();";
-                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
-                    objectDefinitionStatements.add(buildStatement);
-                    getStatementsForMap(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
-            } else {
-                if (!hasDefaultConstructor(value.getClass())) {
-                    throw new RuntimeException("DYNJALLOY ERROR!: Type: " + value.getClass().getCanonicalName() + " has no default Constructor.");
-                }
-                //DPD VAR NAME fix;
-                //String createdVariable = variableName + "_" + value.getClass().getSimpleName() + "_" + index;
-                String createdVariable = generateVariableName(value);
-                if (this.createdInstances.containsKey(System.identityHashCode(value))) {
-                    //DPD BEGIN
-                    //String previousCreatedVariable = this.createdInstances.get(System.identityHashCode(value));
-                    //                  String buildStatement = value.getClass().getCanonicalName() + " " + createdVariable + " = " + previousCreatedVariable + ";";
-                    //                  statements.add(buildStatement);
-                    //DPD END
-                } else {
-                    String buildStatement = value.getClass().getCanonicalName() + " " + createdVariable + " = new " + value.getClass().getCanonicalName() + "();";
-                    this.createdInstances.put(System.identityHashCode(value), createdVariable);
-                    objectDefinitionStatements.add(buildStatement);
-                    getFieldsInitializationStatements(value.getClass(), value, objectDefinitionStatements, objectInitializationStatements);
-                }
-                objectInitializationStatements.add(variableName + ".add(" + createdVariable + ");");
-            }
-            index++;
-        }
-    }
-
-    /**
-     * @param fieldValue
-     * @return
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     */
     private void getStatementsForMap(String variableName, Object fieldValue,
                                      List<String> objectDefinitionStatements, List<String> objectInitializationStatements) throws IllegalArgumentException, IllegalAccessException {
         Map<?, ?> mapFieldValue = (Map<?, ?>) fieldValue;
@@ -1337,7 +1247,7 @@ public class UnitTestBuilder {
                     this.createdInstances.put(System.identityHashCode(keyValue), variableToCreate);
                     String statement = clazz.getCanonicalName() + " " + variableToCreate + " = new " + clazz.getCanonicalName() + ";";
                     objectDefinitionStatements.add(statement);
-                    getValueForArray(componentType, keyValue, objectDefinitionStatements, objectInitializationStatements);
+                    getValueForArray(variableToCreate, componentType, keyValue, objectDefinitionStatements, objectInitializationStatements);
                 }
                 keyString = variableToCreate;
             } else if (List.class.isAssignableFrom(clazz)) {
@@ -1430,7 +1340,7 @@ public class UnitTestBuilder {
                     this.createdInstances.put(System.identityHashCode(value), variableToCreate);
                     String statement = clazz.getCanonicalName() + " " + variableToCreate + " = new " + clazz.getCanonicalName() + ";";
                     objectDefinitionStatements.add(statement);
-                    getValueForArray(componentType, value, objectDefinitionStatements, objectInitializationStatements);
+                    getValueForArray(variableToCreate, componentType, value, objectDefinitionStatements, objectInitializationStatements);
                 }
                 valueString = variableToCreate;
             } else if (List.class.isAssignableFrom(clazz)) {
@@ -1501,6 +1411,115 @@ public class UnitTestBuilder {
             index++;
         }
     }
+
+    /**
+     * @param fieldValue
+     * @return
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    private void getStatementsForCollection(String variableName, Object fieldValue,
+                                            List<String> objectDefinitionStatements, List<String> objectInitializationStatements) throws IllegalArgumentException, IllegalAccessException {
+        Collection<?> listFieldValue = (Collection<?>) fieldValue;
+        @SuppressWarnings("unused")
+        int index = 0;
+        for (Object value : listFieldValue) {
+            //Class<?> clazz = value.getClass();
+            Class<?> clazz;
+            if (value == null) {
+                clazz = null;
+            } else {
+                clazz = value.getClass();
+            }
+            if (value == null) {
+                objectInitializationStatements.add(variableName + ".add(null);");
+            } else if (isAutoboxingClass(clazz)) {
+                String contentValue;
+                if (Character.class.isAssignableFrom(value.getClass())) {
+                    contentValue = "'" + String.valueOf(value) + "'";
+                } else {
+                    contentValue = String.valueOf(value);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + contentValue + ");");
+            } else if (clazz.isArray()) {
+                Class<?> componentType = clazz.getComponentType();
+                //DPD VAR NAME fix;
+                //String variableToCreate = variableName + "_" + index;
+                String variableToCreate = generateVariableName(value);
+                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
+                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
+                    String statement = clazz.getCanonicalName() + " " + variableToCreate + " = new " + clazz.getCanonicalName() + ";";
+                    objectDefinitionStatements.add(statement);
+                    getValueForArray(variableToCreate, componentType, value, objectDefinitionStatements, objectInitializationStatements);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
+            } else if (List.class.isAssignableFrom(clazz)) {
+                imports.add("java.util.List");
+                imports.add("java.util.ArrayList");
+                //DPD VAR NAME fix;
+                //String variableToCreate = variableName + "_" + index;
+                String variableToCreate = generateVariableName(value);
+                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
+                    String buildStatement = clazz.getCanonicalName() + " " + variableToCreate + " = new java.util.ArrayList();";
+                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
+                    objectDefinitionStatements.add(buildStatement);
+                    getStatementsForCollection(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
+            } else if (Set.class.isAssignableFrom(clazz)) {
+                imports.add("java.util.Set");
+                imports.add("kodkod.util.collections.IdentityHashSet");
+                //DPD VAR NAME fix;
+                //String variableToCreate = variableName + "_" + index;
+                String variableToCreate = generateVariableName(value);
+                if (!this.createdInstances.containsKey(System.identityHashCode(value))) {
+                    String buildStatement = value.getClass().getCanonicalName() + " " + variableToCreate + " = new kodkod.util.collections.IdentityHashSet();";
+                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
+                    objectDefinitionStatements.add(buildStatement);
+                    getStatementsForCollection(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                imports.add("java.util.Map");
+                imports.add("java.util.IdentityHashMap");
+                //DPD VAR NAME fix;
+                //String variableToCreate = variableName + "_" + index;
+                String variableToCreate = generateVariableName(value);
+                if (this.createdInstances.containsKey(System.identityHashCode(value))) {
+                    //String createdVariable = this.createdInstances.get(System.identityHashCode(value));
+                    //                  String buildStatement = clazz.getCanonicalName() + " " + variableToCreate + " = (" + clazz.getCanonicalName() + ") " + createdVariable + ";";
+                    //                  statements.add(buildStatement);
+                } else {
+                    String buildStatement = /*clazz.getCanonicalName() +*/ "Map " + variableToCreate + " = new java.util.IdentityHashMap();";
+                    this.createdInstances.put(System.identityHashCode(value), variableToCreate);
+                    objectDefinitionStatements.add(buildStatement);
+                    getStatementsForMap(variableToCreate, value, objectDefinitionStatements, objectInitializationStatements);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + variableToCreate + ");");
+            } else {
+                if (!hasDefaultConstructor(value.getClass())) {
+                    throw new RuntimeException("DYNJALLOY ERROR!: Type: " + value.getClass().getCanonicalName() + " has no default Constructor.");
+                }
+                //DPD VAR NAME fix;
+                //String createdVariable = variableName + "_" + value.getClass().getSimpleName() + "_" + index;
+                String createdVariable = generateVariableName(value);
+                if (this.createdInstances.containsKey(System.identityHashCode(value))) {
+                    //DPD BEGIN
+                    //String previousCreatedVariable = this.createdInstances.get(System.identityHashCode(value));
+                    //                  String buildStatement = value.getClass().getCanonicalName() + " " + createdVariable + " = " + previousCreatedVariable + ";";
+                    //                  statements.add(buildStatement);
+                    //DPD END
+                } else {
+                    String buildStatement = value.getClass().getCanonicalName() + " " + createdVariable + " = new " + value.getClass().getCanonicalName() + "();";
+                    this.createdInstances.put(System.identityHashCode(value), createdVariable);
+                    objectDefinitionStatements.add(buildStatement);
+                    getFieldsInitializationStatements(value.getClass(), value, objectDefinitionStatements, objectInitializationStatements);
+                }
+                objectInitializationStatements.add(variableName + ".add(" + createdVariable + ");");
+            }
+            index++;
+        }
+    }
     //  int tempVarCount = 0;
     //  private String createVar() {
     //      String s = "tmp_" + tempVarCount++;
@@ -1513,10 +1532,10 @@ public class UnitTestBuilder {
      * @throws IllegalArgumentException
      * @requires fieldValue already stored in this.createdInstances
      */
-    private void getValueForArray(Class<?> componentType, Object fieldValue, List<String> objectDefinitionStatements,
+    private void getValueForArray(String varName, Class<?> componentType, Object fieldValue, List<String> objectDefinitionStatements,
                                   List<String> objectInitializationStatements) throws IllegalArgumentException, IllegalAccessException {
         int length = Array.getLength(fieldValue);
-        String arrayAssignedVariable = this.createdInstances.get(System.identityHashCode(fieldValue));
+        String arrayAssignedVariable = varName;
         log.debug("getValueForArray");
         log.debug(fieldValue.toString());
         log.debug(componentType);
@@ -1645,7 +1664,7 @@ public class UnitTestBuilder {
                             String statement = instance.getClass().getCanonicalName() + " " + generatedName + " = new " + componentType.getName() + "[" + instanceLength + "];";
                             objectDefinitionStatements.add(statement);
                             Class<?> aComponentType2 = instance.getClass().getComponentType();
-                            getValueForArray(aComponentType2, instance, objectDefinitionStatements, objectInitializationStatements);
+                            getValueForArray(generatedName, aComponentType2, instance, objectDefinitionStatements, objectInitializationStatements);
                             statement = arrayAssignedVariable + "[" + x + "] = " + generatedName + ";";
                             objectInitializationStatements.add(statement);
                         } else {
@@ -1655,6 +1674,7 @@ public class UnitTestBuilder {
                             objectDefinitionStatements.add(statement);
                             statement = arrayAssignedVariable + "[" + x + "] = " + generatedName + ";";
                             objectInitializationStatements.add(statement);
+                            getFieldsInitializationStatements(instance.getClass(), instance, objectDefinitionStatements, objectInitializationStatements);
                         }
                     }
                 }

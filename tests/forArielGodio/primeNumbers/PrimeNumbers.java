@@ -44,6 +44,7 @@ public class PrimeNumbers {
         primeArray[count - 1] = num;
         count++;
       }
+      num++; //This line was removed. Probably as a seeded fault.
       status = 1;
       for (int j = 2; j <= num / 2; j++) {
         if (div(num, j)) {
@@ -54,10 +55,41 @@ public class PrimeNumbers {
     }
     return primeArray;
   }
-  
-//  public static void main( String[] args) {
-//	  PrimeNumbers pn = new PrimeNumbers();
-//	  int[] primes = pn.primeList(3);
-//      int i = 0;
-//  }
+
+
+  //@ requires 0 < n;
+  //@ ensures primeArray[0] == 2;
+  //@ ensures (\forall int i,j; 0 <= i && i < primeArray.length && 0 <= j && j < primeArray.length; i + 1 == j ==> primeArray[i] < primeArray[j]);
+  //@ ensures (\forall int i; 0 <= i && i < primeArray.length; (\forall int j; 2 <= j && j <= primeArray[i]/2; primeArray[i] % j != 0));
+  //@ ensures primeArray.length == n && \result == primeArray;
+  //@ signals (RuntimeException e) false;
+  public int[] generatePrimes(int n) {
+    primeArray = new int[n];
+    if (n > 0) {
+      primeArray[0] = 2;
+    }
+
+    int count = 1;
+    int candidate = 3;
+
+    while (count < n) {
+      boolean isPrime = true;
+      for (int i = 0; i < count; i++) {
+        if (candidate % primeArray[i] == 0) {
+          isPrime = false;
+          break;
+        }
+      }
+
+      if (isPrime) {
+        primeArray[count] = candidate;
+        count++;
+      }
+      candidate += 2; // Skip even numbers
+    }
+
+    return primeArray;
+  }
+
+
 }

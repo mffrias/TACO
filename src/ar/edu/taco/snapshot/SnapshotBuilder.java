@@ -861,16 +861,31 @@ public class SnapshotBuilder {
 
 			} else {
 				Object instance;
-				instance = createNewInstance(clazz);
+//				instance = evaluate(instanceExpr, clazz);
 
-				returnValue = instance;
-				instances.put(instanceName, returnValue);
-
-				for (Field aField : obtainAllFields(clazz)) {
-
-					if (!isStatic(aField.getModifiers())) {
-						setFieldValueSupport(instanceExpr, instance, aField);
+				if (!instances.containsKey(instanceName)) {
+					Constructor<?>[] constructors = clazz.getConstructors();
+					try {
+						Constructor<?> ctor = constructors[0];
+						ctor.setAccessible(true);
+						Object[] args = new Object[ctor.getParameterCount()];
+						instance = ctor.newInstance(args);
+					} catch (Exception e) {
+						e.printStackTrace();
+						return null;
 					}
+					returnValue = instance;
+//					instances.put(instanceName, returnValue);
+
+					for (Field aField : obtainAllFields(clazz)) {
+
+						if (!isStatic(aField.getModifiers())) {
+							setFieldValueSupport(instanceExpr, instance, aField);
+						}
+					}
+					instances.put(instanceName, returnValue);
+				} else {
+					returnValue = instances.get(instanceName);
 				}
 
 			}
@@ -2035,7 +2050,7 @@ public class SnapshotBuilder {
 			arrayLength = 100;
 		}
 		returnValue = Array.newInstance(componentType, arrayLength);
-		instances.put(instanceName, returnValue);
+	//	instances.put(instanceName, returnValue);
 
 		if (!isPruned("java_lang_IntArray_contents")) {
 			AlloyExpression contents_expr = ExprJoin.join(instanceExpr, prefixExprVariable("java_lang_IntArray_contents"));
@@ -2071,6 +2086,8 @@ public class SnapshotBuilder {
 
 			}
 		}
+		instances.put(instanceName, returnValue);
+
 
 		return returnValue;
 	}
@@ -2244,10 +2261,10 @@ public class SnapshotBuilder {
 
 					if (integer_index >= 0 && integer_index < arrayLength) {
 
-						Class<?> infieredType = inferTypeOfExpression(value_constant);
-						if (infieredType.isAssignableFrom(Object.class) || infieredType.isAssignableFrom(Object[].class)) {
-							Object value_object = evaluate(value_constant, infieredType);
-							updateArrayValue(returnValue, infieredType, integer_index, value_object);
+						Class<?> inferredType = inferTypeOfExpression(value_constant);
+						if ((Object.class).isAssignableFrom(inferredType) || (Object[].class).isAssignableFrom(inferredType)) {
+							Object value_object = evaluate(value_constant, inferredType);
+							updateArrayValue(returnValue, inferredType, integer_index, value_object);
 						}
 					}
 				}

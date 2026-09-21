@@ -18,9 +18,13 @@ public class GenericFunc {
     }
 
 
-    //@   requires !Float.isNaN(num1) && !Float.isNaN(num2);
-    //@   ensures \result == (num1 + num2) / 2.0f;
-    //@   signals (Throwable t) false;
+    //@ public normal_behavior
+    //@ requires true;
+    //@ assignable \nothing;
+    //@ ensures \result == (num1 + num2) / 2.0f;
+    //@ also public exceptional_behavior
+    //@ requires false;
+    //@ signals (Throwable t) false;
     public float func(float num1, float num2) {
         return (num1 + num2) / 2.0f;
     }

@@ -866,6 +866,8 @@ public class SnapshotBuilder {
 				if (!instances.containsKey(instanceName)) {
 					Constructor<?>[] constructors = clazz.getConstructors();
 					try {
+						if (constructors.length == 0)
+							constructors = clazz.getDeclaredConstructors();
 						Constructor<?> ctor = constructors[0];
 						ctor.setAccessible(true);
 						Object[] args = new Object[ctor.getParameterCount()];

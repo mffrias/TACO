@@ -33,8 +33,8 @@ public class FuncTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("llm.iter0.GenericFunc:1");
-		check(GENERIC_PROPERTIES,"func(float, float)",true);
-//		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"func(float, float)");
+//		check(GENERIC_PROPERTIES,"func(float, float)",true);
+		checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"func(float, float)");
 //		iterativeCheckWithLLM(GENERIC_PROPERTIES,"func(float, float)");
 	}
 

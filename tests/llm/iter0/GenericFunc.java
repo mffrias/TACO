@@ -1,23 +1,6 @@
 package llm.iter0;
 public class GenericFunc {
 
-    public Object[] ff;
-
-
-//    //@ requires 0 <= i && i < ff.length;
-//    //@ ensures \result == ff[i];
-//    public Object check(int i){
-//        return ff[i];
-//    }
-
-    //@ requires true;
-    //@ ensures \result != null;
-
-    public static Object check(int i){
-        return null;
-    }
-
-
     //@ public normal_behavior
     //@ requires true;
     //@ assignable \nothing;
@@ -29,10 +12,11 @@ public class GenericFunc {
         return (num1 + num2) / 2.0f;
     }
 
-//    public static void main(String[] args) {
-//        float number1 = 10.5f;
-//        float number2 = 20.2f;
-//        float average = func(number1, number2);
-//        System.out.println(average);
-//    }
+    public static void main(String[] args) {
+        GenericFunc calculator = new GenericFunc();
+        float number1 = 10.5f;
+        float number2 = 20.0f;
+        float average = calculator.func(number1, number2);
+        System.out.println(average);
+    }
 }

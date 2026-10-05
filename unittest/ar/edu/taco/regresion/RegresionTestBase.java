@@ -401,7 +401,7 @@ public class RegresionTestBase extends TestCase {
                 StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
                 Iterable<? extends JavaFileObject> compilationUnit1 =
                         fileManager.getJavaFileObjectsFromFiles(Arrays.asList(file1));
-                javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
+                boolean compiledSuccessfully = javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
                 fileManager.close();
                 javaCompiler = null;
                 file1 = null;

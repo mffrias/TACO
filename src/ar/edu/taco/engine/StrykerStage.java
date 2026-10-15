@@ -19,6 +19,10 @@ import com.google.common.collect.Sets;
 import ar.edu.taco.stryker.StrykerInitialStage;
 import ar.edu.taco.stryker.api.impl.MuJavaController.MsgDigest;
 import ar.edu.taco.stryker.api.impl.OpenJMLController;
+import ar.edu.taco.stryker.api.impl.WeedQueue;
+import ar.edu.taco.stryker.api.impl.input.DarwinistInput;
+import ar.edu.taco.stryker.api.impl.input.MuJavaInput;
+import ar.edu.taco.stryker.api.impl.input.OpenJMLInput;
 import ar.edu.taco.stryker.exceptions.FatalStrykerStageException;
 import ar.edu.taco.utils.FileUtils;
 
@@ -78,6 +82,8 @@ public class StrykerStage implements ITacoStage {
     public static long minSolvingTime = Long.MAX_VALUE;
     public static long totalSolvings = 0;
     
+    
+    public static WeedQueue<MuJavaInput, OpenJMLInput, DarwinistInput> weedQueue = new WeedQueue<>();
     
 	private String configFile;
 

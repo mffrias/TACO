@@ -82,9 +82,10 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                         try {
                             //int j = 0;
                             log.debug("Taking new input from queue");
-                            OpenJMLInput input = queue.take();
+                            OpenJMLInput input = StrykerStage.weedQueue.takeFrom2();
+
                             log.debug("Took from queue");
-                            log.debug("Queue size: "+queue.size());
+//                            log.debug("Queue size: "+StrykerStage.weedQueue.size2());
                             MuJavaInput father;
                             String tempFilename = null;
                             String packageToWrite = null;
@@ -262,7 +263,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                                     inputToInvoke, false, null, null, null, null, null, 
                                                     input.getFeedback(), input.getMutantsToApply(), input.getSyncObject());
                                             output.setRacMethod(input.getRacMethod());
-                                            DarwinistController.getInstance().enqueueTask(output);
+                                            StrykerStage.weedQueue.enqueue3(output);
                                             StrykerStage.candidatesQueuedToDarwinist++;
                                             candidateMethods.add(methodName);
                                             log.debug("Enqueded task to Darwinist Controller");
@@ -333,7 +334,10 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                                         input.getSyncObject()
                                                         );
                                                 darwinistInput.setRacMethod(input.getRacMethod());
-                                                DarwinistController.getInstance().enqueueTask(darwinistInput);
+                                                MuJavaInput inputForFeedback = new MuJavaInput(null, null, null, null, null, null, null, null, null, null);
+                                                inputForFeedback.setComputateFeedback(true);
+                                                inputForFeedback.setInputForFeedback(darwinistInput);
+                                                StrykerStage.weedQueue.enqueue1(inputForFeedback);
                                                 StrykerStage.mutationsQueuedToDarwinistForSeq++;
                                             } else {
                                                 MuJavaInput mujavainput = new MuJavaInput(
@@ -347,7 +351,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                                 feedback.setGetSibling(true);
                                                 feedback.setMutateRight(true);
                                                 mujavainput.setMuJavaFeedback(feedback);
-                                                MuJavaController.getInstance().enqueueTask(mujavainput);
+                                                StrykerStage.weedQueue.enqueue1(mujavainput);
                                             }
                                         }
                                         StrykerStage.postconditionFailedMutations++;
@@ -396,11 +400,17 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                             break;
                             //e.printStackTrace();
                         }
+                        if (StrykerStage.weedQueue.ack(1) == 0) {
+                            UnskippableMuJavaController.getInstance().shutdownNow();
+                            MuJavaController.getInstance().shutdownNow();
+                            DarwinistController.getInstance().shutdownNow();
+                            OpenJMLController.getInstance().shutdownNow();
+                        }
                     }
                     log.warn("Shutting down Darwinist Controller");
                     DarwinistInput output = new DarwinistInput(
                             null, null, null, null, null, null, null, false, null, null, null, null, null, null, null, null);
-                    DarwinistController.getInstance().enqueueTask(output);
+                    StrykerStage.weedQueue.enqueue3(output);
                     //DarwinistController.getInstance().shutdown();
                 } catch (Exception e) {
                     e.printStackTrace();

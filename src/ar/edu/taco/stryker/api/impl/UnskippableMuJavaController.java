@@ -95,8 +95,8 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
                                             mjcInput.getSyncObject(),
                                             mjcInput.getFullyQualifiedFileName(),
                                             mjcInput.getMethodUnderAnalysis());
-                                        MuJavaController.getInstance().enqueueTask(curInput);
-//                                Encolo esto a OJMLController sin busqueda de feedback, solo para validar que no son solucion ya.
+                                StrykerStage.weedQueue.enqueue1(curInput);
+                                //Encolo esto a OJMLController sin busqueda de feedback, solo para validar que no son solucion ya.
                                 if (mjcInput.getMuJavaFeedback() != null) {
                                     MuJavaInput father = fathers.get(mjcInput.getMuJavaFeedback().getFatherIndex());
                                     OpenJMLInput output = mjcInput.getUnskippableOJMLInput();
@@ -113,7 +113,7 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
                                     newFeedback.setUnskippableOJML4CPackage(mjcInput.getUnskippableOJML4CPackage());
                                     output.setFeedback(newFeedback);
                                     log.debug("Adding task to the OpenJMLController");
-                                    OpenJMLController.getInstance().enqueueTask(output);
+                                    StrykerStage.weedQueue.enqueue2(output);
                                     StrykerStage.mutationsQueuedToOJMLC++;
                                 }
                             }

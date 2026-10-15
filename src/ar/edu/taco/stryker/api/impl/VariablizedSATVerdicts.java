@@ -71,6 +71,7 @@ public class VariablizedSATVerdicts {
         	dos.write(tunedContent.getBytes());
         	dos.flush();
         	dos.close();
+            duplicatesTempFile.delete();
         }
         catch (Exception e) {
         	throw new IllegalArgumentException("exception thrown while trying to compute digest in class VariablizedSATVerdicts");

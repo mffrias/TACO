@@ -52,16 +52,18 @@
 
 	<!-- TASK DEFINITION -->
 	<!-- init -->	
+	<!-- Class files and *_temp* backups that Stryker leaves next to the subjects in tests/
+	     must not be copied: a stale class would shadow the real source in bin/. -->
 	<target name="init" description="copy requires files to /bin">
 		<mkdir dir="bin" />
 		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="src" excludes="**/*.launch, **/*.g, **/*.java" />
+			<fileset dir="src" excludes="**/*.launch, **/*.g, **/*.java, **/*.class, **/*_temp*" />
 		</copy>
 		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="tests" excludes="**/*.launch, **/*.g, **/*.java" />
+			<fileset dir="tests" excludes="**/*.launch, **/*.g, **/*.java, **/*.class, **/*_temp*" />
 		</copy>
 		<copy includeemptydirs="false" todir="bin">
-			<fileset dir="unittest" excludes="**/*.launch, **/*.g, **/*.java" />
+			<fileset dir="unittest" excludes="**/*.launch, **/*.g, **/*.java, **/*.class, **/*_temp*" />
 		</copy>
 
 	</target>

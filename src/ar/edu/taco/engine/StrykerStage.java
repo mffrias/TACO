@@ -52,6 +52,8 @@ public class StrykerStage implements ITacoStage {
 	private List<JCompilationUnitType> asts;
 
 	public static String STRYKER_REPORTS_FILENAME = "StrykerLastReports.txt";
+	/** Capacity of the counterexample pool ({@link #junitInputs}, {@link #junitFiles}). */
+	public static final int MAX_COUNTEREXAMPLES = 10000;
 	public static Class<?>[] junitInputs;
     public static String[] junitFiles;
     public static Map<MsgDigest, String> junitFilesHash = Maps.newConcurrentMap();

@@ -283,7 +283,7 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                 index++;
             }
             if (index >= inputs.length || inputs[index] == null)
-                throw new IllegalArgumentException("File name does not correspond to any stored input! Broken invariant!");
+                throw new IllegalArgumentException("Counterexample " + junitFilename + " is not in the counterexample pool");
         } else {
             index = 0;
         }
@@ -541,7 +541,14 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
 
             log.debug("In effect, junit test generation was successful");
 
-            if (MuJavaController.feedbackOn) {
+            // Feedback runs TACO with the input fixed to this counterexample, which is looked up
+            // in the pool. If it could not be stored (pool full, or its test class did not load),
+            // go on without pruning for this candidate instead of failing the feedback request.
+            boolean stored = isStoredCounterexample(junitFile);
+            if (MuJavaController.feedbackOn && !stored) {
+                log.warn("Counterexample " + junitFile + " is not in the pool: no feedback for this candidate");
+            }
+            if (MuJavaController.feedbackOn && stored) {
 
                 final Properties props2 = new Properties();
                 Properties oldProps2 = input.getOverridingProperties();
@@ -605,6 +612,14 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
             //                                              e.printStackTrace();
         }
 
+    }
+
+    /**
+     * Whether {@code junitFile} is a counterexample stored in the pool
+     * ({@code StrykerStage.junitFilesHash}), so that feedback can be computed with it.
+     */
+    private static boolean isStoredCounterexample(String junitFile) {
+        return junitFile != null && StrykerStage.junitFilesHash.containsValue(junitFile);
     }
 
     @SuppressWarnings("resource")
@@ -697,6 +712,9 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                     StrykerStage.junitInputs[StrykerStage.indexToLastJUnitInput] = clazz;
                     StrykerStage.junitFiles[StrykerStage.indexToLastJUnitInput] = junitFile;
                     StrykerStage.indexToLastJUnitInput++;
+                } else {
+                    log.warn("The counterexample pool is full (" + StrykerStage.junitInputs.length
+                            + " inputs): new counterexamples are no longer stored");
                 }
             } else {
                 new File(junitFile).delete();

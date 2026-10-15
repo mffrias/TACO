@@ -601,8 +601,8 @@ public class TacoMain {
                 StrykerStage strykerStage = new StrykerStage(compilation_units, sourceRootDir, classToCheck,
                         methodToCheck, configFile, overridingProperties,
                         TacoConfigurator.getInstance().getMaxStrykerMethodsForFile());
-                StrykerStage.junitInputs = new Class<?>[50];
-                StrykerStage.junitFiles = new String[50];
+                StrykerStage.junitInputs = new Class<?>[StrykerStage.MAX_COUNTEREXAMPLES];
+                StrykerStage.junitFiles = new String[StrykerStage.MAX_COUNTEREXAMPLES];
 
                 try {
                     String currentJunit = null;

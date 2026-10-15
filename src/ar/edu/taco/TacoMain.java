@@ -822,7 +822,10 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           Constructor<?>[] strykerConstructors = clazz.getDeclaredConstructors();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           " + sourceClassName + " instance = null;";
+                    // Object, not the class under test: the test reaches the instance through
+                    // reflection (updateValue, method.invoke), and assigning newInstance()'s result
+                    // to a variable of the class type does not compile without a cast.
+                    str = "           Object instance = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	Class<?>[] strykerParameterTypes = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));

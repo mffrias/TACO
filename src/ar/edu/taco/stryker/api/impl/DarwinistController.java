@@ -539,7 +539,16 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         String classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
         String methodToCheck = props.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
 
-        String junitFile = generateJunitFile(analysis_result, classToCheck, methodToCheck);
+        String junitFile;
+        try {
+            junitFile = generateJunitFile(analysis_result, classToCheck, methodToCheck);
+        } catch (RuntimeException e) {
+            // E.g. TACO's snapshot cannot instantiate an object of the counterexample. An escaping
+            // exception used to end this controller's thread and hang the run; go on without
+            // feedback for this candidate instead (see below).
+            log.warn("Could not turn TACO's counterexample into a test: " + e, e);
+            junitFile = null;
+        }
 
         try {
 

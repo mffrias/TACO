@@ -233,9 +233,13 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                         notCompilable = true;
                         break;
                     } catch (Exception e) {
-                        log.error("Variablization: Unknown Error in TACO during.");
-                        satVerdict = false;
-                        continue;
+                        // An error proves nothing: stop here as if this step were SAT, so only the
+                        // statements already shown UNSAT are skipped. Counting it as UNSAT went on to
+                        // prune every statement, e.g. when the fixed input holds a value that does
+                        // not fit in Alloy's integers (a serialVersionUID).
+                        log.error("Variablization: TACO failed, stopping the feedback here: " + e);
+                        satVerdict = true;
+                        break;
 //                        e.printStackTrace();
                     }
                 }

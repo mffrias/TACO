@@ -161,6 +161,22 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return 1;
     }
 
+    /**
+     * Returns the index where the package of a generated batch file starts.
+     * Batch files live in {@code <tmp>/<n>/a<n>/aOpenJMLInWrap<i>/...}, and the package
+     * starts at the {@code a<n>} directory. Looking for the first "/a" in the whole
+     * path breaks when java.io.tmpdir itself has a directory starting with "a"
+     * (e.g. /var/folders/a3/... on macOS), so search backwards from the
+     * "aOpenJMLInWrap" directory instead.
+     */
+    static int batchPackageStart(String filename) {
+        int wrapperDir = filename.indexOf(FILE_SEP + "aOpenJMLInWrap");
+        if (wrapperDir == NOT_PRESENT) {
+            return filename.indexOf(FILE_SEP + "a") + 1;
+        }
+        return filename.lastIndexOf(FILE_SEP + "a", wrapperDir - 1) + 1;
+    }
+
     protected static String obtainClassNameFromFileName(String fileName) {
         int lastBackslash = fileName.lastIndexOf("/");
         int lastDot = fileName.lastIndexOf(".");
@@ -993,7 +1009,7 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
                 String filename = wrapper.getFilename();
                 String tempFilename = filename.substring(0, filename.lastIndexOf(FILE_SEP)+1) + 
                         MUTANTS_DEST_PACKAGE.replaceAll("\\.", FILE_SEP) + FILE_SEP;
-                String packageToWrite = filename.substring(filename.indexOf(FILE_SEP+"a")+1, 
+                String packageToWrite = filename.substring(batchPackageStart(filename),
                         filename.lastIndexOf(FILE_SEP)+1).replaceAll(FILE_SEP, ".")+MUTANTS_DEST_PACKAGE;
                 tempFilename = adaptSiblingsFileToJML4C(filename, tempFilename, packageToWrite);
 
@@ -1044,11 +1060,14 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
                         PATH_SEP+fileClasspath+
                         PATH_SEP+filteredSystemClasspath;
 
-                String command = System.getProperty("java.home") + "/bin/java -Xmx2048m -XX:MaxPermSize=512m -jar " + 
-                        System.getProperty("user.dir") + FILE_SEP + "lib/stryker/jml4c.jar "
-                		+ "-nowarn " + "-maxProblems " + "9999999 " + "-cp " + currentClasspath + " " + tempFilename;
+                // One argument per element: Runtime.exec(String) splits the command on
+                // whitespace, which broke every batch when a path contained a space.
+                ProcessBuilder jml4c = new ProcessBuilder(
+                        System.getProperty("java.home") + "/bin/java", "-Xmx2048m", "-XX:MaxPermSize=512m",
+                        "-jar", System.getProperty("user.dir") + FILE_SEP + "lib/stryker/jml4c.jar",
+                        "-nowarn", "-maxProblems", "9999999", "-cp", currentClasspath, tempFilename);
                 nanoPrev = System.currentTimeMillis();
-                Process p = Runtime.getRuntime().exec(command);
+                Process p = jml4c.start();
                 String errors = CharStreams.toString(new InputStreamReader(p.getErrorStream()));
                 p.waitFor();
                 StrykerStage.compilationMillis += System.currentTimeMillis() - nanoPrev;

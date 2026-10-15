@@ -420,7 +420,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
             }
 
             public String editFileToPassToNextStage(String filename) {
-                String classPackage = filename.substring(filename.indexOf(FILE_SEP+"a")+1, filename.lastIndexOf(FILE_SEP)).replaceAll(FILE_SEP, ".");
+                String classPackage = filename.substring(MuJavaController.batchPackageStart(filename), filename.lastIndexOf(FILE_SEP)).replaceAll(FILE_SEP, ".");
 
                 return classPackage+"."+MuJavaController.obtainClassNameFromFileName(filename);
             }

@@ -274,9 +274,11 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         if (junitFilename != null){
             String location = System.getProperty("user.dir") + System.getProperty("file.separator") + 
                     "generated" + System.getProperty("file.separator");
+            // Map the loaded class (package ar.edu.output.junit) back to its generated file; only
+            // the class name is rewritten, so the working directory may contain "output".
             while (index < StrykerStage.indexToLastJUnitInput && inputs[index] != null && 
-                    !((location + (inputs[index].getName())
-                            .replace(".", System.getProperty("file.separator")))
+                    !(location + inputs[index].getName()
+                            .replace(".", System.getProperty("file.separator"))
                             .replace("output", "generated")+".java").equals(junitFilename)){
                 index++;
             }
@@ -632,7 +634,7 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         String packageToWrite = "ar.edu.output.junit";
         String fileClasspath = tempFilename.substring(0, tempFilename.lastIndexOf(
                 new String("ar.edu.generated.junit").replaceAll("\\.", FILE_SEP)));
-        fileClasspath = fileClasspath.replaceFirst("generated", "output");
+        fileClasspath = TacoMain.replaceBelowWorkingDir(fileClasspath, "generated", "output", false);
         currentJunit = TacoMain.editTestFileToCompile(junitFile, classToCheck, packageToWrite, methodToCheck);
 
         File[] file1 = new File[]{new File(currentJunit)};

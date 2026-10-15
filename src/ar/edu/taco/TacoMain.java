@@ -610,7 +610,7 @@ public class TacoMain {
                     String tempFilename = junitFile.substring(0, junitFile.lastIndexOf(FILE_SEP)+1) /*+ FILE_SEP*/;
                     String packageToWrite = "ar.edu.output.junit";
                     String fileClasspath = tempFilename.substring(0, tempFilename.lastIndexOf(new String("ar.edu.generated.junit").replaceAll("\\.", FILE_SEP)));
-                    fileClasspath = fileClasspath.replaceFirst("generated", "output");
+                    fileClasspath = replaceBelowWorkingDir(fileClasspath, "generated", "output", false);
                     //					String currentClasspath = System.getProperty("java.class.path")+PATH_SEP+fileClasspath/*+PATH_SEP+System.getProperty("user.dir")+FILE_SEP+"generated"*/;
                     currentJunit = editTestFileToCompile(junitFile, classToCheck, packageToWrite, methodToCheck);
 
@@ -716,14 +716,43 @@ public class TacoMain {
         return manifestAttributeValue;
     }
 
+    /**
+     * Replaces {@code target} with {@code replacement} only in the part of {@code path} below
+     * the working directory (the repository root). Counterexample tests live under
+     * {@code generated/} and their adapted copies under {@code output/}; rewriting the whole
+     * absolute path broke every run whose repository path itself contained "generated".
+     * Paths outside the working directory are rewritten as a whole, as before.
+     *
+     * @param all replace every occurrence, or only the first one
+     */
+    public static String replaceBelowWorkingDir(String path, String target, String replacement, boolean all) {
+        String root = System.getProperty("user.dir");
+        String prefix = "";
+        String rest = path;
+        if (path.startsWith(root)) {
+            prefix = root;
+            rest = path.substring(root.length());
+        }
+        if (all) {
+            return prefix + rest.replace(target, replacement);
+        }
+        int index = rest.indexOf(target);
+        if (index < 0) {
+            return path;
+        }
+        return prefix + rest.substring(0, index) + replacement + rest.substring(index + target.length());
+    }
+
     public static String editTestFileToCompile(String junitFile, String sourceClassName, String classPackage, String methodName) {
         String tmpDir = junitFile.substring(0, junitFile.lastIndexOf(FILE_SEP));
-        tmpDir = tmpDir.replaceAll("generated", "output");
+        tmpDir = replaceBelowWorkingDir(tmpDir, "generated", "output", true);
         File destFile = new File(tmpDir,obtainClassNameFromFileName(junitFile)+ /*"_temp" +*/ ".java");
         String packageSentence = "package "+classPackage+";\n";
         int posLastUnderscore = methodName.lastIndexOf("_");
         methodName = methodName.substring(0, posLastUnderscore);
         try {
+            // output/ is not versioned, so it does not exist in a fresh checkout.
+            destFile.getParentFile().mkdirs();
             destFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(destFile);
             boolean packageAlreadyWritten = false;

@@ -111,7 +111,7 @@ After downloading all repositories, the script will compile **dynalloy4**, use t
 
 _(^) You may need to give the script execution permissions via executing `chmod +x setupTACO.sh`._
 
-_(^^) TACO already has a `mujava++.jar` included, unless needed there is no need to download muJava++ and OJ._
+_(^^) TACO already includes muJava++ and OJ as `lib/mujava2018.jar` and `lib/openjava2018.jar`, so unless needed there is no need to download them._
 
 ## Importing TACO into Eclipse
 

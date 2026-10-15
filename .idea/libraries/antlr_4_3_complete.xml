@@ -14,8 +14,9 @@
       <root url="jar://$PROJECT_DIR$/lib/junit-4.8.2.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/junit.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.15.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/mujava++.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mujava2018.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/objenesis-2.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/openjava2018.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.contenttype_3.4.200.v20120523-2004.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/org.eclipse.core.resources_3.8.0.v20120522-2034.jar!/" />
@@ -31,7 +32,8 @@
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib/mujava++.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mujava2018.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/openjava2018.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -32,8 +32,9 @@
 	        <pathelement location="./lib/junit-4.8.2.jar" />
 	        <pathelement location="./lib/junit.jar" />
 	        <pathelement location="./lib/log4j-1.2.15.jar" />
-	        <pathelement location="./lib/mujava++.jar" />
+	        <pathelement location="./lib/mujava2018.jar" />
 	        <pathelement location="./lib/objenesis-2.6.jar" />
+	        <pathelement location="./lib/openjava2018.jar" />
 	        <pathelement location="./lib/org.eclipse.core.contenttype_3.4.200.v20120523-2004.jar" />
 	        <pathelement location="./lib/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar" />
 	        <pathelement location="./lib/org.eclipse.core.resources_3.8.0.v20120522-2034.jar" />

@@ -3,7 +3,7 @@
 # This script will download all repositories used by TACO and leave a comitaco project ready to load into an IDE*
 # Usage is
 # ./setupTACO.sh [full]
-# If full is specified it will also download mujava++ and OJ repositories, if not, then the mujava++.jar inside comitaco/lib will be used instead
+# If full is specified it will also download mujava++ and OJ repositories, if not, then the mujava2018.jar and openjava2018.jar inside TACO/lib will be used instead
 # (*) If you use Eclipse take into account this issue (https://bugs.eclipse.org/bugs/show_bug.cgi?id=574362) that prevent the usage of java 7 or older
 #     with the latest version of Eclipse (4.20+).
 

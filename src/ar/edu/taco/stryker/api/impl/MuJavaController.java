@@ -220,7 +220,17 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
     private int getFeedbackIndex(Integer mutID, List<Integer> curLineNumbersList, List<Integer> mutableLines) {
         int lineNumber = mutableLines.get(mutID);
 
-        return curLineNumbersList.indexOf(lineNumber);
+        // Positions count from the bottom-most line, so a line's position is the number of
+        // current mutable lines below it. Unlike indexOf, this also works when the line has no
+        // mutations left in this father (indexOf returned -1 and the same candidate was queued
+        // again); the jump then carries to the next line above.
+        int position = 0;
+        for (Integer line : curLineNumbersList) {
+            if (line > lineNumber) {
+                position++;
+            }
+        }
+        return position;
     }
 
     protected static ImmutablePair<List<Mutation>, Integer[]> calculateNextRelevantSonMutationsLists(

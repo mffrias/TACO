@@ -1206,6 +1206,11 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
         classToMutate = obtainClassNameFromFileName(father.getFilename());
 
+        // The feedback of the failed candidate justifies one jump, from that candidate. If the
+        // sibling it leads to is skipped below (duplicate or non-compiling), continue from it
+        // with a plain increment: re-applying the jump would also skip siblings that nothing
+        // has ruled out.
+        boolean applyFeedback = true;
         //Encolo el hijo
         while (true) {
             log.debug("Generating mutants...");
@@ -1216,13 +1221,15 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
                 return; //No tiene mas mutaciones posibles, es una hoja del arbol de mutaciones.
             }
 
-            int feedbackIndex = (input.getMuJavaFeedback() == null || input.getMuJavaFeedback().getSkipUntilMutID() == null) ? 0 : getFeedbackIndex(
+            int feedbackIndex = (!applyFeedback || input.getMuJavaFeedback() == null || input.getMuJavaFeedback().getSkipUntilMutID() == null) ? 0 : getFeedbackIndex(
                     input.getMuJavaFeedback().getSkipUntilMutID(), mutatorsData.getRight().getLeft(), input.getMuJavaFeedback().getMutableLines());
 
             ImmutablePair<List<Mutation>, Integer[]> nextRelevantSiblingMutationsLists = 
                     calculateNextRelevantSonMutationsLists(lineMutationIndexes.clone(), mutatorsList, 
-                            feedbackIndex, mutatorsData.getRight().getRight(), input.getMuJavaFeedback().isMutateRight(), 
-                            input.getMuJavaFeedback().isUNSAT(), father.getMuJavaFeedback().getNonCompilableIndexes());
+                            feedbackIndex, mutatorsData.getRight().getRight(),
+                            applyFeedback ? input.getMuJavaFeedback().isMutateRight() : true,
+                            applyFeedback && input.getMuJavaFeedback().isUNSAT(), father.getMuJavaFeedback().getNonCompilableIndexes());
+            applyFeedback = false;
 
             //tengo que borrar los que se saltearon. Los computo primero:
             List<Integer[]> skipped = Lists.newArrayList();

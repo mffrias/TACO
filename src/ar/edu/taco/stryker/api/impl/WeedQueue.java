@@ -1,8 +1,10 @@
 package ar.edu.taco.stryker.api.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ar.edu.taco.stryker.api.impl.input.DarwinistInput;
 import ar.edu.taco.stryker.api.impl.input.MuJavaInput;
@@ -19,6 +21,9 @@ public final class WeedQueue<A, B, C> {
         private final BlockingQueue<T> queue = new LinkedBlockingQueue<T>();
         private T current;
 
+        /** Work items enqueued and not yet acked: queued, being taken, or in flight. */
+        private final AtomicInteger outstanding = new AtomicInteger();
+
         public synchronized T take() throws InterruptedException {
             if (current != null) {
                 return current;
@@ -29,6 +34,7 @@ public final class WeedQueue<A, B, C> {
         }
 
         public void enqueue(T elem) {
+            outstanding.incrementAndGet();
             queue.add(elem);
         }
 
@@ -38,15 +44,16 @@ public final class WeedQueue<A, B, C> {
                 throw new IllegalStateException("Cannot acknoledge null current value");
             }
             current = null;
+            outstanding.decrementAndGet();
             return queue.size();
         }
 
         public int size() {
-            return queue.size() + ((current == null) ? 0 : 1);
+            return outstanding.get();
         }
 
         public void clear() {
-            queue.clear();
+            outstanding.addAndGet(-queue.drainTo(new ArrayList<T>()));
         }
 
     }

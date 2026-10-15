@@ -619,7 +619,7 @@ public class TacoMain {
                     StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
                     Iterable<? extends JavaFileObject> compilationUnit1 =
                             fileManager.getJavaFileObjectsFromFiles(Arrays.asList(file1));
-                    javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
+                    Boolean compiled = javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
                     fileManager.close();
                     javaCompiler = null;
                     file1 = null;
@@ -628,7 +628,11 @@ public class TacoMain {
                     ///*mfrias*/		int compilationResult =	javaCompiler.run(null, null, null /*new NullOutputStream()*/, new String[]{"-classpath", currentClasspath, currentJunit});
                     ///**/				javaCompiler = null;
                     //					if(compilationResult == 0) {
-                    log.warn("junit counterexample compilation succeded");
+                    if (Boolean.TRUE.equals(compiled)) {
+                        log.warn("junit counterexample compilation succeded");
+                    } else {
+                        log.error("The counterexample test " + currentJunit + " does not compile, so the counterexample is not added to the pool. See the compiler errors above.");
+                    }
                     ClassLoader cl = ClassLoader.getSystemClassLoader();
                     @SuppressWarnings("resource")
                     ClassLoader cl2 = new URLClassLoader(new URL[]{new File(fileClasspath).toURI().toURL()}, cl);
@@ -796,79 +800,83 @@ public class TacoMain {
                         && !translatingGetInstance){
                     //		          str = "        try {";
                     //		          fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           String[] classpaths = fileClasspath.split(System.getProperty(\"path.separator\"));";
+                    // The test method also declares the parameters of the method under test as locals
+                    // (e.g. "int c = -6;" for IntroClass's median(int a, int b, int c)), so the locals
+                    // introduced here carry a "stryker" prefix: a clash makes the test fail to compile
+                    // and the counterexample is lost.
+                    str = "           String[] strykerClasspaths = fileClasspath.split(System.getProperty(\"path.separator\"));";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           URL[] urls = new URL[classpaths.length];";
+                    str = "           URL[] strykerUrls = new URL[strykerClasspaths.length];";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           for (int i = 0 ; i < classpaths.length ; ++i) {";
+                    str = "           for (int i = 0 ; i < strykerClasspaths.length ; ++i) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "              urls[i] = new File(classpaths[i]).toURI().toURL();";
+                    str = "              strykerUrls[i] = new File(strykerClasspaths[i]).toURI().toURL();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           }";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           ClassLoader cl2 = new URLClassLoader(urls);";
+                    str = "           ClassLoader strykerLoader = new URLClassLoader(strykerUrls);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     //		          str = "           ClassLoaderTools.addFile(fileClasspath);";
                     //		          fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           Class<?> clazz = cl2.loadClass(className);";
+                    str = "           Class<?> clazz = strykerLoader.loadClass(className);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           Constructor<?>[] c = clazz.getDeclaredConstructors();";
+                    str = "           Constructor<?>[] strykerConstructors = clazz.getDeclaredConstructors();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           " + sourceClassName + " instance = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	Class<?>[] parameterTypes = null;";
+                    str = "           	Class<?>[] strykerParameterTypes = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	Object[] paramValues = null;";
+                    str = "           	Object[] strykerParamValues = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	Constructor<?> co = null;";
+                    str = "           	Constructor<?> strykerConstructor = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           if (c.length > 0) {";
+                    str = "           if (strykerConstructors.length > 0) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	co = c[0];";
+                    str = "           	strykerConstructor = strykerConstructors[0];";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	co.setAccessible(true);";
+                    str = "           	strykerConstructor.setAccessible(true);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	parameterTypes = co.getParameterTypes();";
+                    str = "           	strykerParameterTypes = strykerConstructor.getParameterTypes();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	paramValues = new Object[co.getParameterTypes().length];";
+                    str = "           	strykerParamValues = new Object[strykerConstructor.getParameterTypes().length];";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "             for (int paramIndexer = 0; paramIndexer<parameterTypes.length; paramIndexer++){";
+                    str = "             for (int paramIndexer = 0; paramIndexer<strykerParameterTypes.length; paramIndexer++){";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           		if (parameterTypes[paramIndexer].isPrimitive()){";
+                    str = "           		if (strykerParameterTypes[paramIndexer].isPrimitive()){";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           			String typeSimpleName = parameterTypes[paramIndexer].getSimpleName();";
+                    str = "           			String typeSimpleName = strykerParameterTypes[paramIndexer].getSimpleName();";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           			if (typeSimpleName.equals(\"boolean\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                         paramValues[paramIndexer] = false;";
+                    str = "                         strykerParamValues[paramIndexer] = false;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"byte\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"char\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"double\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0.0d;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0.0d;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"float\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0.0f;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0.0f;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"int\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"long\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0L;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0L;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else if (typeSimpleName.endsWith(\"short\")) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "                       	paramValues[paramIndexer] = 0;";
+                    str = "                       	strykerParamValues[paramIndexer] = 0;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "                     } else {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
@@ -878,7 +886,7 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           		} else {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           			paramValues[paramIndexer] = null;";
+                    str = "           			strykerParamValues[paramIndexer] = null;";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           		}";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
@@ -886,11 +894,11 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	try {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "             	String dataCall = co.getName() + Arrays.toString(paramValues);";
+                    str = "             	String dataCall = strykerConstructor.getName() + Arrays.toString(strykerParamValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 //                    str = "             	System.out.println(dataCall);";
 //                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	    instance = co.newInstance(paramValues);";
+                    str = "           	    instance = strykerConstructor.newInstance(strykerParamValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	} catch (InstantiationException e) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
@@ -919,11 +927,11 @@ public class TacoMain {
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	try {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "             	String dataCall = co.getName() + Arrays.toString(paramValues);";
+                    str = "             	String dataCall = strykerConstructor.getName() + Arrays.toString(strykerParamValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
 //                    str = "             	System.out.println(dataCall);";
 //                    fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
-                    str = "           	   " + objectName + " = co.newInstance(paramValues);";
+                    str = "           	   " + objectName + " = strykerConstructor.newInstance(strykerParamValues);";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));
                     str = "           	} catch (InstantiationException e) {";
                     fos.write((str + "\n").getBytes(Charset.forName("UTF-8")));

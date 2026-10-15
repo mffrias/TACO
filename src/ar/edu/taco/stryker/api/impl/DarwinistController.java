@@ -670,7 +670,10 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> compilationUnit1 =
                 fileManager.getJavaFileObjectsFromFiles(Arrays.asList(file1));
-        javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
+        Boolean compiled = javaCompiler.getTask(null, fileManager, null, null, null, compilationUnit1).call();
+        if (!Boolean.TRUE.equals(compiled)) {
+            log.error("The counterexample test " + currentJunit + " does not compile, so the counterexample is not added to the pool. See the compiler errors above.");
+        }
         try {
             fileManager.close();
         } catch (IOException e1) {

@@ -40,6 +40,7 @@ import org.multijava.mjc.JCompilationUnitType;
 import org.multijava.util.compiler.CompilationAbortedError;
 import org.multijava.util.compiler.CompilationAbortedException;
 
+import ar.edu.taco.Java7ClassLibrary;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.TacoException;
 
@@ -105,10 +106,16 @@ public class JmlParser {
         }
         //		sources.add(System.getProperty("user.dir") + FILE_SEP + "specs");
 
+        // The JML2 parser cannot read Java 8+ class files: on JDK 8 type checking stops at
+        // java.lang.CharSequence. Read a Java 7 class library instead, if there is one.
+        if (Java7ClassLibrary.isAvailable()) {
+            org.multijava.util.classfile.ClassPath.setBootClassPath(Java7ClassLibrary.path());
+        }
+
         JmlOptions options = new JmlOptions("jml");
 
         // Paths
-        String classPath = System.getProperty("java.class.path") + PATH_SEP + appClassPath + PATH_SEP
+        String classPath = Java7ClassLibrary.withoutJdkEntries(System.getProperty("java.class.path")) + PATH_SEP + appClassPath + PATH_SEP
                 + "D:/work/facu/Tesis/Workspace/dynjalloy/lib/jml-release.jar" + PATH_SEP;
 
         options.set_classpath(classPath);

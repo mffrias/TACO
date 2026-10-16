@@ -343,6 +343,10 @@ public class TacoMain {
         // Start configurator
         JDynAlloyConfig.reset();
         JDynAlloyConfig.buildConfig(configFile, overridingProperties);
+        // Without a Java 7 class library JML4C compiles no mutant and the repair never ends.
+        if (TacoConfigurator.getInstance().getAttemptToCorrectBug()) {
+            Java7ClassLibrary.checkForStryker();
+        }
 
         List<JDynAlloyModule> jdynalloy_modules = new ArrayList<JDynAlloyModule>();
         SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext;

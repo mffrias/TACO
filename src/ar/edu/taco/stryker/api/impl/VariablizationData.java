@@ -29,6 +29,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
+import ar.edu.taco.Java7ClassLibrary;
 import ar.edu.taco.stryker.api.impl.input.DarwinistInput;
 import ar.edu.taco.utils.FileUtils;
 
@@ -173,7 +174,7 @@ public class VariablizationData {
 
         parser.setEnvironment(new String[] {
                 System.getProperty("user.dir") + OpenJMLController.FILE_SEP + "bin", 
-                System.getProperty("java.home") + "/lib/rt.jar"
+                Java7ClassLibrary.path()
         }, 
         null, null, false);
         parser.setUnitName(variablizedFilename);

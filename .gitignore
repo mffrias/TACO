@@ -8,6 +8,8 @@ generated
 *_temp*
 *~
 bin
+# Java 7 class library for the JML tools on JDK 8 (scripts/fetch-java7-classlib.sh)
+lib/java7/
 .project
 .classpath
 mutation_log

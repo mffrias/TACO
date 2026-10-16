@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  * {@link Cancelled} and the run unwinds. A worker that does not stop within
  * {@link #GRACE_MILLIS}, because it is looping in code without checks (a helper class of the
  * subject, or the JDK), is stopped with {@code Thread.stop()} where the JVM still supports it,
- * and abandoned otherwise.
+ * and abandoned otherwise: {@code Thread.stop()} throws on Java 20 to 26, and Java 27 removed it.
  */
 public final class RacTimeout {
 
@@ -76,7 +76,9 @@ public final class RacTimeout {
      * Ends a RAC run that timed out and returns the executor to use from now on. Interrupts the
      * executor's worker and waits up to {@link #GRACE_MILLIS} for it to finish. If it does not,
      * the worker is stopped with {@code Thread.stop()} (Java 19 and earlier) or abandoned (Java 20
-     * and later, where it keeps running until the JVM exits).
+     * and later, where it keeps running until the JVM exits: {@code Thread.stop()} throws
+     * {@code UnsupportedOperationException} from Java 20 on, and Java 27 removed it, so the call
+     * fails with {@code NoSuchMethodError} there).
      *
      * @param executor the executor running the timed-out run; it is shut down
      * @param worker the thread running it, or {@code null} if unknown
@@ -97,7 +99,7 @@ public final class RacTimeout {
                 worker.stop();
                 log.warn("RAC run of " + what
                         + " did not stop when interrupted; stopped it with Thread.stop()");
-            } catch (UnsupportedOperationException e) {
+            } catch (UnsupportedOperationException | NoSuchMethodError e) {
                 log.warn("RAC run of " + what + " did not stop when interrupted, and this JVM has no "
                         + "Thread.stop(): abandoning its thread, which keeps running until the JVM exits");
             }

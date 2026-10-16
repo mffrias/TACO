@@ -78,10 +78,41 @@ import ar.uba.dc.rfm.dynalloy.ast.ProgramDeclaration;
 
 /**
  * <p>Runs the TACO analysis.</p>
- * <p>The configuration options must be stated through the configuration file
- * whose name expects the methods <code>ar.edu.taco.TacoMain.run</code>.
- * Those configurations can be overridden by the sencond argument of
+ * <p>The configuration options are read from the configuration file whose
+ * name is passed to <code>ar.edu.taco.TacoMain.run</code>.
+ * Those configurations can be overridden by the second argument of
  * <code>ar.edu.taco.TacoMain.run(String, Properties)</code>.</p>
+ * <h3>Pipeline</h3>
+ * <p>{@link #run(String, Properties)} translates the class under analysis in
+ * stages: Java and JML parsing, JML simplification, translation to JDynAlloy,
+ * JDynAlloy to DynAlloy, DynAlloy to Alloy and the Alloy analysis. A SAT
+ * result of a check is a counterexample to the method's contract. Optionally
+ * the counterexample is turned into a JUnit test and, when
+ * <code>attemptToCorrectBug</code> is set, the Stryker repair engine
+ * ({@link StrykerStage}) searches for a fix. While searching, Stryker calls
+ * <code>run</code> again, with <code>attemptToCorrectBug=false</code>, to
+ * verify fix candidates and to compute feedback.</p>
+ * <p>A <code>TacoMain</code> created with a non-null <code>inputToFix</code>
+ * map analyses the method with its input fixed to those values. Stryker's
+ * {@link ar.edu.taco.stryker.api.impl.DarwinistController} does so with a
+ * stored counterexample, for its feedback: {@link PrecompiledModules} adds the
+ * literals of the input's values, {@link JDynAlloyStage} turns the input into
+ * the precondition, and {@link DynalloyStage} translates the check for Stryker.
+ * <code>checkAndRunSpecIfFaulty</code> (<code>isCheckAndRunSpecAssertionSupport</code>)
+ * also passes one, to compute the spec's output for a hardcoded input; then
+ * PrecompiledModules and DynalloyStage do not apply Stryker's translation, and
+ * the JUnit step writes tests for the initial and the final state.</p>
+ * <h3>Environment</h3>
+ * <p>This TACO runs on Java 8. A Stryker run also needs a Java 7 class
+ * library for the JML tools ({@link Java7ClassLibrary}), and MiniSat 2.2
+ * (<code>-Ddynalloy.solver=minisat</code>): with DynAlloy's default solver,
+ * SAT4J, some checks of a fix do not finish. Relative paths such as
+ * <code>config/</code>, <code>generated/</code> and <code>output/</code>, and
+ * Stryker's <code>lib/stryker/jml4c.jar</code> and report files, are resolved
+ * against the working directory (<code>user.dir</code>), which must therefore
+ * be the repository root. Stryker keeps run-wide state in singletons and
+ * static fields that are never reset, so only one Stryker run per JVM is
+ * supported.</p>
  * <h3>Integers</h3>
  * <p>TACO can analyse code using Alloy integers or Java-like Integers.
  * In either case, the meaning of the bitwidth value is the same: a bound
@@ -337,10 +368,55 @@ public class TacoMain {
     }
 
     /**
+     * Runs one TACO analysis and, if requested and a bug is found, the Stryker repair.
      *
+     * <p>Steps, in order:
+     * <ol>
+     * <li>Builds the configuration from {@code configFile} and
+     *     {@code overridingProperties} ({@link JDynAlloyConfig#buildConfig}). With
+     *     {@code attemptToCorrectBug}, checks that Stryker can run
+     *     ({@link Java7ClassLibrary#checkForStryker()}) and throws
+     *     {@link IllegalStateException} otherwise.</li>
+     * <li>If {@code jmlParser.enabled} (default {@code true}): parses the class to check and the
+     *     configured classes under {@code jmlParser.sourcePathStr}, one file at a time, returning
+     *     {@code null} if one does not compile (the units are kept, see
+     *     {@link #getCompilationUnits()}); then simplifies JML ({@link JmlStage}), translates to
+     *     JDynAlloy ({@link SimpleJmlStage}, {@link JfslStage}) and prints the JDynAlloy
+     *     modules.</li>
+     * <li>Adds the built-in and static-field JDynAlloy modules ({@link PrecompiledModules}; for a
+     *     Stryker feedback check, with the literals of the fixed input), optionally parses
+     *     JDynAlloy files ({@code jdynalloy.parser.enabled}) and translates everything to
+     *     DynAlloy ({@link JDynAlloyStage}).</li>
+     * <li>If {@code dynalloy.toAlloy.enable}: translates to Alloy ({@link DynalloyStage}) and,
+     *     unless {@code noVerify}, runs the Alloy analysis ({@link AlloyStage}).</li>
+     * <li>If {@code generateUnitTestCase} or {@code attemptToCorrectBug}: without an
+     *     {@code inputToFix}, turns the counterexample, if any, into a JUnit test under
+     *     {@code generated/} ({@link SnapshotStage}, {@link JUnitStage}); with one (the
+     *     computation of the spec's output for a hardcoded input), writes tests for the initial
+     *     and the final state ({@link JUnitStageFinalState}). A {@link TacoException} there is
+     *     printed and ignored.</li>
+     * <li>If {@code buildJavaTrace} and the result is SAT: builds the Java trace.</li>
+     * <li>If {@code attemptToCorrectBug} and the result is SAT for a command starting with
+     *     {@code Check}: loads the JUnit counterexample into {@link StrykerStage#junitInputs}
+     *     and runs {@link StrykerStage#execute()}, which blocks until the search ends. The
+     *     outcome is only logged; the return value is still the original analysis.</li>
+     * </ol>
+     * The steps after the analysis assume that it ran: with {@code noVerify} or without
+     * {@code dynalloy.toAlloy.enable}, the {@code isSAT()} call of the JUnit step throws a
+     * {@link NullPointerException}.
+     * 
      * @param configFile
+     *            path of the TACO configuration file; must not be {@code null}
      * @param overridingProperties
-     *            Properties that overrides properties file's values
+     *            Properties that overrides properties file's values. For Stryker,
+     *            {@code methodToCheck} must be given here, with its parameter types
+     *            (e.g. {@code contains(java.lang.Object)}): the Stryker block reads it from these
+     *            properties only.
+     * @return the result of the Alloy analysis (of the original method, even if Stryker ran),
+     *         or {@code null} if the sources do not compile
+     * @throws IllegalArgumentException if {@code configFile} is {@code null}
+     * @throws IllegalStateException if {@code attemptToCorrectBug} is on and Stryker cannot run
+     *         on this JVM (see {@link Java7ClassLibrary#checkForStryker()})
      */
 
     @SuppressWarnings("unchecked")
@@ -613,19 +689,26 @@ public class TacoMain {
             log.info("****** generateJavaTrace=false ******* ");
         }
 
+        // STRYKER: only for a bug, i.e. a SAT result of a "Check" command.
         if (TacoConfigurator.getInstance().getAttemptToCorrectBug()) {
             if (tacoAnalysisResult.get_alloy_analysis_result().isSAT() &&
                     tacoAnalysisResult.get_alloy_analysis_result().getAlloy_solution().getOriginalCommand().startsWith("Check")) {
                 log.info("****** START: Stryker ****** ");
+                // Read from the overriding properties only (e.g. "contains(java.lang.Object)"); StrykerStage keeps the plain name.
                 methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
                 String sourceRootDir = TacoConfigurator.getInstance().getString(
                         TacoConfigurator.JMLPARSER_SOURCE_PATH_STR);
                 StrykerStage strykerStage = new StrykerStage(compilation_units, sourceRootDir, classToCheck,
                         methodToCheck, configFile, overridingProperties,
                         TacoConfigurator.getInstance().getMaxStrykerMethodsForFile());
+                // Counterexample pool shared with the Stryker controllers, with room for 50 tests.
+                // indexToLastJUnitInput is not reset here.
                 StrykerStage.junitInputs = new Class<?>[StrykerStage.MAX_COUNTEREXAMPLES];
                 StrykerStage.junitFiles = new String[StrykerStage.MAX_COUNTEREXAMPLES];
 
+                // Load the JUnit counterexample of this analysis into the pool: rewrite it into
+                // output/ (package ar.edu.output.junit, see editTestFileToCompile), compile the copy
+                // in place, load it from output/ and record the original file and its MD5 digest.
                 try {
                     String currentJunit = null;
 
@@ -710,6 +793,9 @@ public class TacoMain {
                     //							e.printStackTrace();
                 }
 
+                // Failures above are swallowed (and the javac result is not checked): Stryker runs
+                // anyway, but with an empty pool OpenJMLController attempts no counterexample, so no
+                // mutant ever reaches DarwinistController. Blocks until the search ends.
                 strykerStage.execute();
 
                 log.info("****** FINISH: Stryker ****** ");
@@ -769,6 +855,50 @@ public class TacoMain {
         return prefix + rest.substring(0, index) + replacement + rest.substring(index + target.length());
     }
 
+    /**
+     * Rewrites a generated JUnit counterexample so that it can run against any compiled
+     * version of the class under test, in particular Stryker's JML4C-compiled mutant batches.
+     * Used by {@link #run(String, Properties)} for the first counterexample and by
+     * {@link ar.edu.taco.stryker.api.impl.DarwinistController} for later ones.
+     *
+     * <p>The copy keeps the file name and goes to the original's directory with every
+     * {@code generated} in the path replaced by {@code output}, e.g.
+     * {@code generated/ar/edu/generated/junit/X.java} becomes
+     * {@code output/ar/edu/output/junit/X.java} (directories are created if missing). Line by
+     * line, the rewrite:
+     * <ul>
+     * <li>replaces the package declaration with {@code package <classPackage>;} plus the
+     *     imports the new code needs;</li>
+     * <li>changes the {@code @Test} method to take
+     *     {@code (String fileClasspath, String className, String methodName)} and to declare
+     *     the reflection exceptions;</li>
+     * <li>after the {@code //endGetInstance} marker, replaces the first
+     *     {@code new <sourceClassName>(...)} with code that loads {@code className} through a
+     *     new {@link URLClassLoader} over the {@code fileClasspath} entries and instantiates it
+     *     with its first declared constructor and default arguments ({@code false}, zero or
+     *     {@code null}); later such lines reuse that constructor;</li>
+     * <li>makes the reflective lookup helpers take the loaded {@code Class<?>} instead of a
+     *     class name, and, on lines that mention the class under test, replaces the class and
+     *     method name literals with {@code clazz} and {@code methodName};</li>
+     * <li>replaces {@code e.printStackTrace();} with
+     *     {@code throw(new java.lang.RuntimeException(e));}, so that an exception raised by the
+     *     method under test, including a JML RAC error, propagates out of the test instead of
+     *     being swallowed ({@link ar.edu.taco.stryker.api.impl.OpenJMLController} relies on
+     *     this); widens {@code catch (ClassNotFoundException e)} to {@code catch (Exception e)};
+     *     and clears {@code instance} and {@code method} after the invocation.</li>
+     * </ul>
+     * The rewrite depends on the exact layout written by
+     * {@link ar.edu.taco.junit.UnitTestBuilder} and {@link ar.edu.taco.junit.JUnitPrettyPrinter}.
+     * I/O errors are printed, not thrown.
+     *
+     * @param junitFile path of the generated test (under a {@code generated} directory)
+     * @param sourceClassName the class under test as written in the test; callers pass the
+     *        fully qualified {@code classToCheck}
+     * @param classPackage package of the copy ({@code ar.edu.output.junit} in all callers)
+     * @param methodName the {@code methodToCheck} (e.g. {@code contains(java.lang.Object)});
+     *        its plain name ({@link MethodToCheck#methodName}) is what is matched
+     * @return the path of the copy, returned even if writing it failed
+     */
     public static String editTestFileToCompile(String junitFile, String sourceClassName, String classPackage, String methodName) {
         String tmpDir = junitFile.substring(0, junitFile.lastIndexOf(FILE_SEP));
         tmpDir = replaceBelowWorkingDir(tmpDir, "generated", "output", true);

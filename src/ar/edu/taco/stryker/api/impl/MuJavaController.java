@@ -56,14 +56,105 @@ import mujava.app.Mutator;
 import openjava.ptree.CompilationUnit;
 import openjava.ptree.ParseTreeException;
 
+/**
+ * Main mutation stage of Stryker: explores the (higher-order) mutants of every base
+ * program, choosing which sibling to generate next from the feedback computed for
+ * the previous one.
+ *
+ * <p><b>Inputs (queue 1 of {@link StrykerStage#weedQueue}).</b> The worker thread takes
+ * items with {@code takeFrom1()} and acknowledges them with {@code ack(0)}. An item is
+ * one of:
+ * <ul>
+ * <li>a new base sent by {@link UnskippableMuJavaController} (the original program or one
+ *     combination of "unskippable" left-hand-side mutations). It has no
+ *     {@link MuJavaFeedback} and becomes a first-generation father;</li>
+ * <li>a mutant sent back by {@link OpenJMLController} (RAC) or {@link DarwinistController}
+ *     (TACO) with a {@link MuJavaFeedback} telling whether to queue its next sibling
+ *     ({@code isGetSibling()}), from which position to advance
+ *     ({@code getSkipUntilMutID()}) and whether it may become a father itself
+ *     ({@code isFatherable()});</li>
+ * <li>a feedback request ({@link MuJavaInput#isComputateFeedback()}): this thread runs
+ *     {@link DarwinistController#computateFeedback} (variabilization) and then handles the
+ *     resulting mutant as in the previous case.</li>
+ * </ul>
+ *
+ * <p><b>Outputs.</b> Generated mutants go to the RAC stage through queue 2
+ * ({@code enqueue2}), one at a time per father: {@link #fatherize} queues the first child
+ * and every later sibling is queued by {@link #queueNextRelevantSibling} only when the
+ * outcome of the previous one comes back to queue 1.
+ *
+ * <p><b>Mutation space.</b> Only mutations that affect a single line of the method and
+ * are accepted by {@link #isSkippeableLeftMutation} are used here; the complementary
+ * left-hand-side mutations are enumerated by {@link UnskippableMuJavaController}. Mutable
+ * lines are the lines MuJava mutates (those annotated {@code //mutGenLimit N} with
+ * {@code N > 0} in the subject); there is no automatic fault localization. A child of a
+ * father is identified by an {@code Integer[] lineMutationIndexes} with one position per
+ * mutable line: position 0 is the bottom-most mutable line and the least significant
+ * position; value 0 leaves the line unchanged and a value {@code v > 0} selects
+ * {@code row[row.length - v]} of that line's row in the mutation matrix built by
+ * {@link #getMutatorsList} (rows are in ascending line order, so position {@code i} uses
+ * row {@code n - 1 - i}). Siblings are visited by advancing this array like a counter
+ * with carry, possibly jumping ahead according to the feedback (thesis, Chapter 3,
+ * "Pruning along mutations traversal"); see
+ * {@link #calculateNextRelevantSonMutationsLists}.
+ *
+ * <p><b>Batches and files.</b> Children are materialized in batches of
+ * {@link #batchSize} by {@link #buildNextBatchSiblingsFile}: MuJava writes each mutant, the
+ * batch is merged into one wrapper class whose methods are the mutated versions of the
+ * method under repair, copied into a JML4C package and compiled with an external
+ * {@code java -jar lib/stryker/jml4c.jar} process; non-compiling methods are dropped.
+ * The copy of each new base, the output of each MuJava run and each batch wrapper get their
+ * own directory under {@code java.io.tmpdir} (see {@link #createWorkingDirectory()}). Apart
+ * from duplicate mutants, nothing is deleted during the run (the deletion code is commented
+ * out), so these files accumulate.
+ *
+ * <p><b>Threading and lifecycle.</b> Singleton ({@link #getInstance()}) started by
+ * {@link SimpleStrykerAPI#start()}, with one worker thread ({@link #getQtyOfThreads()}).
+ * The {@link AbstractBaseController} queue inherited by this class is not read.
+ * After each item the thread acks queue 1; when the ack reports that nothing is queued
+ * or being processed in any of the three queues it shuts all controllers down, which is
+ * how a run ends once the search space is exhausted. {@link UnskippableMuJavaController}
+ * calls {@link #buildNextBatchSiblingsFile} on this instance from its own thread; the
+ * fields it uses ({@link #jmlInputs}, {@link #filesHash}, {@link #classToMutate},
+ * {@link #privateI}) are not synchronized, but in the normal flow that controller has
+ * finished generating before this one receives its first input. {@link #fathers} and
+ * {@link #filesHash} are never pruned and grow for the whole run.
+ *
+ * <p><b>Configuration.</b> {@link #feedbackOn}, {@link #fatherizationPruningOn} and
+ * {@link #finishOnFirstFix} are public static flags, mostly read by the other
+ * controllers. They are not bound to any configuration property: change them in code.
+ *
+ * <p><b>Quirks.</b> The worker loop only catches {@link InterruptedException}: any other
+ * exception ends the thread without acking the current item, after which the run can no
+ * longer end by exhaustion. Paths are assumed to use '/' ({@link #obtainClassNameFromFileName},
+ * and {@code FILE_SEP} is used as a regular expression).
+ */
 public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     //	private static AtomicInteger compilationFailCount = new AtomicInteger(0);
 
+    /**
+     * If {@code true}, a mutant that fails RAC ({@link OpenJMLController}), or for which TACO
+     * finds a counterexample ({@link DarwinistController}), comes back to queue 1 as a
+     * feedback request, so its next sibling is chosen with variabilization-based pruning. If
+     * {@code false}, it comes back with plain settings (no skip position, fatherable), so
+     * siblings are visited one by one. Also printed in the report header.
+     */
     public static boolean feedbackOn = true;
 
+    /**
+     * If {@code true}, {@link DarwinistController} uses the variabilization result to decide
+     * whether a rejected mutant may still become a father
+     * ({@link MuJavaFeedback#setFatherable(boolean)}); if {@code false}, every such mutant is
+     * marked fatherable.
+     */
     public static boolean fatherizationPruningOn = true;
 
+    /**
+     * If {@code true}, {@link DarwinistController} shuts all controllers down as soon as the
+     * first fix is found. If {@code false}, the fix is sent back to queue 1 (fatherable,
+     * requesting its next sibling) and the search continues.
+     */
     public static boolean finishOnFirstFix = true;
 
     private static final String FILE_SEP = System.getProperty("file.separator");
@@ -75,27 +166,54 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     private static final int NOT_PRESENT = -1;
 
+    /**
+     * Maximum number of non-duplicate mutants merged into one batch wrapper file by
+     * {@link #buildNextBatchSiblingsFile}. {@link UnskippableMuJavaController} has its own
+     * constant with the same value.
+     */
     private static final int batchSize = 100;
 
     private static MuJavaController instance;
 
     private static Logger log = Logger.getLogger(MuJavaController.class);
 
+    /** Counter used to name the {@code aOpenJMLInWrap<i>} batch directories. */
     private int privateI = 0;
 
     //    private int ownI = 0;
 
+    /**
+     * Only used as the initial capacity of {@link #jmlInputs} when the singleton is
+     * constructed, so {@link #setMaxMethodsInFile(int)} has no effect.
+     */
     private int maxMethodsInFile = 1;
 
     //    private Map<String, Integer> filenameToMutatedLine = Maps.newConcurrentMap();
+    /**
+     * MD5 digests of every mutant registered so far, across all fathers of this controller
+     * and of {@link UnskippableMuJavaController}, used by {@link #mutateWithoutCompiling} to
+     * discard duplicates. Values are file paths only when {@link #EXTRA_DUPLICATES_CHECK} is
+     * on, and empty strings otherwise.
+     */
     private Map<MsgDigest, String> filesHash = Maps.newHashMap();
 
+    /** Scratch list holding the mutants of the batch being built. */
     protected List<OpenJMLInput> jmlInputs = new ArrayList<OpenJMLInput>(maxMethodsInFile);
 
+    /** Scratch field: simple class name of the file currently being mutated. */
     private String classToMutate;
 
+    /**
+     * Every father registered by {@link #fatherize}, in registration order; entries are never
+     * removed. {@link MuJavaFeedback#getFatherIndex()} of a mutant is its father's index in this
+     * list ({@link OpenJMLController}, {@link WeedQueue} and the final report read it too).
+     */
     private List<MuJavaInput> fathers = Lists.newArrayList();
 
+    /**
+     * Has no effect: {@code maxMethodsInFile} is only read when the singleton is constructed.
+     * Called by {@link SimpleStrykerAPI#fixBug}.
+     */
     public void setMaxMethodsInFile(int maxMethodsInFile) {
         this.maxMethodsInFile = maxMethodsInFile;
     }
@@ -111,6 +229,24 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     }
 
+    /**
+     * Returns the worker loop. For each item taken from queue 1 it:
+     * <ol>
+     * <li>if the item is a feedback request ({@link MuJavaInput#isComputateFeedback()}),
+     *     replaces it with the result of {@link DarwinistController#computateFeedback}, run in
+     *     this thread (the method is synchronized on the {@link DarwinistController} instance,
+     *     so it never overlaps with that controller's candidate validation);</li>
+     * <li>if the item's feedback requests a sibling, calls {@link #queueNextRelevantSibling};</li>
+     * <li>if the item has no feedback (a new base) or is fatherable, calls {@link #fatherize};
+     *     otherwise increments {@link StrykerStage#prunedFathers};</li>
+     * <li>acks queue 1 and, if no item is left queued or being processed in any queue, shuts
+     *     down all four controllers.</li>
+     * </ol>
+     * The loop ends when the controller shuts down (the blocking take is interrupted).
+     * If {@code computateFeedback} throws, the exception is only logged and the placeholder
+     * input (no feedback, null file name) goes on to {@link #fatherize} as if it were a new
+     * base, which appears to end the thread with a {@link NullPointerException}.
+     */
     @Override
     protected Runnable getRunnable() {
         return new Runnable() {
@@ -157,6 +293,7 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         };
     }
 
+    /** One worker thread: the traversal state kept in this instance is not thread-safe. */
     @Override
     protected int getQtyOfThreads() {
         return 1;
@@ -178,6 +315,12 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return filename.lastIndexOf(FILE_SEP + "a", wrapperDir - 1) + 1;
     }
 
+    /**
+     * Returns the simple class name of a source file path: the part after the last '/'
+     * up to the last '.' (for example {@code /tmp/x/Foo.java} gives {@code Foo}). Only '/'
+     * is recognized as a separator. Also used by {@link OpenJMLController} and
+     * {@link DarwinistController}.
+     */
     protected static String obtainClassNameFromFileName(String fileName) {
         int lastBackslash = fileName.lastIndexOf("/");
         int lastDot = fileName.lastIndexOf(".");
@@ -194,6 +337,20 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return fileName.substring(lastBackslash, lastDot);
     }
 
+    /**
+     * Counts the combinations skipped by a jump from {@code prevLMI} to
+     * {@code lineMutationIndexes} and adds that number to {@link StrykerStage#prunedMutations}.
+     * Both arrays are read as mixed-radix numbers: position 0 is the least significant one
+     * and the radix of position {@code i} is the number of mutations of its line plus one
+     * (row {@code n - 1 - i} of {@code mutatorsList}). The skipped count is
+     * {@code |next - prev| - 1}, so a move to the immediate successor counts 0. The
+     * arithmetic uses {@code int} and can overflow for very large mutation spaces.
+     *
+     * @param prevLMI index array before the move
+     * @param lineMutationIndexes index array after the move
+     * @param mutatorsList the father's mutation matrix (rows in ascending line order)
+     * @return {@code true} if at least one combination was skipped
+     */
     public static boolean calculatePrunedMutations(Integer prevLMI[], Integer lineMutationIndexes[], Mutation mutatorsList[][]) {
         int prev = 0;
         for (int i = prevLMI.length - 1; i >= 0; --i) {
@@ -218,6 +375,24 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return (Math.abs(next - prev) - 1) > 0;
     }
 
+    /**
+     * Converts the feedback of a variabilization into the position of the current index
+     * array at which the traversal must advance (the value {@code k} returned by
+     * {@code getFeedback} in the thesis, Chapter 3).
+     *
+     * @param mutID 0-based index into {@code mutableLines}. {@link DarwinistController} stores
+     *        {@code lastVariablizedMutID - 1} in {@link MuJavaFeedback#getSkipUntilMutID()}
+     *        because the mutation IDs written into the variabilized source are 1-based
+     *        (negative IDs mark lines that must not be variabilized)
+     * @param curLineNumbersList the current father's mutable lines in descending order, as
+     *        returned by {@link #getMutatorsList} (element {@code i} is the line of position
+     *        {@code i})
+     * @param mutableLines mutable lines of the first-generation father, in ascending order
+     * @return the number of the current father's mutable lines below that line: its position
+     *         when it is mutable in the current father, and otherwise the position of the next
+     *         line above (the advance carries). Until 2026 this used {@code indexOf}, whose -1 for
+     *         a line with no mutations left made the same candidate be queued again
+     */
     private int getFeedbackIndex(Integer mutID, List<Integer> curLineNumbersList, List<Integer> mutableLines) {
         int lineNumber = mutableLines.get(mutID);
 
@@ -234,6 +409,52 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return position;
     }
 
+    /**
+     * Computes the next sibling to visit in a father's mutation space. The index array is
+     * advanced like a counter with carry starting at position {@code feedback}, and every
+     * lower position is reset to 0. This is the
+     * {@code setToZeroAllPositionsInRange(0, k - 1)} / {@code advanceOneStartingAtIndex(k)}
+     * step of the thesis' "Pruning along mutations traversal" (Chapter 3). With
+     * {@code feedback == 0} it yields the immediate successor.
+     *
+     * <p>Before advancing:
+     * <ul>
+     * <li>the highest position {@code i} whose current value is recorded in
+     *     {@code nonCompilableIndexes} (if any) raises the advance position to {@code i}, so
+     *     every remaining combination that keeps that choice is skipped;</li>
+     * <li>if {@code mutateRight == gaveUNSAT}, the starting value at the advance position is
+     *     raised to {@code R}, skipping the line's remaining "right" mutations;</li>
+     * <li>otherwise, if {@code !mutateRight && gaveUNSAT}, it is raised to {@code R + S},
+     *     skipping its remaining "right" and skippable "left" mutations.</li>
+     * </ul>
+     * ({@code R} and {@code S} come from {@code sideChangeIndexes}, see
+     * {@link #getMutatorsList}). While advancing, values recorded as non-compilable for the
+     * position are skipped (each one also increments {@link StrykerStage#prunedMutations}),
+     * and running past the last value of a position carries into the next one.
+     *
+     * <p>Side effects: adds the number of skipped combinations to
+     * {@link StrykerStage#prunedMutations} through {@link #calculatePrunedMutations} (so the
+     * non-compilable values skipped above are counted twice) and increments
+     * {@link StrykerStage#relevantFeedbacksFound} when the jump skipped something.
+     *
+     * @param lineMutationIndexes the current index array; it is modified in place and
+     *        returned, so callers pass a clone
+     * @param mutatorsList the father's mutation matrix (rows in ascending line order;
+     *        position {@code i} uses row {@code n - 1 - i})
+     * @param feedback position (0-based) at which to advance
+     * @param sideChangeIndexes per position, the pair {@code (R + S, R)} built by
+     *        {@link #getMutatorsList}
+     * @param mutateRight {@link MuJavaFeedback#isMutateRight()} of the previous sibling, set
+     *        from the variabilization result
+     * @param gaveUNSAT {@link MuJavaFeedback#isUNSAT()} of the previous sibling
+     * @param nonCompilableIndexes per position, the values known not to compile (kept in the
+     *        father's {@link MuJavaFeedback})
+     * @return the mutations to apply (one per non-zero position) and the new index array, or
+     *         {@code null} when the father's space is exhausted (the remaining combinations
+     *         are then counted as pruned). {@link ArrayIndexOutOfBoundsException} and
+     *         {@link NullPointerException} are logged and a pair with the partially updated
+     *         array, possibly with no mutations, is returned
+     */
     protected static ImmutablePair<List<Mutation>, Integer[]> calculateNextRelevantSonMutationsLists(
             Integer[] lineMutationIndexes, 
             Mutation[][] mutatorsList,
@@ -316,6 +537,13 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return new ImmutablePair<List<Mutation>, Integer[]>(ret, lineMutationIndexes);
     }
 
+    /**
+     * Returns the predecessor of {@code lineMutationIndexes} in traversal order (decrement
+     * with borrow; an all-zero array wraps around to the last combination). Callers use it
+     * so that the next call to {@link #calculateNextRelevantSonMutationsLists} with feedback 0
+     * yields {@code lineMutationIndexes} itself, e.g. to start a batch at a given sibling.
+     * The argument is not modified.
+     */
     Integer[] getPreviousIndexes(Integer[] lineMutationIndexes, Mutation[][] mutatorsList) {
 
         //TODO si se acaban tooodos los indices, que hacemos?? Creo que esto es cuando retorno null
@@ -333,6 +561,15 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return prevLMI;
     }
 
+    /**
+     * Decides which mutation-stage controller handles a mutation. Every operator other than
+     * PRVOL/PRVOL_SMART (the left-hand-side operators) is skippable; a PRVOL/PRVOL_SMART
+     * mutation is skippable only if it just changes the tail of the left-hand side of an
+     * assignment ({@code Mutation.isMutantATailChangeOfTheLeftSideOfAnAssignmentExpression()}).
+     * Skippable mutations are explored by this controller, where feedback may skip them;
+     * the rest are enumerated, without feedback, by {@link UnskippableMuJavaController},
+     * which filters with the negation of this predicate.
+     */
     protected static boolean isSkippeableLeftMutation(Mutation identifier) {
         if (!identifier.getMutOp().equals(MutationOperator.PRVOL) && !identifier.getMutOp().equals(MutationOperator.PRVOL_SMART)) {
             return true;
@@ -343,6 +580,26 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     //<[][], <[i1, i2, i3], [<j1,k1>, <j2,k2>...]>>
 
+    /**
+     * Groups mutations by affected line and lays them out as the mutation matrix used by the
+     * traversal.
+     *
+     * <p>There is one row per affected line, in ascending line order. Each row holds, in this
+     * order: the unskippable "left" mutations (PRVOL/PRVOL_SMART rejected by
+     * {@link #isSkippeableLeftMutation}), the skippable "left" ones, and the "right" ones
+     * (every other operator, guard mutations included). Since an index value {@code v > 0}
+     * selects {@code row[row.length - v]}, values {@code 1..R} select "right" mutations,
+     * {@code R+1..R+S} skippable "left" ones and higher values unskippable "left" ones, where
+     * {@code R} and {@code S} are the sizes of those groups.
+     *
+     * @param mutantIdentifiers the mutations to lay out (callers pass single-line mutations
+     *        already filtered by skippability)
+     * @return a pair whose left element is the matrix and whose right element is a pair of:
+     *         the mutable line numbers in <em>descending</em> order (element {@code i} is the
+     *         line of index-array position {@code i}), and, per position in the same order,
+     *         the pair {@code (R + S, R)} used as {@code sideChangeIndexes} by
+     *         {@link #calculateNextRelevantSonMutationsLists}
+     */
     protected static ImmutablePair<Mutation[][], Pair<List<Integer>, List<Pair<Integer, Integer>>>> getMutatorsList(List<Mutation> mutantIdentifiers) {
         Map<Integer, Pair<Pair<List<Mutation>, List<Mutation>>, List<Mutation>>> theMap = Maps.newTreeMap();
 
@@ -431,6 +688,39 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return new ImmutablePair<Mutation[][], Pair<List<Integer>, List<Pair<Integer, Integer>>>>(mutantIdentifiersList, new ImmutablePair<List<Integer>, List<Pair<Integer, Integer>>>(correctLineNumbersList, correctLeftIndexList));
     }
 
+    /**
+     * Registers {@code input} as a father, i.e. a program whose own mutants will be explored
+     * (higher-order mutation), and queues its first child to the RAC stage.
+     *
+     * <ol>
+     * <li>If {@code first}, removes the {@code //mutGenLimit 0} markers from the input file in
+     *     place ({@link StrykerJavaFileInstrumenter#cleanMutGenLimit0}) and copies the file into
+     *     a new temporary directory; the copy is the father's file. Otherwise the father's file
+     *     is the input file itself, after
+     *     {@link StrykerJavaFileInstrumenter#decrementUnmutatedLimits} has decremented in place
+     *     the {@code //mutGenLimit} counters of the mutable lines that the input's last mutation
+     *     did not touch.</li>
+     * <li>Runs MuJava on the input file and the method under repair with the input's operators
+     *     (sorted by name), writing into another new temporary directory; the time is added to
+     *     {@link StrykerStage#muJavaMillis}. Keeps the single-line mutations accepted by
+     *     {@link #isSkippeableLeftMutation} and builds the matrix with {@link #getMutatorsList}.
+     *     If nothing is left the input is a leaf and the method returns.</li>
+     * <li>Gives the father a {@link MuJavaFeedback} with an all-zero index array.
+     *     {@code mutableLines} are the first-generation father's lines (inherited through the
+     *     input's feedback when not {@code first}) and {@code curMutableLines} this father's
+     *     own. Appends it to {@link #fathers} (its index there becomes the father index of its
+     *     children) and builds its first batch with {@link #buildNextBatchSiblingsFile}.</li>
+     * <li>Stores the batch data in the father and calls {@link #queueNextRelevantSibling} with
+     *     a placeholder sibling positioned just before the first mutant of the batch, which
+     *     sends that mutant to queue 2.</li>
+     * </ol>
+     * {@link ClassNotFoundException}, {@link OpenJavaException} and {@link ParseTreeException}
+     * are printed and swallowed, and I/O errors while copying are ignored. If MuJava returns
+     * no entry for the method, a {@link NullPointerException} escapes.
+     *
+     * @param input the base or mutant to fatherize
+     * @param first {@code true} for a new base, which has no {@link MuJavaFeedback}
+     */
     public void fatherize(MuJavaInput input, boolean first) {
         File firstDir = null;
         File firstFile = null;
@@ -605,6 +895,29 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         }
     }
 
+    /**
+     * Adds a mutant already written by MuJava to the batch being built. Despite the name,
+     * nothing is mutated or compiled here (the "Compilation succeeded" log message is
+     * misleading).
+     *
+     * <p>Always increments {@link StrykerStage#mutationsGenerated}. If the mutant's MD5 digest
+     * is already in {@link #filesHash} it is a duplicate: its file is deleted,
+     * {@link StrykerStage#duplicateMutations} is incremented and {@code null} is returned.
+     * Otherwise the digest is recorded and the file is wrapped in an {@link OpenJMLInput}
+     * carrying a new {@link MuJavaFeedback} for the child (its index array and mutated lines,
+     * the father's matrix and mutable lines, {@code fatherIndex}), which is appended to
+     * {@link #jmlInputs} and returned.
+     *
+     * @param mutantIdentifier the mutant written by MuJava (path and MD5 digest)
+     * @param fileToMutate the father's file (only logged)
+     * @param muJavaInput the father
+     * @param fatherIndex index of the father in the calling controller's fathers list
+     * @param childLineMutationIndexes index array of the child
+     * @param mih MuJava data of the father, stored in the child's feedback
+     * @param mut MuJava mutator of the father, stored in the child's feedback
+     * @param lastMutatedLines lines changed by the child's mutations
+     * @return the new input, or {@code null} for a duplicate
+     */
     @SuppressWarnings("unused")
     protected OpenJMLInput mutateWithoutCompiling(
             MutantInfo mutantIdentifier, 
@@ -707,11 +1020,41 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     public static final String PATH_SEP = System.getProperty("path.separator");
 
+    /**
+     * Package suffix of the JML4C copy of a batch file. The full package is
+     * {@code a<d>.aOpenJMLInWrap<i>.ar.edu.itba.stryker.mutants} (see
+     * {@link #createJMLInputWrapper}).
+     */
     public static final String MUTANTS_DEST_PACKAGE = "ar.edu.itba.stryker.mutants";
 
     //    private static final String CLASSPATH = System.getProperty("java.class.path");
 
 
+    /**
+     * Writes a copy of a batch wrapper file into the given package directory, adapted so that
+     * JML4C can compile it and the RAC stage can run it:
+     * <ul>
+     * <li>the first line containing "package" is replaced by
+     *     {@code package <packageToWrite>;}. If a line containing "import" comes first, the
+     *     package line is written followed by the line after it, so that import line is lost.
+     *     Lines before either one are dropped;</li>
+     * <li>{@link StringsToWriteInFile#reachMethod}, a runtime implementation of {@code reach},
+     *     is inserted right after the opening brace of the first class;</li>
+     * <li>JML {@code \reach(o, T, f)} calls are rewritten as calls to that method,
+     *     {@code reach(o, T.class, "f")} (three arguments without nested parentheses are
+     *     assumed);</li>
+     * <li>the fully qualified name of the class under analysis (the {@code classToCheck}
+     *     setting with '_' replaced by '.') is rewritten to
+     *     {@code <packageToWrite>.<SimpleName>}, except on lines where it is followed by
+     *     "Node" (helper classes in the same package, e.g. {@code BinomialHeapNode}).</li>
+     * </ul>
+     *
+     * @param filename the batch wrapper file
+     * @param tempFilename destination directory, with a trailing separator; created if missing
+     * @param packageToWrite package of the copy
+     * @return the path of the copy (destination directory plus file name), returned even if
+     *         writing failed (I/O errors are only printed)
+     */
     protected static String adaptSiblingsFileToJML4C(String filename, String tempFilename, String packageToWrite) {
         String packageSentence = "package "+packageToWrite+";\n";
         String oldFullyQualifiedClassName = TacoConfigurator.getInstance().getClassToCheck().replace('_', '.');
@@ -848,6 +1191,13 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return tempFilename;
     }
 
+    /**
+     * Debugging helper: lists the canonical names of the classes loaded by
+     * {@code classLoader}, read by reflection from the private {@code ClassLoader.classes}
+     * field. Not called anywhere.
+     *
+     * @return the class names, or {@code null} if the field cannot be read
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<String> getLoadedClasses(final ClassLoader classLoader) {
         List<String> classNames = null;
@@ -867,6 +1217,65 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return classNames;
     }
 
+    /**
+     * Generates, merges and compiles the next batch of children of a father.
+     *
+     * <ol>
+     * <li><b>Generation.</b> Starting after {@code fromLineMutationIndexes}, repeatedly takes the
+     *     successor index array ({@link #calculateNextRelevantSonMutationsLists} with feedback 0,
+     *     which skips the father's known non-compilable indexes), has MuJava write the mutant
+     *     that applies all its mutations to a fresh copy of the father's AST, and registers it
+     *     with {@link #mutateWithoutCompiling}, which discards MD5 duplicates. Stops after
+     *     {@code batchSize} non-duplicate mutants or when the space is exhausted. The index keys
+     *     of duplicates are recorded so that callers skip them.</li>
+     * <li><b>Compilation.</b> Merges the batch into one class with
+     *     {@link #createJMLInputWrapper}, copies it into a JML4C package with
+     *     {@link #adaptSiblingsFileToJML4C} and compiles the copy in an external process,
+     *     {@code <java.home>/bin/java -jar <user.dir>/lib/stryker/jml4c.jar}: it uses the same
+     *     Java installation as Stryker, and the working directory must be the project root. The
+     *     classpath is jml4c.jar, the batch root and the current classpath minus the running
+     *     JDK's jars ({@link ar.edu.taco.Java7ClassLibrary#withoutJdkEntries}) and the Eclipse,
+     *     MuJava, Guava, Commons, ANTLR, javassist, recoder, reflections and jml-release jars.
+     *     JML4C reads the Java 7 class library ({@code -bootclasspath}, see
+     *     {@link ar.edu.taco.Java7ClassLibrary}) and gets {@code -XX:MaxPermSize} only on Java 7.
+     *     The time is added to {@link StrykerStage#compilationMillis}.</li>
+     * <li><b>Non-compiling mutants.</b> If compilation fails, the {@code "(at line N)"} errors
+     *     on stderr that mention the class are mapped to the wrapper method containing them, and
+     *     those mutants are removed from the batch. If an error's line, taken relative to the
+     *     start of its method, is one of the father's {@code curMutableLines} and the error is
+     *     not "Unreachable code", the value that mutant uses at that line's position is added to
+     *     the father's {@code nonCompilableIndexes}, so later traversals skip it. Then a new
+     *     wrapper is built (in a new temporary directory) from the remaining mutants and
+     *     compiled again. If no mutant is left, a new batch is started recursively, or
+     *     {@code null} is returned if the space was exhausted.</li>
+     * </ol>
+     * Statistics updated: {@link StrykerStage#mutationsGenerated} and
+     * {@link StrykerStage#duplicateMutations} (through {@link #mutateWithoutCompiling}),
+     * {@link StrykerStage#nonCompilableMutations}, {@link StrykerStage#compilationMillis} and
+     * {@link StrykerStage#nonCompilableMutationIndexesFound}. The last one is increased by the
+     * total size of all the father's non-compilable sets on every failed compilation, so it
+     * over-counts.
+     *
+     * <p>{@link UnskippableMuJavaController} also calls this method on this instance. Every
+     * exception is printed and swallowed; the method then returns {@code null} or the last
+     * wrapper built, which may be incomplete.
+     *
+     * @param father the father whose children are generated (must already have its mutators
+     *        data and {@link MuJavaFeedback})
+     * @param fatherIndex index of {@code father} in the calling controller's fathers list,
+     *        stored in the children's feedback
+     * @param batchSize maximum number of non-duplicate mutants in the batch
+     * @param fromLineMutationIndexes the batch starts at the successor of this index array
+     * @param fullBatch if {@code true}, keeps generating until the space is exhausted (no
+     *        caller passes {@code true})
+     * @param shouldDelete would delete the father's files once it has no children left, but
+     *        the deletions are commented out, so it has no effect
+     * @return the wrapper with the batch's map from index key ({@code "[ i0 i1 ... ]"}) to
+     *         {@link OpenJMLInput}, the keys of non-compilable and duplicate mutants, the JML4C
+     *         file and package, and the first mutant of the batch
+     *         ({@code getNextRelevantSiblingsMutationsLists()}); {@code null} if no mutant could
+     *         be produced
+     */
     public OpenJMLInputWrapper buildNextBatchSiblingsFile(MuJavaInput father, int fatherIndex, int batchSize, Integer[] fromLineMutationIndexes, boolean fullBatch, boolean shouldDelete) {
         OpenJMLInputWrapper wrapper = null;
         try {
@@ -1215,6 +1624,36 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return wrapper;
     }
 
+    /**
+     * Sends the next child of a father to the RAC stage (queue 2), applying the feedback
+     * carried by {@code input}. At most one child is queued per call.
+     *
+     * <p>{@code input} is the previous sibling (or the placeholder created by
+     * {@link #fatherize}). Its feedback provides the father index, the current index array, the
+     * advance position (from {@code getSkipUntilMutID()} through {@link #getFeedbackIndex}, or 0
+     * when it is {@code null}) and the {@code isMutateRight()}/{@code isUNSAT()} flags. The next
+     * index array is computed with {@link #calculateNextRelevantSonMutationsLists}, and then:
+     * <ul>
+     * <li>if the father's space is exhausted, the method returns;</li>
+     * <li>if the array is a duplicate in the father's batch, the next one is computed;</li>
+     * <li>if it is not in the father's current batch, a new batch starting at it is built with
+     *     {@link #buildNextBatchSiblingsFile} and stored in the father, and the method continues
+     *     with the first mutant of that batch (or returns if no batch can be built);</li>
+     * <li>if it did not compile, the next one is computed. The code that would send it to
+     *     queue 1 as a fatherable input only runs if the batch map still has it, but
+     *     {@link #buildNextBatchSiblingsFile} removes non-compiling mutants from that map;</li>
+     * <li>otherwise the batch's {@link OpenJMLInput} gets a new {@link MuJavaFeedback} (index
+     *     array, mutated lines, father index) and is enqueued to queue 2, incrementing
+     *     {@link StrykerStage#mutationsQueuedToOJMLC}.</li>
+     * </ul>
+     * The advance position and the {@code isMutateRight()}/{@code isUNSAT()} jumps are applied
+     * only to the first computation, from {@code input}'s candidate; each "next one is computed"
+     * step after a skipped sibling is a plain increment. (Until 2026 every step re-applied the
+     * same jump, skipping siblings that nothing had ruled out.) The list of skipped index arrays
+     * built here is only used by file deletions that are commented out.
+     *
+     * @param input the previous sibling, whose {@link MuJavaFeedback} must be set
+     */
     public void queueNextRelevantSibling(MuJavaInput input) {
         MuJavaInput father = fathers.get(input.getMuJavaFeedback().getFatherIndex());
         Mutation[][] mutatorsList = father.getMuJavaFeedback().getLineMutatorsList();
@@ -1451,6 +1890,28 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         }
     }
 
+    /**
+     * Merges a batch of mutants into a single source file, so that they are compiled together
+     * and run by the RAC stage from one class.
+     *
+     * <p>The file is {@code <dir>/a<d>/aOpenJMLInWrap<i>/<classToMutate>.java}, where
+     * {@code <dir>} is a new temporary directory (see {@link #createWorkingDirectory()}),
+     * {@code <d>} its name without '-' and {@code <i>} the counter {@link #privateI}. It is a copy
+     * of the first mutant's file, whose method keeps its name, with the method of every other
+     * mutant inserted after the class declaration and renamed to {@code <method><k>}
+     * ({@code k = 1, 2, ...}). Renaming replaces every occurrence of the method name in the
+     * method's text, including calls and longer identifiers that contain it. Each input's
+     * {@code racMethod} is set to the name of its method in the wrapper.
+     *
+     * <p>Side effect: {@code jmlInputs} is refilled with the inputs actually included, in method
+     * name (string) order. Inputs whose method cannot be extracted are silently left out.
+     *
+     * @param jmlInputs the batch; modified as described above
+     * @param classToMutate simple class name, used as the file name
+     * @return the wrapper, whose map goes from wrapper method name to input
+     * @throws IllegalArgumentException if {@code jmlInputs} is empty
+     * @throws IllegalStateException if the file cannot be created or an I/O error occurs
+     */
     protected OpenJMLInputWrapper createJMLInputWrapper(
             List<OpenJMLInput> jmlInputs, String classToMutate) {
         log.debug("jmlInputs: " + jmlInputs.toString());
@@ -1507,6 +1968,14 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         }
     }
 
+    /**
+     * Extracts the source text of a method with a line-based brace-counting heuristic. The
+     * method starts at the first line containing {@code " " + methodName} and ends when the
+     * braces are balanced again. The class-level lines collected since the last line with a
+     * brace before it (typically its JML specification) are included.
+     *
+     * @throws NoSuchElementException if nothing was collected
+     */
     private String getMethod(String filename, String methodName) throws FileNotFoundException {
         StringBuilder builder = new StringBuilder();
         Scanner scan = new Scanner(new File(filename));
@@ -1553,6 +2022,14 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return builder.toString();
     }
 
+    /**
+     * Rewrites {@code filename} with the given methods inserted after the first line containing
+     * " class " (and after the following line too, if the class line has no '{'). In each
+     * method's code, occurrences of {@code originalMethodName} are replaced with its new name.
+     * The file is rebuilt through {@code <filename>_temp}.
+     *
+     * @param methodCodePairs pairs of (new method name, method source text)
+     */
     private void insertNewMethod(String originalMethodName, List<Pair<String, String>> methodCodePairs, String filename) throws IOException {
         String tempFileName = filename + "_temp";
         File destFile = new File(tempFileName);
@@ -1596,10 +2073,10 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
     }
 
     /**
-     * Used in case the EXTRA_CHECK flag is on. In cases were two hashes are
-     * equal this method is called so as to assure that it is not a false
-     * duplicate (equal hash but different file). Returns true if files are
-     * equal or false if otherwise.
+     * Used only when {@link #EXTRA_DUPLICATES_CHECK} is on (it is off). When two hashes are
+     * equal this method is called to make sure it is not a false duplicate (equal hash but
+     * different file). Returns {@code true} if the files differ (a false duplicate), and
+     * {@code false} if they are equal or cannot be read.
      */
     private boolean isFalseDuplicate(String originalFileName, File tempFile)
             throws IllegalStateException {
@@ -1622,9 +2099,12 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
     }
 
     /**
-     * Sets up the necessary work environment prior to generating the mutants.
-     * 
-     * @throws FatalStrykerStageException
+     * Creates a new, empty temporary directory under {@code java.io.tmpdir} with Guava's
+     * {@code Files.createTempDir()}, whose name has the form
+     * {@code <currentTimeMillis>-<counter>}. Used for father copies, MuJava output and batch
+     * wrappers, also by {@link UnskippableMuJavaController}. The directory is not deleted.
+     *
+     * @throws IllegalStateException if the directory cannot be created
      */
     protected static File createWorkingDirectory() throws IllegalStateException {
         File tmpDir = null;
@@ -1638,6 +2118,7 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
         return tmpDir;
     }
 
+    /** Accepts file names starting with {@code gen<genNum>_}. Not used anywhere. */
     public class GenFileFilter implements FilenameFilter {
 
         private int genNum;
@@ -1654,6 +2135,8 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
     /**
      * byte[] wrapper so as to be able to add digest to collections.
+     * Equality and hash code are based on the array contents. Used as the key of
+     * {@link MuJavaController#filesHash} and by other classes that deduplicate files by digest.
      */
     public static class MsgDigest {
 

@@ -33,6 +33,24 @@ import com.google.common.collect.Sets;
 /**
  * Implements the Stryker stage. In this stage a fix for the bug found in the
  * method to check will be automatically obtained (if possible).
+ *
+ * <p>{@link ar.edu.taco.TacoMain#run(String, Properties)} creates this stage when
+ * {@code attemptToCorrectBug} is set and the TACO check is SAT, loads the counterexample into
+ * {@link #junitInputs}, and calls {@link #execute()}, which blocks until the search ends.
+ *
+ * <p>Besides the stage itself, this class holds, in static fields, the run-wide state that
+ * the Stryker controllers share:
+ * <ul>
+ * <li>the counterexample pool: {@link #junitInputs}, {@link #junitFiles},
+ *     {@link #junitFilesHash}, {@link #indexToLastJUnitInput} and {@link #fileSuffix};</li>
+ * <li>the work queues between controllers: {@link #weedQueue};</li>
+ * <li>timing and counting statistics, printed in each fix report by
+ *     {@link ar.edu.taco.stryker.api.impl.DarwinistController}.</li>
+ * </ul>
+ * These fields are plain, unsynchronized statics updated from several controller threads, so
+ * the statistics are approximate. They are never reset (only {@link #junitInputs} and
+ * {@link #junitFiles} are reallocated by {@code TacoMain}), so one Stryker run per JVM is
+ * assumed.
  */
 public class StrykerStage implements ITacoStage {
 
@@ -47,45 +65,119 @@ public class StrykerStage implements ITacoStage {
 	private File classToCheckFile;
 
 	// The method under analysis in which a bug was found.
+	// (Plain name, e.g. "contains" for "contains(java.lang.Object)".)
 	private String methodToCheck;
 
 	@SuppressWarnings("unused")
 	private List<JCompilationUnitType> asts;
 
+	/**
+	 * Report file in {@code user.dir}. The constructor truncates it; each fix found appends a
+	 * report to it ({@link ar.edu.taco.stryker.api.impl.DarwinistController} uses its own
+	 * copy of this file name).
+	 */
 	public static String STRYKER_REPORTS_FILENAME = "StrykerLastReports.txt";
+
+	// ---- Counterexample pool ----
+
 	/** Capacity of the counterexample pool ({@link #junitInputs}, {@link #junitFiles}). */
 	public static final int MAX_COUNTEREXAMPLES = 10000;
+
+	/**
+	 * Compiled JUnit counterexample classes (package {@code ar.edu.output.junit}, compiled from
+	 * the copies made by {@link ar.edu.taco.TacoMain#editTestFileToCompile}). Slots
+	 * {@code 0..indexToLastJUnitInput-1} are filled. {@code TacoMain.run} allocates {@link #MAX_COUNTEREXAMPLES} slots
+	 * and stores the counterexample of the original TACO check in the first free slot;
+	 * {@link ar.edu.taco.stryker.api.impl.DarwinistController} appends the counterexample of
+	 * each fix candidate that TACO refutes (except validate-only ones), unless it is a
+	 * duplicate or the array is full.
+	 * Read by {@link OpenJMLController} (RAC filtering) and by DarwinistController (final RAC
+	 * check of a candidate, and to fix the input of feedback analyses).
+	 */
 	public static Class<?>[] junitInputs;
+    /**
+     * Parallel to {@link #junitInputs}: path of the original generated JUnit source of each
+     * slot (under {@code generated/ar/edu/generated/junit/}, not the rewritten copy). Used to
+     * name the counterexample that killed a mutant in feedback requests.
+     */
     public static String[] junitFiles;
+    /** MD5 digest of a generated JUnit source's content to its path; used to skip duplicate counterexamples. */
     public static Map<MsgDigest, String> junitFilesHash = Maps.newConcurrentMap();
+	/** Number of filled slots in {@link #junitInputs}, that is, the index of the next free slot. */
 	public static int indexToLastJUnitInput = 0;
+	/**
+	 * Suffix for the next generated JUnit class name; incremented by
+	 * {@link ar.edu.taco.junit.UnitTestBuilder} after writing each test, so successive
+	 * counterexamples get distinct files.
+	 */
 	public static int fileSuffix = 0;
 	
+	// ---- Timing statistics (milliseconds; reported by DarwinistController) ----
+
+	/** Reference time for the reports' total time: set when this class is initialized (first use of its statics). */
 	public static long initialMillis = System.currentTimeMillis();
+	/** Time spent compiling: JML4C batch compilations and javac compilations in DarwinistController. */
 	public static long compilationMillis = 0;
+    /** Time spent in TACO calls made by DarwinistController. */
     public static long tacoMillis = 0;
+    /** Time spent running counterexamples with RAC (OpenJMLController and DarwinistController). */
     public static long racMillis = 0;
+    /** Time spent generating mutants with MuJava. */
     public static long muJavaMillis = 0;
 
+    // ---- Counting statistics (reported by DarwinistController) ----
+
+    /**
+     * Grows on each failed JML4C batch compilation by the total size of the father's sets of
+     * non-compilable mutation indexes, so indexes may be counted more than once.
+     */
     public static int nonCompilableMutationIndexesFound = 0;
+	/** Mutants enqueued to {@link OpenJMLController} (queue 2). */
 	public static int mutationsQueuedToOJMLC = 0;
+    /** Feedback requests enqueued (by OpenJMLController and DarwinistController). */
     public static int mutationsQueuedToDarwinistForSeq = 0;
+    /** Mutants that passed RAC and were enqueued to DarwinistController as fix candidates. */
     public static int candidatesQueuedToDarwinist = 0;
+    /** Mutants produced by MuJavaController's batch builder, counted before duplicate removal. */
     public static int mutationsGenerated = 0;
+    /** Mutants removed from a batch because JML4C could not compile them. */
     public static int nonCompilableMutations = 0;
+    /** Mutants discarded because an identical file was already generated. */
     public static int duplicateMutations = 0;
+    /** Mutants skipped thanks to feedback or known non-compilable indexes. */
     public static int prunedMutations = 0;
+    /** Inputs not used as fathers because their feedback marked them as not fatherable. */
     public static int prunedFathers = 0;
+    /**
+     * Mutants that threw an exception other than a JML RAC error during RAC (not only
+     * {@code NullPointerException}).
+     */
     public static int nullPointerExceptionMutations = 0;
+    /**
+     * Mutants that failed RAC, not counting validate-only inputs, minus the RAC exceptions
+     * counted in {@link #nullPointerExceptionMutations} (which are subtracted for validate-only
+     * inputs too).
+     */
     public static int postconditionFailedMutations = 0;
+    /** Mutants that hit the RAC timeout on at least one counterexample. */
     public static int timeoutMutations = 0;
+    /** Fix candidates rejected by DarwinistController (TACO still SAT, or the final RAC check failed). */
     public static int falseCandidates = 0;
+    /** Times feedback made MuJavaController skip at least one mutant when computing the next sibling. */
     public static int relevantFeedbacksFound = 0;
+    /** Longest TACO call made by DarwinistController. */
     public static long maxSolvingTime = 0;
+    /** Shortest TACO call made by DarwinistController. */
     public static long minSolvingTime = Long.MAX_VALUE;
+    /** Number of TACO calls made by DarwinistController. */
     public static long totalSolvings = 0;
     
     
+    /**
+     * The three queues connecting the controllers: 1 to MuJavaController, 2 to
+     * OpenJMLController, 3 to DarwinistController. Its acknowledgement count also decides
+     * when the search is exhausted; see {@link WeedQueue}.
+     */
     public static WeedQueue<MuJavaInput, OpenJMLInput, DarwinistInput> weedQueue = new WeedQueue<>();
     
 	private String configFile;
@@ -94,22 +186,38 @@ public class StrykerStage implements ITacoStage {
 	
 	private int maxMethodsInFile;
 	
+	/**
+	 * Passed to {@link StrykerInitialStage} as the number of generations wanted. It is copied
+	 * into some MuJava inputs but never read, so it does not bound the search.
+	 */
 	public static AtomicInteger generationsWanted = new AtomicInteger(10);
 
 	/**
 	 * Creates a new Stryker stage with the information given.
 	 * 
+	 * <p>Side effect: truncates {@link #STRYKER_REPORTS_FILENAME} in {@code user.dir}.
+	 *
+	 * @param asts
+	 *            the parsed compilation units; stored but unused.
 	 * @param sourceRootDir
 	 *            the root dir of the source under consideration. The class to
 	 *            check should be under this dir.
 	 * @param classToCheck
-	 *            the class under analysis in which a bug was found.
+	 *            the class under analysis in which a bug was found, fully
+	 *            qualified (e.g. {@code ar.edu.taco.BinTree}); used to locate
+	 *            its {@code .java} file under {@code sourceRootDir}, which must
+	 *            exist (otherwise a {@link RuntimeException} is thrown).
 	 * @param methodToCheck
-	 *            the method under analysis in which a bug was found.
+	 *            the method under analysis in which a bug was found, as TACO's
+	 *            {@code methodToCheck} (e.g. {@code contains(java.lang.Object)});
+	 *            only its plain name is kept.
 	 * @param configFile
 	 *            The configuration file
 	 * @param overridingProperties
 	 *            The properties
+	 * @param maxMethodsInFile
+	 *            passed on to {@link StrykerInitialStage}; see
+	 *            {@link ar.edu.taco.stryker.api.StrykerAPI#fixBug}.
 	 */
 	// TODO agregar los parametros necesarios para las otras partes
 	public StrykerStage(List<JCompilationUnitType> asts, String sourceRootDir,
@@ -175,6 +283,21 @@ public class StrykerStage implements ITacoStage {
 		// }
 	}
 
+	/**
+	 * Runs the repair search and blocks until it ends: builds the mutation operator set and
+	 * executes a {@link StrykerInitialStage} for the class file, simple class name and method
+	 * name computed by the constructor. A {@link FatalStrykerStageException} is printed, not
+	 * rethrown. The outcome is only logged (see {@link StrykerInitialStage}).
+	 *
+	 * <p>The operator set is hard-coded (18 MuJava operators): {@code PRVOL_SMART},
+	 * {@code PRVOR_REFINED}, {@code PRVOU_REFINED}, {@code AODS}, {@code AODU}, {@code AOIS},
+	 * {@code AOIU}, {@code AORB}, {@code AORS}, {@code AORU}, {@code ASRS}, {@code COD},
+	 * {@code COI}, {@code COR}, {@code LOD}, {@code LOR}, {@code ROR} and {@code SOR}
+	 * ({@code LOI} is commented out). Note that
+	 * {@link ar.edu.taco.stryker.api.impl.UnskippableMuJavaController} builds the inputs it
+	 * hands to MuJavaController with its own hard-coded copy of this set, so a change here
+	 * should be mirrored there.
+	 */
 	@Override
 	public void execute() {
 		// TODO: get this from a property file.

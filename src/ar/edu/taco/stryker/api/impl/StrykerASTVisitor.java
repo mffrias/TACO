@@ -30,6 +30,25 @@ import ar.edu.taco.stryker.api.impl.input.OpenJMLInputWrapper;
 
 import com.google.common.collect.Sets;
 
+/**
+ * JDT visitor that instruments a method so that running it records its "sequential trace": the
+ * straight-line list of statements actually executed. The guards of the branches and loops taken are
+ * recorded as {@code if(!(cond)){throw new NoSuchElementException();}}, or as {@code if(cond){...}}
+ * for else branches and loop exits.
+ * <p>
+ * In the instrumented method, each recorded statement is preceded by
+ * {@code try { FileUtils.appendToFile("<seqFileName>_<methodName>", "<statement text>"); } catch (IOException ioexception) {}}.
+ * A statement with a trailing {@code //mutGenLimit} comment is recorded together with that comment. It
+ * is also preceded by a {@code //mutID n} line, unless the comment is {@code //mutGenLimit 0} and the
+ * line is not in {@code lastMutatedLines}. Unlike
+ * {@link StrykerJavaFileInstrumenter#insertMutIDs}, these mutIDs start at the value given to
+ * {@link #setNextMutID(int)} (0 in practice), and the counter only advances on lines that get a mutID.
+ * All edits are collected in {@link #getRewrite()}.
+ * <p>
+ * Only {@link StrykerJavaFileInstrumenter#instrumentForSequentialOutput} instantiates this class, and
+ * that method is currently unused (no callers in this repository). This class is therefore
+ * effectively unused too.
+ */
 public class StrykerASTVisitor extends ASTVisitor {
 
     private final OpenJMLInputWrapper wrapper;
@@ -45,6 +64,15 @@ public class StrykerASTVisitor extends ASTVisitor {
     private List<Integer> mutableLines;
     private static final String mutIDCommentPrefix = "//mutID ";
     
+    /**
+     * @param wrapper batch whose method name selects the method to instrument
+     * @param unit parsed compilation unit of {@code source}
+     * @param source source text of the file being instrumented
+     * @param ast AST of {@code unit}, used to create new nodes and the rewrite
+     * @param seqFileName base path of the trace files (suffixed with {@code _<methodName>})
+     * @param lastMutatedLines lines mutated in the candidate
+     * @param mutableLines mutable lines, indexed by the current mutID counter
+     */
     public StrykerASTVisitor(final OpenJMLInputWrapper wrapper, CompilationUnit unit, String source, final AST ast, String seqFileName, List<Integer> lastMutatedLines, List<Integer> mutableLines) {
         super();
         this.wrapper = wrapper;
@@ -57,14 +85,32 @@ public class StrykerASTVisitor extends ASTVisitor {
         this.mutableLines = mutableLines;
     }
     
+    /**
+     * Sets the next mutID to emit. The value is also the index into {@code mutableLines} that is checked
+     * next.
+     *
+     * @param nextMutID the next mutID
+     */
     public void setNextMutID(int nextMutID) {
         this.nextMutID = nextMutID;
     }
     
+    /**
+     * Sets the name of the method being instrumented, which becomes part of the trace file name.
+     *
+     * @param methodName the method name
+     */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
     
+    /**
+     * Returns the 0-based line on which {@code node} starts. Nothing calls it.
+     *
+     * @param compilationUnit unit containing {@code node}
+     * @param node the node
+     * @return the node's 1-based start line minus one
+     */
     public static int getLineNumber(CompilationUnit compilationUnit, ASTNode node) {
         return compilationUnit.getLineNumber(node.getStartPosition()) - 1;
     }
@@ -164,6 +210,14 @@ public class StrykerASTVisitor extends ASTVisitor {
     //        super.endVisit(node);
     //    }
     
+    /**
+     * Walks the compilation unit's comment list backwards from {@code commentIndex}. It returns the
+     * first comment that contains {@code mutGenLimit}, followed by a newline. It assumes such a comment
+     * exists and is a line comment.
+     *
+     * @param commentIndex index in {@code unit.getCommentList()} to start from
+     * @return the text of the {@code //mutGenLimit} comment plus {@code '\n'}
+     */
     public String getLineComment(int commentIndex) {
         LineComment lineCommentNode;
         //Tiene comentario el statement, potencialmente sea el de mutacion que necesito
@@ -183,6 +237,23 @@ public class StrykerASTVisitor extends ASTVisitor {
         return lineComment;
     }
 
+    /**
+     * Records in {@link #getRewrite()} the instrumentation for {@code node}:
+     * <ul>
+     * <li>other statements (not blocks, {@code if}s, loops or {@code return}s) not yet handled are
+     * prefixed with their logging statement, and their children are not visited;</li>
+     * <li>{@code if}: the first statement of the then branch is prefixed with the logged guard, and the
+     * first statement of the else branch with the negated guard; each such statement is also logged
+     * when it is not itself an {@code if} or loop;</li>
+     * <li>{@code while}, {@code for} and enhanced {@code for}: the same is done for the first statement
+     * of the body, and a logged exit guard is inserted after the loop;</li>
+     * <li>{@code return}: prefixed with its logging statement;</li>
+     * <li>the declaration of the method whose name contains the wrapper's method: its first and last
+     * statements are prefixed with their logging statements.</li>
+     * </ul>
+     * Nodes that have already been rewritten are tracked in {@code customNodes} so that they are not
+     * instrumented twice.
+     */
     @Override
     public boolean preVisit2(ASTNode node) {
         if (node instanceof Statement 
@@ -757,10 +828,20 @@ public class StrykerASTVisitor extends ASTVisitor {
         return super.preVisit2(node);
     }
 
+    /**
+     * @return the rewrite collecting all the edits; the caller applies it to the parsed document
+     */
     public ASTRewrite getRewrite() {
         return rewrite;
     }
 
+    /**
+     * Builds
+     * {@code try { FileUtils.appendToFile("<seqFileName>_<methodName>", value); } catch (IOException ioexception) {}}.
+     *
+     * @param value the text to append to the trace file
+     * @return the new statement
+     */
     @SuppressWarnings("unchecked")
     public TryStatement getAppendToFileExpressionStatement(String value) {
         
@@ -796,6 +877,13 @@ public class StrykerASTVisitor extends ASTVisitor {
         return tryState;
     }
     
+    /**
+     * Like {@link #getAppendToFileExpressionStatement(String)}, but uses {@code FileUtils.writeToFile},
+     * which overwrites the trace file. Only commented-out code refers to it.
+     *
+     * @param value the text to write to the trace file
+     * @return the new statement
+     */
     @SuppressWarnings("unchecked")
     public TryStatement getWriteToFileExpressionStatement(String value) {
         

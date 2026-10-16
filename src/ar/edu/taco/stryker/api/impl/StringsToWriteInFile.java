@@ -1,8 +1,25 @@
 package ar.edu.taco.stryker.api.impl;
 
+/**
+ * Java source snippets that Stryker writes into generated files.
+ */
 public class StringsToWriteInFile {
 
 	
+	/**
+	 * Java source of a helper method,
+	 * {@code protected static ReachSet reach(Object o, Class<?> clazz, String str)}.
+	 * {@code MuJavaController.adaptSiblingsFileToJML4C} inserts it right after the opening brace of the
+	 * class in every JML4C batch file. It also rewrites each JML {@code \reach(o, T, f + g)} into
+	 * {@code reach(o, T.class, "f + g")}, so that runtime assertion checking can evaluate the
+	 * expression.
+	 * <p>
+	 * The helper traverses the heap breadth-first from {@code o}, following only the fields named in
+	 * {@code str} (separated by {@code +}, with spaces ignored, and looked up with
+	 * {@code getDeclaredField} on each object's class). It returns a {@link ReachSet} containing
+	 * {@code o} plus every reached object that is an instance of {@code clazz}, or an empty set if
+	 * {@code o} is {@code null}. Reflection errors are printed and ignored.
+	 */
 	public final static String reachMethod = "" +
 //		"    @java.lang.SuppressWarnings(\"unchecked\")" + "\n" +
 		"    protected static ar.edu.taco.stryker.api.impl.ReachSet reach(/*@nullable@*/ Object o, Class<?> clazz, String str) {" + "\n" +

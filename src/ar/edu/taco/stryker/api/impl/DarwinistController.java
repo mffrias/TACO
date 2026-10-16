@@ -59,12 +59,61 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 // to be removed later when editFile is replaced in this class.
 
+/**
+ * Validates fix candidates with TACO and computes the variabilization feedback that lets Stryker
+ * prune mutants. It has two roles in the repair pipeline:
+ * <ol>
+ * <li><b>Candidate validation</b>, on this controller's own thread. Candidates are mutants that
+ * passed runtime assertion checking (RAC) in {@link OpenJMLController}; they arrive through
+ * queue 3 of {@link StrykerStage#weedQueue}. {@link #validateCandidate(DarwinistInput)} runs TACO
+ * bounded verification on each one. SAT (TACO found a counterexample, so the candidate is still
+ * buggy) stores the counterexample as a new JUnit input and asks for feedback
+ * ({@link #queueFalseCandidate}); UNSAT sends the candidate to {@link #lastRACAnalysis}, which
+ * re-runs every stored counterexample with RAC before accepting it in {@link #fixFound}.</li>
+ * <li><b>Pruning feedback</b> (thesis Chapter 3, Algorithm {@code getFeedback}).
+ * {@link #computateFeedback(DarwinistInput)} is called by {@link MuJavaController} on
+ * <em>its</em> thread when it dequeues a {@link MuJavaInput} whose {@code computateFeedback} flag
+ * is set. It variabilizes the failing mutant against one failing input and returns the
+ * {@link MuJavaInput} that tells MuJavaController which sibling mutants it may skip.</li>
+ * </ol>
+ *
+ * <p><b>Lifecycle and threading.</b> Singleton ({@link #getInstance()}), started by
+ * {@link SimpleStrykerAPI#start()} with one worker thread. The queue and {@code enqueueTask}
+ * inherited from {@link AbstractBaseController} are not used; input comes from
+ * {@link WeedQueue#takeFrom3()}. {@link #computateFeedback} and {@link #validateCandidate} are
+ * {@code synchronized} on the singleton, so the two threads never run TACO at the same time nor
+ * overwrite the subject file concurrently. This matters because every TACO run made by Stryker
+ * happens in one of these two methods and TACO keeps global state (for example the
+ * {@link TacoConfigurator} and {@link JmlParser} singletons). {@link SimpleStrykerAPI#fixBug}
+ * polls this controller's {@code willShutdown} flag, so shutting this controller down is what
+ * ends a repair run for the caller.
+ *
+ * <p><b>Files.</b> TACO reads the class under analysis from its source path, i.e. the subject
+ * file under {@code tests/} ({@link DarwinistInput#getOriginalFilename()}). To analyse a
+ * candidate or a variabilized method, both TACO-running methods back the subject file up to
+ * {@code <originalFilename>_temp}, copy the file to analyse over it, compile it in place with the
+ * system Java compiler (output discarded), run TACO and finally copy the backup back. The restore
+ * is not in a {@code finally} block: if an exception escapes, or when the run ends inside
+ * {@link #fixFound} (see there), the subject file keeps the last version copied over it. Other
+ * files written: {@code StrykerLastReports.txt} and {@code StrykerLastFixFound.java} in the
+ * working directory ({@link #fixFound}), a {@code sequential/} copy of each mutant whose feedback
+ * is computed ({@link #computateFeedback}), and new JUnit counterexamples
+ * ({@link #generateJunitFile}).
+ *
+ * <p>Counterexamples are shared with the other controllers through the static arrays
+ * {@code StrykerStage.junitInputs} and {@code StrykerStage.junitFiles}
+ * ({@code StrykerStage.MAX_COUNTEREXAMPLES} slots, allocated in {@link TacoMain#run}); slot 0
+ * holds the counterexample of the initial TACO check. The fill
+ * index {@code StrykerStage.indexToLastJUnitInput} is never reset, so this holds only for the
+ * first repair run in a JVM.
+ */
 public class DarwinistController extends AbstractBaseController<DarwinistInput> {
 
     private static Logger log = Logger.getLogger(DarwinistController.class);
 
     private static DarwinistController instance;
 
+    /** Filenames of the candidates accepted as fixes, in the order they were found. */
     private List<String> resolvedBugs = Lists.newArrayList();
 
     public static final String PATH_SEP = System.getProperty("path.separator");
@@ -78,14 +127,40 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return instance;
     }
 
+    /**
+     * Runs each RAC test of {@link #lastRACAnalysis} so that it can be bounded by a timeout;
+     * replaced by a new single-thread executor after every timeout.
+     */
     ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
+    /** Thread executing the current RAC test; stopped with {@link Thread#stop()} on timeout. */
     private Thread runningThread = null;
 
     private DarwinistController() {
 
     }
 
+    /**
+     * Main loop of this controller's single worker thread. Until {@code willShutdown} is set, it
+     * takes the next {@link DarwinistInput} from queue 3 and either
+     * <ul>
+     * <li>forwards it to queue 1 wrapped in a {@link MuJavaInput} with
+     * {@code computateFeedback = true}, if {@link DarwinistInput#isForSeqProcessing()}, so that
+     * the feedback is computed on MuJavaController's thread. No current producer puts such inputs
+     * on queue 3 (feedback requests go straight to queue 1 from {@link OpenJMLController},
+     * {@link #queueFalseCandidate} and {@link #processFalseCandidate}), so this branch appears
+     * unused; or</li>
+     * <li>validates it as a fix candidate with {@link #validateCandidate(DarwinistInput)}.</li>
+     * </ul>
+     * It then acknowledges the input ({@code ack(2)}); if nothing is left queued or in flight in
+     * any of the three queues, it shuts all controllers down and clears the queues.
+     *
+     * <p>Only {@link InterruptedException} is caught (that is how {@code shutdownNow()} wakes the
+     * thread up); any other exception ends the loop without acknowledging the input. When
+     * {@link OpenJMLController}'s loop ends it enqueues a {@link DarwinistInput} whose fields are
+     * all {@code null}; if this loop ever takes it before shutting down,
+     * {@link #validateCandidate} fails with a {@link NullPointerException}.
+     */
     @Override
     protected Runnable getRunnable() {
         return new Runnable() {
@@ -122,6 +197,51 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
             }
         };
     }
+    /**
+     * Variabilization loop (thesis Chapter 3, Algorithm {@code getFeedback}) for one failing
+     * mutant. Each iteration:
+     * <ol>
+     * <li>calls {@link VariablizationData#variablizeNext(DarwinistInput)}, which replaces one more
+     * side of a mutable statement (bottom-up and cumulatively; right-hand side first, then the
+     * left-hand side if there is one) by fresh {@code customvar_N} parameters and writes the
+     * result to {@code input.getSeqVariablizedFilename()}. If nothing more can be variabilized the
+     * loop ends with {@code reachedUnvariablizableExpression = true};</li>
+     * <li>prefixes with a JML {@code nullable} annotation every parameter on the method's
+     * declaration line that contains {@code customvar} and is not of a primitive type, presumably
+     * so that TACO may also choose {@code null} for it. The declaration line is any line that
+     * contains both the method name and {@code "public"}, and the primitive test is a substring
+     * match on the parameter text;</li>
+     * <li>copies the result over the subject file, compiles it and runs {@code tacoMain} (built
+     * with the failing input fixed, see {@link #getTacoMainWithFixedInput(String)}), unless
+     * {@link VariablizedSATVerdicts} already holds a verdict for the same source. Before each
+     * call, {@code methodToCheck} is set to the variabilized method's signature: the driver's
+     * parameter types followed by the customvar types so far
+     * ({@link VariablizationData#getVariablizedParameterTypes()}, see
+     * {@link ar.edu.taco.stryker.MethodToCheck}).</li>
+     * </ol>
+     * UNSAT means that no values of the variabilized expressions make the method satisfy its
+     * contract on that input, so no mutation of those statements can make it pass that input, and
+     * the loop goes on; SAT stops the loop.
+     *
+     * <p>Results stored in {@code vdata}: {@code uncompilable} (javac failed, TACO returned
+     * {@code null}, or TACO threw {@link JDynAlloySemanticException} or
+     * {@link TacoNotImplementedYetException}); {@code reachedUnvariablizableExpression}; and,
+     * unless uncompilable, {@code UNSAT} as the negation of the last verdict.
+     *
+     * <p>Quirks: any other exception from TACO is logged and stops the loop as if that step were
+     * SAT (nothing is cached), so only the statements already shown UNSAT are skipped. (Until 2026
+     * it counted as UNSAT and the loop went on, which could prune the whole search.) A cache hit still updates
+     * the TACO statistics in {@link StrykerStage} as if TACO had run. The values written to
+     * {@code vdata} when TACO returns {@code null} do not reach the feedback:
+     * {@code reachedUnvariablizableExpression} is overwritten after the loop and
+     * {@link #computateFeedback} takes its uncompilable branch. The subject file is restored from
+     * {@code <originalFilename>_temp} only if this method returns normally.
+     *
+     * @param tacoMain TACO instance with the failing input fixed
+     * @param vdata variabilization state of this mutant; updated in place
+     * @param input the feedback request (mutant, method, configuration and properties)
+     * @throws IOException if a file copy or read fails
+     */
     private void variablize(TacoMain tacoMain, VariablizationData vdata, DarwinistInput input) throws IOException {
         TacoAnalysisResult analysis_result = null;
         boolean satVerdict = false;
@@ -281,6 +401,26 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
+    /**
+     * Builds a {@link TacoMain} whose analysis is restricted to one stored counterexample input.
+     * The input is looked up among the first {@code StrykerStage.indexToLastJUnitInput} entries of
+     * {@code StrykerStage.junitInputs} by comparing {@code junitFilename} with the path of the
+     * generated JUnit source of each class ({@code <user.dir>/generated/...}, derived from the
+     * class name with every {@code "output"} replaced by {@code "generated"}); {@code null}
+     * selects slot 0, the counterexample of the initial TACO check. The class is instantiated
+     * reflectively and its public {@code theData} map (emitted by
+     * {@link ar.edu.taco.junit.JUnitPrettyPrinter}) is passed to {@link TacoMain#TacoMain(HashMap)}.
+     * TACO hands the map down its translation pipeline as {@code inputToFix}; the fixed-input
+     * contract itself is built in the JDynAlloy translator, which is not part of this source tree.
+     * The thesis describes it as {@code requires this == this0 && args == args0; ensures !post}.
+     *
+     * @param junitFilename path of the generated JUnit source of the counterexample, or
+     *        {@code null}
+     * @return the TACO instance, or {@code null} if reflection fails; with {@code null} the first
+     *         TACO call made by {@link #variablize} throws, which stops the feedback there
+     * @throws IllegalArgumentException if {@code junitFilename} matches no stored input (callers
+     *         only pass stored ones; see {@link #queueFalseCandidate})
+     */
     private TacoMain getTacoMainWithFixedInput(String junitFilename) throws IllegalArgumentException {
         Class<?>[] inputs = StrykerStage.junitInputs;
         int index = 0;
@@ -315,6 +455,49 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
+    /**
+     * Computes the pruning feedback for a mutant that failed on a known input and returns the
+     * {@link MuJavaInput} that MuJavaController should process next (sibling generation guided by
+     * the feedback). Called by {@link MuJavaController} on its own thread.
+     *
+     * <p>Preparation: copies the mutant ({@code input.getFilename()}) to a {@code sequential/}
+     * directory next to it (the path is built by splitting on {@code '/'} and using the file name
+     * as a {@code replaceFirst} pattern); numbers its mutable lines with 1-based {@code mutID}
+     * comments ({@link StrykerJavaFileInstrumenter#insertMutIDs(DarwinistInput)}); drops every
+     * line containing {@code //@decreasing} or {@code /*@decreasing}; unrolls the method's
+     * {@code while} loops with TACO's loop-unroll bound ({@link LoopUnrollTransformation});
+     * collects the variabilizable expressions
+     * ({@link VariablizationData#preprocessVariabilization2}); builds TACO with the failing input
+     * {@code input.getSeqMethodInput()} fixed; and runs {@link #variablize} unless there is
+     * nothing to variabilize. {@link IOException}s are only printed; exceptions from
+     * {@link #getTacoMainWithFixedInput(String)} propagate to the caller.
+     *
+     * <p>Result: the returned input carries {@code input.getFeedback()}, mutated in place, with
+     * {@code getSibling = true} and:
+     * <ul>
+     * <li>if nothing was variabilizable, or variabilization ended at an expression it cannot
+     * variabilize (every step so far UNSAT): {@code UNSAT = true}, {@code mutateRight} from the
+     * last step (default {@code true}) and {@code skipUntilMutID = lastVariablizedMutID - 1},
+     * which turns the 1-based mutID into a 0-based index into {@code feedback.getMutableLines()}.
+     * If no step was taken at all, {@code mutableLines.size() - 1} (the bottom-most mutable line,
+     * as that list is ascending) is used instead, still with {@code UNSAT = true} although TACO
+     * was never called;</li>
+     * <li>if a step did not compile or TACO could not translate it: no skipping
+     * ({@code skipUntilMutID = null}, {@code mutateRight = true}, {@code fatherable = true});</li>
+     * <li>if a step gave SAT: {@code skipUntilMutID = lastVariablizedMutID - 1},
+     * {@code mutateRight} from the side variabilized last and {@code UNSAT = false}.</li>
+     * </ul>
+     * In the first and last cases {@code fatherable} comes from
+     * {@link VariablizationData#isStillFatherable()} (or is {@code true} if that is unset) when
+     * {@link MuJavaController#fatherizationPruningOn} is set, and is {@code true} otherwise.
+     * {@link MuJavaController#queueNextRelevantSibling(MuJavaInput)} maps {@code skipUntilMutID} to
+     * a position of the line-mutation-index array. The {@code else if (unvariablizable)} branch is
+     * unreachable, since the first condition already covers that case.
+     *
+     * @param input feedback request: the failing mutant and the failing input
+     *        ({@code getSeqMethodInput()})
+     * @return the input for MuJavaController, with the feedback attached
+     */
     public synchronized MuJavaInput computateFeedback(DarwinistInput input) {
         final String oldFilename = input.getFilename();
 
@@ -415,6 +598,30 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return mujavainput;
     }
 
+    /**
+     * Validates a fix candidate (a mutant that passed RAC on the inputs tried by
+     * {@link OpenJMLController}) by bounded verification of the whole contract with TACO.
+     *
+     * <p>Backs the subject file up to {@code <originalFilename>_temp}, copies the candidate over it,
+     * compiles it in place (no {@code -d}, so the class file is written next to the source) and
+     * runs a fresh {@link TacoMain} with {@code attemptToCorrectBug} and
+     * {@code generateUnitTestCase} disabled. Then:
+     * <ul>
+     * <li>javac fails: only logged; nothing is sent back to MuJavaController for this mutant;</li>
+     * <li>TACO returns {@code null} (its JML parser rejected the file) or throws: MuJavaController
+     * is asked for the next sibling without skipping; the mutant is marked not fatherable only in
+     * the {@code null} case;</li>
+     * <li>SAT, i.e. TACO found a counterexample: {@link #queueFalseCandidate}, or the candidate is
+     * just counted as false when there is no Alloy result or its feedback is {@code stop}ped;</li>
+     * <li>UNSAT, i.e. the candidate passes bounded verification: {@link #lastRACAnalysis}.</li>
+     * </ul>
+     * Feedback objects with {@code stop} set come from {@link UnskippableMuJavaController}, which
+     * sends its mutants through RAC and validation without asking for feedback; such inputs are
+     * never re-enqueued. The subject file is then restored, unless an exception escapes or the run
+     * ends inside {@link #fixFound}.
+     *
+     * @param input the candidate
+     */
     private synchronized void validateCandidate(DarwinistInput input) {
         TacoMain tacoMain = new TacoMain(null);
 
@@ -543,6 +750,35 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
+    /**
+     * Handles a candidate that TACO showed to be still buggy (SAT in {@link #validateCandidate}).
+     * Counts it as a false candidate and turns TACO's counterexample into a new stored JUnit
+     * input ({@link #generateJunitFile}), so later candidates are also checked against it.
+     * Then, if {@link MuJavaController#feedbackOn} and the counterexample is in the pool, it
+     * requests pruning feedback for this candidate and the new counterexample: a
+     * {@link DarwinistInput} with
+     * {@code forSeqProcessing = true} and {@code seqMethodInput} set to the counterexample, whose
+     * properties copy the overriding properties but force {@code attemptToCorrectBug=false},
+     * {@code generateUnitTestCase=false}, {@code generateCheck=true}, {@code generateRun=false}
+     * (only for keys already present; {@code methodToCheck} stays the driver's, see
+     * {@link #variablize}), is wrapped in a
+     * {@link MuJavaInput} with {@code computateFeedback = true} and enqueued to queue 1. Without
+     * feedback, or when the counterexample could not be stored (pool full, or its test class did
+     * not load; feedback looks counterexamples up in the pool), it just asks MuJavaController for
+     * the next sibling, so the search goes on without pruning for this candidate.
+     *
+     * <p>{@code classToCheck} is read from the global {@link TacoConfigurator} of the TACO run that
+     * just finished. Exceptions inside the {@code try} block are swallowed silently. A
+     * {@link RuntimeException} from {@link #generateJunitFile} (e.g. TACO's snapshot cannot
+     * instantiate an object of the counterexample) is logged and the candidate gets no feedback;
+     * until 2026 it escaped and ended this controller's thread, hanging the run.
+     *
+     * @param input the false candidate
+     * @param analysis_result the SAT result holding the counterexample
+     * @param props properties of that TACO run (source of {@code methodToCheck})
+     * @param compilationUnits the compilation units that TACO run parsed
+     *        ({@link TacoMain#getCompilationUnits()}), which the snapshot needs
+     */
     public void queueFalseCandidate(DarwinistInput input, TacoAnalysisResult analysis_result, Properties props,
             List<JCompilationUnitType> compilationUnits) {
         StrykerStage.falseCandidates++;
@@ -643,6 +879,22 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return junitFile != null && StrykerStage.junitFilesHash.containsValue(junitFile);
     }
 
+    /**
+     * Turns a SAT TACO result into a stored counterexample. Builds a JUnit test from the Alloy
+     * instance ({@link SnapshotStage}, {@link JUnitStage}, using {@code compilation_units}, the
+     * units parsed by the TACO run that produced the result), rewrites it into package
+     * {@code ar.edu.output.junit} with {@link TacoMain#editTestFileToCompile}, compiles it (a
+     * failure is logged) and loads the class with a new {@link URLClassLoader}. Duplicates are detected by the MD5 of the generated
+     * source ({@code StrykerStage.junitFilesHash}): a new input is appended to
+     * {@code StrykerStage.junitInputs} and {@code junitFiles} if a slot is free (the arrays hold
+     * {@code StrykerStage.MAX_COUNTEREXAMPLES} inputs and are never grown; once they are full a
+     * warning is logged and new inputs are not stored); for a duplicate,
+     * the new file is deleted and the stored copy's filename is returned. Class-loading errors are
+     * printed and the unstored filename is returned.
+     *
+     * @return path of the generated JUnit source (or of its stored duplicate)
+     * @throws IllegalArgumentException if the generated file cannot be read or hashed
+     */
     @SuppressWarnings("resource")
     private String generateJunitFile(List<JCompilationUnitType> compilation_units, TacoAnalysisResult analysis_result,
             String classToCheck, String methodToCheck) {
@@ -753,6 +1005,26 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return junitFile;
     }
 
+    /**
+     * Final check for a candidate that passed TACO verification (UNSAT). Runs every stored
+     * counterexample ({@code StrykerStage.junitInputs} up to the first empty slot) against the
+     * candidate with JML runtime assertion checking: the {@code @Test} method of each JUnit class
+     * is invoked with {@code input.getParametersFromOpenJML()} (classpath, qualified class name
+     * and method name of the JML4C-compiled candidate prepared by {@link OpenJMLController}), on
+     * {@link #executor} with a 5-second timeout. Any exception from the test counts as a failure
+     * and stops the loop. A timeout counts as a pass: the test thread is stopped with
+     * {@link Thread#stop()} and the executor replaced. If the test class cannot be instantiated
+     * the error is printed and that input also counts as passed. If every input passes, the
+     * candidate is a fix ({@link #fixFound}); otherwise, unless its feedback is {@code stop}ped,
+     * {@link #processFalseCandidate}.
+     *
+     * <p>Note: the failing input is recorded with {@code input.setSeqMethodInput(...)} only when
+     * {@code Future.get} itself throws. An ordinary RAC failure is reported through the task's
+     * return value, so the input is not recorded and the feedback requested afterwards normally
+     * falls back to slot 0 (see {@link #getTacoMainWithFixedInput(String)}).
+     *
+     * @param input the candidate
+     */
     private void lastRACAnalysis(DarwinistInput input) {
         //candidate solution found. We will now check all stored inputs and if the candidate passes all, then it becomes a FIX. 
         //Otherwise, we discard this fix candidate.
@@ -868,6 +1140,16 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
+    /**
+     * Builds the report appended to {@code StrykerLastReports.txt}: the fix's filename, father
+     * index and line-mutation indexes, plus a snapshot of the global counters in
+     * {@link StrykerStage}. The counters are updated from several threads without
+     * synchronization, so the figures are approximate; "TACO Calls" also counts variabilization
+     * steps answered by {@link VariablizedSATVerdicts}.
+     *
+     * @param input the accepted candidate
+     * @return the report text
+     */
     public String generateReport(DarwinistInput input) { 
         String report = "";
 
@@ -915,6 +1197,23 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return report;
     }
 
+    /**
+     * Records an accepted fix: adds the candidate's filename to {@link #getResolvedBugs()},
+     * appends a {@link #generateReport report} to {@code StrykerLastReports.txt} (emptied when
+     * {@link StrykerStage} is constructed) and overwrites {@code StrykerLastFixFound.java} with the
+     * candidate's source, both in {@code user.dir}; I/O errors are ignored.
+     *
+     * <p>If {@link MuJavaController#finishOnFirstFix} is set (the default), it shuts all
+     * controllers down (this one with {@code shutdown()}, which lets {@link SimpleStrykerAPI#fixBug}
+     * return) and calls {@link WeedQueue#clearQueues()}. That method loops while a queue's size is
+     * non-zero, and a queue's {@code take()} keeps returning its un-acknowledged current element;
+     * since the input being validated here has not been acknowledged yet, the call appears never
+     * to return. As a result the restore step of {@link #validateCandidate} is not reached and the
+     * fix stays in the subject file under {@code tests/}. Otherwise it asks MuJavaController for
+     * the next sibling (no skipping) and the search goes on.
+     *
+     * @param input the accepted candidate
+     */
     private void fixFound(DarwinistInput input) {
         resolvedBugs.add(input.getFilename());
         log.error("Solution: "+input.getFilename());
@@ -958,6 +1257,16 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
+    /**
+     * Handles a candidate that passed TACO but failed RAC on a stored counterexample in
+     * {@link #lastRACAnalysis}. Counts it as a false candidate; with
+     * {@link MuJavaController#feedbackOn} it requests pruning feedback for it (same mechanism as
+     * {@link #queueFalseCandidate}, but with the candidate's overriding properties unchanged and
+     * the failing input taken from {@code input.getSeqMethodInput()}, which is normally
+     * {@code null}, i.e. slot 0); otherwise it asks MuJavaController for the next sibling.
+     *
+     * @param input the rejected candidate
+     */
     private void processFalseCandidate(DarwinistInput input) {
         StrykerStage.falseCandidates++;
         log.error("Failed Solution: "+input.getFilename());
@@ -1008,11 +1317,26 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         return 1;
     }
 
+    /**
+     * @return the live list of filenames of the candidates accepted as fixes so far; this is what
+     *         {@link SimpleStrykerAPI#fixBug} returns
+     */
     public List<String> getResolvedBugs() {
         return resolvedBugs;
     }
 
 
+    /**
+     * Copies {@code inputFile} to {@code outputFile}, replacing every line that contains
+     * {@code "package"} with a declaration of {@code classPackage} followed by imports of
+     * {@code java.net.URL}, {@code java.net.URLClassLoader}, {@code java.net.MalformedURLException},
+     * {@code java.io.File} and {@code java.lang.reflect.InvocationTargetException}.
+     * {@code sourceClassName} and {@code methodName} are ignored. Not called anywhere in
+     * {@code src/} or {@code unittest/}; {@link #generateJunitFile} uses
+     * {@link TacoMain#editTestFileToCompile} instead.
+     *
+     * @return {@code outputFile}
+     */
     public static String editTestFileToCompile(
             String inputFile, String outputFile, String sourceClassName, String classPackage, String methodName) {
         //      String tmpDir = inputFile.substring(0, inputFile.lastIndexOf(FILE_SEP));

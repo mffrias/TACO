@@ -36,22 +36,83 @@ import ar.edu.taco.utils.FileUtils;
 
 import com.google.common.collect.Lists;
 
+/**
+ * State of the variabilization of one failing mutant: the k-variabilization of thesis Chapter 3,
+ * built one step at a time. Created by {@link #preprocessVariabilization2(DarwinistInput)} from the
+ * loop-unrolled, {@code mutID}-annotated {@code sequential/} copy of the mutant, and advanced by
+ * {@link #variablizeNext(DarwinistInput)}, which {@code DarwinistController.variablize} calls
+ * before each TACO check. That method also stores the outcome here ({@link #isUNSAT()},
+ * {@link #isUncompilable()}, {@link #getReachedUnvariablizableExpression()}), and
+ * {@link DarwinistController#computateFeedback(DarwinistInput)} turns it into the
+ * {@link ar.edu.taco.stryker.api.impl.input.MuJavaFeedback} sent to {@link MuJavaController}.
+ *
+ * <p>{@link #getExpressions()} maps each 1-based {@code mutID} (written by
+ * {@link StrykerJavaFileInstrumenter#insertMutIDs(DarwinistInput)}) to the data collected by
+ * {@link StrykerVariablizerVisitor}, as nested pairs:
+ * <pre>
+ * getLeft().getLeft().getLeft()    type of the left-hand-side terms (only t.f = ... assignments)
+ * getLeft().getLeft().getRight()   type of the right-hand-side expressions
+ * getLeft().getRight()             stillFatherable flag recorded for the mutID
+ * getRight().getLeft()             (left-hand-side terms, variabilizable?), or null
+ * getRight().getRight()            (right-hand-side expressions, variabilizable?)
+ * </pre>
+ * A mutID has several expressions when loop unrolling replicated its statement; each one gets its
+ * own fresh variable. The visitor builds the map as a {@code TreeMap}, so mutIDs are in ascending
+ * (source) order; steps take them from the largest mutID down, i.e. bottom-up as in the thesis.
+ *
+ * <p>All replacements go into a single {@link ASTRewrite} over the original source, so each step
+ * writes a file containing every replacement made so far (the variabilization is cumulative).
+ * Not thread-safe; only used inside the synchronized
+ * {@link DarwinistController#computateFeedback(DarwinistInput)}.
+ */
 public class VariablizationData {
 
     private static Logger log = Logger.getLogger(VariablizationData.class);
 
+    /** Collected data per mutID; the layout is described in the class comment. */
     private Map<Integer, MutablePair<MutablePair<MutablePair<ITypeBinding, ITypeBinding>, Boolean>, MutablePair<MutablePair<List<Expression>, Boolean>, MutablePair<List<Expression>, Boolean>>>> expressions;
+    /**
+     * Position, counted from the largest mutID (0), of the entry variabilized by the last
+     * successful step; -1 before the first step.
+     */
     private int lastVariablizedIndex = -1;
+    /** Number of fresh variables created so far; the next one is {@code customvar_<lastVarNumber>}. */
     private int lastVarNumber = 0;
     private CompilationUnit unit;
+    /** Method that receives the fresh parameters (the last matching method seen by the visitor). */
     private MethodDeclaration method;
+    /** Accumulates every replacement and added parameter across steps. */
     private ASTRewrite rewrite;
+    /** Text of the sequential file when it was parsed; each step re-applies {@link #rewrite} to it. */
     private String source;
+    /**
+     * 1-based mutID of the entry variabilized by the last successful step, or {@code null} if none.
+     * The feedback stores it as {@code skipUntilMutID = lastVariablizedMutID - 1}.
+     */
     private Integer lastVariablizedMutID;
+    /**
+     * Side variabilized by the last successful step: {@code true} for the right-hand side,
+     * {@code false} for the left-hand side, {@code null} before the first step. Becomes the
+     * feedback's {@code mutateRight}.
+     */
     private Boolean lastVariablizedMutIDRight;
+    /**
+     * {@code stillFatherable} flag of the entry variabilized last (see
+     * {@link StrykerVariablizerVisitor}); becomes the feedback's {@code fatherable} when
+     * fatherization pruning is on.
+     */
     private Boolean stillFatherable;
+    /**
+     * Negation of the last TACO verdict; set by {@code DarwinistController.variablize} unless the
+     * loop ended because a step was uncompilable.
+     */
     private Boolean UNSAT;
+    /** Whether a step failed to compile or could not be translated by TACO. */
     private Boolean uncompilable;
+    /**
+     * Whether the loop ended because {@link #variablizeNext} returned {@code false}, i.e. every
+     * step was UNSAT and there was nothing more (or nothing allowed) to variabilize.
+     */
     private Boolean reachedUnvariablizableExpression;
     /** Fully qualified types of the customvar parameters added so far, in the order they were appended. */
     private final List<String> variablizedParameterTypes = new ArrayList<String>();
@@ -71,6 +132,7 @@ public class VariablizationData {
         return expressions;
     }
     
+    /** @return whether the visitor collected at least one mutID to variabilize */
     public boolean isVariablizable() {
         return !expressions.isEmpty();
     }
@@ -155,6 +217,23 @@ public class VariablizationData {
         this.reachedUnvariablizableExpression = reachedUnvariablizableExpression;
     }
 
+    /**
+     * Parses the sequential copy of the mutant and collects what can be variabilized. The file is
+     * {@code getSeqVariablizedFilename()}, which is set from {@code getSeqFilesPrefix()} if still
+     * {@code null}. It is parsed with JDT (JLS4), resolving bindings against
+     * {@code <user.dir>/bin} and {@code <java.home>/lib/rt.jar} (a pre-Java 9 JRE layout), and
+     * {@link StrykerVariablizerVisitor} is run over every method of a top-level class whose name
+     * contains {@code getMethod()}. This is a substring match: when repairing {@code add}, a method
+     * {@code addAll} would be visited too and, if it comes later in the class, recorded as the
+     * method that receives the fresh parameters. A read error is ignored (the source is then
+     * empty).
+     *
+     * <p>The inline comments below describe an earlier design that inserted output statements;
+     * the visitor now only collects expressions.
+     *
+     * @param darwinistInput the feedback request
+     * @return the variabilization state, before any step
+     */
     public static VariablizationData preprocessVariabilization2(DarwinistInput darwinistInput) {
         String variablizedFilename = darwinistInput.getSeqVariablizedFilename();
         if (variablizedFilename == null) {
@@ -219,6 +298,30 @@ public class VariablizationData {
 
     }
 
+    /**
+     * Performs one variabilization step and writes the cumulative result to
+     * {@code darwinistInput.getSeqVariablizedFilename()}. Entries are taken from the largest mutID
+     * down (bottom-up). The right-hand side of an entry is variabilized first; the next call
+     * variabilizes the left-hand side of the same entry if it has one (only {@code t.f = ...}
+     * assignments do), and otherwise moves to the right-hand side of the next entry. Since
+     * {@code DarwinistController.variablize} runs TACO after every step, the two sides of a
+     * statement are checked separately.
+     *
+     * <p>Every expression of the chosen side is replaced by a fresh variable
+     * {@code customvar_<n>} (numbered across steps) that is appended to the method's parameters,
+     * with the type given by the recorded binding ({@link #typeFromBinding}). On success it
+     * updates {@code lastVariablizedIndex}, {@code lastVarNumber},
+     * {@code lastVariablizedMutIDRight}, {@code lastVariablizedMutID} and {@code stillFatherable}.
+     * If a recorded binding is {@code null}, the expression is appended to
+     * {@code typebindingnullexpressions.txt} in {@code user.dir} and {@link #typeFromBinding} then
+     * throws a {@link NullPointerException} that propagates to the caller. Errors while applying
+     * the rewrite or writing the file are ignored.
+     *
+     * @param darwinistInput the feedback request (only its filenames are used)
+     * @return {@code false}, leaving the state unchanged, if every entry has already been
+     *         variabilized or the chosen side is marked as not variabilizable (see
+     *         {@link StrykerVariablizerVisitor}); {@code true} otherwise
+     */
     public boolean variablizeNext(final DarwinistInput darwinistInput) {
 
         String variablizedFilename = darwinistInput.getSeqVariablizedFilename();
@@ -341,6 +444,17 @@ public class VariablizationData {
         return typeBinding.getErasure().getQualifiedName();
     }
 
+    /**
+     * Converts a JDT type binding into a type node of {@code ast}, used as the declared type of a
+     * fresh variable. Primitive, array and parameterized types are rebuilt structurally, capture
+     * bindings become wildcard types, and any other type is written with its fully qualified name.
+     *
+     * @return the type node, or {@code null} (after logging) if the name cannot be turned into a
+     *         simple type
+     * @throws NullPointerException if {@code ast} or {@code typeBinding} is {@code null}
+     * @throws IllegalArgumentException if the type has no qualified name (e.g. local or anonymous
+     *         classes)
+     */
     public Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
         if( ast == null ) 
             throw new NullPointerException("ast is null");

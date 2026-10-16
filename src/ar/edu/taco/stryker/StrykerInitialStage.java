@@ -17,6 +17,17 @@ import ar.edu.taco.stryker.exceptions.FatalStrykerStageException;
 /**
  * Stage to launch the stryker process that will attemp to fix the discovered bug.
  *
+ * <p>Created and executed by {@link ar.edu.taco.engine.StrykerStage#execute()}. It only
+ * bridges to the API: it creates a {@link SimpleStrykerAPI}, starts its controllers and
+ * calls {@link StrykerAPI#fixBug}, which blocks until the search ends. The counterexamples
+ * that drive the search must already be in
+ * {@link ar.edu.taco.engine.StrykerStage#junitInputs}.
+ *
+ * <p>The outcome is only logged, at WARN level: {@code "No fix was found: result = null"},
+ * {@code "No fix was found: result = empty"} or {@code "FIX FOUND!!! Look for file [...]"}
+ * with the list of fix files. The detailed report of each fix ({@code StrykerLastReports.txt})
+ * and the last fix found ({@code StrykerLastFixFound.java}) are written to {@code user.dir} by
+ * {@link ar.edu.taco.stryker.api.impl.DarwinistController}.
  */
 
 public class StrykerInitialStage implements IStrykerStage {
@@ -45,6 +56,9 @@ public class StrykerInitialStage implements IStrykerStage {
 	
 	private int maxMethodsInFile;
 	
+	/**
+	 * Stores the arguments for {@link StrykerAPI#fixBug}; see that method for their meaning.
+	 */
 	public StrykerInitialStage(File classToMutate, String classNameToMutate,
 			String methodToMutate, HashSet<MutationOperator> mutOps, AtomicInteger generationsWanted, String configFile, Properties overridingProperties, int maxMethodsInFile) {
 		this.classToMutate = classToMutate;
@@ -57,6 +71,10 @@ public class StrykerInitialStage implements IStrykerStage {
 		this.maxMethodsInFile = maxMethodsInFile;
 	}
 
+	/**
+	 * Starts a new {@link SimpleStrykerAPI}, runs {@link StrykerAPI#fixBug} (blocking) and
+	 * logs the result. Never actually throws {@link FatalStrykerStageException}.
+	 */
 	@Override
 	public void execute() throws FatalStrykerStageException {
 		StrykerAPI api = new SimpleStrykerAPI();

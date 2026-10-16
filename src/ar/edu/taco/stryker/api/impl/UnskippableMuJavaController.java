@@ -38,6 +38,46 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
+/**
+ * First, mandatory mutation stage of Stryker. It enumerates, with no feedback-based
+ * pruning, every combination of "unskippable" left-hand-side mutations of the method under
+ * repair: single-line PRVOL_SMART mutations rejected by
+ * {@link MuJavaController#isSkippeableLeftMutation}, at most one per line.
+ * {@link MuJavaController}, which explores the complementary (skippable) mutations with
+ * feedback, never generates these.
+ *
+ * <p><b>Input.</b> The initial {@link MuJavaInput} enqueued by {@link SimpleStrykerAPI#fixBug},
+ * received through the queue inherited from {@link AbstractBaseController} (this controller
+ * does not consume from {@link StrykerStage#weedQueue}).
+ *
+ * <p><b>Outputs.</b> Generation runs synchronously inside {@link #fatherize}, and its results
+ * are collected in {@link #inputsForMuJavaController}. When the inherited queue has then
+ * been idle for 2 seconds, the worker thread sends them to {@link StrykerStage#weedQueue}:
+ * <ul>
+ * <li>to queue 1, the original program and every combination as new bases (inputs without
+ *     {@link MuJavaFeedback}), which {@link MuJavaController} fatherizes as first-generation
+ *     fathers;</li>
+ * <li>to queue 2, every combination (not the original) as a validate-only RAC input: its
+ *     feedback has {@link MuJavaFeedback#setStop(boolean) stop} set, so
+ *     {@link OpenJMLController} and {@link DarwinistController} report it if it is a fix but
+ *     never send it back to queue 1 (the combination is explored through its new-base copy
+ *     instead). They look its father up in this controller's
+ *     {@link #getFathers()} and use the batch file recorded in its feedback.</li>
+ * </ul>
+ *
+ * <p><b>Lifecycle and threading.</b> Singleton ({@link #getInstance()}) with one worker thread,
+ * started by {@link SimpleStrykerAPI#start()}. Only the initial input is fatherized: the
+ * children it re-queues to itself are not fatherable. This controller never acks the
+ * {@link WeedQueue}, so it does not take part in the exhaustion-based termination; the other
+ * controllers shut it down. Batch generation and compilation are delegated to
+ * {@link MuJavaController#buildNextBatchSiblingsFile} on the {@link MuJavaController}
+ * singleton, called from this thread (so the duplicate filter is shared), with
+ * {@code shouldDelete == false}.
+ *
+ * <p><b>Operators.</b> The new bases carry a hard-coded operator set, identical to the one
+ * built in {@link StrykerStage#execute()}; the operators passed to
+ * {@link SimpleStrykerAPI#fixBug} are not forwarded.
+ */
 public class UnskippableMuJavaController extends AbstractBaseController<MuJavaInput> {
 
     //	private static AtomicInteger compilationFailCount = new AtomicInteger(0);
@@ -50,16 +90,28 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
 
     private static UnskippableMuJavaController instance;
 
+    /**
+     * Inputs collected during generation, dispatched by the worker loop once the inherited
+     * queue goes idle: the unmutated base (no feedback) followed by one input per combination
+     * (with a feedback holding its index array, plus its RAC input and batch file). Never
+     * cleared.
+     */
     public static List<MuJavaInput> inputsForMuJavaController = Lists.newArrayList();
 
     private static Logger log = Logger.getLogger(UnskippableMuJavaController.class);
 
+    /** Counter naming the {@code <java.io.tmpdir>/<baseI>/} directory of the base copy. */
     private static int baseI = 0;
 
+    /** Batch size passed to {@link MuJavaController#buildNextBatchSiblingsFile}. */
     private static final int batchSize = 100;
 
     private String classToMutate;
 
+    /**
+     * Fathers registered by {@link #fatherize} (only the initial input, in practice). The
+     * father index in the feedback of the validate-only RAC inputs refers to this list.
+     */
     private List<MuJavaInput> fathers = Lists.newArrayList();
 
     public synchronized static UnskippableMuJavaController getInstance() {
@@ -73,6 +125,22 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
 
     }
 
+    /**
+     * Returns the worker loop. The first {@code take()} blocks until the initial input arrives.
+     * Each input without feedback, or with a fatherable one, is passed to {@link #fatherize}
+     * (in practice only the initial input, as a new base). Any other input increments
+     * {@link StrykerStage#prunedFathers}; this includes every child re-queued by
+     * {@link #queueNextRelevantSibling}, so that counter also counts the unskippable
+     * combinations. The next input is then polled with a 2-second timeout.
+     *
+     * <p>When the poll times out, generation is assumed to be complete. For each element of
+     * {@link #inputsForMuJavaController}, a copy without feedback is enqueued to queue 1 (a
+     * new base for {@link MuJavaController}). If the element has a feedback (it is a
+     * combination), its RAC input is also enqueued to queue 2 with a new feedback marked
+     * {@code stop}, incrementing {@link StrykerStage#mutationsQueuedToOJMLC}. The thread then
+     * blocks on {@code take()} until shutdown interrupts it. Only {@link InterruptedException}
+     * is caught.
+     */
     @Override
     protected Runnable getRunnable() {
         return new Runnable() {
@@ -137,6 +205,35 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
         };
     }
 
+    /**
+     * Registers {@code input} as a father and generates all of its unskippable combinations
+     * before returning.
+     *
+     * <ol>
+     * <li>If {@code first}, copies the input file into a new temporary directory (the copy is
+     *     the father's file; unlike {@link MuJavaController#fatherize}, the
+     *     {@code //mutGenLimit 0} markers are not removed). In any case writes another copy to
+     *     {@code <java.io.tmpdir>/<baseI>/<FileName>} (in practice {@code baseI} is 0, so runs
+     *     sharing a temporary directory reuse that path) and, if {@code first}, adds it to
+     *     {@link #inputsForMuJavaController} as the unmutated base.</li>
+     * <li>Runs MuJava on the input file with PRVOL_SMART only, keeps the single-line
+     *     mutations rejected by {@link MuJavaController#isSkippeableLeftMutation} and builds the
+     *     matrix with {@link MuJavaController#getMutatorsList}. Returns if there are none.</li>
+     * <li>Gives the father a feedback with an all-zero index array, appends it to
+     *     {@link #fathers}, and builds its first batch with
+     *     {@link MuJavaController#buildNextBatchSiblingsFile}. Returns if no batch can be
+     *     built.</li>
+     * <li>Calls {@link #queueNextRelevantSibling} repeatedly, starting from a placeholder at the
+     *     all-zero array, until the father's space is exhausted.</li>
+     * </ol>
+     * The {@code notFirst} check is always false, because the array has just been set to
+     * zeros. MuJava exceptions are printed and swallowed.
+     *
+     * @param input the input to fatherize
+     * @param first {@code true} for the initial input, which has no {@link MuJavaFeedback}.
+     *        With {@code false} nothing is copied or decremented (that code is commented out);
+     *        this path is not used in practice
+     */
     public void fatherize(MuJavaInput input, boolean first) {
         File firstDir = null;
         File firstFile = null;
@@ -352,10 +449,14 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
     }
 
 
+    /** Not used outside the commented-out code below. */
     public static final String PATH_SEP = System.getProperty("path.separator");
 
+    /** Not used outside the commented-out code below. */
     public static final String MUTANTS_DEST_PACKAGE = "ar.edu.itba.stryker.mutants";
 
+    // The commented-out buildSiblingsFile below is an older version that built all children
+    // in a single file; batches are now built by MuJavaController.buildNextBatchSiblingsFile.
 //    private static final String CLASSPATH = System.getProperty("java.class.path");
 //
 //    @SuppressWarnings("resource")
@@ -708,6 +809,31 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
 //        return wrapper;
 //    }
 
+    /**
+     * Generates the next unskippable combination after {@code input}'s index array. No feedback
+     * is used: it is always the plain successor computed by
+     * {@link MuJavaController#calculateNextRelevantSonMutationsLists} with position 0.
+     * Duplicates and non-compiling combinations are skipped, and a new batch is built through
+     * {@link MuJavaController#buildNextBatchSiblingsFile} when the successor is not in the
+     * father's current batch.
+     *
+     * <p>For the combination found, two inputs are created for its mutant file, both with the
+     * hard-coded operator set and a feedback holding its index array and mutated lines:
+     * <ul>
+     * <li>one is added to {@link #inputsForMuJavaController}, together with the batch's
+     *     {@link OpenJMLInput} and the father's current JML4C file and package, for the later
+     *     dispatch to queues 1 and 2;</li>
+     * <li>one with {@code fatherable == false} is enqueued to this controller's own queue and
+     *     returned, so the caller can continue the traversal from it.</li>
+     * </ul>
+     * The branch that would re-queue a non-compiling combination only runs if the batch map
+     * still has it, but {@link MuJavaController#buildNextBatchSiblingsFile} removes those from
+     * the map. The batch's {@link OpenJMLInput} is dereferenced before its {@code null} check.
+     *
+     * @param input the previous combination, or the placeholder created by {@link #fatherize}
+     * @return the input to continue from, or {@code null} when the father's space is exhausted
+     *         or no batch can be built
+     */
     public MuJavaInput queueNextRelevantSibling(MuJavaInput input) {
         MuJavaInput father = fathers.get(input.getMuJavaFeedback().getFatherIndex());
         Mutation[][] mutatorsList = father.getMuJavaFeedback().getLineMutatorsList();
@@ -912,6 +1038,7 @@ public class UnskippableMuJavaController extends AbstractBaseController<MuJavaIn
         return fathers;
     }
 
+    /** One worker thread. */
     @Override
     protected int getQtyOfThreads() {
         return 1;

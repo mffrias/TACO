@@ -41,6 +41,45 @@ import com.google.common.collect.Sets;
 
 import ar.edu.taco.stryker.api.impl.input.DarwinistInput;
 
+/**
+ * JDT visitor that collects, for the method under repair, the expressions that variabilization
+ * may replace by fresh variables, grouped by the {@code mutID} of each statement. The mutID is
+ * read from the statement's {@code //mutGenLimit <k> mutID <n>} comment, written by
+ * {@link StrykerJavaFileInstrumenter#insertMutIDs(DarwinistInput)}; statements with a negative
+ * mutID (no mutation budget left) are skipped. The visitor does not rewrite anything:
+ * {@link #buildVariablizationData()} hands the collected map to a {@link VariablizationData},
+ * which performs the replacements. The map layout is described there; despite its name,
+ * {@code rhsExpressions} holds both sides.
+ *
+ * <p>What is collected, by statement kind:
+ * <ul>
+ * <li>assignment: the right-hand side (typed with the assignment's type, or {@code boolean} for
+ * boolean literals). If the left-hand side is {@code t.f} (a {@code QualifiedName} or
+ * {@code FieldAccess}), the qualifier {@code t} is also collected as a left-hand-side term,
+ * matching the thesis's {@code LHSVar.f = RHSVar}. A plain variable on the left-hand side is not
+ * collected;</li>
+ * <li>prefix or postfix expression statement ({@code i++}): its operand, so the statement becomes,
+ * e.g., {@code customvar_0++} and no longer updates the original variable;</li>
+ * <li>local variable declaration: the initializer of its first fragment (typed with the declared
+ * type);</li>
+ * <li>{@code return e}: {@code e}, typed with the method's return type;</li>
+ * <li>{@code if} condition: collected as a {@code boolean} right-hand side under the mutID of the
+ * comment(s) located between the {@code if} and the first statement of its then-branch;</li>
+ * <li>any other expression statement (e.g. a method call): stored as a right-hand side marked as
+ * not variabilizable, so variabilization stops when it reaches it.</li>
+ * </ul>
+ * Loop conditions are not collected. The first statement of each branch of an {@code if}, and of
+ * each loop body, is processed when its parent is visited and remembered in {@code customNodes};
+ * the first branch of {@link #preVisit2(ASTNode)} then skips it. Return statements, however, are
+ * handled by a branch that does not check {@code customNodes}, so a return statement in that
+ * position appears to be collected twice (its expression would then get two fresh variables).
+ *
+ * <p>The {@code stillFatherable} value stored with each new mutID entry is "sticky": it becomes
+ * {@code true} the first time an entry is created for a statement whose {@code mutGenLimit} is
+ * not 0 and either is not 1 or belongs to a line in {@code getLastMutatedLines()}, and it is never
+ * reset during the visit. These tests are substring matches, so for example
+ * {@code mutGenLimit 12} counts as 1.
+ */
 public class StrykerVariablizerVisitor extends ASTVisitor {
 
     private static Logger log = Logger.getLogger(StrykerVariablizerVisitor.class);
@@ -48,13 +87,18 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
     private final CompilationUnit unit;
     private final String source;
     private String methodName;
+    /** Only used to reach the AST for resolving {@code boolean}; nothing is recorded in it. */
     private final ASTRewrite rewrite;
+    /** Statements already processed as the first statement of a branch or loop body. */
     private final Set<ASTNode> customNodes = Sets.newHashSet();
     private static final String mutIDCommentPrefix = "mutID ";
     private static final String mutGenLimitPrefix = "mutGenLimit ";
 
+    /** Sticky flag copied into each new mutID entry; see the class comment. */
     private boolean stillFatherable = false;
+    /** Last visited method whose name contains {@link #methodName}; receives the fresh parameters. */
     private MethodDeclaration method = null;
+    /** Collected data per mutID (both sides, despite the name); layout in {@link VariablizationData}. */
     private Map<Integer, MutablePair<MutablePair<MutablePair<ITypeBinding, ITypeBinding>, Boolean>, MutablePair<MutablePair<List<Expression>, Boolean>, MutablePair<List<Expression>, Boolean>>>> rhsExpressions = Maps.newTreeMap();
     private DarwinistInput input;
 
@@ -70,10 +114,18 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
         this.methodName = methodName;
     }
 
+    /** Zero-based line of {@code node}. Not called anywhere in {@code src/} or {@code unittest/}. */
     public static int getLineNumber(CompilationUnit compilationUnit, ASTNode node) {
         return compilationUnit.getLineNumber(node.getStartPosition()) - 1;
     }
 
+    /**
+     * Returns the text of the comment at {@code commentIndex} in the unit's comment list or, if it
+     * does not contain {@code "mutGenLimit "}, of the closest preceding comment that does, followed
+     * by a newline. A statement whose trailing comment is not a {@code mutGenLimit} comment is
+     * therefore attributed to the previous annotated line. Assumes the comments it visits are
+     * {@link LineComment}s; if no annotated comment precedes the index, the list access fails.
+     */
     public String getLineComment(int commentIndex) {
         LineComment lineCommentNode;
         //Tiene comentario el statement, potencialmente sea el de mutacion que necesito
@@ -93,10 +145,18 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
         return lineComment;
     }
 
+    /**
+     * @return a {@link VariablizationData} over this visitor's source, unit, recorded target
+     *         method and collected expressions
+     */
     public VariablizationData buildVariablizationData() {
         return new VariablizationData(source, unit, method, rhsExpressions); 
     }
 
+    /**
+     * Collects the returned expression of a mutable {@code return} statement as a right-hand side
+     * typed with the enclosing method's return type.
+     */
     public void processReturnNode(ReturnStatement statement) {
 
         String mutIDComment = getLineComment(unit.lastTrailingCommentIndex(statement));
@@ -158,6 +218,12 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
         }
     }
 
+    /**
+     * Collects the variabilizable parts of a mutable statement other than {@code return}:
+     * assignment, prefix/postfix expression, any other expression statement, or local variable
+     * declaration (see the class comment). Logs an error for any other statement kind and when a
+     * declaration has more than one fragment.
+     */
     public void processNode(Statement statement) {
         String mutIDComment = getLineComment(unit.lastTrailingCommentIndex(statement));
 
@@ -635,6 +701,11 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
         }
     }
 
+    /**
+     * Collects {@code rhs}, the condition of {@code statement}, as a {@code boolean} right-hand
+     * side under the mutID found from the comment at {@code commentIndex} (see
+     * {@link #getLineComment(int)}).
+     */
     public void processBooleanNode(Statement statement, Expression rhs, int commentIndex) {
         String mutIDComment = getLineComment(commentIndex);
 
@@ -687,6 +758,16 @@ public class StrykerVariablizerVisitor extends ASTVisitor {
         }
     }
 
+    /**
+     * Dispatches on the node kind. Statements other than blocks, {@code if}, loops and
+     * {@code return} that have a trailing comment and were not processed already go to
+     * {@link #processNode(Statement)}, and their children are not visited. {@code if},
+     * {@code while}, {@code for} and enhanced {@code for} statements process the first statement
+     * of their branches or body right away ({@code if} also its condition) and then visit their
+     * children. {@code return} statements with a trailing comment go to
+     * {@link #processReturnNode(ReturnStatement)}. A method declaration whose name contains
+     * {@link #methodName} is recorded as the target method.
+     */
     @Override
     public boolean preVisit2(ASTNode node) {
         if (node instanceof Statement 

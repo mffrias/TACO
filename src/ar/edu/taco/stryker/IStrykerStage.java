@@ -4,6 +4,7 @@ import ar.edu.taco.stryker.exceptions.FatalStrykerStageException;
 
 /**
  * A Stryker stage.
+ * The only implementation is {@link StrykerInitialStage}, which runs the whole search.
  */
 public interface IStrykerStage {
 

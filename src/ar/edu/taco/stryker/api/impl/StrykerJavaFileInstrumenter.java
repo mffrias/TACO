@@ -46,12 +46,51 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * Static source-to-source rewrites of candidate Java files. They combine Eclipse JDT parsing (JLS4)
+ * with plain string replacement. Each method reads a file, locates the method(s) of interest by name,
+ * and writes the result back. I/O and rewrite errors are caught and ignored (at most logged).
+ * <p>
+ * Used at run time:
+ * <ul>
+ * <li>{@link #cleanMutGenLimit0} and {@link #decrementUnmutatedLimits}: MuJavaController, when
+ * fatherizing;</li>
+ * <li>{@link #parseMethodStartLine}: MuJavaController and UnskippableMuJavaController;</li>
+ * <li>{@link #parseMethodsLineNumbers}: MuJavaController;</li>
+ * <li>{@link #insertMutIDs}: {@code DarwinistController.computateFeedback}.</li>
+ * </ul>
+ * The remaining methods belong to an earlier "sequential trace" approach to feedback and are
+ * currently unused.
+ * <p>
+ * Convention: a line of the method under repair is mutable when it carries a trailing
+ * {@code //mutGenLimit N} comment with {@code N > 0}. Stryker does not compute these comments (there
+ * is no automatic fault localization): they must already be present in the subject source. This class
+ * decrements {@code N} across generations.
+ */
 public class StrykerJavaFileInstrumenter {
 
     private static Logger log = Logger.getLogger(StrykerJavaFileInstrumenter.class);
 
+    /** Imports that {@link #instrumentForSequentialOutput} adds so that the instrumented file compiles. */
     private static List<String> ioImports = Lists.newArrayList("java.io.IOException", "ar.edu.taco.utils.FileUtils", "java.util.NoSuchElementException");
 
+    /**
+     * Currently unused (no callers in this repository). It belongs to the earlier "sequential trace"
+     * feedback approach.
+     * <p>
+     * Writes a copy of {@code wrapper.getFilename()} into an {@code instrumented/} subdirectory. In the
+     * copy, every method whose name contains {@code wrapper.getMethod()} is instrumented by
+     * {@link StrykerASTVisitor} so that, when run, it appends the statements it executes (and the guards
+     * of the branches it takes) to the file {@code <seqFileName>_<methodName>}. {@code seqFileName} is
+     * the original path with {@code sequential/} inserted before the file name. The method also adds
+     * imports for {@code IOException}, {@code FileUtils} and {@code NoSuchElementException}.
+     *
+     * @param wrapper the batch whose file is instrumented
+     * @param lastMutatedLines the lines mutated in the candidate ({@code MuJavaFeedback.getLastMutatedLines()})
+     * @param mutableLines the mutable lines ({@code MuJavaFeedback.getMutableLines()})
+     * @return a new wrapper for the instrumented file, with {@code seqFilesPrefix} and
+     *         {@code oldFilename} set
+     */
     @SuppressWarnings("unchecked")
     public static OpenJMLInputWrapper instrumentForSequentialOutput(final OpenJMLInputWrapper wrapper, List<Integer> lastMutatedLines, List<Integer> mutableLines) {
 
@@ -152,6 +191,16 @@ public class StrykerJavaFileInstrumenter {
         return newWrapper;
     }
 
+    /**
+     * Returns the start and end lines of every method in {@code filename} whose name contains
+     * {@code methodName}. Lines are 1-based, as given by {@link CompilationUnit#getLineNumber(int)}.
+     * {@code MuJavaController.buildNextBatchSiblingsFile} uses this to attribute JML4C compilation errors
+     * to the renamed mutant methods of a batch file.
+     *
+     * @param filename the Java file to parse
+     * @param methodName substring that selects the methods
+     * @return map from method name to (start line, end line)
+     */
     @SuppressWarnings("unchecked")
     public static Map<String, Pair<Integer, Integer>> parseMethodsLineNumbers(final String filename, final String methodName) {
 
@@ -195,6 +244,15 @@ public class StrykerJavaFileInstrumenter {
         return methodsLineNumbers;
     }
 
+    /**
+     * Returns the 1-based start line of the first method in {@code filename} whose name contains
+     * {@code methodName}, minus one, or 0 if there is no such method. MuJavaController and
+     * UnskippableMuJavaController use it to fill {@code MuJavaFeedback.methodFirstLine}.
+     *
+     * @param filename the Java file to parse
+     * @param methodName substring that selects the method
+     * @return the method's start line minus one, or 0
+     */
     @SuppressWarnings("unchecked")
     public static int parseMethodStartLine(final String filename, final String methodName) {
 
@@ -235,6 +293,13 @@ public class StrykerJavaFileInstrumenter {
         return 0;
     }
 
+    /**
+     * Currently unused (no callers in this repository). Removes from {@code filename}, in place, every
+     * method whose name is in {@code methodNames}.
+     *
+     * @param filename the Java file to rewrite
+     * @param methodNames exact names of the methods to remove
+     */
     @SuppressWarnings("unchecked")
     public static void removeMethods(final String filename, final Set<String> methodNames) {
 
@@ -287,6 +352,18 @@ public class StrykerJavaFileInstrumenter {
     }
 
 
+    /**
+     * Currently unused (no callers in this repository). It belongs to the earlier "sequential trace"
+     * approach.
+     * <p>
+     * Reads {@code darwinistInput.getOriginalFilename()} and replaces the body of the first method whose
+     * name is contained in {@code getSeqMethod()} with the contents of the trace file
+     * {@code <seqFilesPrefix>_<seqMethod>} (see {@link #instrumentForSequentialOutput}). It then removes
+     * repeated local variable declarations with {@link StrykerDuplicateVariablesVanisherASTVisitor} and
+     * writes the result to {@code getSeqFilesPrefix()}.
+     *
+     * @param darwinistInput the feedback request whose trace is used
+     */
     @SuppressWarnings("unchecked")
     public static void replaceMethodBodies(final DarwinistInput darwinistInput) {
 
@@ -429,6 +506,19 @@ public class StrykerJavaFileInstrumenter {
     //Por ultimo, englobo toda esa conjuncion y le clavo el ! adelante.
     //Cabe destacar que por ahora tenemos solo un ensures por linea, en 1 linea.
     //A futuro, soportar de ser posible mediante parseo, que la formula de c/ensures sea multilinea.
+    /**
+     * Currently unused (no callers in this repository).
+     * <p>
+     * Works in place on the file {@code wrapper.getSeqFilesPrefix()}. Finds the first method whose name
+     * is contained in {@code wrapper.getMethod()}, then scans the comment list, starting at that
+     * method's first leading comment, until it finds a comment with an {@code ensures} line. In that
+     * comment, all {@code ensures} lines are replaced by a single {@code ensures !((f1) && (f2) ...)}
+     * clause placed after the comment's first line, and the {@code requires} lines are removed (the code
+     * that re-added them is commented out).
+     * As the Spanish note above says, each {@code ensures} clause must fit on one line.
+     *
+     * @param wrapper the feedback request whose working copy is rewritten
+     */
     @SuppressWarnings("unchecked")
     public static void negatePostconditions(final DarwinistInput wrapper) {
 
@@ -538,6 +628,16 @@ public class StrykerJavaFileInstrumenter {
 
     }
 
+    /**
+     * Currently unused (no callers in this repository).
+     * <p>
+     * Works in place on the file {@code wrapper.getSeqFilesPrefix()}. On every line containing
+     * {@code signals} in the leading comment of the first method whose name is contained in
+     * {@code wrapper.getMethod()}, replaces {@code false} with {@code true}. For example,
+     * {@code signals (Exception e) false;} becomes {@code signals (Exception e) true;}.
+     *
+     * @param wrapper the feedback request whose working copy is rewritten
+     */
     @SuppressWarnings("unchecked")
     public static void enableExceptionsInContract(final DarwinistInput wrapper) {
 
@@ -611,6 +711,23 @@ public class StrykerJavaFileInstrumenter {
         }
     }
 
+    /**
+     * Currently unused (no callers in this repository). It was meant to hard-wire the failing input into
+     * the sequential version of the method (see the Spanish comment at the top of the body).
+     * <p>
+     * It parses the JUnit file {@code darwinistInput.getSeqMethodInput()} and, from its methods whose
+     * name contains {@code test}, collects:
+     * <ul>
+     * <li>the variable declarations, except {@code method} and {@code instance};</li>
+     * <li>the three-argument {@code updateValue} calls;</li>
+     * <li>the arguments array of the {@code invoke} call.</li>
+     * </ul>
+     * The code that turned these into statements is commented out. As it stands, the method appears to
+     * only prepend an empty generated block and a newline to the body of the first method whose name is
+     * contained in {@code getMethod()}, in the file {@code getSeqFilesPrefix()}.
+     *
+     * @param darwinistInput the feedback request whose working copy is rewritten
+     */
     @SuppressWarnings("unchecked")
     public static void fixInput(final DarwinistInput darwinistInput) {
         /*
@@ -907,6 +1024,20 @@ public class StrykerJavaFileInstrumenter {
 
     }
 
+    /**
+     * Called by {@code MuJavaController.fatherize} before a candidate that is not first-generation
+     * becomes a father. Rewrites {@code input.getFilename()} in place.
+     * <p>
+     * In the body of each method whose name is contained in {@code input.getMethod()}, every
+     * {@code //mutGenLimit N} with {@code N != 0} becomes {@code //mutGenLimit N-1}. Lines that this
+     * candidate mutated (the {@code lastMutatedLines} of its feedback) keep their value. The k-th
+     * {@code //mutGenLimit} comment of the method is matched with {@code getMutableLines().get(k - 1)}
+     * of the feedback, so the comments must correspond one-to-one with the mutable lines (see
+     * {@link #cleanMutGenLimit0}). The number must end the line: anything after it makes
+     * {@code Integer.valueOf} throw, and that exception is not caught here.
+     *
+     * @param input the candidate about to be fatherized; its feedback must be set
+     */
     public static void decrementUnmutatedLimits(MuJavaInput input) {
         String filename = input.getFilename();
         String source = "";
@@ -981,6 +1112,24 @@ public class StrykerJavaFileInstrumenter {
 
     }
 
+    /**
+     * Called by {@code DarwinistController.computateFeedback} on the working copy
+     * {@code input.getSeqFilesPrefix()}, which it rewrites in place before variablization.
+     * <p>
+     * In the body of each method whose name is contained in {@code input.getMethod()}, the k-th
+     * {@code //mutGenLimit N} comment becomes {@code //mutGenLimit N mutID k}. The mutID {@code k} is
+     * 1-based, so {@code k - 1} indexes the feedback's {@code getMutableLines()}. It is written negated
+     * ({@code -k}) when {@code N} is 0 and this candidate did not mutate the line. This tells
+     * StrykerVariablizerVisitor not to variablize that line.
+     * <p>
+     * Numbering starts at 1 on purpose, so that every mutID has a sign (there is no {@code -0}).
+     * {@code computateFeedback} compensates by storing {@code lastVariablizedMutID - 1} as
+     * {@code MuJavaFeedback.skipUntilMutID}. The positional matching assumes that the
+     * {@code //mutGenLimit} comments correspond one-to-one with the mutable lines (see
+     * {@link #cleanMutGenLimit0}).
+     *
+     * @param input the feedback request; its feedback must be set
+     */
     public static void insertMutIDs(DarwinistInput input) {
         String filename = input.getSeqFilesPrefix();
         String source = "";
@@ -1069,6 +1218,15 @@ public class StrykerJavaFileInstrumenter {
 
     }
 
+    /**
+     * Called by {@code MuJavaController.fatherize} for first-generation fathers. Removes every
+     * {@code //mutGenLimit 0} marker from {@code input.getFilename()}, in place, by plain text
+     * replacement over the whole file. In later generations, the k-th {@code //mutGenLimit} comment of
+     * the method is then the k-th mutable line, which {@link #insertMutIDs} and
+     * {@link #decrementUnmutatedLimits} assume.
+     *
+     * @param input the first-generation input whose file is cleaned
+     */
     public static void cleanMutGenLimit0(final MuJavaInput input) {
 
         final String filename = input.getFilename();

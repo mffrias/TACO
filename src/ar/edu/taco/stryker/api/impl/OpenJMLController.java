@@ -32,24 +32,71 @@ import ar.edu.taco.stryker.api.impl.input.OpenJMLInput;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * RAC filter of the Stryker repair pipeline: runs the stored counterexamples against each
+ * mutant with runtime assertion checking (RAC) and forwards only the survivors to TACO.
+ *
+ * <p>Despite its name, this class does not use OpenJML. {@link MuJavaController} (and
+ * {@link UnskippableMuJavaController}, through it) writes each batch of sibling mutants as a
+ * single class with one method per mutant, and compiles that class with JML4C
+ * ({@code lib/stryker/jml4c.jar}), which turns the JML contracts into runtime checks. Each
+ * {@link OpenJMLInput} names one mutant method of such a batch
+ * ({@link OpenJMLInput#getRacMethod()}); this controller invokes the JUnit counterexamples in
+ * {@link StrykerStage#junitInputs} on it and classifies the mutant as passing or failing.
+ *
+ * <p><b>Inputs and outputs.</b> Consumes queue 2 of {@link StrykerStage#weedQueue} and
+ * acknowledges every input it finishes. A mutant that passes all attempted counterexamples
+ * becomes a {@link DarwinistInput} on queue 3 ({@link DarwinistController}, TACO validation).
+ * A mutant that fails produces a {@link MuJavaInput} on queue 1 ({@link MuJavaController}):
+ * a feedback request when {@link MuJavaController#feedbackOn} is set, otherwise a request for
+ * the next sibling. Inputs whose {@link MuJavaFeedback#isStop()} is set come from
+ * {@link UnskippableMuJavaController} and are validate-only: they can still reach queue 3,
+ * but a failure produces no follow-up work. See {@link #getRunnable()} for the details.
+ *
+ * <p><b>Threading and lifecycle.</b> Singleton ({@link #getInstance()}), started by
+ * {@link SimpleStrykerAPI#start()} with a single worker thread. Each counterexample runs on
+ * a separate single-thread {@link #executor} so that it can be timed out; a run that times
+ * out is killed with the deprecated {@link Thread#stop()} and the executor is replaced. The
+ * round-robin cursor {@link #curJunitIndex} and {@link #consumedMutants} are static and never
+ * reset, so they carry over if Stryker runs more than once in the same JVM.
+ *
+ * <p>The JML4C runtime is located as {@code lib/stryker/jml4c.jar} under {@code user.dir},
+ * so the working directory must be the repository root.
+ */
 public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
 
     public static final String FILE_SEP = System.getProperty("file.separator");
 
     public static final String PATH_SEP = System.getProperty("path.separator");
 
+    /**
+     * Package suffix of the JML4C batch classes. Not read in this class; the value actually
+     * used to build batches is {@link MuJavaController#MUTANTS_DEST_PACKAGE}.
+     */
     public static final String MUTANTS_DEST_PACKAGE = "ar.edu.itba.stryker.mutants";
 
     private static Logger log = Logger.getLogger(OpenJMLController.class);
 
+    /**
+     * Round-robin cursor into {@link StrykerStage#junitInputs}: the slot of the next
+     * counterexample to try. Shared by all mutants; advanced only after a passing run and
+     * wrapped to 0 at the end of the array or at the first empty slot.
+     */
     private static int curJunitIndex = 0;
 
     //    private static final String CLASSPATH = System.getProperty("java.class.path");
 
     private static OpenJMLController instance;
 
+    /** Number of inputs processed so far (logged only). */
     private static int consumedMutants = 0;
 
+    /**
+     * Returns the singleton, creating it on first use. It does nothing until
+     * {@link #start()} is called (done by {@link SimpleStrykerAPI#start()}).
+     *
+     * @return the shared controller
+     */
     public synchronized static OpenJMLController getInstance() {
         if (instance == null) {
             instance = new OpenJMLController();
@@ -58,8 +105,13 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
     }
 
     //	private JUnitCore junit;
+    /**
+     * Runs one counterexample at a time so that the worker can wait with a timeout. Replaced
+     * by a fresh executor after every timeout.
+     */
     private ExecutorService executor = Executors.newSingleThreadExecutor(); //Executors.newFixedThreadPool(10);
 
+    /** Thread running the current counterexample; stopped with {@link Thread#stop()} on timeout. */
     private Thread runningThread = null;
 
     private OpenJMLController() {
@@ -70,6 +122,75 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
         //		}
     }
 
+    /**
+     * Returns the worker loop, which runs until {@link #willShutdown} is set. For each
+     * {@link OpenJMLInput} taken from queue 2:
+     * <ol>
+     * <li><b>Locate the compiled batch.</b> If the feedback {@code isStop()}, the JML4C
+     *     source file and package are the ones recorded in the feedback
+     *     ({@code getUnskippableOJML4CFilename()}/{@code getUnskippableOJML4CPackage()});
+     *     otherwise they are taken from the father in {@link MuJavaController#getFathers()}.
+     *     If the file name is {@code null} the controller calls {@link #shutdown()} and leaves
+     *     the loop without acknowledging the input.</li>
+     * <li><b>Run counterexamples.</b> Up to {@code Math.min(StrykerStage.indexToLastJUnitInput, 9)}
+     *     classes from {@link StrykerStage#junitInputs} are tried in round-robin order starting
+     *     at {@link #curJunitIndex}, stopping at the first failure. For each one, its first
+     *     {@code @Test} method found by reflection is invoked with
+     *     {@code (classpath, batchClassName, input.getRacMethod())}, where the classpath is the
+     *     batch's source root plus {@code lib/stryker/jml4c.jar}. The test (rewritten by
+     *     {@link ar.edu.taco.TacoMain#editTestFileToCompile}) loads the batch class in its own
+     *     class loader and calls that mutant method on the counterexample.</li>
+     * <li><b>Classify each run</b> (3-second limit):
+     *   <ul>
+     *   <li>returns normally: pass;</li>
+     *   <li>times out: counted as a <em>pass</em> and recorded in
+     *       {@link StrykerStage#timeoutMutations};</li>
+     *   <li>{@link InvocationTargetException} whose printed stack trace contains both
+     *       {@code org.jmlspecs.jml4.rac.runtime.JML} and {@code Error}: RAC violation, fail;</li>
+     *   <li>any other {@code InvocationTargetException} (null pointer, {@code ThreadDeath} or
+     *       anything else): exception in the mutated method, fail, recorded in
+     *       {@link StrykerStage#nullPointerExceptionMutations};</li>
+     *   <li>{@link IllegalAccessException}, {@link IllegalArgumentException} or any other
+     *       {@link Throwable} inside the task: fail.</li>
+     *   </ul>
+     *   The cursor advances only after a pass, so the counterexample that killed a mutant is
+     *   the first one tried on the next mutant. If waiting for the result is interrupted or
+     *   fails otherwise, the previous attempt's verdict is reused (initially pass).</li>
+     * <li><b>Route the mutant.</b>
+     *   <ul>
+     *   <li>Passed every attempted counterexample: a {@link DarwinistInput} carrying the
+     *       invocation arguments is enqueued to queue 3, whether or not the feedback
+     *       {@code isStop()}. {@link DarwinistController} validates it with TACO and, on UNSAT,
+     *       re-runs all stored counterexamples with those same arguments.</li>
+     *   <li>Failed and not {@code isStop()}, with {@link MuJavaController#feedbackOn}: a
+     *       {@link MuJavaInput} with {@code computateFeedback} set is enqueued to queue 1. It
+     *       wraps a {@link DarwinistInput} marked for sequential processing, with the failing
+     *       counterexample file from {@link StrykerStage#junitFiles} and a copy of the
+     *       overriding properties in which {@code attemptToCorrectBug},
+     *       {@code generateUnitTestCase} and {@code generateRun} become {@code false},
+     *       {@code generateCheck} becomes {@code true} (only keys already present are
+     *       rewritten; {@code methodToCheck} stays the driver's, and
+     *       {@code DarwinistController.variablize} names the variabilized method).</li>
+     *   <li>Failed and not {@code isStop()}, without feedback: a {@link MuJavaInput} for the
+     *       same mutant whose feedback has {@code fatherable}, {@code getSibling} and
+     *       {@code mutateRight} set is enqueued to queue 1.</li>
+     *   <li>Failed and {@code isStop()}: nothing is enqueued.</li>
+     *   </ul></li>
+     * <li><b>Acknowledge</b> with {@code weedQueue.ack(1)}. If no queued or in-flight work is
+     *     left in any queue, {@code shutdownNow()} is called on all four controllers.</li>
+     * </ol>
+     * With no counterexample loaded ({@code indexToLastJUnitInput == 0}) nothing is attempted,
+     * so the mutant is neither forwarded nor answered with feedback. Exceptions thrown while
+     * running or routing a mutant are printed and the input is still acknowledged; a runtime
+     * exception while locating the batch ends the worker (printed by the outer handler)
+     * without an acknowledgement.
+     *
+     * <p>When the loop exits through the shutdown flag, an interrupt or a missing file name,
+     * it enqueues a {@link DarwinistInput} whose fields are all {@code null}/{@code false} to
+     * queue 3; {@link DarwinistController} has no special handling for such an input.
+     *
+     * @return the worker loop for the single worker thread
+     */
     @Override
     protected Runnable getRunnable() {
         return new Runnable() {
@@ -90,6 +211,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                             String tempFilename = null;
                             String packageToWrite = null;
                             
+                            // Validate-only inputs from UnskippableMuJavaController carry their batch location in the feedback.
                             if (input.getFeedback().isStop()) {
                                 father = UnskippableMuJavaController.getInstance().getFathers().get(input.getFeedback().getFatherIndex());
                                 tempFilename = input.getFeedback().getUnskippableOJML4CFilename();
@@ -217,6 +339,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                     try {
                                         result = future.get(3000, TimeUnit.MILLISECONDS);
                                     } catch (TimeoutException ex) {
+                                        // A timeout counts as a pass; kill the runaway test and start a fresh executor.
                                         result = true;
                                         threadTimeout = true;
                                         runningThread.stop();
@@ -254,6 +377,7 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                             timeoutMethods.add(methodName);
                                             log.warn("Timeout Mutation " + input.getFilename() + " for method: " + timeoutMethods.iterator().next());
                                         }
+                                        // Passed the last input to attempt: forward as a fix candidate.
                                         if (attempted + 1 == maxNumberAttemptedInputs) {
                                             log.warn("TEST PASSED: :) for file: " + tempFilename + ", method: "+methodName + ", input: " + curJunitIndex);
                                             DarwinistInput output = null;
@@ -417,6 +541,17 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                 }
             }
 
+            /**
+             * Returns the fully qualified name of the JML4C batch class stored in
+             * {@code filename}. Despite its name, it does not edit any file: the package is
+             * the directory path from {@link MuJavaController#batchPackageStart(String)} up to
+             * the file, with separators turned into dots, and the simple name is the file name
+             * without extension.
+             *
+             * @param filename path of the JML4C-adapted batch source file
+             * @return the batch class name, passed to the counterexample test so it can load
+             *         the class
+             */
             public String editFileToPassToNextStage(String filename) {
                 String classPackage = filename.substring(MuJavaController.batchPackageStart(filename), filename.lastIndexOf(FILE_SEP)).replaceAll(FILE_SEP, ".");
 
@@ -426,6 +561,16 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
         };
     }
 
+    /**
+     * Appends a URL to the system class loader by calling the protected
+     * {@code URLClassLoader.addURL} reflectively. This only works when the system class loader
+     * is a {@link URLClassLoader}, as on Java 7 and 8. Failures are printed and logged at debug
+     * level, never thrown.
+     *
+     * <p>Unused: there is no caller in {@code src/} or {@code unittest/}.
+     *
+     * @param u the URL to add
+     */
     public static void addUrl(URL u) {
         URLClassLoader sysloader = (URLClassLoader) ClassLoader
                 .getSystemClassLoader();

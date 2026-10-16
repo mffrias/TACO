@@ -6,39 +6,90 @@ import java.util.Properties;
 import mujava.api.MutationOperator;
 
 
+/**
+ * A single mutant (a child of some father) that
+ * {@link ar.edu.taco.stryker.api.impl.OpenJMLController OpenJMLController} checks with JML runtime
+ * assertion checking (RAC) against the stored JUnit inputs.
+ * <p>
+ * {@code MuJavaController.mutateWithoutCompiling} creates one for every non-duplicate mutant written
+ * while building a batch (see {@link OpenJMLInputWrapper}). The input is kept in the father's
+ * {@link MuJavaInput#getIndexesToMethod()} until {@code MuJavaController.queueNextRelevantSibling}
+ * selects it as the next relevant sibling. That method attaches a fresh {@link MuJavaFeedback} and puts
+ * the input on queue 2 of {@link ar.edu.taco.engine.StrykerStage#weedQueue}. UnskippableMuJavaController
+ * also puts validate-only inputs there ({@link MuJavaFeedback#isStop()}).
+ * <p>
+ * OpenJMLController invokes the {@code @Test} method of up to nine stored JUnit inputs, passing them the
+ * classpath and qualified name of the father's JML4C-compiled batch class and {@link #getRacMethod()}
+ * as the method to run. If the mutant passes them all, it is wrapped in a
+ * {@link DarwinistInput} and sent to queue 3. If it fails and is not a stop candidate,
+ * OpenJMLController sends a feedback request to queue 1, or a plain {@link MuJavaInput} when feedback
+ * is disabled.
+ */
 public class OpenJMLInput {
 
+    /** Path of this mutant's own source file, as written by muJava. */
     private String filename;
 
+    /** Name of the method under repair. */
     private String method;
 
+    /**
+     * Name of this mutant's copy of the method inside the father's batch class.
+     * {@code MuJavaController.createJMLInputWrapper} assigns it: the first mutant of a batch keeps
+     * {@link #getMethod()}, and the others get the method name followed by a number. OpenJMLController
+     * passes it to the JUnit inputs as the method to run, and MuJavaController uses it to map JML4C
+     * compilation errors back to mutants.
+     */
     private String racMethod;
 
+    /** TACO configuration file. */
     private String configFile;
 
+    /** TACO overriding properties. */
     private Properties overridingProperties;
 
+    /** Path of the original subject file (see {@link MuJavaInput#getOriginalFilename()}). */
     private String originalFilename;
 
+    /**
+     * Search state of this mutant. It is set at creation and replaced with a fresh one when the mutant
+     * is enqueued on queue 2.
+     */
     private MuJavaFeedback feedback;
 
+    /** muJava mutation operators, carried along for later generations. */
     private Collection<MutationOperator> mutantsToApply;
 
+    /** Per-run object propagated through all messages; nothing synchronizes on it. */
     private Object syncObject;
     
+    /**
+     * Not initialised by the constructor, which ignores the matching parameter. Only
+     * UnskippableMuJavaController sets it (to {@link MuJavaInput#getFullyQualifiedFileName()}). It is
+     * only propagated.
+     */
     private String fullyQualifiedClassName;
     
+    /**
+     * Not initialised by the constructor, which ignores the matching parameter. Only
+     * UnskippableMuJavaController sets it (to {@link MuJavaInput#getMethodUnderAnalysis()}). It is only
+     * propagated.
+     */
     private String methodUnderAnalysis;
 
     /**
-     * Creates a OpenJMLInput.
+     * Creates an OpenJMLInput.
      * 
-     * @param filename The filename that contains the class that has failed.
-     * @param method The method that has failed.
-     * @param junitFile The file that contains all the statements that will make the class fail.
-     * @param configFile The TACO configuration file.
-     * @param overridingProperties The overriding properties
-     * @param originalFilename The original filename
+     * @param filename path of the mutant's own source file
+     * @param method name of the method under repair
+     * @param configFile the TACO configuration file
+     * @param overridingProperties the TACO overriding properties
+     * @param originalFilename the original subject file
+     * @param feedback the mutant's search state
+     * @param mutantsToApply the muJava mutation operators carried along
+     * @param syncObject per-run object propagated through all messages
+     * @param fullyQualifiedClassName ignored: this constructor does not store it
+     * @param methodUnderAnalysis ignored: this constructor does not store it
      */	
     public OpenJMLInput(String filename, String method, String configFile, 
             Properties overridingProperties, String originalFilename, MuJavaFeedback feedback, Collection<MutationOperator> mutantsToApply, Object syncObject,
@@ -55,7 +106,7 @@ public class OpenJMLInput {
     }
 
     /**
-     * @return The method that has failed.
+     * @return the name of the method under repair
      */
     public String getMethod() {
         return method;
@@ -74,7 +125,7 @@ public class OpenJMLInput {
     }
 
     /**
-     * @return The filename that contains the class that has failed.
+     * @return the path of this mutant's own source file
      */
     public String getFilename() {
         return filename;
@@ -122,6 +173,10 @@ public class OpenJMLInput {
         this.syncObject = syncObject;
     }
 
+    /**
+     * Based on {@code feedback}, {@code filename}, {@code method}, {@code originalFilename} and
+     * {@code racMethod}.
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -134,6 +189,11 @@ public class OpenJMLInput {
         return result;
     }
 
+    /**
+     * Compares {@code feedback}, {@code filename}, {@code method}, {@code originalFilename} and
+     * {@code racMethod}. MuJavaController relies on it when removing non-compiling mutants from a
+     * batch ({@code List.removeAll}).
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

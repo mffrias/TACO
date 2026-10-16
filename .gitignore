@@ -15,3 +15,13 @@ org.eclipse.jdt.core.prefs
 StrykerLastFixFound.java
 # IntelliJ project output (.idea/misc.xml)
 /out/
+
+# Built by setupTACO.sh from the dynalloy4 and jDynAlloy repositories
+lib/dynalloy4.jar
+lib/jdynalloy.jar
+
+# Ant: the jar target (dist/, build.num) and the unittest target (junit/)
+/dist/
+/build.num
+/temp-jar-file.jar
+/junit/

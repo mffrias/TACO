@@ -609,6 +609,10 @@ public class UnitTestBuilder {
 								//String createdVariable = this.createdInstances.get(System.identityHashCode(fieldValue));
 								//                              String buildStatement = fieldValue.getClass().getCanonicalName() + " " + buildVariable + " = " + createdVariable + ";";
 								//                              statements.add(buildStatement);
+							} else if (fieldValue instanceof java.io.PrintStream) {
+								// System.out, see SnapshotBuilder.createNewInstance.
+								this.createdInstances.put(System.identityHashCode(fieldValue), buildVariable);
+								objectDefinitionStatements.add("java.io.PrintStream " + buildVariable + " = System.out;");
 							} else {
 								Object thizInstance = null;
 								//                              Constructor<?>[] cons = field.getType().getConstructors();
@@ -1129,6 +1133,10 @@ public class UnitTestBuilder {
 
                     //                              }
                 }
+            } else if (instance instanceof java.io.PrintStream) {
+                // System.out, see SnapshotBuilder.createNewInstance.
+                this.createdInstances.put(System.identityHashCode(instance), generatedVariableName);
+                objectDefinitionStatements.add(clazz.getCanonicalName() + " " + generatedVariableName + " = System.out;");
             } else if (Object.class.isAssignableFrom(clazz)) {
                 Object thizInstance = null;
                 Constructor<?>[] cons = clazz.getConstructors();

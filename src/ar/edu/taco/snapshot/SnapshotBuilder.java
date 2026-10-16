@@ -1436,6 +1436,13 @@ public class SnapshotBuilder {
     private static HashMap<Class, Object> createdDefaultObjects = new HashMap<Class, Object>();
 
     public Object createNewInstance(@SuppressWarnings("rawtypes") Class clazz) {
+        // The PrintStream atoms of a TACO model stand for System.out (static field
+        // java_lang_System_out), and a counterexample may store one in any field of a compatible
+        // type. The generated test cannot build a PrintStream from default arguments, so use
+        // System.out, as UnitTestBuilder does.
+        if (clazz == java.io.PrintStream.class) {
+            return System.out;
+        }
         Object instance = null;
         try {
             Class<?> loadedClass = Class.forName(clazz.getName(), true, loader);

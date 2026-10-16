@@ -125,6 +125,11 @@
 			<src path="unittest" />
 			<classpath refid="build.classpath" />
 		</javac>
+		<!-- The run-time class path, relative to the repository root, for scripts/run-benchmark.sh -->
+		<pathconvert property="runtime.classpath" refid="build.classpath">
+			<map from="${basedir}${file.separator}" to="" />
+		</pathconvert>
+		<echo file="bin/runtime.classpath" message="bin${path.separator}${runtime.classpath}" />
 	</target>
 
 	<!-- TESTS -->

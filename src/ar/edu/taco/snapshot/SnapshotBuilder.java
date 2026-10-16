@@ -1138,6 +1138,31 @@ public class SnapshotBuilder {
         return clazz;
     }
 
+    /**
+     * The class TACO translated whose Alloy signature is {@code signature}, or
+     * null. A signature is the Java name with its dots turned into underscores,
+     * so a class whose own name has an underscore, such as IntroClass's
+     * introclass_0cdfa335_003 (whose "_003" also looks like an atom index), cannot
+     * be recovered by turning every underscore back into a dot. Look it up among
+     * the class under analysis and the classes TACO was asked to translate first
+     * (by then the latter may already hold signatures, which do not load).
+     */
+    private Class<?> translatedClassWithSignature(String signature) {
+        List<String> javaNames = new ArrayList<String>();
+        javaNames.add(recoveredInformation.getClassToCheck());
+        javaNames.addAll(Arrays.asList(TacoConfigurator.getInstance().getClasses()));
+        for (String javaName : javaNames) {
+            if (javaName.replace('.', '_').equals(signature)) {
+                try {
+                    return Class.forName(javaName, true, loader);
+                } catch (ClassNotFoundException e) {
+                    // not a Java name
+                }
+            }
+        }
+        return null;
+    }
+
     private Class<?> inferTypeOfExpression(String value) {
         Class<?> clazz;
 
@@ -1160,6 +1185,10 @@ public class SnapshotBuilder {
             }
 
             String className = value.substring(0, i);
+            Class<?> translatedClass = translatedClassWithSignature(className);
+            if (translatedClass != null) {
+                return translatedClass;
+            }
 
             // remove "_inner_" used for inner classes
             className = className.replaceAll("_inner_", "\\$");
@@ -1171,6 +1200,10 @@ public class SnapshotBuilder {
                 if (stringBeforeLastUnderscore.matches("[0-9]+")) {
                     className = className.substring(0, lastUnderscore);
                 }
+            }
+            translatedClass = translatedClassWithSignature(className);
+            if (translatedClass != null) {
+                return translatedClass;
             }
 
             if (className.equals("char")) {

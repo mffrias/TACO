@@ -114,9 +114,15 @@ public class JfslStage implements ITacoStage {
 					env.putSimpleJmlToJDynAlloy(method, jprogramDeclaration);
 
 					String methodStringRepresentation;
-					if (method.isConstructor())
-						methodStringRepresentation = "<init>";
-					else
+					if (method.isConstructor()) {
+						int posOpeningParenthesis = method.stringRepresentation().lastIndexOf('(');
+						int posLastDot = method.stringRepresentation().lastIndexOf('.');
+						String typeName = method.stringRepresentation().substring(posLastDot+1, posOpeningParenthesis);
+						String qualifiedClassName = method.stringRepresentation().substring(0,posOpeningParenthesis);
+						String paramTypes = method.stringRepresentation().substring(posOpeningParenthesis);
+						methodStringRepresentation = qualifiedClassName + "." + typeName + paramTypes;//"<init>";
+
+					} else
 						methodStringRepresentation = method.stringRepresentation();
 
 					Vector<String> parameterIds = new Vector<String>();

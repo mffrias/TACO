@@ -109,8 +109,8 @@ public class InformationRecoveryVisitor extends JmlAstTransverseStatementVisitor
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration jMethodDeclaration) {
 		String methodName = jMethodDeclaration.ident();
-
-		Boolean inputEqualsConsructorToCheck = methodName.equals(this.methodToCheck);
+		String typedMethodName = TacoConfigurator.getInstance().getClassToCheck() + "_" + methodName;
+		Boolean inputEqualsConsructorToCheck = typedMethodName.equals(this.methodToCheck);
 		String originalMethodNameWithParameterTypes = TacoConfigurator.getInstance().getMethodToCheck();
 		String parameterTypes = originalMethodNameWithParameterTypes.substring(originalMethodNameWithParameterTypes.indexOf('('));
 		String paramTypesWithoutParenthesis = parameterTypes.substring(1, parameterTypes.length()-1);

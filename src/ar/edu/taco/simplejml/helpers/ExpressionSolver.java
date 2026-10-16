@@ -67,7 +67,7 @@ public class ExpressionSolver {
 			// DynAlloy
 			leftExpression = ExprVariable.buildExprVariable(new AlloyVariable(
 					"super"));
-		} else {
+		} else if (expression != null) {
 			expression.accept(expressionVisitor);
 			leftExpression = expressionVisitor.getAlloyExpression();
 		}

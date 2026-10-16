@@ -111,7 +111,7 @@ public class DynalloyStage implements ITacoStage {
 				TacoConfigurator.CLASS_TO_CHECK_FIELD));
 		int finalPos = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).indexOf('(');
 		String methodToCheckWithoutTyping = TacoConfigurator.getInstance().getString(TacoConfigurator.METHOD_TO_CHECK_FIELD).substring(0, finalPos);
-		String assertion_id = "check_" + classToCheckNormalizer.getQualifiedClassName() + "_"
+		String assertion_id = "check_" /*+ classToCheckNormalizer.getQualifiedClassName() + "_"*/
 				+ methodToCheckWithoutTyping;
 
 		dynalloyToAlloyManager.setSourceJDynAlloyModules(this.src_jdynalloy_modules);

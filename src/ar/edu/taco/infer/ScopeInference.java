@@ -55,7 +55,7 @@ public class ScopeInference {
                 for (JProgramDeclaration prog : mod.getPrograms()){
                     String theMethodName = TacoConfigurator.getInstance().getMethodToCheck();
                     String theCurrProgramFullName = getFullTypedname(prog);
-                    theCurrProgramFullName = theType + "_" + theCurrProgramFullName;
+                    theCurrProgramFullName = /*theType + "_" +*/ theCurrProgramFullName;
                     if (theCurrProgramFullName.equals(theMethodName)){
                         for (JVariableDeclaration var : prog.getParameters()){
                             if (var.getVariable().getVariableId().getString().equals("thiz")){
@@ -413,7 +413,7 @@ public class ScopeInference {
         Set<JProgramDeclaration> theProgs = module.getPrograms();
         for (JProgramDeclaration progDecl : module.getPrograms()) {
             String buildFullyTypedProgramName = getFullTypedname(progDecl);
-            String fullyQualifiedAndFullyTypedName = TacoConfigurator.getInstance().getClassToCheck() + "_" + buildFullyTypedProgramName;
+            String fullyQualifiedAndFullyTypedName = /*TacoConfigurator.getInstance().getClassToCheck() + "_" +*/ buildFullyTypedProgramName;
             if (fullyQualifiedAndFullyTypedName.equals(TacoConfigurator.getInstance().getMethodToCheck())) {
                 thePreds = progDecl.getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures();
                 for (AlloyFormula pred : thePreds){
@@ -448,7 +448,7 @@ public class ScopeInference {
             if (module.getModuleId().equals(TacoConfigurator.getInstance().getClassToCheck())) {
                 for (JProgramDeclaration progDecl : module.getPrograms()) {
                     String buildFullyTypedProgramName = getFullTypedname(progDecl);
-                    String fullyQualifiedAndFullyTypedName = TacoConfigurator.getInstance().getClassToCheck() + "_" + buildFullyTypedProgramName;
+                    String fullyQualifiedAndFullyTypedName = /*TacoConfigurator.getInstance().getClassToCheck() + "_" +*/ buildFullyTypedProgramName;
                     if (fullyQualifiedAndFullyTypedName.equals(TacoConfigurator.getInstance().getMethodToCheck())) {
                         for (JVariableDeclaration var : progDecl.getParameters()) {
                             String varName = var.getVariable().getVariableId().getString();

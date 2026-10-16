@@ -30,7 +30,7 @@ public class ForArielGodioBinarySeachBug01Test extends CollectionTestBase {
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyNumericTypeQuantificationRange(0,5);
 		setConfigKeyTypeScopes("forArielGodio.binarySearch.bug01.BinarySearch:1");
-		check(GENERIC_PROPERTIES,"binary(int[], int)",true);
+		check(GENERIC_PROPERTIES,"forArielGodio_binarySearch_bug01_BinarySearch_binary(int[], int)",true);
 	}
 
 }

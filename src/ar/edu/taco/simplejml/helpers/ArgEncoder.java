@@ -46,9 +46,11 @@ public final class ArgEncoder {
 			throw new IllegalArgumentException("A method cannot be static and constructor at the same time.");			
 		}
 
-		if (!isStatic /* && !isConstructor */) {
+		//Since parameter thiz is not removed even when the method is static, i am maintaining it.
+		//this is why thisIndex is always 0. This is achieved by commenting as done immediately below.
+//		if (!isStatic /* && !isConstructor */) {
 			thisIndex = currentIndex++;			
-		}
+//		}
 		
 		if (hasThrowArgument) {
 			throwIndex = currentIndex++;

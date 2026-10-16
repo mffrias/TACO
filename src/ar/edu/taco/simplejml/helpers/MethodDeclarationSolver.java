@@ -100,6 +100,8 @@ public class MethodDeclarationSolver {
 			// mfrias + Constructor			
 			//			programId = "Constructor";
 			programId = methodDeclaration.ident();
+		} else {
+			programId = TacoConfigurator.getInstance().getClassToCheck() + "_" + programId;
 		}
 
 
@@ -302,7 +304,7 @@ public class MethodDeclarationSolver {
 		}
 
 
-		String programId = String.valueOf(constructorDeclaration.ident());
+		String programId = normalizedClassName + "_" + String.valueOf(constructorDeclaration.ident());
 		//		if (constructorDeclaration.isConstructor()) {
 		//			//mfrias + Constructor
 		//			programId = "Constructor";

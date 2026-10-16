@@ -115,16 +115,13 @@ import ar.uba.dc.rfm.alloy.ast.formulas.QuantifiedFormula;
 
 /**
  * @author elgaby
- * 
+ *
  */
 public class ExpressionVisitor extends BaseExpressionVisitor {
     private static Logger log = Logger.getLogger(ExpressionVisitor.class);
 
 
-
-    ////// ARITHMETIC EXPRESSIONS	
-
-
+    /// /// ARITHMETIC EXPRESSIONS
 
 
     @Override
@@ -238,12 +235,11 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                     array_expression);
 
         } else {
-            e = AlloyIntArrayFactory.arrayLength(array_type, 
+            e = AlloyIntArrayFactory.arrayLength(array_type,
                     array_expression);
         }
         super.getStack().push(e);
     }
-
 
 
     @Override
@@ -260,17 +256,16 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitCastExpression(JCastExpression jCastExpression) {
         jCastExpression.expr().accept(this);
         AlloyExpression right = this.getAlloyExpression();
-        if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true){
+        if (TacoConfigurator.getInstance().getUseJavaArithmetic() == true) {
             //we will only consider narrowing casts, since the widening ones are considered in a prior step
-            if (jCastExpression.expr().getApparentType().isPrimitive() && jCastExpression.getType().isPrimitive() && jCastExpression.expr().getApparentType() != jCastExpression.getType()){
-                if (jCastExpression.expr().getApparentType().toString().equals("int") && jCastExpression.getType().toString().equals("char")){
+            if (jCastExpression.expr().getApparentType().isPrimitive() && jCastExpression.getType().isPrimitive() && jCastExpression.expr().getApparentType() != jCastExpression.getType()) {
+                if (jCastExpression.expr().getApparentType().toString().equals("int") && jCastExpression.getType().toString().equals("char")) {
                     right = (AlloyExpression) JExpressionFactory.fun_java_primitive_int_value_to_char_value(right);
-                } else if (jCastExpression.expr().getApparentType().toString().equals("long") && jCastExpression.getType().toString().equals("char")){
+                } else if (jCastExpression.expr().getApparentType().toString().equals("long") && jCastExpression.getType().toString().equals("char")) {
                     right = (AlloyExpression) JExpressionFactory.fun_java_primitive_long_value_to_char_value(right);
                 } else if (jCastExpression.expr().getApparentType().toString().equals("long") && jCastExpression.getType().toString().equals("int")) {
                     right = (AlloyExpression) JExpressionFactory.fun_java_primitive_long_value_to_int_value(right);
@@ -292,7 +287,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitCharLiteral(JCharLiteral jCharLiteral) {
         jCharLiteral.accept(prettyPrint);
@@ -312,7 +306,7 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         //
         //		super.getStack().push(hashCodeExpression);
 
-        char theCharLiteral = (char)jCharLiteral.getValue();
+        char theCharLiteral = (char) jCharLiteral.getValue();
         AlloyExpression literalAlloyExpression = JavaPrimitiveCharValue
                 .getInstance().toJavaPrimitiveCharLiteral(theCharLiteral, false);
 
@@ -378,7 +372,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitEqualityExpression(JEqualityExpression jEqualityExpression) {
         jEqualityExpression.accept(prettyPrint);
@@ -390,8 +383,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
 
         super.getStack().push(binaryExpression);
     }
-
-
 
 
     @Override
@@ -420,9 +411,9 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
             e2 = ExprVariable.buildExprVariable(fieldName);
 
             e1 = ar.edu.jdynalloy.factory.JExpressionFactory.CLASS_FIELDS;
-        } 
-        
-        
+        }
+
+
         if (jClassFieldExpression.getField().isStatic() && !(jClassFieldExpression.prefix() instanceof JTypeNameExpression)) {
             String fieldName = jClassFieldExpression.getField().getType().toString().replace('.', '_') + "_"
                     + jClassFieldExpression.ident();
@@ -430,7 +421,7 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
             e2 = new ExprProduct(new ExprConstant(null, "univ"), ExprJoin.join(ar.edu.jdynalloy.factory.JExpressionFactory.CLASS_FIELDS, e2));
 
         }
-        
+
         if (!jClassFieldExpression.getField().isStatic()) {
             e2 = ExprVariable.buildExprVariable(jClassFieldExpression.ident());
         }
@@ -438,7 +429,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         ExprJoin exprJoin = ExprJoin.join(e1, e2);
         this.getStack().push(exprJoin);
     }
-
 
 
     @Override
@@ -459,7 +449,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                 JPredicateFactory.instanceOf(leftExpression, signatureId));
 
     }
-
 
 
     @Override
@@ -483,7 +472,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitJmlRelationalExpression(
             JmlRelationalExpression jmlRelationalExpression) {
@@ -498,7 +486,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
 
         super.getStack().push(binaryExpression);
     }
-
 
 
     @Override
@@ -520,7 +507,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         // }
 
     }
-
 
 
     @Override
@@ -558,14 +544,22 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         // Resolve the left side of the call (e.g. this.something() or
         // Integer.something())
         AlloyExpression leftExpression = null;
-        if (!isStatic) {
-            leftExpression = ExpressionSolver.getLeftExpression(this,
-                    jMethodCallExpression.prefix());
+
+        //Since parameter thiz is always maintained, I modified the code below to not check if the method is static.
+        //mfrias4 10/07/2026
+//        if (!isStatic) {
+        leftExpression = ExpressionSolver.getLeftExpression(this,
+                jMethodCallExpression.prefix());
+//        }
+        if (isStatic && leftExpression == null){
+            //create the thiz parameter that has to be in all methods even if static.
+            //mfrias4 10/07/2026
+            leftExpression = JExpressionFactory.THIS_EXPRESSION;
         }
 
         Vector<AlloyExpression> encodedArguments = convention.encode(
                 leftExpression, JExpressionFactory.THROW_EXPRESSION, this
-                .getLeftAssignmentExpression(), argumentsList);
+                        .getLeftAssignmentExpression(), argumentsList);
         String methodName = jMethodCallExpression.ident();
 
         if (isStatic) {
@@ -583,9 +577,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
 
         super.getStack().push(jProgramCall);
     }
-
-
-
 
 
     @Override
@@ -618,7 +609,6 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitNewArrayExpression(JNewArrayExpression jNewArrayExpression) {
         jNewArrayExpression.accept(prettyPrint);
@@ -637,9 +627,9 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
 
         if (jtype.equals(JSignatureFactory.INT_ARRAY_TYPE)) {
             signatureId = JSignatureFactory.INT_ARRAY_TYPE.singletonFrom();
-        } else if (jtype.equals(JSignatureFactory.LONG_ARRAY_TYPE)) {	
+        } else if (jtype.equals(JSignatureFactory.LONG_ARRAY_TYPE)) {
             signatureId = JSignatureFactory.LONG_ARRAY_TYPE.singletonFrom();
-        } else if (jtype.equals(JSignatureFactory.CHAR_ARRAY_TYPE)) {	
+        } else if (jtype.equals(JSignatureFactory.CHAR_ARRAY_TYPE)) {
             signatureId = JSignatureFactory.CHAR_ARRAY_TYPE.singletonFrom();
         } else if (jtype.equals(JSignatureFactory.OBJECT_ARRAY_TYPE)) {
             signatureId = JSignatureFactory.OBJECT_ARRAY_TYPE.singletonFrom();
@@ -661,9 +651,9 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         argumentsList.add(this.getAlloyExpression());
 
         Vector<AlloyExpression> encodedArguments = convention.encode(this
-                .getLeftAssignmentExpression(),
+                        .getLeftAssignmentExpression(),
                 JExpressionFactory.THROW_EXPRESSION, this
-                .getLeftAssignmentExpression(), argumentsList);
+                        .getLeftAssignmentExpression(), argumentsList);
 
         JProgramCall call_constructor = new JProgramCall(false, "Constructor",
                 encodedArguments);
@@ -688,11 +678,10 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         }
 
         JBlock new_array_block = JDynAlloyFactory.block(array_stmts
-                .toArray(new JStatement[] {}));
+                .toArray(new JStatement[]{}));
         super.getStack().push(new_array_block);
 
     }
-
 
 
     @Override
@@ -747,9 +736,9 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                     leftSideAlloyVariable);
 
             Vector<AlloyExpression> encodedArguments = convention.encode(this
-                    .getLeftAssignmentExpression(),
+                            .getLeftAssignmentExpression(),
                     JExpressionFactory.THROW_EXPRESSION, this
-                    .getLeftAssignmentExpression(), argumentsList);
+                            .getLeftAssignmentExpression(), argumentsList);
 
             JProgramCall call = new JProgramCall(false, "Constructor",
                     encodedArguments);
@@ -762,12 +751,10 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
-
     @Override
     public void visitNullLiteral(JNullLiteral jNullLiteral) {
         this.getStack().push(JExpressionFactory.NULL_EXPRESSION);
     }
-
 
 
     @Override
@@ -915,9 +902,9 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                 leftSideAlloyVariable);
 
         Vector<AlloyExpression> encodedArguments = convention.encode(this
-                .getLeftAssignmentExpression(),
+                        .getLeftAssignmentExpression(),
                 JExpressionFactory.THROW_EXPRESSION, this
-                .getLeftAssignmentExpression(), new LinkedList<AlloyExpression>());
+                        .getLeftAssignmentExpression(), new LinkedList<AlloyExpression>());
 
         JProgramCall call = new JProgramCall(false, "Constructor",
                 encodedArguments);
@@ -928,15 +915,13 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         super.getStack().push(statement);
 
 
-
-
     }
 
     @Override
     public void visitThisExpression(JThisExpression jThisExpression) {
         this.getStack().push(
                 ExprVariable
-                .buildExprVariable(JExpressionFactory.THIS_VARIABLE));
+                        .buildExprVariable(JExpressionFactory.THIS_VARIABLE));
     }
 
     @Override

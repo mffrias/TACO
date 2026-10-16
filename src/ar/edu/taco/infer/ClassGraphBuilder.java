@@ -155,7 +155,7 @@ abstract class ClassGraphBuilder {
 				if (jdynalloy_module.getSignature().getSignatureId().equals(class_to_check)) {
 					for (JProgramDeclaration prog_declaration : jdynalloy_module.getPrograms()) {
 						String program_id = prog_declaration.getProgramId();
-						String qualified_program_id = class_to_check + "_" + program_id;
+						String qualified_program_id = /*class_to_check + "_" +*/ program_id;
 						if (method_to_check.startsWith(qualified_program_id)) {
 	
 							for (JVariableDeclaration var_decl : prog_declaration.getParameters()) {

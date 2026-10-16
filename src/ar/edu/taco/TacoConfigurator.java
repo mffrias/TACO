@@ -388,7 +388,7 @@ public class TacoConfigurator extends PropertiesConfiguration implements
 	public String getMethodToCheck() {
 		String methodToCheck = this.externalMethodNameWithParameters;
 		methodToCheck = methodToCheck.replace('.', '_');
-		return getClassToCheck() + "_" + methodToCheck;
+		return methodToCheck;
 
 	}
 

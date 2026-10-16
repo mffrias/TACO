@@ -10,7 +10,8 @@ import roops.core.objects.SinglyLinkedListNode;
 public class SinglyLinkedList {
 
 	/*@
-    @ invariant (\forall SinglyLinkedListNode n; \reach(this.header, SinglyLinkedListNode, next).has(n); \reach(n.next, SinglyLinkedListNode, next).has(n)==false);
+    @ invariant (\forall SinglyLinkedListNode n; \reach(this.header, SinglyLinkedListNode, next).has(n);
+     \reach(n.next, SinglyLinkedListNode, next).has(n)==false);
     @*/   
 
 	public /*@nullable@*/roops.core.objects.SinglyLinkedListNode header;

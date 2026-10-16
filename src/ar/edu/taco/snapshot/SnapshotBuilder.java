@@ -632,7 +632,7 @@ public class SnapshotBuilder {
         String classToCheck = TacoConfigurator.getInstance().getClassToCheck();
         String methodToCheck = TacoConfigurator.getInstance().getMethodToCheck();
 
-        methodToCheck = methodToCheck.substring(classToCheck.length() + 1);
+        //methodToCheck = methodToCheck.substring(classToCheck.length() + 1);
         methodToCheck = methodToCheck.substring(0, methodToCheck.indexOf('('));
         String methodToCheckJavaName = methodToCheck;
         //		int methodToCheckIndex = Integer.valueOf(methodToCheck.substring(postion + 1, methodToCheck.length()));
@@ -644,7 +644,9 @@ public class SnapshotBuilder {
         while (!methodFound && i < methods.length) {
             aMethod = methods[i];
 
-            String aMethodName = aMethod.getName();
+            String aMethodClassName = aMethod.getDeclaringClass().getName();
+            aMethodClassName = aMethodClassName.replace('.', '_');
+            String aMethodName = aMethodClassName + "_" + aMethod.getName();
             String aMethodJavaName = aMethodName.substring(aMethodName.lastIndexOf('.') + 1, aMethodName.length());
             if (aMethodJavaName.equals(methodToCheckJavaName)) {
                 methodFound = true;

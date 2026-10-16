@@ -1230,7 +1230,8 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
      *     of duplicates are recorded so that callers skip them.</li>
      * <li><b>Compilation.</b> Merges the batch into one class with
      *     {@link #createJMLInputWrapper}, copies it into a JML4C package with
-     *     {@link #adaptSiblingsFileToJML4C} and compiles the copy in an external process,
+     *     {@link #adaptSiblingsFileToJML4C}, inserts the checks that let RAC runs be cancelled
+     *     ({@link RacTimeoutInstrumenter}) and compiles the copy in an external process,
      *     {@code <java.home>/bin/java -jar <user.dir>/lib/stryker/jml4c.jar}: it uses the same
      *     Java installation as Stryker, and the working directory must be the project root. The
      *     classpath is jml4c.jar, the batch root and the current classpath minus the running
@@ -1435,6 +1436,9 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
 
                 if (tempFilename == null) {
                     log.error("MJC: Didn't adapt for JML4C!");
+                } else {
+                    // So that RAC runs of this batch that time out can be cancelled (RacTimeout).
+                    RacTimeoutInstrumenter.instrument(tempFilename);
                 }
 
                 wrapper.setJml4cFilename(tempFilename);

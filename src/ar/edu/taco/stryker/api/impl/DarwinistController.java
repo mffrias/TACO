@@ -22,7 +22,6 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -131,9 +130,9 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
      * Runs each RAC test of {@link #lastRACAnalysis} so that it can be bounded by a timeout;
      * replaced by a new single-thread executor after every timeout.
      */
-    ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    ExecutorService executor = RacTimeout.newExecutor();
 
-    /** Thread executing the current RAC test; stopped with {@link Thread#stop()} on timeout. */
+    /** Thread executing the current RAC test, for {@link RacTimeout#endTimedOutRun}. */
     private Thread runningThread = null;
 
     private DarwinistController() {
@@ -1012,11 +1011,11 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
      * is invoked with {@code input.getParametersFromOpenJML()} (classpath, qualified class name
      * and method name of the JML4C-compiled candidate prepared by {@link OpenJMLController}), on
      * {@link #executor} with a 5-second timeout. Any exception from the test counts as a failure
-     * and stops the loop. A timeout counts as a pass: the test thread is stopped with
-     * {@link Thread#stop()} and the executor replaced. If the test class cannot be instantiated
-     * the error is printed and that input also counts as passed. If every input passes, the
-     * candidate is a fix ({@link #fixFound}); otherwise, unless its feedback is {@code stop}ped,
-     * {@link #processFalseCandidate}.
+     * and stops the loop. A timeout counts as a pass: the test is cancelled with
+     * {@link RacTimeout#endTimedOutRun} and the executor replaced. If the test class cannot be
+     * instantiated the error is printed and that input also counts as passed. If every input
+     * passes, the candidate is a fix ({@link #fixFound}); otherwise, unless its feedback is
+     * {@code stop}ped, {@link #processFalseCandidate}.
      *
      * <p>Note: the failing input is recorded with {@code input.setSeqMethodInput(...)} only when
      * {@code Future.get} itself throws. An ordinary RAC failure is reported through the task's
@@ -1104,9 +1103,8 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                 failed = false;
                 //                input.setSeqMethodInput(StrykerStage.junitFiles[i]);
                 //                log.warn("timeouted file: "+input.getFilename());
-                runningThread.stop();
-                executor.shutdownNow();
-                executor = Executors.newSingleThreadExecutor();
+                executor = RacTimeout.endTimedOutRun(executor, runningThread,
+                        input.getFilename() + ", method " + input.getMethod());
                 // handle the timeout
             } catch (InterruptedException e) {
                 log.debug("Interrupted");

@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -56,7 +55,7 @@ import com.google.common.collect.Sets;
  * <p><b>Threading and lifecycle.</b> Singleton ({@link #getInstance()}), started by
  * {@link SimpleStrykerAPI#start()} with a single worker thread. Each counterexample runs on
  * a separate single-thread {@link #executor} so that it can be timed out; a run that times
- * out is killed with the deprecated {@link Thread#stop()} and the executor is replaced. The
+ * out is cancelled with {@link RacTimeout#endTimedOutRun} and the executor is replaced. The
  * round-robin cursor {@link #curJunitIndex} and {@link #consumedMutants} are static and never
  * reset, so they carry over if Stryker runs more than once in the same JVM.
  *
@@ -109,9 +108,9 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
      * Runs one counterexample at a time so that the worker can wait with a timeout. Replaced
      * by a fresh executor after every timeout.
      */
-    private ExecutorService executor = Executors.newSingleThreadExecutor(); //Executors.newFixedThreadPool(10);
+    private ExecutorService executor = RacTimeout.newExecutor(); //Executors.newFixedThreadPool(10);
 
-    /** Thread running the current counterexample; stopped with {@link Thread#stop()} on timeout. */
+    /** Thread running the current counterexample, for {@link RacTimeout#endTimedOutRun}. */
     private Thread runningThread = null;
 
     private OpenJMLController() {
@@ -144,7 +143,8 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
      *   <ul>
      *   <li>returns normally: pass;</li>
      *   <li>times out: counted as a <em>pass</em> and recorded in
-     *       {@link StrykerStage#timeoutMutations};</li>
+     *       {@link StrykerStage#timeoutMutations}. The run is cancelled with
+     *       {@link RacTimeout#endTimedOutRun}, and what it returns then is ignored;</li>
      *   <li>{@link InvocationTargetException} whose printed stack trace contains both
      *       {@code org.jmlspecs.jml4.rac.runtime.JML} and {@code Error}: RAC violation, fail;</li>
      *   <li>any other {@code InvocationTargetException} (null pointer, {@code ThreadDeath} or
@@ -313,7 +313,8 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                                 } else if (retValue.contains("NullPointerException")) {
                                                     //                                                    System.out.println("NULL POINTER EXCEPTION EN RAC!!!!!!!!!!!!");
                                                     result = null;
-                                                } else if (retValue.contains("ThreadDeath")) {
+                                                } else if (retValue.contains("ThreadDeath")
+                                                        || retValue.contains(RacTimeout.Cancelled.class.getName())) {
                                                     //                                                    System.out.println("THREAD DEATH EN RAC!!!!!!!!!!!!!!!!");
                                                     result = null;
                                                     result = null;
@@ -339,12 +340,11 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                     try {
                                         result = future.get(3000, TimeUnit.MILLISECONDS);
                                     } catch (TimeoutException ex) {
-                                        // A timeout counts as a pass; kill the runaway test and start a fresh executor.
+                                        // A timeout counts as a pass; end the runaway test and start a fresh executor.
                                         result = true;
                                         threadTimeout = true;
-                                        runningThread.stop();
-                                        executor.shutdownNow();
-                                        executor = Executors.newSingleThreadExecutor();
+                                        executor = RacTimeout.endTimedOutRun(executor, runningThread,
+                                                tempFilename + ", method " + methodName);
                                         // handle the timeout
                                     } catch (InterruptedException e) {
                                         log.debug("Interrupted");

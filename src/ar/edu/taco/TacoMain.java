@@ -46,6 +46,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import ar.edu.taco.engine.*;
+import ar.edu.taco.stryker.MethodToCheck;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -773,8 +774,7 @@ public class TacoMain {
         tmpDir = replaceBelowWorkingDir(tmpDir, "generated", "output", true);
         File destFile = new File(tmpDir,obtainClassNameFromFileName(junitFile)+ /*"_temp" +*/ ".java");
         String packageSentence = "package "+classPackage+";\n";
-        int posLastUnderscore = methodName.lastIndexOf("_");
-        methodName = methodName.substring(0, posLastUnderscore);
+        methodName = MethodToCheck.methodName(methodName);
         try {
             // output/ is not versioned, so it does not exist in a fresh checkout.
             destFile.getParentFile().mkdirs();

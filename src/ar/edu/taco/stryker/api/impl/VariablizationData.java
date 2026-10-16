@@ -1,6 +1,7 @@
 package ar.edu.taco.stryker.api.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,8 @@ public class VariablizationData {
     private Boolean UNSAT;
     private Boolean uncompilable;
     private Boolean reachedUnvariablizableExpression;
+    /** Fully qualified types of the customvar parameters added so far, in the order they were appended. */
+    private final List<String> variablizedParameterTypes = new ArrayList<String>();
 
     public VariablizationData(String source, CompilationUnit unit, MethodDeclaration method, 
             Map<Integer, MutablePair<MutablePair<MutablePair<ITypeBinding, ITypeBinding>, Boolean>, 
@@ -278,6 +281,7 @@ public class VariablizationData {
                 }
             }
             Type assignmentType = typeFromBinding(ast, binding);
+            variablizedParameterTypes.add(qualifiedTypeName(binding));
             //Seteamos el tipo
             try {
                 variableDeclaration.setType(assignmentType);
@@ -319,6 +323,22 @@ public class VariablizationData {
         setLastVariablizedMutID(mutIDs.get(expressions.size() - 1 - curVariablizationIndex));
 
         return true;
+    }
+
+    /**
+     * The types of the customvar parameters that variabilization has appended
+     * to the method so far, fully qualified and in order. TACO needs them to
+     * name the variabilized method (see {@link ar.edu.taco.stryker.MethodToCheck}).
+     */
+    public List<String> getVariablizedParameterTypes() {
+        return variablizedParameterTypes;
+    }
+
+    private static String qualifiedTypeName(ITypeBinding typeBinding) {
+        if (typeBinding.isPrimitive()) {
+            return typeBinding.getName();
+        }
+        return typeBinding.getErasure().getQualifiedName();
     }
 
     public Type typeFromBinding(AST ast, ITypeBinding typeBinding) {

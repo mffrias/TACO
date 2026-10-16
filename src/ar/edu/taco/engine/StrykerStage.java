@@ -16,6 +16,7 @@ import org.multijava.mjc.JCompilationUnitType;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import ar.edu.taco.stryker.MethodToCheck;
 import ar.edu.taco.stryker.StrykerInitialStage;
 import ar.edu.taco.stryker.api.impl.MuJavaController.MsgDigest;
 import ar.edu.taco.stryker.api.impl.OpenJMLController;
@@ -126,8 +127,7 @@ public class StrykerStage implements ITacoStage {
 		}
 		this.classToCheckFile = obtainJavaFileOfClassToCheck(sourceRootDir,
 				classToCheck);
-		this.methodToCheck = methodToCheck.substring(0,
-				methodToCheck.lastIndexOf("_"));
+		this.methodToCheck = MethodToCheck.methodName(methodToCheck);
 		this.configFile = configFile;
 		this.maxMethodsInFile = maxMethodsInFile;
 

@@ -310,8 +310,6 @@ public class OpenJMLController extends AbstractBaseController<OpenJMLInput> {
                                                         props.put(o.getKey(), "true");
                                                     } else if (o.getKey().equals("generateRun")) {
                                                         props.put(o.getKey(), "false");
-                                                    } else if (o.getKey().equals("methodToCheck")) {
-                                                        props.put(o.getKey(), input.getMethod() + "_0");
                                                     } else {
                                                         props.put(o.getKey(), o.getValue());
                                                     }

@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import ar.edu.taco.engine.SnapshotStage;
 import ar.edu.taco.engine.StrykerStage;
 import ar.edu.taco.jml.parser.JmlParser;
 import ar.edu.taco.junit.RecoveredInformation;
+import ar.edu.taco.stryker.MethodToCheck;
 import ar.edu.taco.stryker.api.impl.MuJavaController.MsgDigest;
 import ar.edu.taco.stryker.api.impl.input.DarwinistInput;
 import ar.edu.taco.stryker.api.impl.input.MuJavaFeedback;
@@ -144,6 +146,9 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
         props.put("attemptToCorrectBug",false);
         props.put("generateUnitTestCase",false);
+        // Variabilization appends customvar parameters to the method, so TACO has to be
+        // told the signature of the variabilized method before each check.
+        final String originalMethodToCheck = oldProps.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
 
         while (satVerdict==false) {
 
@@ -210,6 +215,10 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                     log.warn("AVOIDED ONE SAT CHECK. THE OUTCOME IS: " + (satVerdict ? "SAT" : "UNSAT"));
                 } else {    
                     try {
+                        List<String> parameterTypes = new ArrayList<String>(MethodToCheck.parameterTypes(originalMethodToCheck));
+                        parameterTypes.addAll(vdata.getVariablizedParameterTypes());
+                        props.put(TacoConfigurator.METHOD_TO_CHECK_FIELD,
+                                MethodToCheck.of(MethodToCheck.methodName(originalMethodToCheck), parameterTypes));
                         log.warn("========================================================================PREVIOUS TO CALL OF TACOMAIN");
                         analysis_result = tacoMain.run(configurationFile, props);
                         if (analysis_result == null) {
@@ -575,8 +584,6 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                         props2.put(o.getKey(), "true");
                     } else if (o.getKey().equals("generateRun")) {
                         props2.put(o.getKey(), "false");
-                    } else if (o.getKey().equals("methodToCheck")) {
-                        props2.put(o.getKey(), input.getMethod() + "_0");
                     } else {
                         props2.put(o.getKey(), o.getValue());
                     }

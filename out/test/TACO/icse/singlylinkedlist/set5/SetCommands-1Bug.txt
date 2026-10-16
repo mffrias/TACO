@@ -1,3 +1,0 @@
-icse.singlylinkedlist.set5.StrykerSinglyLinkedListContains1Bug7DTest
-icse.singlylinkedlist.set5.StrykerSinglyLinkedListInsertBack1Bug2DTest
-icse.singlylinkedlist.set5.StrykerSinglyLinkedListGetNode1Bug5DTest

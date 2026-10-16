@@ -1,4 +1,0 @@
-arg_0,0,8,SAT
-arg_0,0,9,SAT
-arg_0,0,10,SAT
-arg_0,0,11,SAT

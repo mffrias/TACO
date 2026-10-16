@@ -1,4 +1,0 @@
-method insert | affected line: 18 | (PRVOR_REFINED, x, x.parent)
-method insert | affected line: 2 | (PRVOU_REFINED, root, y)
-method insert | affected line: 4 | (PRVOR_REFINED, x, y)
-method insert | affected line: 16 | (PRVOR_REFINED, k, 0)

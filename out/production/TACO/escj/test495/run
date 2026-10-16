@@ -1,6 +1,0 @@
-#!/bin/sh
-# usage: run FLAGS
-# Test for Ticket #495
-
-${ESCJ} $* StackCheck.java Stack.java
-

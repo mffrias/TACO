@@ -1,1 +1,0 @@
-method extractMin | affected line: 15 | (PRVOL_SMART, prevTemp.sibling, prevTemp.sibling.sibling)

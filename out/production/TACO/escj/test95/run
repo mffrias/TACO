@@ -1,5 +1,0 @@
-#!/bin/sh
-# usage: run FLAGS
-
-${ESCJ} $* ghost.java
-${ESCJ} $* Specials.java

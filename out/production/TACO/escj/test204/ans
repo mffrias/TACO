@@ -1,7 +1,0 @@
-Teste.java:29: Warning: Possible negative array index (IndexNegative)
-                        r[idxr--] = (byte) v;
-                         ^
-Teste.java:35: Warning: Possible negative array index (IndexNegative)
-                r[idxr] = (byte) v;
-                 ^
-2 warnings

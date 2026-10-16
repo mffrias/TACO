@@ -1,4 +1,0 @@
-#!/bin/sh
-# usage: run FLAGS
-
-${ESCJ} -noNotCheckedWarnings $* *.java

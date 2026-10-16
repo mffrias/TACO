@@ -1,6 +1,0 @@
-#!/bin/sh
-# usage: run FLAGS
-
-${ESCJ} -loopSafe $* *.java
-${ESCJ} -loop 3 $* C1.java
-${ESCJ} -loop 3 $* C3.java

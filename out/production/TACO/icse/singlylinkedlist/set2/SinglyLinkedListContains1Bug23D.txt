@@ -1,1 +1,0 @@
-method contains | affected line: 23 | (PRVOR_REFINED, current.next, this.header.next)

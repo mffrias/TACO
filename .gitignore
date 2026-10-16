@@ -13,3 +13,5 @@ bin
 mutation_log
 org.eclipse.jdt.core.prefs
 StrykerLastFixFound.java
+# IntelliJ project output (.idea/misc.xml)
+/out/

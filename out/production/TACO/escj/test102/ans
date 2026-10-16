@@ -1,4 +1,0 @@
-C.java:11: Fatal error: The @pure modifier may not come before method specifications.
-                foo();
-                ^
-1 error

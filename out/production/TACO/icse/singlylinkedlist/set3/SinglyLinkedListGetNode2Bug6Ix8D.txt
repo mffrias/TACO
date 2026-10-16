@@ -1,2 +1,0 @@
-method getNode | affected line: 6 | (PRVOL_SMART, result, result.next)
-method getNode | affected line: 8 | (AOIS, current_index, current_index--)

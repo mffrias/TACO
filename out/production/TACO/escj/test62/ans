@@ -1,7 +1,0 @@
-ooo.java:3: Warning: Possible assertion failure (Assert)
-        /*@ assert a > 6 | b > 7; */
-            ^
-ooo.java:4: Warning: Possible assertion failure (Assert)
-        /*@ assert a > 6; */
-            ^
-2 warnings

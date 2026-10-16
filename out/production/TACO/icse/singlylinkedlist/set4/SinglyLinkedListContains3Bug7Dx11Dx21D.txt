@@ -1,3 +1,0 @@
-method contains | affected line: 11 | (PRVOU_REFINED, valueParam, this.header)
-method contains | affected line: 21 | (PRVOR_REFINED, true, result)
-method contains | affected line: 7 | (PRVOU_REFINED, null, result)

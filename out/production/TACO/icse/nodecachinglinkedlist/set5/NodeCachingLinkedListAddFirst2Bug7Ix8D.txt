@@ -1,2 +1,0 @@
-method addFirst | affected line: 8 | (AORS, this.size++, this.size--)
-method addFirst | affected line: 7 | (PRVOL_SMART, insertBeforeNode.previous, newNode.previous)

@@ -1,1 +1,0 @@
-method getNode | affected line: 5 | (PRVOU_REFINED, index, current_index)

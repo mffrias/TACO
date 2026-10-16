@@ -1,2 +1,0 @@
-method findMinimum | affected line: 9 | (PRVOL_SMART, x, x.parent)
-method findMinimum | affected line: 7 | (PRVOR_REFINED, x.key, y.key)

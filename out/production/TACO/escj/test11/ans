@@ -1,7 +1,0 @@
-State.java:8: Warning: Owner ghost field of constructed object possibly non-null (OwnerNull)
-  }  // error: OwnerNull
-  ^
-State.java:17: Warning: Owner ghost field of constructed object possibly non-null (OwnerNull)
-  }  // error: OwnerNull on one path
-  ^
-2 warnings

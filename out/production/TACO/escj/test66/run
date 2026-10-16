@@ -1,5 +1,0 @@
-#!/bin/sh
-# usage: run FLAGS
-
-${ESCJ} $* C.java
-${ESCJ} $* -excuseNullInitializers C.java

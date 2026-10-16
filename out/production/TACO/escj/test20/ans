@@ -1,7 +1,0 @@
-NonNull.java:5: Warning: Field declared non_null possibly not initialized (NonNullInit)
-class NonNull {
-              ^
-Associated declaration is "NonNull.java", line 9, col 6:
-  /*@ non_null */ Object o;
-      ^
-1 warning

@@ -1,5 +1,5 @@
 # check=skip=FromPlatformFlagConstDisallowed
-# Optional environment for running Stryker without installing an x86_64 JDK 8:
+# Optional environment for running Stryker without installing a JDK 8 locally:
 # Linux x86_64 with Azul Zulu 8, the Java 7 class library the JML tools read,
 # Ant, and the tools the scripts use.
 #
@@ -12,7 +12,7 @@
 # setupTACO.sh); to run with MiniSat they must be built from the stryker
 # branch of mffrias/dynalloy4.
 #
-# Always linux/amd64: MiniSat is bundled only for x86_64.
+# Always linux/amd64: on Linux, MiniSat is bundled only for x86 and x86_64.
 FROM --platform=linux/amd64 debian:bookworm-slim
 
 ARG ZULU8=zulu8.96.0.205-ca-jdk8.0.504-linux_x64

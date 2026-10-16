@@ -19,7 +19,8 @@
 #
 # Environment:
 #   STRYKER_JAVA_HOME  JDK 8 to use (otherwise auto-detected; on Apple Silicon
-#                      it must be an x86_64 build)
+#                      an arm64 one needs lib/dynalloy4.jar from the stryker
+#                      branch of mffrias/dynalloy4, else use an x86_64 build)
 #   STRYKER_CLASSLIB   the Java 7 rt.jar for the JML tools (default:
 #                      lib/java7/rt.jar, see scripts/fetch-java7-classlib.sh)
 #   STRYKER_SOLVER     minisat (default) or sat4j; minisat needs dynalloy4 from

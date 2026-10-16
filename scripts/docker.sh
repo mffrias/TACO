@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Runs a command in the optional Docker environment (Linux x86_64 with a
 # JDK 8 and the Java 7 class library, see docker/Dockerfile), with this
-# repository mounted at /work. An alternative to installing an x86_64 JDK 8
-# locally; the other scripts work the same inside it.
+# repository mounted at /work. An alternative to installing a JDK 8 locally;
+# the other scripts work the same inside it.
 #
 # Usage: scripts/docker.sh [--rebuild] [command [args...]]
 #

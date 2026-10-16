@@ -7,15 +7,28 @@ die() {
     exit 2
 }
 
-# Succeeds if $1 is the home of a JDK 8 that can run Stryker on this machine. On Apple Silicon
-# the JDK must be an x86_64 build (it runs under Rosetta): MiniSat, the SAT solver Stryker runs
-# with, is only bundled for Intel.
+# Prints the architecture the JVM in the JDK home $1 runs as (its os.arch: x86_64, aarch64, ...).
+jvm_arch() {
+    "$1/bin/java" -XshowSettings:properties -version 2>&1 | sed -n 's/^ *os\.arch = //p'
+}
+
+# Succeeds if the MiniSat 2.2 library that lib/dynalloy4.jar bundles for macOS has an arm64
+# slice, as the one from the stryker branch of mffrias/dynalloy4 does. Earlier ones are x86_64
+# only.
+bundled_minisat_has_arm64() {
+    unzip -p "$STRYKER_ROOT/lib/dynalloy4.jar" x86-mac/libminisat220.jnilib 2>/dev/null \
+        | file - | grep -q arm64
+}
+
+# Succeeds if $1 is the home of a JDK 8 that can run Stryker on this machine. On a Mac, an arm64
+# JDK can only load MiniSat, the SAT solver Stryker runs with, if lib/dynalloy4.jar bundles it
+# for arm64; otherwise the JDK must be an x86_64 build, which runs under Rosetta.
 is_usable_jdk8() {
     local home="$1"
     [ -x "$home/bin/java" ] && [ -x "$home/bin/javac" ] || return 1
     "$home/bin/java" -version 2>&1 | grep -q 'version "1\.8[._]' || return 1
-    if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ] \
-        && ! file "$home/bin/java" | grep -q x86_64; then
+    if [ "$(uname -s)" = "Darwin" ] && [ "$(jvm_arch "$home")" = "aarch64" ] \
+        && ! bundled_minisat_has_arm64; then
         return 1
     fi
 }
@@ -51,11 +64,15 @@ require_jdk() {
     if ! JAVA_HOME="$(find_jdk)"; then
         if [ -n "${STRYKER_JAVA_HOME:-}" ]; then
             die "STRYKER_JAVA_HOME=$STRYKER_JAVA_HOME is not a usable JDK 8
-(on Apple Silicon it must be an x86_64 build, which runs under Rosetta)."
+(on Apple Silicon, an arm64 JDK needs the MiniSat for arm64 that dynalloy4.jar
+from the stryker branch of mffrias/dynalloy4 bundles; with an older
+lib/dynalloy4.jar, use an x86_64 JDK 8, which runs under Rosetta)."
         fi
         die "a JDK 8 is required but none was found.
-Install one (e.g. Azul Zulu 8; on Apple Silicon, the x86_64 build) and, if the
-scripts don't find it, point STRYKER_JAVA_HOME at it."
+Install one (e.g. Azul Zulu 8) and, if the scripts don't find it, point
+STRYKER_JAVA_HOME at it. On Apple Silicon, an arm64 JDK needs lib/dynalloy4.jar
+from the stryker branch of mffrias/dynalloy4 (MiniSat for arm64); with an older
+one, install the x86_64 build, which runs under Rosetta."
     fi
     export JAVA_HOME
 }

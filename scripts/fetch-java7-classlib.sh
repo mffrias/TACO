@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Puts a Java 7 class library at lib/java7/rt.jar. Stryker needs it on JDK 8
-# and 21: the JML parser and JML4C read the JDK's class library and cannot use
+# Puts a Java 7 class library at lib/java7/rt.jar. Stryker needs it on JDK 8,
+# 21 and 25: the JML parser and JML4C read the JDK's class library and cannot use
 # the one of Java 8 or later, so they read this Java 7 rt.jar instead (see
 # src/ar/edu/taco/Java7ClassLibrary.java). Plain TACO runs without it.
 # lib/java7/ is git-ignored.

@@ -7,7 +7,7 @@
 # scripts/, build.xml), it runs `scripts/smoke-test.sh --quick`
 # (about 40 seconds) on the working tree and aborts the push if a benchmark
 # behaves differently. Pushes that only touch documentation are not checked.
-# It never blocks when no usable JDK 8 or 21, Java 7 class library or
+# It never blocks when no usable JDK 8, 21 or 25, Java 7 class library or
 # MiniSat-capable dynalloy4 is set up, or tests/ has local changes; it warns and
 # lets the push through. Skip it once with
 # `git push --no-verify`.
@@ -36,7 +36,7 @@ fi
 cd "$root"
 . scripts/common.sh
 if ! (STRYKER_SOLVER=minisat; require_jdk; require_classlib; require_solver) > /dev/null 2>&1; then
-    echo "pre-push: code changed but Stryker cannot run here (JDK 8 or 21, Java 7 class library or MiniSat-capable dynalloy4 missing); smoke test skipped." >&2
+    echo "pre-push: code changed but Stryker cannot run here (JDK 8, 21 or 25, Java 7 class library or MiniSat-capable dynalloy4 missing); smoke test skipped." >&2
     echo "pre-push: run scripts/smoke-test.sh to see what is missing." >&2
     exit 0
 fi

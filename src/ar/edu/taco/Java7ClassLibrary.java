@@ -27,7 +27,7 @@ import java.io.File;
  * <p>The JML parser (JML2/MultiJava, {@code lib/jml-release.jar}) and the runtime assertion
  * checker JML4C ({@code lib/stryker/jml4c.jar}) resolve JDK types by reading the JDK's class
  * files, and they cannot use the class library of Java 8 or later (they do read the subjects'
- * classes compiled for Java 8). On Java 8 and 21 they, and the JDT parser Stryker uses for
+ * classes compiled for Java 8). On Java 8, 21 and 25 they, and the JDT parser Stryker uses for
  * variabilization, are given a Java 7 {@code rt.jar} instead: the one named by the
  * {@value #PROPERTY} system property, or {@value #DEFAULT_LOCATION} under the working directory,
  * where {@code scripts/fetch-java7-classlib.sh} puts it.
@@ -105,7 +105,7 @@ public final class Java7ClassLibrary {
     }
 
     /**
-     * Fails unless Stryker can run: on Java 8 or 21, with a Java 7 class library at
+     * Fails unless Stryker can run: on Java 8, 21 or 25, with a Java 7 class library at
      * {@link #path()}. This TACO does not run on Java 7, and Stryker has not been tried on other
      * versions.
      *
@@ -113,8 +113,8 @@ public final class Java7ClassLibrary {
      */
     public static void checkForStryker() {
         String version = System.getProperty("java.specification.version");
-        if (!"1.8".equals(version) && !"21".equals(version)) {
-            throw new IllegalStateException("Stryker runs on Java 8 or 21, but this is Java " + version
+        if (!"1.8".equals(version) && !"21".equals(version) && !"25".equals(version)) {
+            throw new IllegalStateException("Stryker runs on Java 8, 21 or 25, but this is Java " + version
                     + " (" + System.getProperty("java.home") + ").");
         }
         if (!isAvailable()) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the project into bin/ with JDK 8 (or 21) and Ant.
+# Builds the project into bin/ with JDK 8 (or 21 or 25) and Ant.
 # Usage: scripts/build.sh [ant targets...]   (default target: build)
 set -eo pipefail
 . "$(dirname "$0")/common.sh"

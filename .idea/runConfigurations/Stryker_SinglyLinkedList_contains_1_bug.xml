@@ -9,7 +9,7 @@
     <option name="VM_PARAMETERS" value="-Xmx4g -Xss8m -Ddynalloy.solver=minisat" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <envs>
-      <env name="JDK_JAVA_OPTIONS" value="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED" />
+      <env name="JDK_JAVA_OPTIONS" value="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --enable-native-access=ALL-UNNAMED" />
     </envs>
     <method v="2">
       <option name="Make" enabled="true" />

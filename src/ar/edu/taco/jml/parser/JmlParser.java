@@ -106,7 +106,7 @@ public class JmlParser {
         }
         //		sources.add(System.getProperty("user.dir") + FILE_SEP + "specs");
 
-        // The JML2 parser cannot read Java 8+ class files: on JDK 8 type checking stops at
+        // The JML2 parser cannot use the Java 8+ class library: on JDK 8 type checking stops at
         // java.lang.CharSequence. Read a Java 7 class library instead, if there is one.
         if (Java7ClassLibrary.isAvailable()) {
             org.multijava.util.classfile.ClassPath.setBootClassPath(Java7ClassLibrary.path());

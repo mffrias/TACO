@@ -1492,7 +1492,7 @@ public class MuJavaController extends AbstractBaseController<MuJavaInput> {
                 }
                 jml4cCommand.addAll(Arrays.asList("-jar", System.getProperty("user.dir") + FILE_SEP + "lib/stryker/jml4c.jar",
                         "-nowarn", "-maxProblems", "9999999"));
-                // JML4C cannot read Java 8+ class files either: give it the Java 7 class library.
+                // JML4C cannot use the Java 8+ class library either: give it the Java 7 one.
                 jml4cCommand.addAll(Arrays.asList("-bootclasspath", Java7ClassLibrary.path()));
                 jml4cCommand.addAll(Arrays.asList("-cp", currentClasspath, tempFilename));
                 ProcessBuilder jml4c = new ProcessBuilder(jml4cCommand);

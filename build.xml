@@ -7,8 +7,17 @@
 	<property name="junit.output.dir" value="junit" />
 	<property name="debuglevel" value="source,lines,vars" />
 	
+	<!-- Java 7 bytecode on JDK 8. javac 20 and later cannot target Java 7, so on JDK 9 and later
+	     (JDK 21) the release attribute applies instead and the classes are Java 8 ones; Ant ignores
+	     it on JDK 8. The JML tools, which read the compiled subjects in bin/, accept both. -->
 	<property name="target" value="1.7" />
 	<property name="source" value="1.7" />
+	<property name="release" value="8" />
+
+	<!-- On JDK 21, the options that runs need, as in scripts/common.sh (java21_opts). -->
+	<condition property="stryker.java21.opts" value="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED" else="">
+		<equals arg1="${java.specification.version}" arg2="21" />
+	</condition>
 	
 	<!-- TACO properties definition -->
 	<property name="app.id" value="taco" />
@@ -111,17 +120,17 @@
 	<!-- Compile the project -->
 	<target name="compile" depends="init">
 		<echo message="${ant.project.name}: ${ant.file}" />
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
 			<src path="src" />
 			<exclude name="ar/edu/jdynalloy/jfsl/" />
 			<exclude name="ar/edu/jdynalloy/parser/" />
 			<classpath refid="build.classpath" />
 		</javac>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
 			<src path="tests" />
 			<classpath refid="build.classpath" />
 		</javac>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
 			<src path="unittest" />
 			<classpath refid="build.classpath" />
 		</javac>
@@ -140,6 +149,7 @@
 			<jvmarg value="-Xmx1024m" />
 			<jvmarg value="-Xms512m" />
 			<jvmarg value="-Xss2048k" />
+			<jvmarg line="${stryker.java21.opts}" />
 			<formatter type="xml" />
 			<batchtest todir="${junit.output.dir}">
 				<fileset dir="unittest" includes="**/*Test.java">

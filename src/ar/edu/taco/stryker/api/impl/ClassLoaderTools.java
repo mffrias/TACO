@@ -9,7 +9,7 @@ import java.net.URLClassLoader;
 /**
  * Reflection helpers that add a file or URL to a {@link URLClassLoader} at run time by calling its
  * protected {@code addURL} method. The variants without a class loader argument target the system class
- * loader, which is a {@code URLClassLoader} only up to Java 8 (Stryker runs on Java 8).
+ * loader, which is a {@code URLClassLoader} only up to Java 8 (so they would fail on Java 21).
  * <p>
  * Currently unused (no callers in this repository; the remaining references are commented out).
  * OpenJMLController has a similar static {@code addUrl} helper.

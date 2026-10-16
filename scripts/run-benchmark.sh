@@ -18,15 +18,18 @@
 #   -h, --help       show this help
 #
 # Environment:
-#   STRYKER_JAVA_HOME  JDK 8 to use (otherwise auto-detected; on Apple Silicon
-#                      an arm64 one needs lib/dynalloy4.jar from the stryker
-#                      branch of mffrias/dynalloy4, else use an x86_64 build)
+#   STRYKER_JAVA_HOME  JDK 8 or 21 to use (otherwise auto-detected: JDK 8, then
+#                      21; on Apple Silicon an arm64 one needs lib/dynalloy4.jar
+#                      from the stryker branch of mffrias/dynalloy4, else use an
+#                      x86_64 build)
 #   STRYKER_CLASSLIB   the Java 7 rt.jar for the JML tools (default:
 #                      lib/java7/rt.jar, see scripts/fetch-java7-classlib.sh)
 #   STRYKER_SOLVER     minisat (default) or sat4j; minisat needs dynalloy4 from
 #                      the stryker branch of mffrias/dynalloy4
 #   STRYKER_JVM_OPTS   JVM options (default: -Xmx4g -Xss8m, plus
-#                      -XX:-TieredCompilation for an x86_64 JDK under Rosetta)
+#                      -XX:-TieredCompilation for an x86_64 JDK under Rosetta).
+#                      On JDK 21 the run also gets the options in java21_opts
+#                      (scripts/common.sh).
 #
 # Exit status: 0 fix found, 1 no fix found, 2 usage/environment error,
 #              3 build failed, 4 the run crashed, 124 timed out.
@@ -119,8 +122,8 @@ rm -f StrykerLastReports.txt StrykerLastFixFound.java stryker.log stryker-consol
 
 run_tmp="$(mktemp -d "${TMPDIR:-/tmp}/stryker.XXXXXX")"
 
-echo "Running $test_class with the JDK at $JAVA_HOME and $STRYKER_SOLVER"
-jvm_opts="${STRYKER_JVM_OPTS:-$(default_jvm_opts)}"
+echo "Running $test_class with Java $STRYKER_JAVA_VERSION at $JAVA_HOME and $STRYKER_SOLVER"
+jvm_opts="${STRYKER_JVM_OPTS:-$(default_jvm_opts)} $(java21_opts)"
 # shellcheck disable=SC2086
 "$JAVA_HOME/bin/java" -Djava.io.tmpdir="$run_tmp" -Dstryker.classlib="$STRYKER_CLASSLIB" \
     -Ddynalloy.solver="$STRYKER_SOLVER" $jvm_opts \

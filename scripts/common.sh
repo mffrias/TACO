@@ -20,61 +20,80 @@ bundled_minisat_has_arm64() {
         | file - | grep -q arm64
 }
 
-# Succeeds if $1 is the home of a JDK 8 that can run Stryker on this machine. On a Mac, an arm64
-# JDK can only load MiniSat, the SAT solver Stryker runs with, if lib/dynalloy4.jar bundles it
-# for arm64; otherwise the JDK must be an x86_64 build, which runs under Rosetta.
-is_usable_jdk8() {
-    local home="$1"
+# Prints 8 or 21 if $1 is the home of a JDK 8 or 21 that can run Stryker on this machine, or
+# fails. On a Mac, an arm64 JDK can only load MiniSat, the SAT solver Stryker runs with, if
+# lib/dynalloy4.jar bundles it for arm64; otherwise the JDK must be an x86_64 build, which runs
+# under Rosetta.
+jdk_version() {
+    local home="$1" version
     [ -x "$home/bin/java" ] && [ -x "$home/bin/javac" ] || return 1
-    "$home/bin/java" -version 2>&1 | grep -q 'version "1\.8[._]' || return 1
+    version="$("$home/bin/java" -version 2>&1 \
+        | sed -n -e 's/.*version "1\.\(8\)[._].*/\1/p' -e 's/.*version "\(21\)[."].*/\1/p' | head -1)"
+    [ -n "$version" ] || return 1
     if [ "$(uname -s)" = "Darwin" ] && [ "$(jvm_arch "$home")" = "aarch64" ] \
         && ! bundled_minisat_has_arm64; then
         return 1
     fi
+    echo "$version"
 }
 
-# Prints the home of the JDK 8 to use, or fails: $STRYKER_JAVA_HOME if set (it must be usable),
-# else $JAVA_HOME if it is usable, else the first usable JDK 8 found in the usual places
-# (macOS: /Library/Java/JavaVirtualMachines and its ~/Library counterpart; Linux: /usr/lib/jvm,
-# /opt).
+# Prints the home of the JDK to use, or fails: $STRYKER_JAVA_HOME if set (it must be a usable
+# JDK 8 or 21), else $JAVA_HOME if it is a usable JDK 8, else the first JDK 8, then the first
+# JDK 21, among $JAVA_HOME and the usual places (macOS: /Library/Java/JavaVirtualMachines and its
+# ~/Library counterpart; Linux: /usr/lib/jvm, /opt). So JDK 8 stays the default even when
+# $JAVA_HOME is a JDK 21.
 find_jdk() {
     if [ -n "${STRYKER_JAVA_HOME:-}" ]; then
-        is_usable_jdk8 "$STRYKER_JAVA_HOME" || return 1
+        jdk_version "$STRYKER_JAVA_HOME" > /dev/null || return 1
         echo "$STRYKER_JAVA_HOME"
         return 0
     fi
-    if [ -n "${JAVA_HOME:-}" ] && is_usable_jdk8 "$JAVA_HOME"; then
-        echo "$JAVA_HOME"
-        return 0
-    fi
-    local home
-    for home in /Library/Java/JavaVirtualMachines/*/Contents/Home \
-        "$HOME"/Library/Java/JavaVirtualMachines/*/Contents/Home \
-        /usr/lib/jvm/* /opt/*jdk* /opt/*java*; do
-        if [ -d "$home" ] && is_usable_jdk8 "$home"; then
-            echo "$home"
+    local candidates=() versions=() dir i wanted
+    if [ -n "${JAVA_HOME:-}" ]; then
+        if [ "$(jdk_version "$JAVA_HOME")" = 8 ]; then
+            echo "$JAVA_HOME"
             return 0
         fi
+        candidates+=("$JAVA_HOME")
+    fi
+    for dir in /Library/Java/JavaVirtualMachines/*/Contents/Home \
+        "$HOME"/Library/Java/JavaVirtualMachines/*/Contents/Home \
+        /usr/lib/jvm/* /opt/*jdk* /opt/*java*; do
+        [ -d "$dir" ] && candidates+=("$dir")
+    done
+    for i in ${candidates[@]+"${!candidates[@]}"}; do
+        versions[$i]="$(jdk_version "${candidates[$i]}" || true)"
+    done
+    for wanted in 8 21; do
+        for i in ${candidates[@]+"${!candidates[@]}"}; do
+            if [ "${versions[$i]}" = "$wanted" ]; then
+                echo "${candidates[$i]}"
+                return 0
+            fi
+        done
     done
     return 1
 }
 
-# Sets and exports JAVA_HOME to a usable JDK 8 (see find_jdk), or exits with instructions.
+# Sets and exports JAVA_HOME to a usable JDK 8 or 21 (see find_jdk) and STRYKER_JAVA_VERSION to
+# 8 or 21, or exits with instructions.
 require_jdk() {
     if ! JAVA_HOME="$(find_jdk)"; then
         if [ -n "${STRYKER_JAVA_HOME:-}" ]; then
-            die "STRYKER_JAVA_HOME=$STRYKER_JAVA_HOME is not a usable JDK 8
+            die "STRYKER_JAVA_HOME=$STRYKER_JAVA_HOME is not a usable JDK 8 or 21
 (on Apple Silicon, an arm64 JDK needs the MiniSat for arm64 that dynalloy4.jar
 from the stryker branch of mffrias/dynalloy4 bundles; with an older
-lib/dynalloy4.jar, use an x86_64 JDK 8, which runs under Rosetta)."
+lib/dynalloy4.jar, use an x86_64 JDK, which runs under Rosetta)."
         fi
-        die "a JDK 8 is required but none was found.
+        die "a JDK 8 (or 21) is required but none was found.
 Install one (e.g. Azul Zulu 8) and, if the scripts don't find it, point
 STRYKER_JAVA_HOME at it. On Apple Silicon, an arm64 JDK needs lib/dynalloy4.jar
 from the stryker branch of mffrias/dynalloy4 (MiniSat for arm64); with an older
 one, install the x86_64 build, which runs under Rosetta."
     fi
     export JAVA_HOME
+    STRYKER_JAVA_VERSION="$(jdk_version "$JAVA_HOME")"
+    export STRYKER_JAVA_VERSION
 }
 
 # Sets and exports STRYKER_CLASSLIB to the Java 7 class library (rt.jar) that the JML tools
@@ -121,6 +140,15 @@ default_jvm_opts() {
         echo "-Xmx4g -Xss8m -XX:-TieredCompilation"
     else
         echo "-Xmx4g -Xss8m"
+    fi
+}
+
+# JVM options a Stryker run needs on JDK 21, whatever STRYKER_JVM_OPTS says. TACO reads fields of
+# counterexample objects through reflection, those of JDK classes included (the serialVersionUID
+# of an exception, for example), which Java 17 and later only allow in packages opened to it.
+java21_opts() {
+    if [ "${STRYKER_JAVA_VERSION:-}" = 21 ]; then
+        echo "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
     fi
 }
 

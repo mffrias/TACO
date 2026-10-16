@@ -103,16 +103,16 @@ import ar.uba.dc.rfm.dynalloy.ast.ProgramDeclaration;
  * PrecompiledModules and DynalloyStage do not apply Stryker's translation, and
  * the JUnit step writes tests for the initial and the final state.</p>
  * <h3>Environment</h3>
- * <p>This TACO runs on Java 8. A Stryker run also needs a Java 7 class
- * library for the JML tools ({@link Java7ClassLibrary}), and MiniSat 2.2
- * (<code>-Ddynalloy.solver=minisat</code>): with DynAlloy's default solver,
- * SAT4J, some checks of a fix do not finish. Relative paths such as
- * <code>config/</code>, <code>generated/</code> and <code>output/</code>, and
- * Stryker's <code>lib/stryker/jml4c.jar</code> and report files, are resolved
- * against the working directory (<code>user.dir</code>), which must therefore
- * be the repository root. Stryker keeps run-wide state in singletons and
- * static fields that are never reset, so only one Stryker run per JVM is
- * supported.</p>
+ * <p>This TACO runs on Java 8, and Stryker also on Java 21. A Stryker run
+ * needs a Java 7 class library for the JML tools ({@link Java7ClassLibrary}),
+ * and MiniSat 2.2 (<code>-Ddynalloy.solver=minisat</code>): with DynAlloy's
+ * default solver, SAT4J, some checks of a fix do not finish. Relative paths
+ * such as <code>config/</code>, <code>generated/</code> and
+ * <code>output/</code>, and Stryker's <code>lib/stryker/jml4c.jar</code> and
+ * report files, are resolved against the working directory
+ * (<code>user.dir</code>), which must therefore be the repository root.
+ * Stryker keeps run-wide state in singletons and static fields that are never
+ * reset, so only one Stryker run per JVM is supported.</p>
  * <h3>Integers</h3>
  * <p>TACO can analyse code using Alloy integers or Java-like Integers.
  * In either case, the meaning of the bitwidth value is the same: a bound

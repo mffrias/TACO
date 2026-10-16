@@ -26,10 +26,11 @@ import java.io.File;
  *
  * <p>The JML parser (JML2/MultiJava, {@code lib/jml-release.jar}) and the runtime assertion
  * checker JML4C ({@code lib/stryker/jml4c.jar}) resolve JDK types by reading the JDK's class
- * files, and they cannot read the Java 8 class file format. On Java 8 they, and the JDT parser
- * Stryker uses for variabilization, are given a Java 7 {@code rt.jar} instead: the one named by
- * the {@value #PROPERTY} system property, or {@value #DEFAULT_LOCATION} under the working
- * directory, where {@code scripts/fetch-java7-classlib.sh} puts it.
+ * files, and they cannot use the class library of Java 8 or later (they do read the subjects'
+ * classes compiled for Java 8). On Java 8 and 21 they, and the JDT parser Stryker uses for
+ * variabilization, are given a Java 7 {@code rt.jar} instead: the one named by the
+ * {@value #PROPERTY} system property, or {@value #DEFAULT_LOCATION} under the working directory,
+ * where {@code scripts/fetch-java7-classlib.sh} puts it.
  *
  * <p>Plain TACO runs without it: the JML parser then stops type checking at
  * {@code java.lang.CharSequence}, and TACO logs the error and goes on. Stryker cannot: without it
@@ -68,7 +69,7 @@ public final class Java7ClassLibrary {
      * {@code classPath} without the entries that belong to the running JDK (files under its
      * installation directory). Some launchers, IntelliJ among them, put the JDK's own jars, its
      * {@code rt.jar} included, on the class path of the programs they run; the JML tools, which
-     * are handed {@code java.class.path}, would then read Java 8 class files there despite
+     * are handed {@code java.class.path}, would then read the running JDK's classes there despite
      * {@link #path()}.
      *
      * @param classPath a class path, entries separated by {@link File#pathSeparator}
@@ -104,15 +105,16 @@ public final class Java7ClassLibrary {
     }
 
     /**
-     * Fails unless Stryker can run: on Java 8, with a Java 7 class library at {@link #path()}.
-     * This TACO needs Java 8, and Stryker has not been tried on later versions.
+     * Fails unless Stryker can run: on Java 8 or 21, with a Java 7 class library at
+     * {@link #path()}. This TACO does not run on Java 7, and Stryker has not been tried on other
+     * versions.
      *
      * @throws IllegalStateException with instructions, if that is not the case
      */
     public static void checkForStryker() {
         String version = System.getProperty("java.specification.version");
-        if (!"1.8".equals(version)) {
-            throw new IllegalStateException("Stryker runs on Java 8, but this is Java " + version
+        if (!"1.8".equals(version) && !"21".equals(version)) {
+            throw new IllegalStateException("Stryker runs on Java 8 or 21, but this is Java " + version
                     + " (" + System.getProperty("java.home") + ").");
         }
         if (!isAvailable()) {

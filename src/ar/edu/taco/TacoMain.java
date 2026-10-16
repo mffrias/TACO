@@ -435,11 +435,15 @@ public class TacoMain {
 
         // JDYNALLOY BUILT-IN MODULES
         PrecompiledModules precompiledModules = null;
-//        if (this.inputToFix != null){
-//            precompiledModules = new PrecompiledModules((HashMap<String, Object>)inputToFix);
-//        } else {
-        precompiledModules = new PrecompiledModules();
-//        }
+        // Stryker's feedback fixes the input to a counterexample; with Java arithmetic, the
+        // literal modules of its int, long and float values have to be among the built-in
+        // modules. The computation of the spec's output for a hardcoded input
+        // (isCheckAndRunSpecAssertionSupport) also passes an inputToFix, and does not use them.
+        if (this.inputToFix != null && !isCheckAndRunSpecAssertionSupport){
+            precompiledModules = new PrecompiledModules((HashMap<String, Object>)inputToFix);
+        } else {
+            precompiledModules = new PrecompiledModules();
+        }
         precompiledModules.execute();
         jdynalloy_modules.addAll(precompiledModules.getModules());
         // END JDYNALLOY BUILT-IN MODULES

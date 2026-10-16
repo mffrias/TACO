@@ -93,12 +93,16 @@ public class DynalloyStage implements ITacoStage {
 		//complying i/o instance according to the spec after the program
 		//failed with respect to its contract. If Stryker is going to be used
 		//this needs to be uncommented.
-//		if (inputToFix != null)
-//			translatingForStryker = true;
+		// Both uses of inputToFix are now told apart in execute(), once
+		// isCheckAndAfterRunSpec has been set.
 	}
 
 	@Override
 	public void execute() {
+		// A fixed input comes either from Stryker's feedback (variabilization), which
+		// needs the translation for Stryker, or from the computation of the spec's output
+		// for a hardcoded input (isCheckAndAfterRunSpec), which must not get it.
+		this.translatingForStryker = inputToFix != null && !isCheckAndAfterRunSpec;
 		dynalloyToAlloyManager = new DynalloyToAlloyManager(this.translatingForStryker);
 		DynalloyToAlloyManager.isCheckAndAfterRunSpec = isCheckAndAfterRunSpec;
 

@@ -106,11 +106,22 @@ SAT4J. Build dynalloy4 and jDynAlloy from the stryker branch of mffrias/dynalloy
     export STRYKER_SOLVER
 }
 
-# JVM options for a Stryker run when STRYKER_JVM_OPTS is not set. Tiered compilation is turned
-# off, as it was by default on Java 7: on comitaco, runs with it took up to twice as long under
-# Rosetta, with the same results.
+# Succeeds if the JVM in the JDK home $1 runs under Rosetta: an x86_64 JVM on an Apple Silicon
+# Mac. (hw.optional.arm64 tells the machine apart even from a shell that itself runs under Rosetta.)
+under_rosetta() {
+    [ "$(uname -s)" = "Darwin" ] && [ "$(sysctl -n hw.optional.arm64 2>/dev/null)" = "1" ] \
+        && [ "$(jvm_arch "$1")" = "x86_64" ]
+}
+
+# JVM options for a Stryker run on the JDK in $JAVA_HOME when STRYKER_JVM_OPTS is not set. Under
+# Rosetta, tiered compilation is turned off, as it was by default on Java 7: on comitaco, runs with
+# it took up to twice as long there, with the same results. A native JVM is faster with it.
 default_jvm_opts() {
-    echo "-Xmx4g -Xss8m -XX:-TieredCompilation"
+    if under_rosetta "$JAVA_HOME"; then
+        echo "-Xmx4g -Xss8m -XX:-TieredCompilation"
+    else
+        echo "-Xmx4g -Xss8m"
+    fi
 }
 
 # Runs Ant 1.9 or later: $ANT if set, else ant on the PATH.

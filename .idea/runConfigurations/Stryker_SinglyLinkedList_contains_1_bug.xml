@@ -6,7 +6,7 @@
     <option name="MAIN_CLASS_NAME" value="icse.singlylinkedlist.set1.StrykerSinglyLinkedListContains1Bug25DTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
-    <option name="VM_PARAMETERS" value="-Xmx4g -Xss8m -XX:-TieredCompilation -Ddynalloy.solver=minisat" />
+    <option name="VM_PARAMETERS" value="-Xmx4g -Xss8m -Ddynalloy.solver=minisat" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

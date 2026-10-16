@@ -25,7 +25,8 @@
 #                      lib/java7/rt.jar, see scripts/fetch-java7-classlib.sh)
 #   STRYKER_SOLVER     minisat (default) or sat4j; minisat needs dynalloy4 from
 #                      the stryker branch of mffrias/dynalloy4
-#   STRYKER_JVM_OPTS   JVM options (default: -Xmx4g -Xss8m -XX:-TieredCompilation)
+#   STRYKER_JVM_OPTS   JVM options (default: -Xmx4g -Xss8m, plus
+#                      -XX:-TieredCompilation for an x86_64 JDK under Rosetta)
 #
 # Exit status: 0 fix found, 1 no fix found, 2 usage/environment error,
 #              3 build failed, 4 the run crashed, 124 timed out.

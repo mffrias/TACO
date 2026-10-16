@@ -514,7 +514,7 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                 log.debug("Valor 2: " + StrykerStage.indexToLastJUnitInput);
 
                 if (analysisResult != null && !input.getFeedback().isStop()){
-                    queueFalseCandidate(input, analysis_result, props);
+                    queueFalseCandidate(input, analysis_result, props, tacoMain.getCompilationUnits());
                 } else {
                     StrykerStage.falseCandidates++;
                 }
@@ -534,14 +534,15 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
         }
     }
 
-    public void queueFalseCandidate(DarwinistInput input, TacoAnalysisResult analysis_result, Properties props) {
+    public void queueFalseCandidate(DarwinistInput input, TacoAnalysisResult analysis_result, Properties props,
+            List<JCompilationUnitType> compilationUnits) {
         StrykerStage.falseCandidates++;
         String classToCheck = TacoConfigurator.getInstance().getString(TacoConfigurator.CLASS_TO_CHECK_FIELD);
         String methodToCheck = props.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
 
         String junitFile;
         try {
-            junitFile = generateJunitFile(analysis_result, classToCheck, methodToCheck);
+            junitFile = generateJunitFile(compilationUnits, analysis_result, classToCheck, methodToCheck);
         } catch (RuntimeException e) {
             // E.g. TACO's snapshot cannot instantiate an object of the counterexample. An escaping
             // exception used to end this controller's thread and hang the run; go on without
@@ -636,11 +637,9 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
     }
 
     @SuppressWarnings("resource")
-    private String generateJunitFile(TacoAnalysisResult analysis_result, String classToCheck, String methodToCheck) {
+    private String generateJunitFile(List<JCompilationUnitType> compilation_units, TacoAnalysisResult analysis_result,
+            String classToCheck, String methodToCheck) {
         String junitFile = null;
-
-
-        List<JCompilationUnitType> compilation_units = null;
 
         SnapshotStage snapshotStage = new SnapshotStage(
                 compilation_units, analysis_result, classToCheck, methodToCheck);

@@ -111,6 +111,8 @@ public class TacoMain {
 
     public String outputJunitFile = "";
 
+    private List<JCompilationUnitType> compilationUnits = new ArrayList<JCompilationUnitType>();
+
     public static boolean isCheckAndRunSpecAssertionSupport = false;
 
     /**
@@ -318,6 +320,16 @@ public class TacoMain {
         this.inputToFix = inputToFix;
     }
 
+    /**
+     * The compilation units parsed by the last {@link #run}, one per class it
+     * translated. Sources are parsed one file at a time, so the JmlParser
+     * singleton only keeps the last file's units afterwards; Stryker needs the
+     * class under analysis among them to turn a counterexample into a test.
+     */
+    public List<JCompilationUnitType> getCompilationUnits() {
+        return compilationUnits;
+    }
+
 
     public void run(String configFile) throws IllegalArgumentException {
         this.run(configFile, new Properties());
@@ -337,6 +349,7 @@ public class TacoMain {
         }
 
         List<JCompilationUnitType> compilation_units = new ArrayList<>();
+        this.compilationUnits = compilation_units;
         String classToCheck = null;
         String methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
 

@@ -122,12 +122,25 @@ if [ -e "${COMITACO}" ]; then
 else
   git clone ${URL}mffrias/TACO.git
 fi
+# dynalloy4 is built from the branch with the same name as TACO's current branch, if dynalloy4 has
+# one (TACO's stryker branch needs dynalloy4's stryker branch), and from master otherwise.
+TACO_BRANCH=$(git -C "${COMITACO}" rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [[ -n "$TACO_BRANCH" ]] && git ls-remote --exit-code --heads ${URL}mffrias/dynalloy4.git "$TACO_BRANCH" > /dev/null 2>&1; then
+  DYNALLOY_BRANCH="$TACO_BRANCH"
+else
+  DYNALLOY_BRANCH="master"
+fi
+echo "dynalloy4 branch: ${DYNALLOY_BRANCH} (TACO is on '${TACO_BRANCH}')"
 if [ ! -e "${DYNALLOY}" ]; then
-  git clone ${URL}mffrias/dynalloy4.git
+  git clone -b "${DYNALLOY_BRANCH}" ${URL}mffrias/dynalloy4.git
 else
   echo "${DYNALLOY} folder found, checking..."
   if [ ! -e "${DYNALLOY_BUILD}" ]; then
     echo "ERROR: missing ${DYNALLOY_BUILD}"
+  fi
+  dynalloyBranch=$(git -C "${DYNALLOY}" rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ "$dynalloyBranch" != "${DYNALLOY_BRANCH}" ]]; then
+    echo "WARNING: ${DYNALLOY} is on branch '${dynalloyBranch}', not ${DYNALLOY_BRANCH} (git -C ${DYNALLOY} checkout ${DYNALLOY_BRANCH})"
   fi
   if $(grep -qE "<project.*name=\"${DYNALLOY_NAME}>\"" "${DYNALLOY_BUILD}"); then
     echo "ERROR: ${DYNALLOY_BUILD} does not appear to be valid"

@@ -123,17 +123,19 @@
 	<!-- Compile the project -->
 	<target name="compile" depends="init">
 		<echo message="${ant.project.name}: ${ant.file}" />
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
+		<!-- The sources are UTF-8, and some have non-ASCII characters. Without encoding, javac reads
+		     them with the platform's default, which is ASCII in a minimal Linux or Docker image. -->
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}" encoding="UTF-8">
 			<src path="src" />
 			<exclude name="ar/edu/jdynalloy/jfsl/" />
 			<exclude name="ar/edu/jdynalloy/parser/" />
 			<classpath refid="build.classpath" />
 		</javac>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}" encoding="UTF-8">
 			<src path="tests" />
 			<classpath refid="build.classpath" />
 		</javac>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" release="${release}" encoding="UTF-8">
 			<src path="unittest" />
 			<classpath refid="build.classpath" />
 		</javac>

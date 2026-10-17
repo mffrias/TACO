@@ -410,7 +410,7 @@ public class TacoMain {
      * @param overridingProperties
      *            Properties that overrides properties file's values. For Stryker,
      *            {@code methodToCheck} must be given here, with its parameter types
-     *            (e.g. {@code contains(java.lang.Object)}): the Stryker block reads it from these
+     *            (e.g. {@code pkg_Class_contains(java_lang_Object)}): the Stryker block reads it from these
      *            properties only.
      * @return the result of the Alloy analysis (of the original method, even if Stryker ran),
      *         or {@code null} if the sources do not compile
@@ -694,7 +694,7 @@ public class TacoMain {
             if (tacoAnalysisResult.get_alloy_analysis_result().isSAT() &&
                     tacoAnalysisResult.get_alloy_analysis_result().getAlloy_solution().getOriginalCommand().startsWith("Check")) {
                 log.info("****** START: Stryker ****** ");
-                // Read from the overriding properties only (e.g. "contains(java.lang.Object)"); StrykerStage keeps the plain name.
+                // Read from the overriding properties only (e.g. "pkg_Class_contains(java_lang_Object)"); StrykerStage keeps the plain name.
                 methodToCheck = overridingProperties.getProperty(TacoConfigurator.METHOD_TO_CHECK_FIELD);
                 String sourceRootDir = TacoConfigurator.getInstance().getString(
                         TacoConfigurator.JMLPARSER_SOURCE_PATH_STR);
@@ -895,7 +895,7 @@ public class TacoMain {
      * @param sourceClassName the class under test as written in the test; callers pass the
      *        fully qualified {@code classToCheck}
      * @param classPackage package of the copy ({@code ar.edu.output.junit} in all callers)
-     * @param methodName the {@code methodToCheck} (e.g. {@code contains(java.lang.Object)});
+     * @param methodName the {@code methodToCheck} (e.g. {@code pkg_Class_contains(java_lang_Object)});
      *        its plain name ({@link MethodToCheck#methodName}) is what is matched
      * @return the path of the copy, returned even if writing it failed
      */
@@ -904,7 +904,7 @@ public class TacoMain {
         tmpDir = replaceBelowWorkingDir(tmpDir, "generated", "output", true);
         File destFile = new File(tmpDir,obtainClassNameFromFileName(junitFile)+ /*"_temp" +*/ ".java");
         String packageSentence = "package "+classPackage+";\n";
-        methodName = MethodToCheck.methodName(methodName);
+        methodName = MethodToCheck.methodName(methodName, sourceClassName);
         try {
             // output/ is not versioned, so it does not exist in a fresh checkout.
             destFile.getParentFile().mkdirs();

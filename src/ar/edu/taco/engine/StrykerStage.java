@@ -65,7 +65,7 @@ public class StrykerStage implements ITacoStage {
 	private File classToCheckFile;
 
 	// The method under analysis in which a bug was found.
-	// (Plain name, e.g. "contains" for "contains(java.lang.Object)".)
+	// (Plain name, e.g. "contains" for "pkg_Class_contains(java_lang_Object)".)
 	private String methodToCheck;
 
 	@SuppressWarnings("unused")
@@ -209,7 +209,7 @@ public class StrykerStage implements ITacoStage {
 	 *            exist (otherwise a {@link RuntimeException} is thrown).
 	 * @param methodToCheck
 	 *            the method under analysis in which a bug was found, as TACO's
-	 *            {@code methodToCheck} (e.g. {@code contains(java.lang.Object)});
+	 *            {@code methodToCheck} (e.g. {@code pkg_Class_contains(java_lang_Object)});
 	 *            only its plain name is kept.
 	 * @param configFile
 	 *            The configuration file
@@ -235,7 +235,7 @@ public class StrykerStage implements ITacoStage {
 		}
 		this.classToCheckFile = obtainJavaFileOfClassToCheck(sourceRootDir,
 				classToCheck);
-		this.methodToCheck = MethodToCheck.methodName(methodToCheck);
+		this.methodToCheck = MethodToCheck.methodName(methodToCheck, classToCheck);
 		this.configFile = configFile;
 		this.maxMethodsInFile = maxMethodsInFile;
 

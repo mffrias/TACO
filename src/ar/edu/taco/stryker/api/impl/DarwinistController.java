@@ -335,9 +335,11 @@ public class DarwinistController extends AbstractBaseController<DarwinistInput> 
                 } else {    
                     try {
                         List<String> parameterTypes = new ArrayList<String>(MethodToCheck.parameterTypes(originalMethodToCheck));
-                        parameterTypes.addAll(vdata.getVariablizedParameterTypes());
+                        for (String type : vdata.getVariablizedParameterTypes()) {
+                            parameterTypes.add(MethodToCheck.typeName(type));
+                        }
                         props.put(TacoConfigurator.METHOD_TO_CHECK_FIELD,
-                                MethodToCheck.of(MethodToCheck.methodName(originalMethodToCheck), parameterTypes));
+                                MethodToCheck.of(MethodToCheck.qualifiedName(originalMethodToCheck), parameterTypes));
                         log.warn("========================================================================PREVIOUS TO CALL OF TACOMAIN");
                         analysis_result = tacoMain.run(configurationFile, props);
                         if (analysis_result == null) {

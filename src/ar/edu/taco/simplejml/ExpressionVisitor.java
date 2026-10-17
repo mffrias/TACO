@@ -562,15 +562,15 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                         .getLeftAssignmentExpression(), argumentsList);
         String methodName = jMethodCallExpression.ident();
 
-        if (isStatic) {
+//        if (isStatic) {
             // JavaClassNameNormalizer classNameNormalizer = new
             // JavaClassNameNormalizer(jMethodCallExpression.method().receiverType().toVerboseString());
             // String classQualifiedName =
             // classNameNormalizer.getQualifiedClassName();
             // methodName = classQualifiedName + "_" + methodName;
-            methodName = methodInformation.getQualifiedReceiverType() + "_"
+        methodName = methodInformation.getQualifiedReceiverType() + "_"
                     + methodName;
-        }
+//        }
 
         IProgramCall jProgramCall = new JProgramCall(isSuper, methodName,
                 encodedArguments);

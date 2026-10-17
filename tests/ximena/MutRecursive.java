@@ -4,16 +4,18 @@ public class MutRecursive {
 
 
     public int field1;
-    public Object field2;
+    public MutRecursiveAux field2;
 
     //@ requires true;
     //@ ensures \result == true <==> n%2 == 0;
     //@signals (Exception e) false;
-    public static boolean isEven(int n, MutRecursive m){
-        if (n == 0)
-            return true;
-        else
-            return isOdd(n-1);
+    public static boolean isEven(int n, MutRecursive mr){
+//        if (n == 0)
+//            return true;
+//        else
+//            return isOdd(n-1);
+        MutRecursiveAux mra = new MutRecursiveAux();
+        return mra.m(n) == 1;
     }
 
     //@ requires true;
@@ -27,12 +29,14 @@ public class MutRecursive {
     }
 
 
-    //@ requires true;
-    //@ ensures field2 != null;
-    public MutRecursive(){
-        field2 = new MutRecursive(0);
-    }
+//    //@ requires true;
+//    //@ ensures field2 != null;
+//    public MutRecursive(){
+//        field2 = new MutRecursive(0);
+//    }
 
+    //@ requires true;
+    //@ ensures field1 == 0;
     public MutRecursive(int i){
     }
 

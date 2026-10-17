@@ -297,6 +297,8 @@ public class JmlAstTransverseStatementVisitor extends JmlBaseVisitor {
 
 		self.predicate().accept(this);
 	}
-	
+
+
+
 
 }

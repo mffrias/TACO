@@ -101,7 +101,7 @@ public class MethodDeclarationSolver {
 			//			programId = "Constructor";
 			programId = methodDeclaration.ident();
 		} else {
-			programId = TacoConfigurator.getInstance().getClassToCheck() + "_" + programId;
+			programId = buffer.getThisType().toString() + "_" + programId;
 		}
 
 

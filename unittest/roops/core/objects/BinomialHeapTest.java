@@ -46,8 +46,8 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:12");
-        check(GENERIC_PROPERTIES,"insert(int)", false);
+        setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:3");
+        check(GENERIC_PROPERTIES,"roops_core_objects_BinomialHeap_insert(int)", false);
     }
 
 

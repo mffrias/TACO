@@ -13,7 +13,7 @@ public class isEvenTest extends CollectionTestBase {
 
 
     public void test_isEven() throws VizException {
-        setConfigKeyRelevantClasses("ximena.MutRecursive");
+        setConfigKeyRelevantClasses("ximena.MutRecursive, ximena.MutRecursiveAux");
         setConfigKeyRelevancyAnalysis(true);
         setConfigKeyCheckNullDereference(true);
         setConfigKeyUseJavaArithmetic(true);
@@ -29,12 +29,12 @@ public class isEvenTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("ximena.MutRecursive:1");
+        setConfigKeyTypeScopes("ximena.MutRecursive:1, ximena.MutRecursiveAux:2");
         check(GENERIC_PROPERTIES,"ximena_MutRecursive_isEven(int, ximena_MutRecursive)",false);
     }
 
     public void test_Constructor() throws VizException {
-        setConfigKeyRelevantClasses("ximena.MutRecursive");
+        setConfigKeyRelevantClasses("ximena.MutRecursive, ximena.MutRecursiveAux");
         setConfigKeyRelevancyAnalysis(true);
         setConfigKeyCheckNullDereference(true);
         setConfigKeyUseJavaArithmetic(true);
@@ -50,8 +50,8 @@ public class isEvenTest extends CollectionTestBase {
         setConfigKeyRemoveQuantifiers(true);
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("ximena.MutRecursive:1");
-        check(GENERIC_PROPERTIES,"ximena_MutRecursive_MutRecursive()",false);
+        setConfigKeyTypeScopes("ximena.MutRecursive:1, ximena.MutRecursiveAux:2");
+        check(GENERIC_PROPERTIES,"ximena_MutRecursive_MutRecursive(int)",false);
     }
 
 

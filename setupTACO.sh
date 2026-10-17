@@ -179,5 +179,13 @@ runAnt
 cp "dist/${JDYNALLOY_NAME}.jar" "../${COMITACO_LIB}"
 cd ..
 echo "Done"
-echo "Now you can create a project for ${COMITACO}, use Java 7, all jars inside lib folder should be used"
+# On JDK 8 and later the JML tools need a Java 7 class library (lib/java7/rt.jar); the script
+# downloads Azul Zulu 7 and checks its checksum, and does nothing if the file is already there.
+echo "Fetching the Java 7 class library..."
+if ! (cd "$COMITACO" && scripts/fetch-java7-classlib.sh); then
+  echo "ERROR: could not fetch the Java 7 class library (see ${COMITACO}/scripts/fetch-java7-classlib.sh)"
+  exit 8
+fi
+echo "Done"
+echo "Now you can create a project for ${COMITACO}, use JDK 8, all jars inside lib folder should be used"
 

@@ -1,130 +1,133 @@
 # TACO
-### Translation of Annotated Code
+### Translation of Annotated COde
 
-[TACO](https://github.com/mffrias/TACO) is a tool that translates a **Java** program annotated with [JML](https://www.cs.ucf.edu/~leavens/JML/index.shtml) specifications into a [DynAlloy](https://doi.org/10.1007/978-3-540-45236-2_37) model. Properties described by the JML annotations can then be verified using a SAT Solver.
+TACO checks Java methods against their [JML](https://www.cs.ucf.edu/~leavens/JML/index.shtml)
+specifications within bounds: a bounded number of objects of each class, of
+loop iterations and recursive calls, and a bounded integer bit width. It
+translates the annotated code into a [DynAlloy](https://doi.org/10.1007/978-3-540-45236-2_37)
+model, then into Alloy, and lets a SAT solver look for an execution that
+violates the contract. If there is one, TACO reports it as a counterexample and
+can turn it into a JUnit test. TACO is run from the JUnit test classes under
+`unittest/` (called drivers here, to tell them apart from the programs under
+`tests/`, which are what TACO checks).
 
-## Requirements
+This branch, `stryker`, adds **Stryker**, which repairs a faulty method: it
+mutates the statements you mark as suspicious, discards mutants that fail on
+the counterexamples found so far (runtime assertion checking with JML4C), asks
+TACO to verify the survivors, and uses TACO's verdicts on partially
+"variabilized" programs to prune the search. When TACO verifies a candidate
+within the bounds, Stryker reports it as a fix.
 
-As for the moment, TACO requires [Java 7](https://www.oracle.com/java/technologies/javase/javase7-archive-downloads.html) and [Apache Ant 1.9.16](https://ant.apache.org/bindownload.cgi).
-> [!TIP]
-> Apache Ant 1.9 can also be installed using [Homebrew](https://brew.sh). Ensure that Ant 1.9 is linked before executing `./setupTACO.sh`.
+## The three repositories
 
-TACO depends on [jdynalloy](https://github.com/mffrias/jDynAlloy) and [muJava++](https://github.com/saiema/MuJava). These dependencies and their dependencies are all downloaded by the provided script `setupTACO.sh`.
+    Java + JML ──TACO──▶ JDynAlloy ──jDynAlloy──▶ DynAlloy ──dynalloy4──▶ Alloy ──Alloy Analyzer──▶ SAT
 
-## Installation
+| Repository | What it does |
+|---|---|
+| [mffrias/TACO](https://github.com/mffrias/TACO) (this one) | Parses Java + JML (JML2/MultiJava), simplifies it and translates it into JDynAlloy modules, runs the whole pipeline, turns counterexamples into JUnit tests; Stryker (on this branch). |
+| [mffrias/jDynAlloy](https://github.com/mffrias/jDynAlloy) | Translates JDynAlloy, an object-oriented layer over DynAlloy, into DynAlloy: bindings, relevancy analysis, modifies clauses, recursion unfolding, and the translation itself. |
+| [mffrias/dynalloy4](https://github.com/mffrias/dynalloy4) | Translates DynAlloy into Alloy (unrolling loops), and runs the Alloy Analyzer, which solves with MiniSat 2.2 or SAT4J. |
 
-### Windows
-#### Setting Up Dependencies
+TACO uses the other two as jars, `lib/jdynalloy.jar` and `lib/dynalloy4.jar`,
+which `setupTACO.sh` builds from their repositories. They are not in git. This
+branch needs the `stryker` branches of both: dynalloy4's chooses the SAT solver
+and has MiniSat 2.2 for Apple Silicon and arm64 Linux, and jDynAlloy's has
+fixes for the new method naming ([docs/METHOD-NAMING.md](docs/METHOD-NAMING.md#status)).
 
-> [!NOTE]
-> Setup within [WSL2](https://ubuntu.com/desktop/wsl)
+## Quick start
 
-- GitHub Cli
-  - `sudo apt update`
-  - `sudo apt upgrade`
-  - `sudo apt install gh`
-  - After installation:
-    - `gh auth login -w`
+macOS or Linux with git, curl, Ant (1.9 or later) and a JDK 8 (see
+[docs/BUILDING.md](docs/BUILDING.md), also for JDK 21 and 25, Docker and
+IntelliJ):
 
-- Setup SSH
-  - Generate SSH Key
-    - `ssh-keygen -t ed25519 -C "your_email@example.com"`
-      - enter for default directory, enter password if
-    - `eval "$(ssh-agent -s)"`
-    - `ssh-add ~/.ssh/id_ed25519`
+    git clone https://github.com/mffrias/TACO.git
+    cd TACO
+    git checkout stryker
+    export JAVA_HOME=/path/to/your/jdk8
+    ./setupTACO.sh "" -h
+    scripts/build.sh
+    scripts/smoke-test.sh --quick
 
-- Change back to home
-  - `cd ~`
+`setupTACO.sh` clones dynalloy4 and jDynAlloy next to `TACO/`, builds them
+(each from its branch with the same name as TACO's, `stryker`), copies the
+jars into `lib/`, and downloads the Java 7 class library that Stryker's JML
+tools read (`lib/java7/rt.jar`, 61 MB). `"" -h` makes it clone over HTTPS;
+without arguments it uses SSH. `scripts/smoke-test.sh --quick` runs two repair
+benchmarks and checks that they give the expected results.
 
-- Install Unzip
-  - `sudo apt-get install unzip`
+## What a run looks like
 
-- Install Zip
-  - `sudo apt-get install zip`
+TACO runs from drivers (there is no usable command line). A driver names the
+class and method, sets configuration keys, and calls `check(...)`:
 
-- Install SDKMan
-  - `curl -s "https://get.sdkman.io" | bash`
+    scripts/run-benchmark.sh --reset icse.singlylinkedlist.set1.StrykerSinglyLinkedListContains1Bug25DTest
 
-  - Then run:
-    - `source "$HOME/.sdkman/bin/sdkman-init.sh"`
+runs one Stryker benchmark and ends with a `STRYKER RESULT` block (fix found
+or not, the repaired class in `StrykerLastFixFound.java`, statistics in
+`StrykerLastReports.txt`). See [docs/RUNNING.md](docs/RUNNING.md).
 
-- Install Java 7
-  - `sdk install java 7.0.352-zulu`
+## Documentation
 
-- Copy `java` to `/usr/bin/`
-  - Java is located at: `.sdkman/candidates/java/7.0.352-zulu/bin/java`
+| Page | Contents |
+|---|---|
+| [docs/BUILDING.md](docs/BUILDING.md) | Requirements, `setupTACO.sh`, JDK 8/21/25, the Java 7 class library, the SAT solver, building, IntelliJ, Docker, Windows |
+| [docs/RUNNING.md](docs/RUNNING.md) | Drivers, running TACO and Stryker, the scripts, reading the results, the smoke test |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The TACO pipeline and where Stryker hooks in; how a repair run works |
+| [docs/METHOD-NAMING.md](docs/METHOD-NAMING.md) | How drivers name the method to check, and the status of the new naming |
+| [docs/SPEC-OUTPUT.md](docs/SPEC-OUTPUT.md) | `checkAndRunSpecIfFaulty`: computing the output the specification allows; the fixed input (`inputToFix`) |
+| [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) | What does not work, or works in surprising ways |
+| [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | Questions for the maintainer about intent |
+| [AGENTS.md](AGENTS.md) | Notes for coding agents (and people) changing this repository |
 
-  - Copy with:
-    - `cp .sdkman/candidates/java/7.0.352-zulu/bin/java /usr/bin/`
+## Branches
 
-- Install Ant 1.9
-  - `sdk install ant 1.9.15`
+- `master`: Marcelo Frias's line of development (TACO without Stryker).
+- `stryker`: Stryker, ported from comitaco, Luciano Zemin's repository
+  ([github.com/zeminlu/comitaco](https://github.com/zeminlu/comitaco),
+  currently private; access on request), on top of master, with JDK 8/21/25
+  support, scripts, a smoke test, Docker and IntelliJ settings.
+- `cleanup`: removes stale files (IntelliJ's build output, leftovers, stale
+  Stryker drivers); independent of `stryker`.
+- `docs`: this documentation, on top of `stryker`.
 
-- Intellij Installation
-  - `wget https://download.jetbrains.com/idea/ideaIC-2024.2.4.tar.gz`
+## References / how to cite
 
-  - Untar/unzip with:
-    - `tar -xvf ideaIC-2024.2.4.tar.gz`
+DynAlloy:
 
-- Close terminal and open new terminal
+- M. F. Frias, C. G. López Pombo, G. A. Baum, N. M. Aguirre, T. Maibaum.
+  “Taking Alloy to the Movies.” LNCS, 2003, pp. 678–697.
+  DOI [10.1007/978-3-540-45236-2_37](https://doi.org/10.1007/978-3-540-45236-2_37).
+- M. F. Frias, J. P. Galeotti, C. G. López Pombo, N. M. Aguirre. “DynAlloy:
+  Upgrading Alloy with Actions.” ICSE 2005, pp. 442–451.
+  DOI [10.1145/1062455.1062535](https://doi.org/10.1145/1062455.1062535).
 
-#### TACO Setup
+TACO:
 
-- [GitHub](https://github.com/mffrias/TACO):
-  - Go to `Code` and copy link
+- J. P. Galeotti, N. Rosner, C. G. López Pombo, M. F. Frias. “Analysis of
+  Invariants for Efficient Bounded Verification.” ISSTA 2010, pp. 25–36.
+  DOI [10.1145/1831708.1831712](https://doi.org/10.1145/1831708.1831712).
+- J. P. Galeotti, N. Rosner, C. G. López Pombo, M. F. Frias. “TACO: Efficient
+  SAT-Based Bounded Verification Using Symmetry Breaking and Tight Bounds.”
+  IEEE TSE 39(9):1283–1307, 2013.
+  DOI [10.1109/TSE.2013.15](https://doi.org/10.1109/TSE.2013.15).
+- J. P. Galeotti. Software Verification using Alloy. PhD thesis, Universidad de
+  Buenos Aires, 2010.
 
-- In `Terminal` run:
-  - `git clone https://github.com/mffrias/TACO`
-  - `cd TACO`
-  - `./setupTACO.sh`
+Built on TACO:
 
-- Change into Intellij Directory
-- go back to home directory `cd ~`
-  - `cd idea-IC-whatever-numbers`, use tab to autocomplete
-  - `cd bin`
+- Stryker: L. Zemin, S. Gutiérrez Brida, S. Bermúdez, S. Perez De Rosso,
+  N. Aguirre, A. Mili, A. Jaoua, M. F. Frias. “Stryker: Scaling
+  Specification-Based Program Repair by Pruning Infeasible Mutants with SAT.”
+  [arXiv:1910.14011](https://arxiv.org/abs/1910.14011), 2019.
+- L. Zemin. Using Specifications to Overcome the Limitations of Test-Based
+  Automated Program Repair. PhD thesis, ITBA, 2026.
+- MuchoTACO, parallel TACO, not part of this repository yet: N. Rosner,
+  J. P. Galeotti, S. Bermúdez, G. Marucci Blas, S. Perez De Rosso, L. Pizzagalli,
+  L. Zemin, M. F. Frias. “Parallel Bounded Analysis in Code with Rich Invariants
+  by Refinement of Field Bounds.” ISSTA 2013, pp. 23–33.
+  DOI [10.1145/2483760.2483770](https://doi.org/10.1145/2483760.2483770).
 
-  - Open Intellij:
-    - `./idea`
+## License
 
-- Setup Project
-  - Create new project
-
-  - Find the location you would like to create it and give it a name
-
-  - JDK version 1.7
-  - Create project
-
-  - Top Left (Hamburger 4 lines) -> Project Structure ->
-  Modules -> + (Plus Sign) -> Insert Modules -> Import Module ->
-  Create from Existing Sources -> Select TACO directory
-
-### Unix/Linux
-Download this repository and execute `./setupTACO.sh`^. This script will download the following repositories:
-
- * This one if this script was downloaded elsewhere or it can't find TACO's `build.xml` file.
- * JDynAlloy.
- * [dynalloy4](https://github.com/mffrias/dynalloy4) (a dependency for JDynAlloy).
- * muJava++^^ (only if the script is run with the `full` argument).
- * [OJ](https://github.com/saiema/OJ-with-Java-1.6) (a dependency of muJava++, only if the script is run with the `full` argument).
- 
-After downloading all repositories, the script will compile **dynalloy4**, use the compiled jar file to compile **JDynAlloy**, and it will copy both compiled jars into **TACO**'s `lib` folder.
-
-_(^) You may need to give the script execution permissions via executing `chmod +x setupTACO.sh`._
-
-_(^^) TACO already includes muJava++ and OJ as `lib/mujava2018.jar` and `lib/openjava2018.jar`, so unless needed there is no need to download them._
-
-## Importing TACO into Eclipse
-
-**As a result of an [issue with Eclipse](https://bugs.eclipse.org/bugs/show_bug.cgi?id=574362), versions 4.20+ will not support TACO**
-
-Create a new project from existing files, select Java 7 for both compilation and execution, and all jar files inside the `lib` folder (disregard jar files inside `lib/stryker` folder).
-
-## Importing TACO into IntelliJ
-
-Follow the same instructions as for Eclipse. Set the `tests` folder as a `Source` folder.
-
-## Running TACO
-
-For the moment TACO works by using tests (JUnit tests). Several examples of these can be found in the `unittest` source folder.
-
-In the near future, a usable terminal option will be developed.
+GNU GPL: the sources say version 2 or later in their headers, and `COPYING`
+is version 3. The licenses of the bundled third-party code are in `LICENSES/`.

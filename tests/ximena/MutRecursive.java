@@ -9,7 +9,7 @@ public class MutRecursive {
     //@ requires true;
     //@ ensures \result == true <==> n%2 == 0;
     //@signals (Exception e) false;
-    public static boolean isEven(int n){
+    public static boolean isEven(int n, MutRecursive m){
         if (n == 0)
             return true;
         else
@@ -23,7 +23,7 @@ public class MutRecursive {
         if (n == 0)
             return false;
         else
-            return isEven(n-1);
+            return false;//isEven(n-1);
     }
 
 

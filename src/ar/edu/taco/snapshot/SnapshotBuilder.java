@@ -866,7 +866,31 @@ public class SnapshotBuilder {
                         constructors = clazz.getDeclaredConstructors();
                     Constructor<?> ctor = constructors[0];
                     ctor.setAccessible(true);
+                    Class<?>[] parTypes = ctor.getParameterTypes();
                     Object[] args = new Object[ctor.getParameterCount()];
+                    for (int i = 0; i < args.length; i++){
+                        if (parTypes[i].isPrimitive()) {
+                            String typeName = parTypes[i].getName();
+                            if (typeName.equals("int") || typeName.equals("long") || typeName.equals("short") || typeName.equals("byte")) {
+                                args[i] = 0;
+                            }
+                            if (typeName.equals("char")) {
+                                args[i] = '\u0000';
+                            }
+                            if (typeName.equals("float")) {
+                                args[i] = 0.0f;
+                            }
+                            if (typeName.equals("double")) {
+                                args[i] = 0.0;
+                            }
+                            if (typeName.equals("boolean")) {
+                                args[i] = false;
+                            }
+                        } else {
+                            args[i] = null;
+                        }
+                    }
+
                     instance = ctor.newInstance(args);
                 } catch (Exception e) {
                     e.printStackTrace();

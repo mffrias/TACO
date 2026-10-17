@@ -30,7 +30,7 @@ public class isEvenTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("ximena.MutRecursive:1");
-        check(GENERIC_PROPERTIES,"ximena_MutRecursive_isEven(int)",false);
+        check(GENERIC_PROPERTIES,"ximena_MutRecursive_isEven(int, ximena_MutRecursive)",false);
     }
 
     public void test_Constructor() throws VizException {

@@ -119,11 +119,14 @@ public class DynalloyStage implements ITacoStage {
 				+ methodToCheckWithoutTyping;
 
 		dynalloyToAlloyManager.setSourceJDynAlloyModules(this.src_jdynalloy_modules);
+		// DynAlloy uses the fixed input only for the spec's output (b58e74b in dynalloy4, a block of
+		// DynalloyXlatorVisitor that widens index ranges); Stryker's translation must not get it.
+		Object inputToFixForDynalloy = this.translatingForStryker ? null : inputToFix;
 		specContext = dynalloyToAlloyManager.process_dynalloy_module(dynalloy_filename , alloy_filename, assertion_id,
 				varsAndTheirTypesComingFromArithmeticConstraintsInObjectInvariantsByModule,
 				predsComingFromArithmeticConstraintsInObjectInvariantsByModule,
 				varsAndTheirTypesComingFromArithmeticConstraintsInContractsByProgram,
-				predsComingFromArithmeticConstraintsInContractsByProgram, inputToFix);
+				predsComingFromArithmeticConstraintsInContractsByProgram, inputToFixForDynalloy);
 	}
 
 	public String get_alloy_filename() {

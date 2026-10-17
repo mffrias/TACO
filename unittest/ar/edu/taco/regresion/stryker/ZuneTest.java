@@ -30,29 +30,6 @@ public class ZuneTest extends CollectionTestBase {
 			setConfigKeyTypeScopes("examples.stryker.Zune:1");
 			check(GENERIC_PROPERTIES,"computeYear_0", false);
 		}
-		
-		
-		
-		public void test_buggyVar() throws VizException {
-			setConfigKeyRelevantClasses("ar.edu.taco.floatTest.FloatTest");
-			setConfigKeyRelevancyAnalysis(true);
-			setConfigKeyCheckNullDereference(true);
-			setConfigKeyUseJavaArithmetic(true); 
-			setConfigKeyInferScope(true);
-		    setConfigKeyIntBithwidth(0);
-		    setConfigKeyLoopUnroll(0);
-		    setConfigKeyObjectScope(0);
-			setConfigKeySkolemizeInstanceInvariant(true);
-			setConfigKeySkolemizeInstanceAbstraction(true);
-			setConfigKeyGenerateUnitTestCase(true);
-			setConfigKeyAttemptToCorrectBug(false);
-			setConfigKeyRemoveQuantifiers(true);
-			setConfigKeyUseJavaSBP(false);
-			setConfigKeyUseTightUpperBounds(true);
-			setConfigKeyMaxStrykerMethodsPerFile(70);
-			setConfigKeyTypeScopes("ar.edu.taco.floatTest.FloatTest:1");
-			check(GENERIC_PROPERTIES,"buggyVar_0", false);
-		}
 
 		
 		

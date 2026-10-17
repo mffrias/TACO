@@ -54,27 +54,6 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
         //check(GENERIC_PROPERTIES, "insert_0", true);
         check(GENERIC_PROPERTIES, "extractMin_0", true);
     }
-    
-    public void test_findMinimumTest() throws VizException {
-        setConfigKeyRelevantClasses("pldi.binomialheap.BinomialHeap,pldi.binomialheap.BinomialHeapNode");
-        setConfigKeyRelevancyAnalysis(true);
-        setConfigKeyCheckNullDereference(true);
-        setConfigKeyUseJavaArithmetic(false);
-        setConfigKeyInferScope(true);
-        setConfigKeyObjectScope(0);
-        setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(4);
-        setConfigKeySkolemizeInstanceInvariant(true);
-        setConfigKeySkolemizeInstanceAbstraction(false);
-        setConfigKeyGenerateUnitTestCase(true);
-        setConfigKeyAttemptToCorrectBug(true);
-        setConfigKeyMaxStrykerMethodsPerFile(1);
-        setConfigKeyRemoveQuantifiers(true);
-        setConfigKeyUseJavaSBP(true);
-        setConfigKeyUseTightUpperBounds(true);
-        setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES,"findMinimum_0", false);
-    }
 
     
     

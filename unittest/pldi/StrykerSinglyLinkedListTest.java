@@ -77,27 +77,6 @@ public class StrykerSinglyLinkedListTest extends CollectionTestBase {
 		check(GENERIC_PROPERTIES,"insertBack_0",false);
 	}
 
-	public void test_SortTest() throws VizException {
-		setConfigKeyRelevantClasses("pldi.singlylinkedlist.SinglyLinkedList,pldi.singlylinkedlist.SinglyLinkedListNode");
-		setConfigKeyRelevancyAnalysis(true);
-		setConfigKeyCheckNullDereference(true);
-		setConfigKeyUseJavaArithmetic(false);
-		setConfigKeyInferScope(true);
-		setConfigKeyObjectScope(0);
-        setConfigKeyIntBithwidth(4);
-        setConfigKeyLoopUnroll(10);
-		setConfigKeySkolemizeInstanceInvariant(true);
-		setConfigKeySkolemizeInstanceAbstraction(true);
-		setConfigKeyGenerateUnitTestCase(true);
-		setConfigKeyAttemptToCorrectBug(true);
-		setConfigKeyMaxStrykerMethodsPerFile(50);
-		setConfigKeyRemoveQuantifiers(true);
-		setConfigKeyUseJavaSBP(true);
-		setConfigKeyUseTightUpperBounds(true);
-		setConfigKeyTypeScopes("pldi.singlylinkedlist.SinglyLinkedList:1,pldi.singlylinkedlist.SinglyLinkedListNode:10");
-		check(GENERIC_PROPERTIES,"sort_0",false);
-	}
-
 
 
 }

@@ -2,8 +2,11 @@
 
 # This script will download all repositories used by TACO and leave a comitaco project ready to load into an IDE*
 # Usage is
-# ./setupTACO.sh [full]
+# ./setupTACO.sh [full] [-h]
 # If full is specified it will also download mujava++ and OJ repositories, if not, then the mujava2018.jar and openjava2018.jar inside TACO/lib will be used instead
+# With -h as the second argument (e.g. ./setupTACO.sh "" -h) it clones over HTTPS instead of SSH.
+# Exit status: 0 done, 1 a TACO folder without lib/, 2 a git clone failed, 5, 6 or 7 ant clean, build
+# or jar failed, 8 the Java 7 class library could not be fetched.
 # (*) If you use Eclipse take into account this issue (https://bugs.eclipse.org/bugs/show_bug.cgi?id=574362) that prevent the usage of java 7 or older
 #     with the latest version of Eclipse (4.20+).
 
@@ -106,7 +109,19 @@ function antCommand() {
   local ecode="$?"
   if [[ ! "$ecode" -eq "0" ]]; then
     echo "ERROR: ant ${command} FAILED!"
-    exit exitCode
+    exit "$exitCode"
+  fi
+}
+
+# This will clone a repository, and exit the script if git fails
+# repository : the repository, e.g. mffrias/TACO
+# any further arguments are passed to git clone, e.g. -b stryker
+function cloneRepository() {
+  local repository="$1"
+  shift
+  if ! git clone "$@" "${URL}${repository}.git"; then
+    echo "ERROR: git clone ${URL}${repository}.git FAILED!"
+    exit 2
   fi
 }
 
@@ -120,7 +135,7 @@ if [ -e "${COMITACO}" ]; then
   fi
   echo "comitaco/TACO will not be downloaded"
 else
-  git clone ${URL}mffrias/TACO.git
+  cloneRepository mffrias/TACO
 fi
 # dynalloy4 is built from the branch with the same name as TACO's current branch, if dynalloy4 has
 # one (TACO's stryker branch needs dynalloy4's stryker branch), and from master otherwise.
@@ -132,7 +147,7 @@ else
 fi
 echo "dynalloy4 branch: ${DYNALLOY_BRANCH} (TACO is on '${TACO_BRANCH}')"
 if [ ! -e "${DYNALLOY}" ]; then
-  git clone -b "${DYNALLOY_BRANCH}" ${URL}mffrias/dynalloy4.git
+  cloneRepository mffrias/dynalloy4 -b "${DYNALLOY_BRANCH}"
 else
   echo "${DYNALLOY} folder found, checking..."
   if [ ! -e "${DYNALLOY_BUILD}" ]; then
@@ -147,7 +162,7 @@ else
   fi
 fi
 if [ ! -e "${JDYNALLOY}" ]; then
-  git clone ${URL}mffrias/jDynAlloy.git
+  cloneRepository mffrias/jDynAlloy
 else
   echo "${JDYNALLOY} folder found, checking..."
   if [ ! -e "${JDYNALLOY_BUILD}" ]; then
@@ -159,8 +174,8 @@ else
 fi
 
 if [[ "$downloadMUJAVA" -eq "1" ]]; then
-  git clone ${URL}saiema/MuJava.git
-  git clone ${URL}saiema/OJ-with-Java-1.6.git
+  cloneRepository saiema/MuJava
+  cloneRepository saiema/OJ-with-Java-1.6
   cd OJ-with-Java-1.6
   git checkout develop
   cd ..

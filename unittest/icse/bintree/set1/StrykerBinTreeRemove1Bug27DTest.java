@@ -28,7 +28,7 @@ public class StrykerBinTreeRemove1Bug27DTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set1.BinTreeRemove1Bug27D:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"remove_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set1_BinTreeRemove1Bug27D_remove(int)",true);
 	}
 
 }

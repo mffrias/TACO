@@ -28,7 +28,7 @@ public class StrykerArrayListTest extends CollectionTestBase {
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyMaxStrykerMethodsPerFile(70);
 		setConfigKeyTypeScopes("roops.core.objects.ArrayList:1,java.lang.Object:12,java.lang.ObjectArray:1");
-		check(GENERIC_PROPERTIES,"indexOf_0", false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_ArrayList_indexOf(java_lang_Object)", false);
 	}
 	
 	
@@ -53,7 +53,7 @@ public class StrykerArrayListTest extends CollectionTestBase {
 		setConfigKeyMaxStrykerMethodsPerFile(50);
 //		setCondigKeyBuildJavaTrace(true);	
 		setConfigKeyTypeScopes("roops.core.objects.ArrayList:1,java.lang.Object:15,java.lang.ObjectArray:2");
-		check(GENERIC_PROPERTIES, "add_0", true);
+		check(GENERIC_PROPERTIES, "roops_core_objects_ArrayList_add(java_lang_Object)", true);
 	}
 
 }

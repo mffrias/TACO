@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListContains5Bug7Dx8Dx11Dx14Dx20DTest extends Co
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set2.SinglyLinkedListContains5Bug7Dx8Dx11Dx14Dx20D:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set2_SinglyLinkedListContains5Bug7Dx8Dx11Dx14Dx20D_contains(java_lang_Object)",true);
 	}
 
 

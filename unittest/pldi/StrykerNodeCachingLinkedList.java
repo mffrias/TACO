@@ -29,7 +29,7 @@ public class StrykerNodeCachingLinkedList extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedList:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"remove_0",true);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedList_remove(int)",true);
 	}
 	
 
@@ -51,7 +51,7 @@ public class StrykerNodeCachingLinkedList extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedList:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedList_contains(java_lang_Object)",false);
 	}
 
 	   public void test_addFirstTest() throws VizException {
@@ -72,7 +72,7 @@ public class StrykerNodeCachingLinkedList extends CollectionTestBase {
 	        setConfigKeyUseJavaSBP(true);
 	        setConfigKeyUseTightUpperBounds(true);
 	        setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedList:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-	        check(GENERIC_PROPERTIES,"addFirst_0",false);
+	        check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedList_addFirst(java_lang_Object)",false);
 	    }
 
 
@@ -95,7 +95,7 @@ public class StrykerNodeCachingLinkedList extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedList:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedList_remove(int)",false);
 	}
 	
 	

@@ -47,7 +47,7 @@ public class StrykerBinomialHeapInsertRoopsTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:13");
-        check(GENERIC_PROPERTIES, "insert_0", true);
+        check(GENERIC_PROPERTIES, "roops_core_objects_BinomialHeap_insert(int)", true);
     }
 
 

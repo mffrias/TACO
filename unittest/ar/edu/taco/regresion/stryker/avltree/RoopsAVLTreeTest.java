@@ -31,7 +31,7 @@ public class RoopsAVLTreeTest extends CollectionTestBase {
 		setConfigKeyMaxStrykerMethodsPerFile(50);
 //		setCondigKeyBuildJavaTrace(true);	
 		setConfigKeyTypeScopes("roops.core.objects.avltree.base.AvlTree:1,roops.core.objects.avltree.base.AvlNode:7");
-		check(GENERIC_PROPERTIES,"find_0", false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_avltree_base_AvlTree_find(int)", false);
 	}
 	
 	
@@ -54,7 +54,7 @@ public class RoopsAVLTreeTest extends CollectionTestBase {
 		setConfigKeyMaxStrykerMethodsPerFile(50);
 //		setCondigKeyBuildJavaTrace(true);	
 		setConfigKeyTypeScopes("roops.core.objects.avltree.base.AvlTree:1,roops.core.objects.avltree.base.AvlNode:7");
-		check(GENERIC_PROPERTIES,"findMin_0", false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_avltree_base_AvlTree_findMin()", false);
 	}
 
 	
@@ -78,7 +78,7 @@ public class RoopsAVLTreeTest extends CollectionTestBase {
 		setConfigKeyMaxStrykerMethodsPerFile(50);
 //		setCondigKeyBuildJavaTrace(true);	
 		setConfigKeyTypeScopes("roops.core.objects.avltree.base.AvlTree:1,roops.core.objects.avltree.base.AvlNode:7");
-		check(GENERIC_PROPERTIES,"findMax_0", false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_avltree_base_AvlTree_findMax()", false);
 	}
 	
 	public void test_privateinsertTest() throws VizException {
@@ -100,7 +100,7 @@ public class RoopsAVLTreeTest extends CollectionTestBase {
 		setConfigKeyMaxStrykerMethodsPerFile(50);
 //		setCondigKeyBuildJavaTrace(true);	
 		setConfigKeyTypeScopes("roops.core.objects.avltree.base.AvlTree:1,roops.core.objects.avltree.base.AvlNode:5");
-		check(GENERIC_PROPERTIES,"insert_0", false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_avltree_base_AvlTree_insert(int)", false);
 	}
 	
 

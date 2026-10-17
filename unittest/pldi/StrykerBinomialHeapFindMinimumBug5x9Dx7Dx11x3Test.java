@@ -48,7 +48,7 @@ public class StrykerBinomialHeapFindMinimumBug5x9Dx7Dx11x3Test extends Collectio
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "findMinimum_0", true);
+        check(GENERIC_PROPERTIES, "roops_core_objects_BinomialHeap_findMinimum()", true);
     }
 
 

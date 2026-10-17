@@ -52,7 +52,7 @@ public class StrykerSinglyLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedList:1,roops.core.objects.SinglyLinkedListNode:5");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedList_contains(java_lang_Object)",false);
 	}
 
 	
@@ -75,7 +75,7 @@ public class StrykerSinglyLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedList:1,roops.core.objects.SinglyLinkedListNode:7");
-		check(GENERIC_PROPERTIES,"getNode_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedList_getNode(int)",false);
 	}
 
 	
@@ -97,7 +97,7 @@ public class StrykerSinglyLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedList:1,roops.core.objects.SinglyLinkedListNode:15");
-		check(GENERIC_PROPERTIES,"insertBack_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedList_insertBack(java_lang_Object)",false);
 	}
 
 	public void test_SortTest() throws VizException {

@@ -29,7 +29,7 @@ public class StrykerGcdTestPRVOU_REFINED117 extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("examples.stryker.gcd.prvou_refined.prvou_refined117.Gcd:1");
-		check(GENERIC_PROPERTIES,"gcd_0",false);
+		check(GENERIC_PROPERTIES,"examples_stryker_gcd_prvou_refined_prvou_refined117_Gcd_gcd(int, int)",false);
 	}
 
 

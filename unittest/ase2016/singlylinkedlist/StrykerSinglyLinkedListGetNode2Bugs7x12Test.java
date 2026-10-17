@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListGetNode2Bugs7x12Test extends CollectionTestB
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.singlylinkedlist.SinglyLinkedListGetNode2Bugs7x12:1,ase2016.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"getNode_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_singlylinkedlist_SinglyLinkedListGetNode2Bugs7x12_getNode(int)",true);
 	}
 
 

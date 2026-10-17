@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListAddFirst4Bugs3x2x5x1Test extends Collec
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("ase2016.nodecachinglinkedlist.NodeCachingLinkedListAddFirst4Bugs3x2x5x1:1,ase2016.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"addFirst_0",true);
+        check(GENERIC_PROPERTIES,"ase2016_nodecachinglinkedlist_NodeCachingLinkedListAddFirst4Bugs3x2x5x1_addFirst(java_lang_Object, ase2016_nodecachinglinkedlist_LinkedListNode)",true);
 	}
 
 }

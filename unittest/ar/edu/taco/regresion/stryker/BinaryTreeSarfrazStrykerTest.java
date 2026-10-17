@@ -31,6 +31,6 @@ public class BinaryTreeSarfrazStrykerTest extends CollectionTestBase {
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyMaxStrykerMethodsPerFile(1);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
-		check(GENERIC_PROPERTIES,"insert_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_BinTree_insert(int)",false);
 	}
 }

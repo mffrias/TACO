@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemove1Bug23Test extends CollectionTest
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("ase2016.nodecachinglinkedlist.NodeCachingLinkedListRemove1Bug23:1,ase2016.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"ase2016_nodecachinglinkedlist_NodeCachingLinkedListRemove1Bug23_remove(int)",true);
 	}
 
 }

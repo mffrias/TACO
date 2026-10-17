@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContains3Bug3Dx4Ix7DTest extends Collec
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set2.NodeCachingLinkedListContains3Bug3Dx4Ix7D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"contains_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set2_NodeCachingLinkedListContains3Bug3Dx4Ix7D_contains(java_lang_Object)",true);
 	}
 
 }

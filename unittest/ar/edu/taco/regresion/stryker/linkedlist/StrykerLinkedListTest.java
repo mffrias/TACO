@@ -33,7 +33,7 @@ public class StrykerLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.linkedlist.base.LinkedList:1,roops.core.objects.linkedlist.base.LinkedListNode:10");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_linkedlist_base_LinkedList_contains(java_lang_Object)",false);
 	}
 
 
@@ -55,7 +55,7 @@ public class StrykerLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.linkedlist.base.LinkedList:1,roops.core.objects.linkedlist.base.LinkedListNode:7");
-		check(GENERIC_PROPERTIES,"removeNode_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_linkedlist_base_LinkedList_removeNode(roops_core_objects_linkedlist_base_LinkedListNode)",false);
 	}
 
 	
@@ -77,7 +77,7 @@ public class StrykerLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.linkedlist.base.LinkedList:1,roops.core.objects.linkedlist.base.LinkedListNode:7");
-		check(GENERIC_PROPERTIES,"getNode_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_linkedlist_base_LinkedList_getNode(int, boolean)",false);
 	}
 
 	
@@ -120,7 +120,7 @@ public class StrykerLinkedListTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.linkedlist.base.LinkedList:1,roops.core.objects.linkedlist.base.LinkedListNode:7");
-		check(GENERIC_PROPERTIES,"removeIndex_0",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_linkedlist_base_LinkedList_removeIndex(int)",false);
 	}
 
 	

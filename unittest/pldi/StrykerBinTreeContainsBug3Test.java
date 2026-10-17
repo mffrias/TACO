@@ -30,7 +30,7 @@ public class StrykerBinTreeContainsBug3Test extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTreeContainsBug3:1,pldi.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTreeContainsBug3_contains(int)",false);
 	}
 
 }

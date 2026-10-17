@@ -47,7 +47,7 @@ public class StrykerBinomialHeapFindMinimum1Bug11DTest extends CollectionTestBas
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set1.BinomialHeapFindMinimum1Bug11D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "findMinimum()", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set1_BinomialHeapFindMinimum1Bug11D_findMinimum()", true);
     }
 
 

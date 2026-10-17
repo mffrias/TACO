@@ -47,7 +47,7 @@ public class StrykerBinomialHeapFindMinimum4Bug1Dx2Dx3Dx7DTest extends Collectio
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set4.BinomialHeapFindMinimum4Bug1Dx2Dx3Dx7D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "findMinimum_0", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set4_BinomialHeapFindMinimum4Bug1Dx2Dx3Dx7D_findMinimum()", true);
     }
 
 

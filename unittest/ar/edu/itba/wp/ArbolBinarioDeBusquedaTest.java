@@ -28,7 +28,7 @@ public class ArbolBinarioDeBusquedaTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ar.edu.itba.wp.ArbolBinarioDeBusqueda:1,ar.edu.itba.wp.Nodo:5");
-		check(GENERIC_PROPERTIES,"mostrarArbol()",true);
+		check(GENERIC_PROPERTIES,"ar_edu_itba_wp_ArbolBinarioDeBusqueda_mostrarArbol()",true);
 	}
 	
 	public void test_findTest() throws VizException {
@@ -49,7 +49,7 @@ public class ArbolBinarioDeBusquedaTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ar.edu.itba.wp.ArbolBinarioDeBusqueda:1,ar.edu.itba.wp.Nodo:5");
-		check(GENERIC_PROPERTIES,"find(int,ar.edu.itba.wp.ArbolBinarioDeBusqueda,ar.edu.itba.wp.Nodo, int )",true);
+		check(GENERIC_PROPERTIES,"ar_edu_itba_wp_ArbolBinarioDeBusqueda_find(int, ar_edu_itba_wp_ArbolBinarioDeBusqueda, ar_edu_itba_wp_Nodo, int)",true);
 	}
 
 

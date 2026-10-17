@@ -48,7 +48,7 @@ public class StrykerBinomialHeapExtractMinBug76x74x81Dx83Dx93DTest extends Colle
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeapExtractMinBug76x74x81Dx83Dx93D:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES, "extractMin_0", false);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapExtractMinBug76x74x81Dx83Dx93D_extractMin()", false);
     }
 
 

@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListInsertBack6Bug2Ix4Dx5Dx9Dx10Dx12ITest extend
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set2.SinglyLinkedListInsertBack6Bug2Ix4Dx5Dx9Dx10Dx12I:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"insertBack_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set2_SinglyLinkedListInsertBack6Bug2Ix4Dx5Dx9Dx10Dx12I_insertBack(java_lang_Object, icse_singlylinkedlist_SinglyLinkedListNode)",true);
 	}
 
 

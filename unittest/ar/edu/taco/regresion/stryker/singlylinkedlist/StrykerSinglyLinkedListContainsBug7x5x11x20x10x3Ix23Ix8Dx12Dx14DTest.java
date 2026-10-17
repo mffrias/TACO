@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListContainsBug7x5x11x20x10x3Ix23Ix8Dx12Dx14DTes
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedListContainsBug7x5x11x20x10x3Ix23Ix8Dx12Dx14D:1,roops.core.objects.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedListContainsBug7x5x11x20x10x3Ix23Ix8Dx12Dx14D_contains(java_lang_Object)",true);
 	}
 
 

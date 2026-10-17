@@ -69,7 +69,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:4");
-        check(GENERIC_PROPERTIES,"findMinimum()", false);
+        check(GENERIC_PROPERTIES,"roops_core_objects_BinomialHeap_findMinimum()", false);
     }
 
 
@@ -92,7 +92,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:3");
         this.checkAndRunSpecIfFaulty(GENERIC_PROPERTIES,"extractMin()");
-        //check(GENERIC_PROPERTIES,"extractMin()", false);
+        //check(GENERIC_PROPERTIES,"roops_core_objects_BinomialHeap_extractMin()", false);
     }
 
 

@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContainsBug3x2x6Dx1x4x8Test extends Col
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_NodeCachingLinkedList_contains(java_lang_Object)",true);
 	}
 	
 }

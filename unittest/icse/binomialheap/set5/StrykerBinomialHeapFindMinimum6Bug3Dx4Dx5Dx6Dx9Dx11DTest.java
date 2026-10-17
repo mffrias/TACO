@@ -47,7 +47,7 @@ public class StrykerBinomialHeapFindMinimum6Bug3Dx4Dx5Dx6Dx9Dx11DTest extends Co
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set5.BinomialHeapFindMinimum6Bug3Dx4Dx5Dx6Dx9Dx11D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "findMinimum_0", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set5_BinomialHeapFindMinimum6Bug3Dx4Dx5Dx6Dx9Dx11D_findMinimum()", true);
     }
 
 

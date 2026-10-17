@@ -30,7 +30,7 @@ public class StrykerBinTreeRemoveBug37x2x38Ix43Ix14x3x6x31x18DTest extends Colle
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTreeRemoveBug37x2x38Ix43Ix14x3x6x31x18D:1,pldi.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"remove_0",true);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTreeRemoveBug37x2x38Ix43Ix14x3x6x31x18D_remove(int)",true);
 	}
 
 }

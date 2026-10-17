@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListInsertBack4Bugs11x10x7x14Test extends Collec
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.singlylinkedlist.SinglyLinkedListInsertBack4Bugs11x10x7x14:1,ase2016.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"insertBack_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_singlylinkedlist_SinglyLinkedListInsertBack4Bugs11x10x7x14_insertBack(java_lang_Object)",true);
 	}
 
 

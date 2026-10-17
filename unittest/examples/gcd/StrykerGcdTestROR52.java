@@ -30,7 +30,7 @@ public class StrykerGcdTestROR52 extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("examples.stryker.gcd.ror.ror52.Gcd:1");
-		check(GENERIC_PROPERTIES,"gcd_0",false);
+		check(GENERIC_PROPERTIES,"examples_stryker_gcd_ror_ror52_Gcd_gcd(int, int)",false);
 	}
 
 

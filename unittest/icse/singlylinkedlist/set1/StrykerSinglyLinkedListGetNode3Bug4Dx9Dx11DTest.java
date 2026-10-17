@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListGetNode3Bug4Dx9Dx11DTest extends CollectionT
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set1.SinglyLinkedListGetNode3Bug4Dx9Dx11D:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"getNode_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set1_SinglyLinkedListGetNode3Bug4Dx9Dx11D_getNode(int)",true);
 	}
 
 

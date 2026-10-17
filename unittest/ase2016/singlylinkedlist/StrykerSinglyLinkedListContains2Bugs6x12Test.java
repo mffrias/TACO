@@ -31,7 +31,7 @@ public class StrykerSinglyLinkedListContains2Bugs6x12Test extends CollectionTest
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.singlylinkedlist.SinglyLinkedListContains2Bugs6x12:1,ase2016.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_singlylinkedlist_SinglyLinkedListContains2Bugs6x12_contains(java_lang_Object)",true);
 	}
 
 

@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListContains3Bug7Dx11Dx21DTest extends Collectio
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set4.SinglyLinkedListContains3Bug7Dx11Dx21D:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set4_SinglyLinkedListContains3Bug7Dx11Dx21D_contains(java_lang_Object)",true);
 	}
 
 

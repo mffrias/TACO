@@ -51,8 +51,8 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeapNoInlining:1,pldi.binomialheap.BinomialHeapNode:5");
-        //check(GENERIC_PROPERTIES, "insert_0", true);
-        check(GENERIC_PROPERTIES, "extractMin_0", true);
+        //check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapNoInlining_insert(int)", true);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapNoInlining_extractMin()", true);
     }
     
     public void test_findMinimumTest() throws VizException {
@@ -96,7 +96,7 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES, "insert_0", false);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapNoInlining_insert(int)", false);
     }
 
 
@@ -120,7 +120,7 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES,"extractMin_0", false);
+        check(GENERIC_PROPERTIES,"pldi_binomialheap_BinomialHeapNoInlining_extractMin()", false);
     }
 
 

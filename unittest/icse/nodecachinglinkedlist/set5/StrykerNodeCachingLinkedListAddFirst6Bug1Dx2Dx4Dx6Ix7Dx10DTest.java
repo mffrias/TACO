@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListAddFirst6Bug1Dx2Dx4Dx6Ix7Dx10DTest exte
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set5.NodeCachingLinkedListAddFirst6Bug1Dx2Dx4Dx6Ix7Dx10D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"addFirst_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set5_NodeCachingLinkedListAddFirst6Bug1Dx2Dx4Dx6Ix7Dx10D_addFirst(java_lang_Object, icse_nodecachinglinkedlist_LinkedListNode)",true);
 	}
 
 }

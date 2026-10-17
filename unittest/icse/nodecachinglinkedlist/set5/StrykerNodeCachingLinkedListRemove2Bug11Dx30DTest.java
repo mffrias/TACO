@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemove2Bug11Dx30DTest extends Collectio
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set5.NodeCachingLinkedListRemove2Bug11Dx30D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set5_NodeCachingLinkedListRemove2Bug11Dx30D_remove(int)",true);
 	}
 
 }

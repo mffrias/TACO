@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListAddFirstBug6ITest extends CollectionTes
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"addFirst_0",true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_NodeCachingLinkedList_addFirst(java_lang_Object)",true);
 	}
 	
 }

@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemove3Bug2Dx31Ix32DTest extends Collec
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set1.NodeCachingLinkedListRemove3Bug2Dx31Ix32D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set1_NodeCachingLinkedListRemove3Bug2Dx31Ix32D_remove(int)",true);
 	}
 
 }

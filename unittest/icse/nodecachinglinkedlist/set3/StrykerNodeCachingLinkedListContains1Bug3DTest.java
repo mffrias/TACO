@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContains1Bug3DTest extends CollectionTe
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set3.NodeCachingLinkedListContains1Bug3D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"contains_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set3_NodeCachingLinkedListContains1Bug3D_contains(java_lang_Object)",true);
 	}
 
 }

@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContains2Bug3Dx4DTest extends Collectio
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set1.NodeCachingLinkedListContains2Bug3Dx4D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"contains_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set1_NodeCachingLinkedListContains2Bug3Dx4D_contains(java_lang_Object)",true);
 	}
 
 }

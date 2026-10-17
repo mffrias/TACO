@@ -48,7 +48,7 @@ public class ComplexTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
         setConfigKeyTypeScopes("ar.edu.itba.complex.Complex:10");
-        check(GENERIC_PROPERTIES, "reciprocal_0", true);
+        check(GENERIC_PROPERTIES, "ar_edu_itba_complex_Complex_reciprocal()", true);
     }
     
 //    public static void main(String[] args) {

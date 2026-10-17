@@ -30,7 +30,7 @@ public class StrykerIntroClassGrade_95362737_015Test extends CollectionTestBase 
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.introclass.grade.introclass_95362737_015:1");
-		check(GENERIC_PROPERTIES,"grade_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_introclass_grade_introclass_95362737_015_grade(int, int, int, int, int)",true);
 	}
 
 

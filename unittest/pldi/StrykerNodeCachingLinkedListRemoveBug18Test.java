@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemoveBug18Test extends CollectionTestB
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedListRemoveBug18:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedListRemoveBug18_remove(int)",false);
 	}
 	
 }

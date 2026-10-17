@@ -30,7 +30,7 @@ public class StrykerIntroClassMedian_e9c6206d_000Test extends CollectionTestBase
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.introclass.median.introclass_e9c6206d_000:1");
-		check(GENERIC_PROPERTIES,"median_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_introclass_median_introclass_e9c6206d_000_median(int, int, int)",true);
 	}
 
 

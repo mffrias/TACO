@@ -28,7 +28,7 @@ public class StrykerBinTreeRemove6Bug2Dx11Dx27Dx31Dx37Dx45ITest extends Collecti
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set4.BinTreeRemove6Bug2Dx11Dx27Dx31Dx37Dx45I:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"remove_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set4_BinTreeRemove6Bug2Dx11Dx27Dx31Dx37Dx45I_remove(int)",true);
 	}
 
 }

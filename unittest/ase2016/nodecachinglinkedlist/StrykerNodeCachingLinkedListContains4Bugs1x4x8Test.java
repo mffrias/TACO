@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContains4Bugs1x4x8Test extends Collecti
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("ase2016.nodecachinglinkedlist.NodeCachingLinkedListContains4Bugs1x4x8:1,ase2016.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"contains_0",true);
+        check(GENERIC_PROPERTIES,"ase2016_nodecachinglinkedlist_NodeCachingLinkedListContains4Bugs1x4x8_contains(java_lang_Object)",true);
 	}
 
 }

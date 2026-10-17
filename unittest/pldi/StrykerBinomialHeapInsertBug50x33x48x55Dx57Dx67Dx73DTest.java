@@ -48,7 +48,7 @@ public class StrykerBinomialHeapInsertBug50x33x48x55Dx57Dx67Dx73DTest extends Co
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeapInsertBug50x33x48x55Dx57Dx67Dx73D:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES, "insert_0", false);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapInsertBug50x33x48x55Dx57Dx67Dx73D_insert(int)", false);
     }
 
 

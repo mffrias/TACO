@@ -30,7 +30,7 @@ public class StrykerBinTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTree:1,pldi.bintree.BinTreeNode:4");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTree_contains(int)",false);
 	}
 
 	
@@ -53,7 +53,7 @@ public class StrykerBinTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTree:1,pldi.bintree.BinTreeNode:4");
-		check(GENERIC_PROPERTIES,"insert_0",false);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTree_insert(int)",false);
 	}
 	
 	
@@ -75,7 +75,7 @@ public class StrykerBinTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTree:1,pldi.bintree.BinTreeNode:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTree_remove(int)",false);
 	}
 
 

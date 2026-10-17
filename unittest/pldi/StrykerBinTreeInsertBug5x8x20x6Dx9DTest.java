@@ -30,7 +30,7 @@ public class StrykerBinTreeInsertBug5x8x20x6Dx9DTest extends CollectionTestBase 
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.bintree.BinTreeInsertBug5x8x20x6Dx9D:1,pldi.bintree.BinTreeNode:4");
-		check(GENERIC_PROPERTIES,"insert_0",false);
+		check(GENERIC_PROPERTIES,"pldi_bintree_BinTreeInsertBug5x8x20x6Dx9D_insert(int)",false);
 	}
 
 }

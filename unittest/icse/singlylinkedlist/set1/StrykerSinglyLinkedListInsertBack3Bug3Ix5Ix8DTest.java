@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListInsertBack3Bug3Ix5Ix8DTest extends Collectio
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set1.SinglyLinkedListInsertBack3Bug3Ix5Ix8D:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"insertBack_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set1_SinglyLinkedListInsertBack3Bug3Ix5Ix8D_insertBack(java_lang_Object, icse_singlylinkedlist_SinglyLinkedListNode)",true);
 	}
 
 

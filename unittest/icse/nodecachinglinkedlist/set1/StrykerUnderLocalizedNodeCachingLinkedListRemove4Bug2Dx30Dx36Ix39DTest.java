@@ -28,7 +28,7 @@ public class StrykerUnderLocalizedNodeCachingLinkedListRemove4Bug2Dx30Dx36Ix39DT
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set1.UnderLocalizedNodeCachingLinkedListRemove4Bug2Dx30Dx36Ix39D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set1_UnderLocalizedNodeCachingLinkedListRemove4Bug2Dx30Dx36Ix39D_remove(int)",true);
 	}
 
 }

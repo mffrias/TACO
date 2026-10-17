@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("wg1point9.NodeCachingLinkedList:1,wg1point9.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"wg1point9_NodeCachingLinkedList_remove(int)",true);
 	}
 
 }

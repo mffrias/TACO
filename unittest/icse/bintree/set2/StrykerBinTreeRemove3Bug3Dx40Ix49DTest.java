@@ -28,7 +28,7 @@ public class StrykerBinTreeRemove3Bug3Dx40Ix49DTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set2.BinTreeRemove3Bug3Dx40Ix49D:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"remove_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set2_BinTreeRemove3Bug3Dx40Ix49D_remove(int)",true);
 	}
 
 }

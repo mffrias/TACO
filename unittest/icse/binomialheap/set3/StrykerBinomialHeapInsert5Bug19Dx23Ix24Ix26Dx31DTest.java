@@ -47,7 +47,7 @@ public class StrykerBinomialHeapInsert5Bug19Dx23Ix24Ix26Dx31DTest extends Collec
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set3.BinomialHeapInsert5Bug19Dx23Ix24Ix26Dx31D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "insert_0", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set3_BinomialHeapInsert5Bug19Dx23Ix24Ix26Dx31D_insert(int)", true);
     }
 
 

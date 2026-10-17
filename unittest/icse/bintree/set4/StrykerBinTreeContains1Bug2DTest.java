@@ -28,7 +28,7 @@ public class StrykerBinTreeContains1Bug2DTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set4.BinTreeContains1Bug2D:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set4_BinTreeContains1Bug2D_contains(int)",true);
 	}
 
 }

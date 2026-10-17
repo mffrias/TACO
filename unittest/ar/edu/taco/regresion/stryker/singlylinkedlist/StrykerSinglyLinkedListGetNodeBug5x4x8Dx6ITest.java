@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListGetNodeBug5x4x8Dx6ITest extends CollectionTe
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedListGetNodeBug5x4x8Dx6I:1,roops.core.objects.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"getNode_0",true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedListGetNodeBug5x4x8Dx6I_getNode(int)",true);
 	}
 
 

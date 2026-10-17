@@ -47,7 +47,7 @@ public class StrykerBinomialHeapInsert3Bug22Ix44Ix66DTest extends CollectionTest
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set4.BinomialHeapInsert3Bug22Ix44Ix66D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "insert_0", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set4_BinomialHeapInsert3Bug22Ix44Ix66D_insert(int)", true);
     }
 
 

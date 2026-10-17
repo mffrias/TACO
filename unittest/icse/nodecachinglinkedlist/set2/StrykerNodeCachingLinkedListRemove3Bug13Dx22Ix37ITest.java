@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemove3Bug13Dx22Ix37ITest extends Colle
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set2.NodeCachingLinkedListRemove3Bug13Dx22Ix37I:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set2_NodeCachingLinkedListRemove3Bug13Dx22Ix37I_remove(int)",true);
 	}
 
 }

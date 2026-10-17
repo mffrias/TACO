@@ -48,7 +48,7 @@ public class StrykerBinomialHeapExtractMinBug76Test extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeapExtractMinBug76:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES, "extractMin_0", false);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapExtractMinBug76_extractMin()", false);
     }
 
 

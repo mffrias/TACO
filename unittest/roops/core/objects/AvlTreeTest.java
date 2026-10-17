@@ -47,7 +47,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:4");
-		check(GENERIC_PROPERTIES, "find(int)", false);
+		check(GENERIC_PROPERTIES, "roops_core_objects_AvlTree_find(int)", false);
 	}
 
 	public void test_findMinTest() throws VizException {
@@ -68,7 +68,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:7");
-		check(GENERIC_PROPERTIES, "findMin()", false);
+		check(GENERIC_PROPERTIES, "roops_core_objects_AvlTree_findMin()", false);
 	}
 
 	public void test_findMaxTest() throws VizException {
@@ -89,7 +89,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:7");
-		check(GENERIC_PROPERTIES, "findMax()", false);
+		check(GENERIC_PROPERTIES, "roops_core_objects_AvlTree_findMax()", false);
 	}
 
 	public void test_insertTest() throws VizException {
@@ -110,7 +110,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:5");
-		check(GENERIC_PROPERTIES, "insert(int)", false);
+		check(GENERIC_PROPERTIES, "roops_core_objects_AvlTree_insert(int)", false);
 	}
 
 
@@ -153,7 +153,7 @@ public class AvlTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.AvlTree:1,roops.core.objects.AvlNode:20");
-		check(GENERIC_PROPERTIES, "generateTreeInstance()", false);
+		check(GENERIC_PROPERTIES, "roops_core_objects_AvlTree_generateTreeInstance()", false);
 	}
 
 }

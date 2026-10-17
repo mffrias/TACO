@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListGetNode4Bug2Dx5Dx8Dx9DTest extends Collectio
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.singlylinkedlist.set2.SinglyLinkedListGetNode4Bug2Dx5Dx8Dx9D:1,icse.singlylinkedlist.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"getNode_0",true);
+		check(GENERIC_PROPERTIES,"icse_singlylinkedlist_set2_SinglyLinkedListGetNode4Bug2Dx5Dx8Dx9D_getNode(int)",true);
 	}
 
 

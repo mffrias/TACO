@@ -47,7 +47,7 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
         setConfigKeyTypeScopes("girish.github.heapbenchmarks.BNode:13,girish.github.heapbenchmarks.BinomialHeap:3");
-        check(GENERIC_PROPERTIES, "removeMin_0", true);
+        check(GENERIC_PROPERTIES, "girish_github_heapbenchmarks_BinomialHeap_removeMin()", true);
     }
 
 

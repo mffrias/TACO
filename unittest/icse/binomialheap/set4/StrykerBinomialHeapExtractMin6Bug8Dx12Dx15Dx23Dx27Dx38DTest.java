@@ -47,7 +47,7 @@ public class StrykerBinomialHeapExtractMin6Bug8Dx12Dx15Dx23Dx27Dx38DTest extends
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.binomialheap.set4.BinomialHeapExtractMin6Bug8Dx12Dx15Dx23Dx27Dx38D:1,icse.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "extractMin_0", true);
+        check(GENERIC_PROPERTIES, "icse_binomialheap_set4_BinomialHeapExtractMin6Bug8Dx12Dx15Dx23Dx27Dx38D_extractMin()", true);
     }
 
 

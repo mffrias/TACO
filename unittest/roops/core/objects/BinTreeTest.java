@@ -47,7 +47,7 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
-		check(GENERIC_PROPERTIES,"contains(int)", true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_BinTree_contains(int)", true);
 	}
 	
 	
@@ -66,7 +66,7 @@ public class BinTreeTest extends CollectionTestBase {
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyInferScope(false);
 		setConfigKeyTypeScopes("roops.core.objects.BinTree:1,roops.core.objects.BinTreeNode:5");
-		check(GENERIC_PROPERTIES,"insert(int)", true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_BinTree_insert(int)", true);
 	}
 	
 

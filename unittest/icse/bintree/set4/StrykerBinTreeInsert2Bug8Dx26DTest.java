@@ -28,7 +28,7 @@ public class StrykerBinTreeInsert2Bug8Dx26DTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set4.BinTreeInsert2Bug8Dx26D:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"insert_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set4_BinTreeInsert2Bug8Dx26D_insert(int)",true);
 	}
 
 }

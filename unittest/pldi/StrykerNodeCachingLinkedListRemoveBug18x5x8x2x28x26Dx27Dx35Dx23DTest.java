@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemoveBug18x5x8x2x28x26Dx27Dx35Dx23DTes
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedListRemoveBug18x5x8x2x28x26Dx27Dx35Dx23D:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedListRemoveBug18x5x8x2x28x26Dx27Dx35Dx23D_remove(int)",false);
 	}
 	
 }

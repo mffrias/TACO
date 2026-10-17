@@ -44,7 +44,7 @@ public class TreeSetTest extends CollectionTestBase {
 //		this.setConfigKeyAttemptToCorrectBug(true);
 //		this.setConfigKeyMaxStrykerMethodsPerFile(30);
 
-		check(GENERIC_PROPERTIES,"generateInput_0", false);
+		check(GENERIC_PROPERTIES,"ar_edu_taco_skunk_TreeSet_generateInput()", false);
 	}
 
 	

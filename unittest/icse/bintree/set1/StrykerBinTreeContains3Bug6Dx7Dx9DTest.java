@@ -28,7 +28,7 @@ public class StrykerBinTreeContains3Bug6Dx7Dx9DTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("icse.bintree.set1.BinTreeContains3Bug6Dx7Dx9D:1,icse.bintree.BinTreeNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"icse_bintree_set1_BinTreeContains3Bug6Dx7Dx9D_contains(int)",true);
 	}
 
 }

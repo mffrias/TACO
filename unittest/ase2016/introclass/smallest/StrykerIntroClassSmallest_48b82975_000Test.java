@@ -30,7 +30,7 @@ public class StrykerIntroClassSmallest_48b82975_000Test extends CollectionTestBa
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("ase2016.introclass.smallest.introclass_48b82975_000:1");
-		check(GENERIC_PROPERTIES,"smallest_0",true);
+		check(GENERIC_PROPERTIES,"ase2016_introclass_smallest_introclass_48b82975_000_smallest(int, int, int, int)",true);
 	}
 
 

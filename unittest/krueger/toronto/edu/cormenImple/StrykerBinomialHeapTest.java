@@ -47,7 +47,7 @@ public class StrykerBinomialHeapTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
         setConfigKeyTypeScopes("krueger.toronto.edu.cormenImple.BinomialHeapNode:13,krueger.toronto.edu.cormenImple.BinomialHeap:3");
-        check(GENERIC_PROPERTIES, "extractMin_0", true);
+        check(GENERIC_PROPERTIES, "krueger_toronto_edu_cormenImple_BinomialHeap_extractMin()", true);
     }
 
 

@@ -29,7 +29,7 @@ public class StrykerGcdTestLOI73 extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("examples.stryker.gcd.loi.loi73.Gcd:1");
-		check(GENERIC_PROPERTIES,"gcd_0",false);
+		check(GENERIC_PROPERTIES,"examples_stryker_gcd_loi_loi73_Gcd_gcd(int, int)",false);
 	}
 
 

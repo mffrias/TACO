@@ -30,7 +30,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:15");
-		check(GENERIC_PROPERTIES,"contains(int)",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_TreeSet_contains(int)",false);
 	}
 
 	
@@ -53,7 +53,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:15");
-		check(GENERIC_PROPERTIES,"add(int)",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_TreeSet_add(int)",false);
 	}
 	
 	
@@ -75,7 +75,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:6");
-		check(GENERIC_PROPERTIES,"remove(int)",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_TreeSet_remove(int)",false);
 	}
 
 
@@ -97,7 +97,7 @@ public class TreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.TreeSet:1,roops.core.objects.TreeSetEntry:10");
-		check(GENERIC_PROPERTIES,"generateInstance()",false);
+		check(GENERIC_PROPERTIES,"roops_core_objects_TreeSet_generateInstance()",false);
 	}
 
 

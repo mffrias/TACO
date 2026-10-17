@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListContains4Bug1Dx2Dx7Dx8DTest extends Col
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set2.NodeCachingLinkedListContains4Bug1Dx2Dx7Dx8D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"contains_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set2_NodeCachingLinkedListContains4Bug1Dx2Dx7Dx8D_contains(java_lang_Object)",true);
 	}
 
 }

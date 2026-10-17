@@ -30,7 +30,7 @@ public class StrykerSinglyLinkedListContainsBug7x5x11x20x10Test extends Collecti
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("roops.core.objects.SinglyLinkedListContainsBug7x5x11x20x10:1,roops.core.objects.SinglyLinkedListNode:3");
-		check(GENERIC_PROPERTIES,"contains_0",true);
+		check(GENERIC_PROPERTIES,"roops_core_objects_SinglyLinkedListContainsBug7x5x11x20x10_contains(java_lang_Object)",true);
 	}
 
 

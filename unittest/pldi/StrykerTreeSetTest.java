@@ -30,7 +30,7 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.treeset.TreeSet:1,pldi.treeset.TreeSetEntry:4");
-		check(GENERIC_PROPERTIES,"contains_0",false);
+		check(GENERIC_PROPERTIES,"pldi_treeset_TreeSet_contains(int)",false);
 	}
 
 	
@@ -75,7 +75,7 @@ public class StrykerTreeSetTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.treeset.TreeSet:1,pldi.treeset.TreeSetEntry:4");
-		check(GENERIC_PROPERTIES,"remove_0",false);
+		check(GENERIC_PROPERTIES,"pldi_treeset_TreeSet_remove(int)",false);
 	}
 
 

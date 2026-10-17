@@ -31,7 +31,7 @@ public class NodeCachingLinkedListTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:7");
-        check(GENERIC_PROPERTIES,"remove(int)",true);
+        check(GENERIC_PROPERTIES,"roops_core_objects_NodeCachingLinkedList_remove(int)",true);
 	}
 	
 	public void test_addFirstTest() throws VizException {
@@ -52,7 +52,7 @@ public class NodeCachingLinkedListTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:7");
-        check(GENERIC_PROPERTIES,"addFirst(java_lang_Object)",true);
+        check(GENERIC_PROPERTIES,"roops_core_objects_NodeCachingLinkedList_addFirst(java_lang_Object)",true);
 	}
 
 
@@ -74,7 +74,7 @@ public class NodeCachingLinkedListTest extends CollectionTestBase {
                 setConfigKeyUseJavaSBP(true);
                 setConfigKeyUseTightUpperBounds(true);
                 setConfigKeyTypeScopes("roops.core.objects.NodeCachingLinkedList:1,roops.core.objects.LinkedListNode:11");
-                check(GENERIC_PROPERTIES,"generateInstance()",true);
+                check(GENERIC_PROPERTIES,"roops_core_objects_NodeCachingLinkedList_generateInstance()",true);
         }
 
 }

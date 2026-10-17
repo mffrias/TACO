@@ -47,7 +47,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:4");
-        check(GENERIC_PROPERTIES,"insert_0", false);
+        check(GENERIC_PROPERTIES,"pldi_binomialheap_BinomialHeap_insert(int)", false);
     }
 
 
@@ -69,7 +69,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:4");
-        check(GENERIC_PROPERTIES,"findMinimum_0", false);
+        check(GENERIC_PROPERTIES,"pldi_binomialheap_BinomialHeap_findMinimum()", false);
     }
 
 
@@ -91,7 +91,7 @@ public class BinomialHeapTest extends CollectionTestBase {
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeap:1,pldi.binomialheap.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES,"extractMin_0", false);
+        check(GENERIC_PROPERTIES,"pldi_binomialheap_BinomialHeap_extractMin()", false);
     }
 
 

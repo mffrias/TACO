@@ -47,7 +47,7 @@ public class StrykerBinomialHeapUnionNodesRoopsTest extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("roops.core.objects.BinomialHeap:1,roops.core.objects.BinomialHeapNode:7");
-        check(GENERIC_PROPERTIES, "unionNodes_0", true);
+        check(GENERIC_PROPERTIES, "roops_core_objects_BinomialHeap_unionNodes(roops_core_objects_BinomialHeapNode)", true);
     }
 
 

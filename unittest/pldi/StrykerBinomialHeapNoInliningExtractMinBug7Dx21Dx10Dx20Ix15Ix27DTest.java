@@ -48,7 +48,7 @@ public class StrykerBinomialHeapNoInliningExtractMinBug7Dx21Dx10Dx20Ix15Ix27DTes
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("pldi.binomialheap.BinomialHeapNoInliningExtractMinBug7Dx21Dx10Dx20Ix15Ix27D:1,pldi.binomialheap.BinomialHeapNode:5");
-        check(GENERIC_PROPERTIES, "extractMin_0", false);
+        check(GENERIC_PROPERTIES, "pldi_binomialheap_BinomialHeapNoInliningExtractMinBug7Dx21Dx10Dx20Ix15Ix27D_extractMin()", false);
     }
 
 

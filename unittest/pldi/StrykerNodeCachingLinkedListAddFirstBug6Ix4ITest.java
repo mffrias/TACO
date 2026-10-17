@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListAddFirstBug6Ix4ITest extends Collection
 		setConfigKeyUseJavaSBP(true);
 		setConfigKeyUseTightUpperBounds(true);
 		setConfigKeyTypeScopes("pldi.nodecachinglinkedlist.NodeCachingLinkedListAddFirstBug6Ix4I:1,pldi.nodecachinglinkedlist.LinkedListNode:4");
-		check(GENERIC_PROPERTIES,"addFirst_0",false);
+		check(GENERIC_PROPERTIES,"pldi_nodecachinglinkedlist_NodeCachingLinkedListAddFirstBug6Ix4I_addFirst(java_lang_Object)",false);
 	}
 	
 }

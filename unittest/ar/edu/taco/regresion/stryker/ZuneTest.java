@@ -28,7 +28,7 @@ public class ZuneTest extends CollectionTestBase {
 			setConfigKeyUseTightUpperBounds(false);
 			setConfigKeyMaxStrykerMethodsPerFile(1);
 			setConfigKeyTypeScopes("examples.stryker.Zune:1");
-			check(GENERIC_PROPERTIES,"computeYear_0", false);
+			check(GENERIC_PROPERTIES,"examples_stryker_Zune_computeYear(int)", false);
 		}
 		
 		

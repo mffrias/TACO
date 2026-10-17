@@ -28,7 +28,7 @@ public class StrykerNodeCachingLinkedListRemove5Bug12Dx29Ix30Dx38Dx39DTest exten
         setConfigKeyUseJavaSBP(true);
         setConfigKeyUseTightUpperBounds(true);
         setConfigKeyTypeScopes("icse.nodecachinglinkedlist.set2.NodeCachingLinkedListRemove5Bug12Dx29Ix30Dx38Dx39D:1,icse.nodecachinglinkedlist.LinkedListNode:4");
-        check(GENERIC_PROPERTIES,"remove_0",true);
+        check(GENERIC_PROPERTIES,"icse_nodecachinglinkedlist_set2_NodeCachingLinkedListRemove5Bug12Dx29Ix30Dx38Dx39D_remove(int)",true);
 	}
 
 }

@@ -29,7 +29,7 @@ public class StrykerGcdTestAOIU14 extends CollectionTestBase {
 		setConfigKeyUseJavaSBP(false);
 		setConfigKeyUseTightUpperBounds(false);
 		setConfigKeyTypeScopes("examples.stryker.gcd.aoiu.aoiu14.Gcd:1");
-		check(GENERIC_PROPERTIES,"gcd_0",false);
+		check(GENERIC_PROPERTIES,"examples_stryker_gcd_aoiu_aoiu14_Gcd_gcd(int, int)",false);
 	}
 
 

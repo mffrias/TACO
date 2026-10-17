@@ -1,0 +1,84 @@
+# Open questions
+
+Points where the code does not say what was intended, collected for the
+maintainer (Marcelo Frias) instead of being guessed in the other pages.
+dynalloy4's own questions are in its `docs/OPEN-QUESTIONS.md`. Line numbers are
+those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
+
+## Method naming
+
+1. **Calls into the built-in modules.** e5760d76 names every call
+   `<receiver type>_<method>`, while the built-in modules (`simplejml/builtin`,
+   the precompiled `.djals`) declare their programs without the prefix. This
+   branch prefixes only static calls and calls to the classes TACO translates
+   (507ecc4b; [METHOD-NAMING.md](METHOD-NAMING.md#status), item 3b). Or should
+   the built-in modules' programs get the prefix too?
+2. **Overloads.** Two methods or constructors with the same name get the same
+   program name. This branch tells them apart by their parameter types in the
+   recursion unfolder and by their number of arguments in the scope
+   inference (jDynAlloy d2b09e9, TACO 7b560282; item 5), which still leaves
+   two overloads with the same number of parameters unusable in one analysis
+   (they worked on comitaco, whose jDynAlloy named programs
+   `<signature>_<program>_<index>`). Should program names include the
+   parameter types instead, or the index again?
+3. **jDynAlloy's remaining prefixes.** `JBindingKey` (line 67) keys static
+   programs as `<signature>_<program>`, the rule the built-in modules follow.
+   Both `ReplaceModifiesModuleVisitor`s test `startsWith(<signature>_<program>_)`,
+   which the new names never match; they stopped matching with 3ae43be3
+   (2022), and comitaco still generates the frame conditions
+   ([KNOWN-LIMITATIONS.md](KNOWN-LIMITATIONS.md#analysis)). Should they match
+   again (`<program>(`), given that JML's checker already enforces
+   `assignable` by field name?
+4. **Your drivers.** Should the non-Stryker drivers (the spec-output ones
+   included) be converted to the new naming, with `scripts/convert-method-names.py --all`
+   or by you? Two are converted (`ximena.isEvenTest`,
+   `ForArielGodioBinarySeachBug01Test`).
+5. **`MethodDeclarationSolver` line 86** keeps the input to fix only if
+   `methodToCheck.contains(<method name>)`, a substring test. Intended, or an
+   exact match?
+6. **`InformationRecoveryVisitor`**: the constructor branch (lines 137-160)
+   compares the bare constructor name with the qualified `methodToCheck`, which
+   can never be equal. Intended?
+7. **The command line** (`TacoMain.main`) appends `_0` to the method name. Should
+   it take the new form?
+
+## Specified output (`checkAndRunSpecIfFaulty`)
+
+8. The key `hardcode_input_and_run_spec` is set
+   (`RegresionTestBase.java:104`) but nothing reads it. Was it meant to replace
+   the static flag `TacoMain.isCheckAndRunSpecAssertionSupport`, and should the
+   flag be reset after the second run? As it is, every later run in the same JVM
+   runs in spec-output mode.
+9. Should `checkAndRunSpecIfFaulty` assert something, or return the second
+   run's result to the driver?
+10. `methodBodySimplifier` replaces every method body, of every class, with
+    `return <default>`. Is that right for pure methods used in specifications?
+11. The final-state test (`UnitTestBuilderFinalState`) calls the method on the
+    final receiver, with the initial parameters, and asserts nothing. Should it
+    call the method, and should it assert the outputs?
+12. With an input to fix, jDynAlloy drops every `requires`, the callees'
+    included, and adds the input instead. Is the TACO-side `requires` with the
+    input (`JmlExpressionVisitor.java:1543-1548`) still needed, and is dropping
+    the callees' preconditions intended?
+13. `edu.utep.ds2.AverageTest.test_absMethodTest` checks `calculateAverage`,
+    while its commented-out line checks `abs(int)`. A copy-paste slip?
+
+## Other
+
+14. `ximena.isEvenTest.test_isEven` expects no counterexample, but TACO finds
+    a real one: `isEven(n)` returns `MutRecursiveAux.m(n) == 1`, and `m(n)` is
+    `n + 1`, so `isEven(2)` is false (as in
+    [FIXES-FOR-MASTER.md](FIXES-FOR-MASTER.md), F4). Is the subject or the
+    expectation the one to change?
+15. The IntelliJ library `mjc-1_3_2` points at `lib/mjc-1_3_2.jar`, which is not
+    in the repository. Can it go?
+16. `ant unittest` runs no driver: its class path (`build.classpath`) lacks
+    `bin/`, so every driver fails with `ClassNotFoundException`. With `bin/` it
+    would run every driver under `unittest/`, hundreds of Stryker benchmarks
+    included (many hours). Should it get `bin/` on its class path, leave the
+    Stryker benchmarks out, or go?
+17. The README's references list J. P. Galeotti's PhD thesis as "Software
+    Verification using Alloy" (Universidad de Buenos Aires, 2010). That title
+    comes from the Mathematics Genealogy Project, not from UBA's library: is it
+    right?
+18. Should other DynAlloy or TACO papers be listed in the README's references?

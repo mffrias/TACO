@@ -1769,7 +1769,7 @@ public class UnitTestBuilder {
         statements.add("// Method Invocation");
         if (!methodToCheck.isAccessible()) {
             statements.add("Method method = getAccessibleMethod(\"" + recoveredInformation.getClassToCheck() + "\", \""
-                    + recoveredInformation.getMethodToCheck() + "\", true);");
+                    + methodToCheck.getName() + "\", true);");
             statements.add("try {");
             statements.add("    method.invoke(instance, " + ((methodParameters.length() == 0) ? "new Object[]{}" : "new Object[]{" + methodParameters + "}") + ");");
             statements.add("} catch (Exception e) {");

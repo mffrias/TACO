@@ -137,15 +137,23 @@ if [ -e "${COMITACO}" ]; then
 else
   cloneRepository mffrias/TACO
 fi
-# dynalloy4 is built from the branch with the same name as TACO's current branch, if dynalloy4 has
-# one (TACO's stryker branch needs dynalloy4's stryker branch), and from master otherwise.
+# dynalloy4 and jDynAlloy are built from the branch with the same name as TACO's current branch,
+# if they have one (TACO's stryker branch needs their stryker branches), and from master otherwise.
 TACO_BRANCH=$(git -C "${COMITACO}" rev-parse --abbrev-ref HEAD 2>/dev/null)
-if [[ -n "$TACO_BRANCH" ]] && git ls-remote --exit-code --heads ${URL}mffrias/dynalloy4.git "$TACO_BRANCH" > /dev/null 2>&1; then
-  DYNALLOY_BRANCH="$TACO_BRANCH"
-else
-  DYNALLOY_BRANCH="master"
-fi
-echo "dynalloy4 branch: ${DYNALLOY_BRANCH} (TACO is on '${TACO_BRANCH}')"
+
+# Prints the branch of the repository (e.g. mffrias/dynalloy4) to build: TACO's branch if the
+# repository has a branch with that name, master otherwise.
+function sameNameBranch() {
+  if [[ -n "$TACO_BRANCH" ]] && git ls-remote --exit-code --heads "${URL}$1.git" "$TACO_BRANCH" > /dev/null 2>&1; then
+    echo "$TACO_BRANCH"
+  else
+    echo "master"
+  fi
+}
+
+DYNALLOY_BRANCH=$(sameNameBranch mffrias/dynalloy4)
+JDYNALLOY_BRANCH=$(sameNameBranch mffrias/jDynAlloy)
+echo "dynalloy4 branch: ${DYNALLOY_BRANCH}, jDynAlloy branch: ${JDYNALLOY_BRANCH} (TACO is on '${TACO_BRANCH}')"
 if [ ! -e "${DYNALLOY}" ]; then
   cloneRepository mffrias/dynalloy4 -b "${DYNALLOY_BRANCH}"
 else
@@ -162,11 +170,15 @@ else
   fi
 fi
 if [ ! -e "${JDYNALLOY}" ]; then
-  cloneRepository mffrias/jDynAlloy
+  cloneRepository mffrias/jDynAlloy -b "${JDYNALLOY_BRANCH}"
 else
   echo "${JDYNALLOY} folder found, checking..."
   if [ ! -e "${JDYNALLOY_BUILD}" ]; then
     echo "ERROR: missing ${JDYNALLOY_BUILD}"
+  fi
+  jdynalloyBranch=$(git -C "${JDYNALLOY}" rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ "$jdynalloyBranch" != "${JDYNALLOY_BRANCH}" ]]; then
+    echo "WARNING: ${JDYNALLOY} is on branch '${jdynalloyBranch}', not ${JDYNALLOY_BRANCH} (git -C ${JDYNALLOY} checkout ${JDYNALLOY_BRANCH})"
   fi
   if $(grep -qE "<property.*name=\"app\.id\" value=\"${JDYNALLOY_NAME}>\"" "${JDYNALLOY_BUILD}"); then
     echo "ERROR: ${JDYNALLOY_BUILD} does not appear to be valid"

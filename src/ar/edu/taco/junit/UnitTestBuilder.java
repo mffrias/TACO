@@ -1797,7 +1797,7 @@ public class UnitTestBuilder {
      * class-method found in the recoveredInformation.
      */
     public String getOutputClassName() {
-        String className = recoveredInformation.getClassToCheck().substring(recoveredInformation.getClassToCheck().lastIndexOf(".") + 1) + "Test";
+        String className = recoveredInformation.getClassToCheck().substring(recoveredInformation.getClassToCheck().lastIndexOf(".") + 1)/* + "Test"*/;
         String methodName = recoveredInformation.getMethodToCheck();
         int suffix = recoveredInformation.getFileNameSuffix();
         return className + "_" + methodName + "_" + suffix;

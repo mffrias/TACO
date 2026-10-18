@@ -32,7 +32,9 @@ TACO uses the other two as jars, `lib/jdynalloy.jar` and `lib/dynalloy4.jar`,
 which `setupTACO.sh` builds from their repositories. They are not in git. This
 branch needs the `stryker` branches of both: dynalloy4's chooses the SAT solver
 and has MiniSat 2.2 for Apple Silicon and arm64 Linux, and jDynAlloy's has
-fixes for the new method naming ([docs/METHOD-NAMING.md](docs/METHOD-NAMING.md#status)).
+fixes for the new method naming and for invariants broken through callees.
+[docs/FIXES-FOR-MASTER.md](docs/FIXES-FOR-MASTER.md) describes every fix on
+the `stryker` branches of the three repositories.
 
 ## Quick start
 
@@ -77,6 +79,7 @@ or not, the repaired class in `StrykerLastFixFound.java`, statistics in
 | [docs/SPEC-OUTPUT.md](docs/SPEC-OUTPUT.md) | `checkAndRunSpecIfFaulty`: computing the output the specification allows; the fixed input (`inputToFix`) |
 | [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) | What does not work, or works in surprising ways |
 | [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | Questions for the maintainer about intent |
+| [docs/FIXES-FOR-MASTER.md](docs/FIXES-FOR-MASTER.md) | Every fix on the `stryker` branches of TACO, jDynAlloy and dynalloy4: the bug, its cause in master, the commit, how it was checked |
 | [AGENTS.md](AGENTS.md) | Notes for coding agents (and people) changing this repository |
 
 ## Branches

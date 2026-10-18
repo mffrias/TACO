@@ -20,12 +20,22 @@ class ProgramInliner extends ProgramMutator {
 
 	@Override
 	public Object visit(InvokeProgram u) {
-		String called_program_id = u.getProgramId();
-		
-		ProgramDeclaration called_program = dynalloy_module.getProgram(called_program_id);
+		ProgramDeclaration called_program = calledProgram(u);
 		DynalloyProgram program_to_inline = (DynalloyProgram) called_program.getBody().accept(this);
 
 		return program_to_inline;
+	}
+
+	// The program a call invokes: the one with its name and number of arguments, which is how
+	// DynAlloy resolves calls; overloaded methods and constructors share their name.
+	private ProgramDeclaration calledProgram(InvokeProgram u) {
+		for (ProgramDeclaration program : dynalloy_module.getPrograms()) {
+			if (program.getProgramId().equals(u.getProgramId())
+					&& program.getParameters().size() == u.getActualParameters().size()) {
+				return program;
+			}
+		}
+		return dynalloy_module.getProgram(u.getProgramId());
 	}
 
 	

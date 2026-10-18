@@ -93,7 +93,7 @@ public class DynalloyToAlloyManager {
 //				specFormulas.add(oi.getFormula()); //once for the invariant in the postcondition
 			}
 			for (JProgramDeclaration progDecl : thePrograms) {
-				String fullyQualifiedMethodName = progDecl.getSignatureId() + "_" + progDecl.getProgramId();
+				String fullyQualifiedMethodName = progDecl.getProgramId();
 				if (assertionId.substring(6).equals(fullyQualifiedMethodName)) {
 					List<JSpecCase> theSpecCases = progDecl.getSpecCases();
 					for (JSpecCase specCase : theSpecCases) {

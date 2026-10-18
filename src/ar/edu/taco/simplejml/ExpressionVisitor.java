@@ -562,20 +562,38 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
                         .getLeftAssignmentExpression(), argumentsList);
         String methodName = jMethodCallExpression.ident();
 
-//        if (isStatic) {
+        // The programs of the classes TACO translates are named <Class>_<method>
+        // (MethodDeclarationSolver); those of the built-in modules are not, and calls to them keep
+        // the earlier rule, which jDynAlloy's bindings expect: Class_method if static, bare otherwise.
+        String receiverType = methodInformation.getQualifiedReceiverType();
+        if (isStatic || isTranslatedClass(receiverType)) {
             // JavaClassNameNormalizer classNameNormalizer = new
             // JavaClassNameNormalizer(jMethodCallExpression.method().receiverType().toVerboseString());
             // String classQualifiedName =
             // classNameNormalizer.getQualifiedClassName();
             // methodName = classQualifiedName + "_" + methodName;
-        methodName = methodInformation.getQualifiedReceiverType() + "_"
-                    + methodName;
-//        }
+            methodName = receiverType + "_" + methodName;
+        }
 
         IProgramCall jProgramCall = new JProgramCall(isSuper, methodName,
                 encodedArguments);
 
         super.getStack().push(jProgramCall);
+    }
+
+    // Whether TACO translates the class (classToCheck, and the classes or relevantClasses it
+    // parses), as opposed to a built-in module. The name is written as JavaClassNameNormalizer does.
+    private static boolean isTranslatedClass(String qualifiedClassName) {
+        TacoConfigurator configurator = TacoConfigurator.getInstance();
+        if (qualifiedClassName.equals(configurator.getClassToCheck())) {
+            return true;
+        }
+        for (String aClass : configurator.getClasses()) {
+            if (qualifiedClassName.equals(new JavaClassNameNormalizer(aClass.trim()).getQualifiedClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

@@ -412,7 +412,7 @@ public class JDynAlloyClassHierarchy {
 				int posOpeningParenthesis = typedMethodToCheck.indexOf("(");
 				String untypedMethodToCheck = typedMethodToCheck.substring(0, posOpeningParenthesis);
 				if (!(sigId.equals(TacoConfigurator.getInstance().getClassToCheck()) && 
-						(sigId + "_" + program.getProgramId()).equals(untypedMethodToCheck))) {
+						program.getProgramId().equals(untypedMethodToCheck))) {
 					continue;
 				}
 				for (JVariableDeclaration var : program.getParameters()) {

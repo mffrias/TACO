@@ -25,6 +25,24 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.OrFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the JDynAlloy statements that compute a Java-arithmetic multiplication, division,
+ * remainder, addition or subtraction in a method body ({@code BlockStatementsVisitor}, with
+ * {@code useJavaArithmetic}). An operation does not become a function call: it gets fresh
+ * variables named {@code SK_<predicate>_ARG_<argument>_<n>} ({@code left}, {@code right},
+ * {@code result}, and {@code overflow} or {@code remainder}), which the statements declare,
+ * {@code havoc}, assume equal to the operands, and pass to the operation's marker predicate
+ * ({@code pred_..._marker}, whose body in {@code Integer32.als} and the other {@code .als}
+ * files is empty). With {@code useJavaArithmetic}, {@code DynalloyToAlloyManager} runs
+ * {@code ar.edu.taco.alloy.sk.SkolemizejavaArithPlugin}, which finds these variables by name in
+ * the Alloy text and adds facts with the real predicates; {@code ArithmeticOpCollector} counts
+ * them by name too. The names are therefore a contract with those classes. The caller appends
+ * the statements of the result to the program and uses its {@code result_value} (and, for a
+ * division, its {@code remainder}) in place of the operation.
+ *
+ * <p>Static state: one counter per builder, starting at -1 and never reset, so the {@code n}
+ * in the names keeps growing over the runs in one JVM.
+ */
 public abstract class AuxiliaryConstantsFactory {
 
 	private static abstract class AuxiliaryConstants {
@@ -37,6 +55,10 @@ public abstract class AuxiliaryConstantsFactory {
 		public AlloyExpression result_value;
 	}
 
+	/**
+	 * The result of a multiplication builder: {@code statements}, the block that declares and
+	 * constrains the variables, and {@code result_value}, the variable holding the product.
+	 */
 	public final static class MultAuxiliaryConstants extends AuxiliaryConstants {
 
 		public MultAuxiliaryConstants(JBlock stmt, AlloyExpression ret_expression) {
@@ -45,6 +67,11 @@ public abstract class AuxiliaryConstantsFactory {
 
 	}
 
+	/**
+	 * The result of an addition builder: {@code statements}, the block that constrains the
+	 * variables (and declares them, except for the char builders), and {@code result_value}, the
+	 * variable holding the sum.
+	 */
 	public final static class AddAuxiliaryConstants extends AuxiliaryConstants {
 
 		public AddAuxiliaryConstants(JBlock stmt, ExprVariable ret_expression) {
@@ -52,6 +79,10 @@ public abstract class AuxiliaryConstantsFactory {
 		}
 	}
 
+	/**
+	 * The result of a subtraction builder: {@code statements}, the block that declares and
+	 * constrains the variables, and {@code result_value}, the variable holding the difference.
+	 */
 	public final static class MinusAuxiliaryConstants extends AuxiliaryConstants {
 
 		public MinusAuxiliaryConstants(JBlock stmt, ExprVariable ret_expression) {
@@ -60,6 +91,11 @@ public abstract class AuxiliaryConstantsFactory {
 
 	}
 
+	/**
+	 * The result of a division builder: {@code statements}, the block that declares and
+	 * constrains the variables, {@code result_value}, the variable holding the quotient, and
+	 * {@code remainder}, the variable holding the remainder ({@code %} uses the same builders).
+	 */
 	public final static class DivAuxiliaryConstants extends AuxiliaryConstants {
 
 		public AlloyExpression remainder;
@@ -74,6 +110,14 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int long_mul_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of a {@code long} multiplication (marker
+	 * {@code pred_java_primitive_long_value_mul_marker}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the product
+	 */
 	public static MultAuxiliaryConstants build_long_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++long_mul_auxiliary_index;
@@ -99,6 +143,14 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int float_mul_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of a {@code float} multiplication (marker
+	 * {@code pred_java_primitive_float_value_mul_marker}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the product
+	 */
 	public static MultAuxiliaryConstants build_float_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++float_mul_auxiliary_index;
@@ -125,6 +177,16 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_charIntToInt_add_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code char + int}, an {@code int}. Unlike the int and
+	 * float additions, the statements do not declare their variables, and the plugin that adds
+	 * the real predicates does not handle this one. Nothing calls it. Increments this builder's
+	 * counter.
+	 *
+	 * @param left the {@code char} operand
+	 * @param right the {@code int} operand
+	 * @return the statements, without declarations, and the sum
+	 */
 	public static AddAuxiliaryConstants build_charIntToInt_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int add_auxiliary_index = ++char_charIntToInt_add_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_charIntToInt_VALUE_ADD;
@@ -151,6 +213,16 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_intCharToInt_add_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code int + char}, an {@code int}. Unlike the int and
+	 * float additions, the statements do not declare their variables, and the plugin that adds
+	 * the real predicates does not handle this one. Nothing calls it. Increments this builder's
+	 * counter.
+	 *
+	 * @param left the {@code int} operand
+	 * @param right the {@code char} operand
+	 * @return the statements, without declarations, and the sum
+	 */
 	public static AddAuxiliaryConstants build_intCharToInt_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int add_auxiliary_index = ++char_intCharToInt_add_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_intCharToInt_VALUE_ADD;
@@ -177,6 +249,16 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_charCharToInt_add_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code char + char}, an {@code int}. Unlike the int and
+	 * float additions, the statements do not declare their variables, and the plugin that adds
+	 * the real predicates does not handle this one. Nothing calls it. Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, without declarations, and the sum
+	 */
 	public static AddAuxiliaryConstants build_charCharToInt_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int add_auxiliary_index = ++char_charCharToInt_add_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_charCharToInt_VALUE_ADD;
@@ -204,6 +286,15 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_intCharToInt_sub_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code int - char}, an {@code int}. The plugin that
+	 * adds the real predicates does not handle this one. Nothing calls it. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the {@code int} operand
+	 * @param right the {@code char} operand
+	 * @return the statements, which declare their variables, and the difference
+	 */
 	public static MinusAuxiliaryConstants build_intCharToInt_sub_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int minus_auxiliary_index = ++char_intCharToInt_sub_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_intCharToInt_VALUE_SUB;
@@ -231,6 +322,15 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_charIntToInt_sub_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code char - int}, an {@code int}. The plugin that
+	 * adds the real predicates does not handle this one. Nothing calls it. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the {@code char} operand
+	 * @param right the {@code int} operand
+	 * @return the statements, which declare their variables, and the difference
+	 */
 	public static MinusAuxiliaryConstants build_charIntToInt_sub_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int minus_auxiliary_index = ++char_charIntToInt_sub_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_charIntToInt_VALUE_SUB;
@@ -259,6 +359,15 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int char_charCharToInt_sub_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of {@code char - char}, an {@code int}. The plugin that
+	 * adds the real predicates does not handle this one. Nothing calls it. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the difference
+	 */
 	public static MinusAuxiliaryConstants build_charCharToInt_sub_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int minus_auxiliary_index = ++char_charCharToInt_sub_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_charCharToInt_VALUE_SUB;
@@ -288,6 +397,14 @@ public abstract class AuxiliaryConstantsFactory {
 	private static int float_add_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the statements and result of a {@code float} addition (marker
+	 * {@code pred_java_primitive_float_value_add_marker}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the sum
+	 */
 	public static AddAuxiliaryConstants build_float_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int add_auxiliary_index = ++float_add_auxiliary_index;
@@ -316,6 +433,16 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int float_sub_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and result of a {@code float} subtraction. The marker is
+	 * {@code JPredicateFactory.PRED_JAVA_PRIMITIVE_INTEGER_VALUE_SUB_MARKER}, whose value is
+	 * nevertheless {@code pred_java_primitive_float_value_sub_marker}. Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the difference
+	 */
 	public static MinusAuxiliaryConstants build_float_sub_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		int sub_auxiliary_index = ++float_sub_auxiliary_index;
@@ -372,6 +499,14 @@ public abstract class AuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the statements and result of an {@code int} multiplication (marker
+	 * {@code pred_java_primitive_integer_value_mul_marker}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the product
+	 */
 	public static MultAuxiliaryConstants build_integer_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++integer_mul_auxiliary_index;
@@ -439,6 +574,14 @@ public abstract class AuxiliaryConstantsFactory {
 	private static int integer_add_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the statements and result of an {@code int} addition (marker
+	 * {@code pred_java_primitive_integer_value_add_marker}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the statements, which declare their variables, and the sum
+	 */
 	public static AddAuxiliaryConstants build_integer_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		AddAuxiliaryConstants auxiliaryConstants = null;
@@ -587,6 +730,20 @@ public abstract class AuxiliaryConstantsFactory {
 	private static int integer_divide_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the statements and results of an {@code int} division, quotient and remainder
+	 * (marker {@code pred_java_primitive_integer_value_div_rem_marker}). With
+	 * {@code checkArithmeticException} (on by default) the right operand is first copied into a
+	 * variable {@code auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveIntegerValue_<n>};
+	 * if it is zero, {@code throw} becomes the {@code java.lang.ArithmeticException} literal and
+	 * the division is by 1 instead, otherwise it is the plain division. That literal exists only
+	 * with {@code newExceptionsAreLiterals}; without it this throws a
+	 * {@code NullPointerException}. Increments this builder's counter (twice with the check).
+	 *
+	 * @param left the dividend
+	 * @param right the divisor
+	 * @return the statements, which declare their variables, the quotient and the remainder
+	 */
 	public static DivAuxiliaryConstants build_integer_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		DivAuxiliaryConstants auxiliaryConstants = null;
@@ -743,6 +900,18 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int long_divide_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and results of a {@code long} division, quotient and remainder
+	 * (marker {@code pred_java_primitive_long_value_div_rem_marker}), with the same division by
+	 * zero check as {@link #build_integer_divide_auxiliary_constants} (variable
+	 * {@code auxVarForArithmeticExceptionDivisionByZeroJavaPrimitiveLongValue_<n>}) and the same
+	 * need for {@code newExceptionsAreLiterals}. Increments this builder's counter (twice with
+	 * the check).
+	 *
+	 * @param left the dividend
+	 * @param right the divisor
+	 * @return the statements, which declare their variables, the quotient and the remainder
+	 */
 	public static DivAuxiliaryConstants build_long_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 
@@ -850,6 +1019,16 @@ public abstract class AuxiliaryConstantsFactory {
 
 	private static int float_divide_auxiliary_index = -1;
 
+	/**
+	 * Returns the statements and results of a {@code float} division (marker
+	 * {@code pred_java_primitive_float_value_div_marker}); there is no division by zero check.
+	 * Increments this builder's counter.
+	 *
+	 * @param left the dividend
+	 * @param right the divisor
+	 * @return the statements, which declare their variables, the quotient and the remainder
+	 *         variable
+	 */
 	public static DivAuxiliaryConstants build_float_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int div_auxiliary_index = ++float_divide_auxiliary_index;

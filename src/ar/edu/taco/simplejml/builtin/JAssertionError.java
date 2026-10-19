@@ -52,10 +52,33 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_AssertionError}, TACO's model of
+ * {@code java.lang.AssertionError}, like {@link JThrowable}: a signature extending
+ * {@code java_lang_Error}, abstract with {@code newExceptionsAreLiterals}, which also adds the
+ * literal signature {@code java_lang_AssertionErrorLit}; no fields; and a {@code Constructor}
+ * with only {@code thiz} and {@code throw} and the body {@code skip}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JAssertionError}).
+ *
+ * <p>jDynAlloy translates a failing {@code assert} into
+ * {@code throw := java_lang_AssertionErrorLit} (jDynAlloy's docs/ARCHITECTURE.md), which needs
+ * this literal, that is, {@code newExceptionsAreLiterals}; its relevancy analysis adds this
+ * module, by name, to the relevant modules whenever it meets an {@code assert}
+ * ({@code RelevancyAnalysisStatementVisitor}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JAssertionError implements IBuiltInModule {
 
 	private static JAssertionError instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JAssertionError getInstance() {
 		if (instance == null)
 			instance = new JAssertionError();

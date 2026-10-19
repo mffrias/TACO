@@ -32,6 +32,14 @@ public class MI_JavaLangByte implements MethodInformationSupplier {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.pipeline.javatodynjalloy.methodinfo.MethodInformationSupplier#getInformationForMethod(java.lang.String)
 	 */
+	/**
+	 * Returns the information for {@code Byte.valueOf}: static, not a constructor, result typed
+	 * {@code byte} ({@code CStdType.Byte}), receiver type {@code java_lang_Byte}.
+	 *
+	 * @param methodName the method's simple name
+	 * @return the information
+	 * @throws TacoException for any other name
+	 */
 	@Override
 	public ConcreteMethodInformation getInformationForMethod(String methodName) {
 		ConcreteMethodInformation concreteMethodInformation = new ConcreteMethodInformation();

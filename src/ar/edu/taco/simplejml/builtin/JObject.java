@@ -65,6 +65,22 @@ import ar.uba.dc.rfm.alloy.AlloyVariable;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_Object}, TACO's model of {@code java.lang.Object}
+ * and the root of the classes TACO translates: a signature with no parent and no fields,
+ * abstract when {@code abstractSignatureObject} is on (the default), and two programs:
+ * {@code Constructor}, whose body only sets {@code throw} to null, and the pure
+ * {@code equals(o)}, which returns whether {@code o} is not null and is {@code thiz}.
+ * {@code engine.PrecompiledModules} always adds it, whatever {@code builtInModules} says. The
+ * translation from Java uses its signature id as the parent of a class without a superclass
+ * ({@code JDynAlloyASTVisitor}), and so does the scope inference
+ * ({@code infer.ScopeInference}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} (which may come
+ * during the translation from Java, before {@code PrecompiledModules} runs) and never reset. It
+ * reads {@code abstractSignatureObject} only then, so later runs in the same JVM keep the first
+ * run's choice.
+ */
 public class JObject implements IBuiltInModule {
 
 //	private static final JBindingKey OBJECT_CONSTRUCTOR_KEY = new JBindingKey(
@@ -115,12 +131,24 @@ public class JObject implements IBuiltInModule {
 	private final JDynAlloyModule module;
 //	private final Map<JBindingKey, JProgramDeclaration> bindings;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code abstractSignatureObject}).
+	 *
+	 * @return the singleton
+	 */
 	public static JObject getInstance() {
 		if (instance == null)
 			instance = new JObject();
 		return instance;
 	}
 
+	/**
+	 * Returns the id of the module's signature, {@code java_lang_Object}, building the singleton
+	 * if needed (see {@link #getInstance()}).
+	 *
+	 * @return the signature id
+	 */
 	public static String getSignatureId() {
 		return getInstance().getModule().getSignature().getSignatureId();
 	}

@@ -47,6 +47,23 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_NullPointerException}, TACO's model of
+ * {@code java.lang.NullPointerException}, like {@link JThrowable}: a {@code one} signature
+ * extending {@code java_lang_RuntimeException}, abstract with {@code newExceptionsAreLiterals},
+ * which also adds the literal signature {@code java_lang_NullPointerExceptionLit}; no fields;
+ * and a {@code Constructor} with only {@code thiz} and {@code throw} and the body {@code skip}.
+ * Added by {@code engine.PrecompiledModules} (key {@code JNullPointerException}).
+ *
+ * <p>With {@code checkNullDereference}, {@code NullDerefVisitor} sets {@code throw} to the
+ * literal on a null dereference, and the precompiled {@code java_util_Map.djals} uses it too.
+ * Both need {@code newExceptionsAreLiterals}: without it there is no literal, and
+ * {@code NullDerefVisitor} throws a {@code NullPointerException}. {@code NullDerefVisitor} may
+ * build the singleton during the translation, before {@code PrecompiledModules} does.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JNullPointerException implements IBuiltInModule {
 
 	// public static final JBindingKey NULLPOINTER_EXCEPTION_CONSTRUCTOR_KEY =
@@ -55,6 +72,12 @@ public class JNullPointerException implements IBuiltInModule {
 
 	private static JNullPointerException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JNullPointerException getInstance() {
 		if (instance == null)
 			instance = new JNullPointerException();

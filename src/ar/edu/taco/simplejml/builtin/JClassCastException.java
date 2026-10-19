@@ -51,10 +51,31 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_ClassCastException}, TACO's model of
+ * {@code java.lang.ClassCastException}, like {@link JThrowable}: a {@code one} signature
+ * extending {@code java_lang_RuntimeException}, abstract with {@code newExceptionsAreLiterals},
+ * which also adds the literal signature {@code java_lang_ClassCastExceptionLit}; with
+ * {@code useClassSingletons}, the class singleton {@code java_lang_ClassCastExceptionClass}
+ * (extending {@code Class}, see {@link JClass}); no fields; and a {@code Constructor} with only
+ * {@code thiz} and {@code throw} and the body {@code skip}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JClassCastException}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} and {@code useClassSingletons} only then.
+ */
 public class JClassCastException implements IBuiltInModule {
 
 	private static JClassCastException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}, {@code useClassSingletons}).
+	 *
+	 * @return the singleton
+	 * @throws java.util.NoSuchElementException on the first call, if {@code useClassSingletons} is
+	 *         not set (TACO's configuration has no default for it)
+	 */
 	public static JClassCastException getInstance() {
 		if (instance == null)
 			instance = new JClassCastException();

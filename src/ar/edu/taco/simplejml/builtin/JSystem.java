@@ -69,6 +69,29 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_System}, a model of {@code java.lang.System}: a
+ * signature extending {@code java_lang_Object}, no fields, and one pure program,
+ * {@code currentTimeMillis()}, whose body sets {@code throw} to null and havocs
+ * {@code return}. The program has a {@code thiz} parameter, like every program built with
+ * {@code helpers.ArgEncoder}, although the method is static. Its {@code return} is {@code Int}
+ * with {@code useJavaArithmetic} and {@code JavaPrimitiveLongValue} without it, the reverse of
+ * {@code helpers.CTypeAdapter}, which types a {@code long} as {@code JavaPrimitiveLongValue}
+ * only with {@code useJavaArithmetic}. Building the module also declares the static field
+ * {@code java_lang_System_out} ({@code ClassFields -> java_io_PrintStream}, the model of
+ * {@code System.out}, see {@link JPrintStream}) in jDynAlloy's
+ * {@code StaticFieldsModuleBuilder}. Added by {@code engine.PrecompiledModules} (key
+ * {@code JSystem}).
+ *
+ * <p>Unclear: TACO names a static call {@code java_lang_System_currentTimeMillis}
+ * ({@code ExpressionVisitor}), while jDynAlloy's {@code JBindingKey} keys a program whose first
+ * parameter is {@code thiz} by its bare name; whether such a call binds to this program was
+ * not checked.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset. It
+ * reads {@code useJavaArithmetic} only then, and the static field goes to the
+ * {@code StaticFieldsModuleBuilder} singleton then, once per JVM.
+ */
 public class JSystem implements IBuiltInModule {
 
 	private final JDynAlloyModule module;
@@ -146,6 +169,15 @@ public class JSystem implements IBuiltInModule {
 
 	private static JSystem instance = null;
 
+	/**
+	 * Returns the singleton. The first call builds its module with the configuration then in
+	 * effect ({@code useJavaArithmetic}) and adds the static field {@code java_lang_System_out} to
+	 * jDynAlloy's {@code StaticFieldsModuleBuilder} singleton, so it must come before
+	 * {@code PrecompiledModules.generateStaticFieldsModule()} builds the {@code ClassFields}
+	 * module, as it does in {@code TacoMain.run}.
+	 *
+	 * @return the singleton
+	 */
 	public static JSystem getInstance() {
 		if (instance == null)
 			instance = new JSystem();

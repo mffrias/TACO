@@ -54,6 +54,24 @@ import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
 
 
+/**
+ * Builds the built-in module {@code java_lang_Throwable}, TACO's model of
+ * {@code java.lang.Throwable} and the root of its exception modules: a signature extending
+ * {@code java_lang_Object}, no fields, and one program, {@code Constructor}, with only the
+ * {@code thiz} and {@code throw} parameters and the body {@code skip}. With
+ * {@code newExceptionsAreLiterals} the signature is abstract and the module also has the
+ * literal signature {@code java_lang_ThrowableLit}; {@code ExpressionVisitor} then translates
+ * {@code new} of a subclass of {@code java.lang.Exception} (not of {@code Error}) into an
+ * assignment of that class's literal, instead of a new object and a call of
+ * {@code Constructor}. {@code engine.PrecompiledModules} adds the
+ * module (key {@code builtInModules}, value {@code JThrowable}), and the scope inference reads
+ * its signature id ({@code infer.ClassGraphBuilder}). The other exception builders of this
+ * package follow the same pattern. See jDynAlloy's docs/LANGUAGE.md for modules and programs.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset. It
+ * reads {@code newExceptionsAreLiterals} only then, so later runs in the same JVM keep the
+ * first run's choice.
+ */
 public class JThrowable implements IBuiltInModule {
 
 //	private static final JBindingKey THROWABLE_CONSTRUCTOR_KEY = new JBindingKey(
@@ -61,6 +79,12 @@ public class JThrowable implements IBuiltInModule {
 
 	private static JThrowable instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JThrowable getInstance() {
 		if (instance == null)
 			instance = new JThrowable();

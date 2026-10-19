@@ -46,6 +46,17 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_RuntimeException}, TACO's model of
+ * {@code java.lang.RuntimeException}, like {@link JThrowable}: a signature extending
+ * {@code java_lang_Exception}, abstract with {@code newExceptionsAreLiterals}, which also adds
+ * the literal signature {@code java_lang_RuntimeExceptionLit}; no fields; and a
+ * {@code Constructor} with only {@code thiz} and {@code throw} and the body {@code skip}. Added
+ * by {@code engine.PrecompiledModules} (key {@code JRuntimeException}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JRuntimeException implements IBuiltInModule {
 
 //	private static final JBindingKey RUNTIME_EXCEPTION_CONSTRUCTOR_KEY = new JBindingKey(
@@ -53,6 +64,12 @@ public class JRuntimeException implements IBuiltInModule {
 
 	private static JRuntimeException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JRuntimeException getInstance() {
 		if (instance == null)
 			instance = new JRuntimeException();

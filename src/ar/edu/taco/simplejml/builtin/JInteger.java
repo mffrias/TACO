@@ -69,6 +69,28 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_Integer}, a model of {@code java.lang.Integer}: a
+ * signature extending {@code java_lang_Object} that declares {@code intValue: Int} itself (not
+ * as a module field), and three programs: {@code Constructor(value)}, which assumes
+ * {@code thiz.intValue = value}; the pure {@code intValue()}, which returns
+ * {@code thiz.intValue}; and the pure {@code equals(obj)}. The types are Alloy's {@code Int}
+ * even with {@code useJavaArithmetic}.
+ *
+ * <p>{@code equals} returns false when {@code obj} is null and also when it is a
+ * {@code java_lang_Integer}; otherwise it compares the {@code intValue} of both. Its type test
+ * is not negated, unlike the one of {@code java_lang_Integer.djals}.
+ *
+ * <p>{@code engine.PrecompiledModules} adds this module under the key {@code JInteger}, and
+ * under the same key registers {@code java_lang_Integer.djals} (or
+ * {@code java_lang_Integer_JavaPrimitiveIntegerValue.djals} with {@code useJavaArithmetic}),
+ * which declares a module of the same name. The parsed one is added later, and jDynAlloy's
+ * linker keeps the later of two modules with the same id, so the analysis uses that one, not
+ * this (checked by running TACO; docs/FIXES-FOR-MASTER.md, F8). Unclear: whether this class is
+ * still needed (docs/OPEN-QUESTIONS.md, item 41).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset.
+ */
 public class JInteger implements IBuiltInModule {
 
 //	private static final JBindingKey INTEGER_CONSTRUCTOR_BINDING_KEY = new JBindingKey(
@@ -240,6 +262,11 @@ public class JInteger implements IBuiltInModule {
 
 	private static JInteger instance = null;
 
+	/**
+	 * Returns the singleton, building its module on the first call.
+	 *
+	 * @return the singleton
+	 */
 	public static JInteger getInstance() {
 		if (instance == null)
 			instance = new JInteger();

@@ -71,6 +71,18 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_String}, a minimal model of
+ * {@code java.lang.String}: a signature extending {@code java_lang_Object}, no fields, and one
+ * program, {@code Constructor}, with no parameters of its own, whose body only sets
+ * {@code throw} to null. Its {@code thiz} parameter is declared {@code java_lang_ObjectArray},
+ * not {@code java_lang_String}. Added by {@code engine.PrecompiledModules} (key
+ * {@code JString}). The fuller models in {@code java_lang_String_int.djals} and
+ * {@code java_lang_String_JavaPrimitiveIntegerValue.djals} are not registered by
+ * {@code PrecompiledModules}.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset.
+ */
 public class JString implements IBuiltInModule {
 
 	private final JDynAlloyModule module;
@@ -131,6 +143,11 @@ public class JString implements IBuiltInModule {
 
 	private static JString instance = null;
 
+	/**
+	 * Returns the singleton, building its module on the first call.
+	 *
+	 * @return the singleton
+	 */
 	public static JString getInstance() {
 		if (instance == null)
 			instance = new JString();

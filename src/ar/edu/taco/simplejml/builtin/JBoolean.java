@@ -67,6 +67,23 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_Boolean}, a model of {@code java.lang.Boolean}: a
+ * signature extending {@code java_lang_Object}, the field
+ * {@code booleanValue: java_lang_Boolean -> one boolean}, and three programs:
+ * {@code Constructor(value)}, which assumes {@code thiz.booleanValue = value};
+ * {@code booleanValue()}, which returns it; and the pure {@code equals(obj)}, which, like
+ * {@link JInteger}'s, returns false when {@code obj} is null or is a {@code java_lang_Boolean},
+ * and compares {@code booleanValue} otherwise, so {@code a.equals(a)} is false
+ * (docs/FIXES-FOR-MASTER.md, F8). Building the module also declares the static
+ * fields {@code java_lang_Boolean_TRUE} and {@code java_lang_Boolean_FALSE}
+ * ({@code ClassFields -> one java_lang_Boolean}) in jDynAlloy's
+ * {@code StaticFieldsModuleBuilder}; this module does not constrain their
+ * {@code booleanValue}. Added by {@code engine.PrecompiledModules} (key {@code JBoolean}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset. The
+ * static fields go to the {@code StaticFieldsModuleBuilder} singleton then, once per JVM.
+ */
 public class JBoolean implements IBuiltInModule {
 
 	private final JDynAlloyModule module;
@@ -230,6 +247,15 @@ public class JBoolean implements IBuiltInModule {
 
 	private static JBoolean instance = null;
 
+	/**
+	 * Returns the singleton. The first call builds its module and adds the static fields
+	 * {@code java_lang_Boolean_TRUE} and {@code java_lang_Boolean_FALSE} to jDynAlloy's
+	 * {@code StaticFieldsModuleBuilder} singleton, so it must come before
+	 * {@code PrecompiledModules.generateStaticFieldsModule()} builds the {@code ClassFields}
+	 * module, as it does in {@code TacoMain.run}.
+	 *
+	 * @return the singleton
+	 */
 	public static JBoolean getInstance() {
 		if (instance == null)
 			instance = new JBoolean();

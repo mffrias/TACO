@@ -48,8 +48,29 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
 
+/**
+ * Helpers of {@code ExpressionVisitor} and its JML subclasses for parts of expressions: the
+ * receiver of a call, binary and unary operators, conditions, and conversions between the
+ * Java-arithmetic types. They translate sub-expressions by making them accept the visitor
+ * passed in and reading its result ({@code getAlloyExpression()} or
+ * {@code getAlloyFormula()}), so they change that visitor's stack. No state of their own.
+ */
 public class ExpressionSolver {
 
+	/**
+	 * Returns the receiver of a call as an Alloy expression: {@code thiz} for {@code this}
+	 * ({@code thiz'}, the primed variable, if the visitor is a {@code JmlExpressionVisitor} in
+	 * the pre-state); a variable named {@code super} for {@code super}; otherwise the prefix
+	 * translated by the visitor. Unclear: giving the primed {@code thiz'} in the pre-state is the
+	 * opposite of {@code JmlExpressionVisitor.visitThisExpression} and of
+	 * {@link JmlExpressionSolver#buildInstantVariable}, and since
+	 * {@code JmlExpressionVisitor} overrides {@code visitMethodCallExpression} without calling
+	 * this method, whether that branch is ever reached is an open question.
+	 *
+	 * @param expressionVisitor the visitor translating the call
+	 * @param expression the call's prefix, or null
+	 * @return the receiver, or null if {@code expression} is null
+	 */
 	public static AlloyExpression getLeftExpression(
 			ExpressionVisitor expressionVisitor, JExpression expression) {
 		AlloyExpression leftExpression = null;
@@ -94,6 +115,19 @@ public class ExpressionSolver {
 
 
 	//requires useJavaArithmetic == true
+	/**
+	 * Returns {@code alloyExpression} converted from {@code right_alloy_type} to
+	 * {@code left_alloy_type} with the Java-arithmetic conversion functions: char to int, char
+	 * to long and int to long (widening), int to char, long to char and long to int (narrowing).
+	 * For any other pair, the same type included, returns the expression unchanged. Assumes
+	 * {@code useJavaArithmetic}, as the comment above says. Used by {@code BlockStatementsVisitor}
+	 * for assignments, initializers and returns.
+	 *
+	 * @param left_alloy_type the type to convert to
+	 * @param right_alloy_type the expression's type
+	 * @param alloyExpression the expression
+	 * @return the converted expression, or {@code alloyExpression}
+	 */
 	public static AlloyExpression getCastingExpression(JType left_alloy_type, JType right_alloy_type,
 			AlloyExpression alloyExpression) {
 		if (left_alloy_type.equals(JSignatureFactory.JAVA_PRIMITIVE_INTEGER_VALUE) &&
@@ -121,6 +155,28 @@ public class ExpressionSolver {
 	}
 
 
+	/**
+	 * Translates a binary expression with the given operator. For {@code ==>}, {@code <==} and
+	 * {@code <==>} each operand becomes a formula (an expression {@code e} becomes
+	 * {@code e = true}), and
+	 * {@link JavaOperatorSolver#getAlloyBinaryFormula(AlloyFormula, AlloyFormula, int)}
+	 * combines them. For any other operator both operands must translate to
+	 * expressions: an operand that is a {@code JmlSpecExpression} is translated by a new
+	 * {@code JmlExpressionVisitor} (pre-state, no compilation units), a method call by the
+	 * visitor's {@code visitMethodCallExpression}, anything else by accepting the visitor. Then
+	 * {@code <:} gives {@code instanceOf}, and every other operator goes to
+	 * {@link JavaOperatorSolver#getAlloyBinaryExpression} with the operands' JDynAlloy types
+	 * ({@link CTypeAdapter} of {@link #getType}). For a method call as the right operand the
+	 * visitor is cast to {@code JmlExpressionVisitor} (not for the left one), so with a plain
+	 * {@code ExpressionVisitor} that case throws a {@code ClassCastException}.
+	 *
+	 * @param expressionVisitor the visitor translating the enclosing expression
+	 * @param binaryExpression the expression
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return an {@code AlloyExpression} or an {@code AlloyFormula}, depending on the operator
+	 * @throws TacoNotImplementedYetException if an operand of a non-logical operator does not
+	 *         translate to an expression
+	 */
 	public static Object getBinaryExpression(
 			ExpressionVisitor expressionVisitor,
 			JBinaryExpression binaryExpression, int operator) {
@@ -233,6 +289,21 @@ public class ExpressionSolver {
 
 	}
 
+	/**
+	 * Translates a unary expression. For minus: with {@code useJavaArithmetic}, the int or long
+	 * negation function, and for any other operand type
+	 * {@link JavaOperatorSolver#getAlloyUnaryExpression} (int negation again); without it,
+	 * Alloy's integer negation. For other operators, an operand that translates to an expression
+	 * goes to {@link JavaOperatorSolver#getAlloyUnaryExpression}, and one that translates to a
+	 * formula is negated for {@code !}.
+	 *
+	 * @param expressionVisitor the visitor translating the enclosing expression
+	 * @param jUnaryExpression the expression
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return an {@code AlloyExpression} or an {@code AlloyFormula}
+	 * @throws TacoNotImplementedYetException for a formula operand and an operator other than
+	 *         {@code !}
+	 */
 	public static Object getUnaryExpression(
 			ExpressionVisitor expressionVisitor,
 			JUnaryExpression jUnaryExpression, int operator) {
@@ -291,6 +362,18 @@ public class ExpressionSolver {
 		}
 	}
 
+	/**
+	 * Translates the condition of an {@code if}, a loop or an assertion into a formula, after
+	 * removing one level of parentheses. Binary, equality and {@code instanceof} expressions and
+	 * method calls are taken from the visitor as formulas; the literal {@code true} becomes
+	 * {@code e = e} and {@code false} {@code not (e = e)}, where {@code e} is the literal's
+	 * translation; anything else (names, unary expressions) becomes {@code e = true} if it
+	 * translates to an expression {@code e}, or the formula itself.
+	 *
+	 * @param expressionVisitor the visitor to translate with
+	 * @param condition the condition
+	 * @return the formula
+	 */
 	public static AlloyFormula getConditionAsAlloyFormula(
 			ExpressionVisitor expressionVisitor, JExpression condition) {
 		if (condition instanceof JParenthesedExpression) {
@@ -330,6 +413,16 @@ public class ExpressionSolver {
 		return alloyFormula;
 	}
 
+	/**
+	 * Returns whether the type is {@code java.lang.Exception} or one of its subclasses, by
+	 * loading the class by name in TACO's own JVM ({@code Class.forName}); a class that cannot be
+	 * loaded counts as not an exception, and so does an {@code Error}. {@code ExpressionVisitor}
+	 * uses it, with {@code newExceptionsAreLiterals}, to translate {@code new} of an exception
+	 * into the exception's literal.
+	 *
+	 * @param ctype a class type
+	 * @return true if the class loads and is an {@code Exception}
+	 */
 	public static boolean isDescendentOfException(CType ctype) {
 		try {
 			Class<?> exceptionClass = Class.forName("java.lang.Exception");
@@ -344,6 +437,15 @@ public class ExpressionSolver {
 
 	}
 
+	/**
+	 * Returns {@code literalValue} reduced to what {@code bitwidth} bits can hold: its absolute
+	 * value modulo 2^(bitwidth-1), with its sign (so a multiple of 2^(bitwidth-1) becomes 0). Its
+	 * calls in {@code ExpressionVisitor} are commented out.
+	 *
+	 * @param literalValue the literal
+	 * @param bitwidth the integer bit width
+	 * @return the bounded value
+	 */
 	public static int preventBitwidthOverflow(int literalValue, int bitwidth) {
 
 		// max count of int represented by alloy

@@ -31,6 +31,15 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
  */
 public class JmlExpressionSolver {
 
+	/**
+	 * Returns the variable in the given state of a contract: primed ({@code varName'}) for the
+	 * post-state, plain for the pre-state. {@code JmlExpressionVisitor} uses it for fields and
+	 * for the {@code return} variable.
+	 *
+	 * @param varName the variable's name
+	 * @param instant {@code PRE_INSTANT} or {@code POST_INSTANT}
+	 * @return the variable expression
+	 */
 	public static ExprVariable buildInstantVariable(String varName,
 			Instant instant) {
 		if (instant == Instant.POST_INSTANT) {

@@ -60,6 +60,24 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprJoin;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code org_jmlspecs_models_JMLObjectSet}, TACO's model of JML's
+ * {@code JMLObjectSet}: a signature with no parent and two pure programs with specifications,
+ * {@code has(e)}, which returns whether the set contains {@code e} ({@code fun_set_contains}),
+ * and {@code int_size()} ({@code fun_set_size}). With {@code JMLObjectSetToAlloySet} (on in
+ * {@code config/genericTest.properties}) the signature is abstract, the module declares the
+ * field {@code JMLObjectSet_contains: org_jmlspecs_models_JMLObjectSet -> set univ}, and the
+ * programs apply those functions to {@code thiz} itself; without it there is no field, and the
+ * programs apply them to {@code thiz.JMLObjectSet_contains}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JJMLObjectSet}).
+ *
+ * <p>Unclear: as in {@link JJMLObjectSequence#getInstance()}, the field is declared only when
+ * the programs do not use it; whether the condition is inverted is an open question.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code JMLObjectSetToAlloySet} only then. Building it also builds the singleton of
+ * {@code JObject}, the type of {@code e}.
+ */
 public class JJMLObjectSet implements IBuiltInModule {
 
     public static final AlloyVariable CONTAINS_FIELD = new AlloyVariable("JMLObjectSet_contains");
@@ -69,6 +87,12 @@ public class JJMLObjectSet implements IBuiltInModule {
 
     private static JJMLObjectSet instance;
 
+    /**
+     * Returns the singleton, building its module on the first call with the configuration then in
+     * effect ({@code JMLObjectSetToAlloySet}).
+     *
+     * @return the singleton
+     */
     public static JJMLObjectSet getInstance() {
 	if (instance == null)
 	    instance = new JJMLObjectSet();

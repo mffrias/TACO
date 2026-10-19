@@ -38,10 +38,30 @@ import ar.edu.jdynalloy.xlator.JDynAlloyTyping;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_NegativeArraySizeException}, TACO's model of
+ * {@code java.lang.NegativeArraySizeException}, like {@link JThrowable}: a {@code one}
+ * signature extending {@code java_lang_RuntimeException}, abstract with
+ * {@code newExceptionsAreLiterals}, which also adds the literal signature
+ * {@code java_lang_NegativeArraySizeExceptionLit}; no fields; and, unlike the other exception
+ * modules, no programs, not even a {@code Constructor}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JNegativeArraySizeException}). The precompiled
+ * array modules ({@code java_lang_IntArray.djals}, {@code java_lang_ObjectArray.djals}, ...)
+ * set {@code throw} to the literal, so they need {@code newExceptionsAreLiterals}.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JNegativeArraySizeException implements IBuiltInModule {
 
 	private static JNegativeArraySizeException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JNegativeArraySizeException getInstance() {
 		if (instance == null)
 			instance = new JNegativeArraySizeException();

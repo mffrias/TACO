@@ -132,6 +132,28 @@ public class JJMLObjectSequence implements IBuiltInModule {
 
 	}
 
+	/**
+	 * Returns the singleton, building on the first call the built-in module
+	 * {@code org_jmlspecs_models_JMLObjectSequence}, TACO's model of JML's
+	 * {@code JMLObjectSequence} (described here, as the class comment only names its author). The
+	 * module has a signature with no parent and three pure programs with specifications:
+	 * {@code get(index)}, which requires {@code 0 <= index < size} and returns the element at
+	 * {@code index} ({@code fun_list_get}); {@code int_size()} ({@code fun_list_size}); and
+	 * {@code isEmpty()} ({@code fun_list_empty}). With {@code JMLObjectSequenceToAlloySequence}
+	 * (on in {@code config/genericTest.properties}) the signature is abstract, the module declares
+	 * the field {@code JMLObjectSequence_contains: org_jmlspecs_models_JMLObjectSequence -> seq
+	 * univ}, and the programs apply those functions to {@code thiz} itself; without it there is no
+	 * field, and the programs apply them to {@code thiz.JMLObjectSequence_contains}. Added by
+	 * {@code engine.PrecompiledModules} (key {@code JJMLObjectSequence}).
+	 *
+	 * <p>Unclear: the field is declared only when the programs do not use it; whether the
+	 * condition is inverted is an open question.
+	 *
+	 * <p>The singleton is never reset, and it reads {@code JMLObjectSequenceToAlloySequence} only
+	 * when it is built, so later runs in the same JVM keep the first run's choice.
+	 *
+	 * @return the singleton
+	 */
 	public static JJMLObjectSequence getInstance() {
 		if (instance == null)
 			instance = new JJMLObjectSequence();

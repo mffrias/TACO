@@ -28,6 +28,14 @@ import ar.edu.taco.TacoException;
  * 
  */
 public class MI_JavaLangInteger implements MethodInformationSupplier {
+	/**
+	 * Returns the information for {@code Integer.valueOf}: static, not a constructor, result typed
+	 * {@code int} ({@code CStdType.Integer}), receiver type {@code java_lang_Integer}.
+	 *
+	 * @param methodName the method's simple name
+	 * @return the information
+	 * @throws TacoException for any other name
+	 */
 	@Override
 	public ConcreteMethodInformation getInformationForMethod(String methodName) {
 		ConcreteMethodInformation concreteMethodInformation = new ConcreteMethodInformation();

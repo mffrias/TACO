@@ -34,12 +34,49 @@ import ar.edu.jdynalloy.factory.JTypeFactory;
 import ar.edu.jdynalloy.xlator.JType;
 import ar.edu.taco.TacoConfigurator;
 
+/**
+ * Translates the JML parser's types (MultiJava {@code CType}s) into JDynAlloy types
+ * ({@code JType}): for parameters, fields, local variables, results and operands, during
+ * the translation to JDynAlloy ({@code JDynAlloyASTVisitor}, {@code BlockStatementsVisitor},
+ * {@code ExpressionVisitor}, {@link MethodDeclarationSolver}). The result depends on
+ * {@code useJavaArithmetic}, and for JML model types on {@code JMLObjectSequenceToAlloySequence}
+ * and {@code JMLObjectSetToAlloySet}, read at each call. The two fields are never set, so an
+ * instance has no state that matters.
+ */
 final public class CTypeAdapter {
 
 	private JType alloyType;
 
 	private String signatureId;
 
+	/**
+	 * Returns the JDynAlloy type of a Java or JML type:
+	 * <ul>
+	 * <li>{@code boolean}: {@code boolean}.</li>
+	 * <li>Numbers, without {@code useJavaArithmetic}: {@code int}, {@code byte}, {@code long},
+	 *     {@code char} and {@code \bigint} are Alloy's {@code Int}. With it: {@code byte} and
+	 *     {@code int} are {@code JavaPrimitiveIntegerValue}, {@code long}
+	 *     {@code JavaPrimitiveLongValue}, {@code float} {@code JavaPrimitiveFloatValue} and
+	 *     {@code char} {@code JavaPrimitiveCharValue}.</li>
+	 * <li>One-dimensional arrays: {@code int[]} and {@code \bigint[]} are
+	 *     {@code java_lang_IntArray+null}, {@code byte[]} and {@code long[]}
+	 *     {@code java_lang_LongArray+null}, {@code char[]} {@code java_lang_CharArray+null},
+	 *     arrays whose element type is a {@code CClassNameType} of a class
+	 *     {@code java_lang_ObjectArray+null}. Two-dimensional: only {@code int[][]}, as
+	 *     {@code java_lang_IntArray2d+null}.</li>
+	 * <li>Class types: {@code JMLObjectSequence} and {@code JMLObjectSet} are Alloy sequences
+	 *     and sets of {@code java_lang_Object} when their configuration key is on; any other
+	 *     class {@code C} is {@code C+null}, with {@code C} written as
+	 *     {@link JavaClassNameNormalizer} does. {@code JavaSignatures} is looked up with the
+	 *     simple class name, which is never one of its keys, so it changes nothing.</li>
+	 * <li>{@code void}: null.</li>
+	 * </ul>
+	 *
+	 * @param ctype the type
+	 * @return the JDynAlloy type, or null for {@code void}
+	 * @throws IllegalArgumentException for any other type ({@code double}, {@code short},
+	 *         {@code float} without Java arithmetic, other arrays, type variables, ...)
+	 */
 	public JType translate(CType ctype) {
 		if (ctype instanceof CBooleanType) {
 			return translateBoolean((CBooleanType) ctype);
@@ -180,10 +217,21 @@ final public class CTypeAdapter {
 		return JSignatureFactory.BOOLEAN.getType();
 	}
 
+	/**
+	 * Returns the field {@code alloyType}, which nothing sets.
+	 *
+	 * @return null
+	 */
 	public JType getAlloyType() {
 		return alloyType;
 	}
 
+	/**
+	 * Returns the field {@code signatureId}, which nothing sets ({@link #translate} assigns a
+	 * local variable of the same name).
+	 *
+	 * @return null
+	 */
 	public String getBaseSignatureId() {
 		return signatureId;
 	}

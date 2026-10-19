@@ -41,6 +41,12 @@ public class MethodInformationBuilder {
 	private MethodInformationBuilder() {
 	}
 	
+	/**
+	 * Returns the single builder, created on first use and kept for the whole JVM. It holds no
+	 * other state, so sharing it between runs has no effect.
+	 *
+	 * @return the builder
+	 */
 	public static MethodInformationBuilder getInstance() {
 		if (INSTANCE == null) {
 			INSTANCE = new MethodInformationBuilder(); 
@@ -48,6 +54,32 @@ public class MethodInformationBuilder {
 		return INSTANCE;
 	}
 	
+	/**
+	 * Returns what the translation needs to know about a called method: whether it is static or a
+	 * constructor, its return type, and the class that declares it. There are three cases:
+	 * <ul>
+	 * <li>The parser resolved the method ({@code method()} is not null): static and constructor
+	 *     come from the method, the return type from the call's type (left null if it has none),
+	 *     and the receiver type is the method's receiver type through
+	 *     {@code JavaClassNameNormalizer} ({@code pkg_Class}). Here {@code isModelMethod} is
+	 *     computed as "no prefix and no method", which is always false.</li>
+	 * <li>Not resolved, and the prefix is a local variable or a name: a model method, not static,
+	 *     not a constructor, returning the call's type or {@code java.lang.Object}; no receiver
+	 *     type.</li>
+	 * <li>Otherwise the prefix is taken as a type: its printed form is split at {@code /}, each
+	 *     part capitalized ({@code java/lang/Integer} gives {@code JavaLangInteger}), and the
+	 *     {@link MethodInformationSupplier} {@code MI_<that>} of this package is instantiated by
+	 *     reflection and asked about the method's name.</li>
+	 * </ul>
+	 * Callers: {@code ExpressionVisitor}, {@code ExpressionVisitorWithNewParamsInMethodCall},
+	 * {@code ESExpressionVisitor} and {@code JMethodCallExpressionExtensiorForMethodInformation}.
+	 *
+	 * @param jMethodCallExpression the call
+	 * @return the information; null if the supplier class of the third case does not exist or
+	 *         cannot be instantiated (the stack trace is printed), which callers do not expect.
+	 *         The third case throws a {@code NullPointerException} if the call has no prefix, and
+	 *         the supplier throws {@code ar.edu.taco.TacoException} for a method it does not know
+	 */
 	public MethodInformation getMethodInformation(JMethodCallExpression jMethodCallExpression) {
 		ConcreteMethodInformation concreteMethodInformation = null;
 		

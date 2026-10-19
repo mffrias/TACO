@@ -48,6 +48,21 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_util_NoSuchElementException}, TACO's model of
+ * {@code java.util.NoSuchElementException}, like {@link JThrowable}: a {@code one} signature
+ * extending {@code java_lang_Exception} (in Java the class extends {@code RuntimeException}),
+ * abstract with {@code newExceptionsAreLiterals}, which also adds the literal signature
+ * {@code java_util_NoSuchElementExceptionLit}; with {@code useClassSingletons}, the class
+ * singleton {@code java_util_NoSuchElementExceptionClass} (extending {@code Class}, see
+ * {@link JClass}); no fields; and a {@code Constructor} with only {@code thiz} and
+ * {@code throw} and the body {@code skip}. Added by {@code engine.PrecompiledModules} (key
+ * {@code JNoSuchElementException}). The precompiled {@code java_util_Iterator.djals} sets
+ * {@code throw} to the literal, so it needs {@code newExceptionsAreLiterals}.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} and {@code useClassSingletons} only then.
+ */
 public class JNoSuchElementException implements IBuiltInModule {
 
 	// public static final JBindingKey
@@ -56,6 +71,14 @@ public class JNoSuchElementException implements IBuiltInModule {
 
 	private static JNoSuchElementException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}, {@code useClassSingletons}).
+	 *
+	 * @return the singleton
+	 * @throws java.util.NoSuchElementException on the first call, if {@code useClassSingletons} is
+	 *         not set (TACO's configuration has no default for it)
+	 */
 	public static JNoSuchElementException getInstance() {
 		if (instance == null)
 			instance = new JNoSuchElementException();

@@ -47,11 +47,32 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_ArithmeticException}, TACO's model of
+ * {@code java.lang.ArithmeticException}, like {@link JThrowable}: a {@code one} signature
+ * extending {@code java_lang_RuntimeException}, abstract with {@code newExceptionsAreLiterals},
+ * which also adds the literal signature {@code java_lang_ArithmeticExceptionLit}; no fields;
+ * and a {@code Constructor} with only {@code thiz} and {@code throw} and the body {@code skip}.
+ * Added by {@code engine.PrecompiledModules} (key {@code JArithmeticException}).
+ *
+ * <p>With Java arithmetic and {@code checkArithmeticException}, {@link AuxiliaryConstantsFactory}
+ * sets {@code throw} to the literal on an {@code int} or {@code long} division by zero, which
+ * needs {@code newExceptionsAreLiterals} (see there).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JArithmeticException implements IBuiltInModule {
 
 
 	private static JArithmeticException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JArithmeticException getInstance() {
 		if (instance == null)
 			instance = new JArithmeticException();

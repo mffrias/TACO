@@ -159,6 +159,28 @@ public class MethodDeclarationSolver {
 	}
 
 
+	/**
+	 * Builds the declaration of a pure method's program, without a body. It differs from
+	 * {@code getMethodDeclaration}: the program has the bare method name, without the declaring
+	 * class (see docs/METHOD-NAMING.md for the names {@code getMethodDeclaration} gives); its
+	 * parameters have no {@code throw} ({@link ArgEncoder#encodePure}); every spec case loses its
+	 * {@code modifies}; and the input to fix is passed on whatever {@code methodToCheck} is. As
+	 * there, {@code non_null} parameters add {@code requires} to the existing spec cases only, and
+	 * the nullity {@code ensures} are computed and dropped. Nothing calls it.
+	 *
+	 * @param methodDeclaration the pure method
+	 * @param buffer the module being built: its {@code thiz} type and signature
+	 * @param modulesObjectState for each module, its fields in the data group {@code objectState}
+	 * @param modulesNoStaticFields for each module, its non-static fields
+	 * @param varsResultOfArithmeticOperationsInObjectInvariants the variables that encode the
+	 *        arithmetic of the object invariants; only their number is used, to decide whether
+	 *        there are arguments
+	 * @param predsResultOfArithmeticOperationsInObjectInvariants their predicates; not used
+	 * @param compilationUnits the parsed compilation units, for the {@code JmlExpressionVisitor}
+	 *        that translates the specification
+	 * @param inputToFix the input to fix, or null (see docs/SPEC-OUTPUT.md, "inputToFix")
+	 * @return the program declaration, with a null body
+	 */
 	public static JProgramDeclaration getPureMethodDeclaration(JmlMethodDeclaration methodDeclaration, DynJMLAlloyModuleBuffer buffer, 
 			Map<String, List<String>> modulesObjectState, Map<String, 
 			List<String>> modulesNoStaticFields,

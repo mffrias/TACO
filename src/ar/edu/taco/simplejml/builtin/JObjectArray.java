@@ -58,6 +58,20 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
 
 
+/**
+ * Builds a module {@code java_lang_ObjectArray}, a model of object arrays: a signature
+ * extending {@code java_lang_Object}, the fields {@code java_lang_ObjectArray_contents} and
+ * {@code java_lang_ObjectArray_length} (indexed and sized by {@code JavaPrimitiveIntegerValue}
+ * with {@code useJavaArithmetic}, by {@code Int} without it), and a
+ * {@code Constructor(length)} that assumes
+ * {@code arrayLength[java_lang_ObjectArray_length, thiz] = length}. Nothing uses this class:
+ * {@code engine.PrecompiledModules} takes the object-array module from
+ * {@code java_lang_ObjectArray.djals} (or {@code java_lang_AlloyIntObjectArray.djals} without
+ * {@code useJavaArithmetic}). Unclear: whether it is still needed is an open question.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code useJavaArithmetic} only then.
+ */
 public class JObjectArray implements IBuiltInModule {
 	private final JDynAlloyModule module;
 
@@ -138,6 +152,12 @@ public class JObjectArray implements IBuiltInModule {
 
 	private static JObjectArray instance = null;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code useJavaArithmetic}). Nothing calls it.
+	 *
+	 * @return the singleton
+	 */
 	public static JObjectArray getInstance() {
 		if (instance == null)
 			instance = new JObjectArray();

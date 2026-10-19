@@ -21,6 +21,36 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the fresh variables and the predicate call that stand for a Java-arithmetic addition,
+ * subtraction, multiplication, division or remainder in a JML expression
+ * ({@code JmlExpressionVisitor}, with {@code useJavaArithmetic}; except for {@code %}, only
+ * when no operand mentions a quantified variable); {@link AuxiliaryConstantsFactory} does the
+ * same for method bodies. Each builder returns a result variable
+ * {@code SK_jml_<predicate>_<op>_ARG_result_<n>}, a second variable
+ * ({@code ..._ARG_overflow_<n>}, {@code ..._ARG_compatibility_<n>} or
+ * {@code ..._ARG_remainder_<n>}) and the call {@code <predicate>[left, right, result,
+ * second]}, where {@code <op>} is {@code add}, {@code minus}, {@code mult}, {@code divide} or
+ * {@code modulo}. Nothing is declared here: the caller types the two variables, adds them and
+ * the call to its requires/ensures lists when it translates a contract (to its math-operations
+ * lists otherwise), and uses the result (the remainder, for {@code %}) in place of the
+ * operation. The call is to the operation's real
+ * predicate, defined in the {@code .als} files of this package ({@code Integer32.als},
+ * {@code Long64.als}, {@code Float32.als}, ...), except for the {@code long},
+ * {@code char}-by-{@code int} and {@code char}-by-{@code long} divisions, which call marker
+ * predicates, whose bodies are empty; their variables are still named after the real
+ * predicate. Other classes recognise these variables by name
+ * ({@code alloy.sbp.JDynAlloyClassHierarchy} by the prefix {@code SK_jml_pred_java_primitive},
+ * {@code ResultVariableNamesCollectorVisitor} by {@code ARG_result}), so the names are a
+ * contract.
+ *
+ * <p>Unclear: nothing here constrains the quotient and the remainder of the three divisions
+ * that call marker predicates (the {@code int} division calls the real one); whether something
+ * else does was not checked.
+ *
+ * <p>Static state: one counter per builder, starting at -1 and never reset, so the {@code n}
+ * in the names keeps growing over the runs in one JVM.
+ */
 public abstract class JMLAuxiliaryConstantsFactory {
 
 	private static abstract class JMLAuxiliaryConstants {
@@ -41,6 +71,11 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * The result of an addition builder: {@code pred}, the predicate call;
+	 * {@code result_variable}, the sum; and {@code overflow_or_compatibility_variable}, the
+	 * overflow flag (the compatibility flag for {@code float}).
+	 */
 	public final static class JMLAddAuxiliaryConstants extends JMLAuxiliaryConstants {
 
 
@@ -82,6 +117,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	private static int char_char_jml_add_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the variables and predicate call that stand for an {@code int} addition in a JML
+	 * expression ({@code pred_java_primitive_integer_value_add}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the overflow flag
+	 */
 	public static JMLAddAuxiliaryConstants build_integer_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_add_auxiliary_index = ++integer_jml_add_auxiliary_index;
@@ -104,6 +148,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code int + char} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_addIntCharToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the overflow flag
+	 */
 	public static JMLAddAuxiliaryConstants build_integer_char_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_add_auxiliary_index = ++integer_char_jml_add_auxiliary_index;
@@ -126,6 +180,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char + int} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_addCharIntToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the overflow flag
+	 */
 	public static JMLAddAuxiliaryConstants build_char_integer_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_add_auxiliary_index = ++char_integer_jml_add_auxiliary_index;
@@ -148,6 +212,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char + char} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_addCharCharToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the overflow flag
+	 */
 	public static JMLAddAuxiliaryConstants build_char_char_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_add_auxiliary_index = ++char_char_jml_add_auxiliary_index;
@@ -172,6 +246,14 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 	private static int long_jml_add_auxiliary_index = -1;
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code long} addition in a JML
+	 * expression ({@code pred_java_primitive_long_value_add}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the overflow flag
+	 */
 	public static JMLAddAuxiliaryConstants build_long_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_add_auxiliary_index = ++long_jml_add_auxiliary_index;
@@ -196,6 +278,14 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 	private static int float_add_auxiliary_index = -1;
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code float} addition in a JML
+	 * expression ({@code pred_java_primitive_float_value_add}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the sum and the compatibility flag
+	 */
 	public static JMLAddAuxiliaryConstants build_float_add_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int add_auxiliary_index = ++float_add_auxiliary_index;
@@ -220,6 +310,11 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	//-------------- MINUS --------------//
 
 
+	/**
+	 * The result of a subtraction builder: {@code pred}, the predicate call;
+	 * {@code result_variable}, the difference; and {@code overflow_or_compatibility_variable}, the
+	 * overflow flag (the compatibility flag for {@code float}).
+	 */
 	public final static class JMLMinusAuxiliaryConstants extends JMLAuxiliaryConstants {
 
 		public JMLMinusAuxiliaryConstants(PredicateFormula pred, ExprVariable ret_variable, ExprVariable overflow_variable) {
@@ -260,6 +355,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	private static int float_jml_minus_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the variables and predicate call that stand for an {@code int} subtraction in a JML
+	 * expression ({@code pred_java_primitive_integer_value_sub}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the overflow flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_integer_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++integer_jml_minus_auxiliary_index;
@@ -281,6 +385,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 		return subAuxiliaryConstants;
 	}
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char - int} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_subCharIntToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the overflow flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_char_integer_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++char_integer_jml_minus_auxiliary_index;
@@ -301,6 +415,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 		return subAuxiliaryConstants;
 	}
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code int - char} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_subIntCharToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the overflow flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_integer_char_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++integer_char_jml_minus_auxiliary_index;
@@ -322,6 +446,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char - char} (an {@code int})
+	 * in a JML expression
+	 * ({@code pred_java_primitive_char_value_subCharCharToJavaPrimitiveIntegerValue}). Increments
+	 * this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the overflow flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_char_char_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++char_char_jml_minus_auxiliary_index;
@@ -343,6 +477,14 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code long} subtraction in a JML
+	 * expression ({@code pred_java_primitive_long_value_sub}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the overflow flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_long_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++long_jml_minus_auxiliary_index;
@@ -365,6 +507,14 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code float} subtraction in a JML
+	 * expression ({@code pred_java_primitive_float_value_sub}). Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the difference and the compatibility flag
+	 */
 	public static JMLMinusAuxiliaryConstants build_float_minus_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_minus_auxiliary_index = ++float_jml_minus_auxiliary_index;
@@ -395,6 +545,12 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 	//-------------- MULT --------------//
 
+	/**
+	 * The result of a multiplication builder: {@code pred}, the predicate call;
+	 * {@code result_variable}, the product; and {@code overflow_or_compatibility_variable}, the
+	 * overflow flag (named so for {@code float} too, where the predicate takes a compatibility
+	 * argument).
+	 */
 	public final static class JMLMultAuxiliaryConstants extends JMLAuxiliaryConstants {
 
 
@@ -416,6 +572,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	private static int char_long_jml_mul_auxiliary_index = -1;
 
 
+	/**
+	 * Returns the variables and predicate call that stand for an {@code int} multiplication in a
+	 * JML expression ({@code pred_java_primitive_integer_value_mul}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the product and the overflow flag
+	 */
 	public static JMLMultAuxiliaryConstants build_integer_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++integer_jml_mul_auxiliary_index;
@@ -438,6 +603,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 	
 	
+	/**
+	 * Returns the variables and predicate call that stand for {@code char * int} (an {@code int})
+	 * in a JML expression ({@code pred_java_primitive_char_value_int_mul}). Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the product and the overflow flag
+	 */
 	public static JMLMultAuxiliaryConstants build_char_int_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++char_int_jml_mul_auxiliary_index;
@@ -460,6 +634,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 	
 	
+	/**
+	 * Returns the variables and predicate call that stand for {@code char * long} (a {@code long})
+	 * in a JML expression ({@code pred_java_primitive_char_value_long_mul}). Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the product and the overflow flag
+	 */
 	public static JMLMultAuxiliaryConstants build_char_long_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++char_long_jml_mul_auxiliary_index;
@@ -483,6 +666,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code long} multiplication in a
+	 * JML expression ({@code pred_java_primitive_long_value_mul}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the product and the overflow flag
+	 */
 	public static JMLMultAuxiliaryConstants build_long_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++long_jml_mul_auxiliary_index;
@@ -501,6 +693,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code float} multiplication in a
+	 * JML expression ({@code pred_java_primitive_float_value_mul}). Unlike the {@code float}
+	 * addition and subtraction, the second variable is named {@code overflow}. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the product and the predicate's compatibility argument, named overflow
+	 */
 	public static JMLMultAuxiliaryConstants build_float_mult_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int current_mul_auxiliary_index = ++float_mul_auxiliary_index;
@@ -546,6 +748,11 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 	//-------------- DIV --------------//
 
+	/**
+	 * The result of a division builder: {@code pred}, the predicate call; {@code result_variable},
+	 * the quotient; and {@code remainder}, the remainder.
+	 * {@code overflow_or_compatibility_variable} is null.
+	 */
 	public final static class JMLDivAuxiliaryConstants extends JMLAuxiliaryConstants {
 
 		public ExprVariable remainder;
@@ -586,6 +793,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the variables and predicate call that stand for an {@code int} division in a JML
+	 * expression ({@code pred_java_primitive_integer_value_div_rem}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder
+	 */
 	public static JMLDivAuxiliaryConstants build_integer_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int div_auxiliary_index = ++integer_divide_auxiliary_index;
@@ -603,6 +819,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code long} division in a JML
+	 * expression (the marker {@code pred_java_primitive_long_value_div_rem_marker}, whose body is
+	 * empty). The variables are named after {@code pred_java_primitive_long_value_div_rem}. See
+	 * the class comment. Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder
+	 */
 	public static JMLDivAuxiliaryConstants build_long_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int div_auxiliary_index = ++long_divide_auxiliary_index;
@@ -624,6 +850,16 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code float} division in a JML
+	 * expression ({@code pred_java_primitive_float_value_div}). The second variable is named
+	 * {@code remainder}, although the predicate's fourth argument is a compatibility argument.
+	 * Increments this builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the predicate's fourth argument, named remainder
+	 */
 	public static JMLDivAuxiliaryConstants build_float_divide_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int div_auxiliary_index = ++float_divide_auxiliary_index;
@@ -649,6 +885,11 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 	//-------------- MOD --------------//
 
+	/**
+	 * The result of a remainder builder: {@code pred}, the predicate call (the division's);
+	 * {@code result_variable}, the quotient; and {@code remainder}, the remainder, which is the
+	 * value of {@code %}. {@code overflow_or_compatibility_variable} is null.
+	 */
 	public final static class JMLModuloAuxiliaryConstants extends JMLAuxiliaryConstants {
 
 		public ExprVariable remainder;
@@ -698,6 +939,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 
 
 
+	/**
+	 * Returns the variables and predicate call that stand for an {@code int} remainder in a JML
+	 * expression ({@code pred_java_primitive_integer_value_div_rem}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder, which is the value of {@code %}
+	 */
 	public static JMLModuloAuxiliaryConstants build_integer_modulo_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int mod_auxiliary_index = ++integer_modulo_auxiliary_index;
@@ -715,6 +965,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for a {@code long} remainder in a JML
+	 * expression ({@code pred_java_primitive_long_value_div_rem}). Increments this builder's
+	 * counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder, which is the value of {@code %}
+	 */
 	public static JMLModuloAuxiliaryConstants build_long_modulo_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 
 		final int mod_auxiliary_index = ++long_modulo_auxiliary_index;
@@ -733,6 +992,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char % int} (an {@code int})
+	 * in a JML expression ({@code pred_java_primitive_char_int_value_div_rem}). Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder, which is the value of {@code %}
+	 */
 	public static JMLModuloAuxiliaryConstants build_char_modulo_int_auxiliary_constants(AlloyExpression left, AlloyExpression right) {
 		final int mod_auxiliary_index = ++char_modulo_int_auxiliary_index;
 		final String predicate_id = JPredicateFactory.PRED_JAVA_PRIMITIVE_CHAR_INT_VALUE_DIV_REM;
@@ -751,6 +1019,15 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char % long} (a {@code long})
+	 * in a JML expression ({@code pred_java_primitive_char_long_value_div_rem}). Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder, which is the value of {@code %}
+	 */
 	public static JMLModuloAuxiliaryConstants build_char_modulo_long_auxiliary_constants(AlloyExpression left,
 			AlloyExpression right) {
 		final int mod_auxiliary_index = ++char_modulo_long_auxiliary_index;
@@ -793,6 +1070,17 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char / int} (an {@code int})
+	 * in a JML expression (the marker {@code pred_java_primitive_char_value_div_rem_int_marker},
+	 * whose body is empty). The variables are named after
+	 * {@code pred_java_primitive_char_int_value_div_rem}. See the class comment. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder
+	 */
 	public static JMLDivAuxiliaryConstants build_char_int_divide_auxiliary_constants(AlloyExpression left,
 			AlloyExpression right) {
 		final int div_auxiliary_index = ++char_int_divide_auxiliary_index;
@@ -812,6 +1100,19 @@ public abstract class JMLAuxiliaryConstantsFactory {
 	}
 
 
+	/**
+	 * Returns the variables and predicate call that stand for {@code char / long} (a {@code long})
+	 * in a JML expression
+	 * ({@code JPredicateFactory.PRED_JAVA_PRIMITIVE_CHAR_VALUE_DIV_REM_LONG_MARKER}, whose value
+	 * is nevertheless {@code pred_java_primitive_char_value_div_rem_int_marker}, the {@code int}
+	 * marker, with an empty body). The variables are named after
+	 * {@code pred_java_primitive_char_long_value_div_rem}. See the class comment. Increments this
+	 * builder's counter.
+	 *
+	 * @param left the left operand
+	 * @param right the right operand
+	 * @return the call, the quotient and the remainder
+	 */
 	public static JMLDivAuxiliaryConstants build_char_long_divide_auxiliary_constants(AlloyExpression left,
 			AlloyExpression right) {
 		final int div_auxiliary_index = ++char_long_divide_auxiliary_index;

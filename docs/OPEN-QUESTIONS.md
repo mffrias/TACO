@@ -112,6 +112,16 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 24. **`switch`** (`simplejml/BlockStatementsVisitor`, `visitSwitchStatement`): every group is
     translated and runs, in order; the selector is translated but not used, and the case labels
     are ignored. Is `switch` meant to be supported?
+25. **The receiver in the pre-state** (`simplejml/helpers/ExpressionSolver`): for `this`, it
+    gives the primed `thiz'` when the visitor is a `JmlExpressionVisitor` in the pre-state, the
+    opposite of `JmlExpressionVisitor.visitThisExpression` and of
+    `JmlExpressionSolver.buildInstantVariable`; and `JmlExpressionVisitor` overrides
+    `visitMethodCallExpression` without calling it. Is that branch reached, and is it right?
+26. **`JavaSignatures`** (`simplejml/helpers`) maps `java_util_HashSet`, `java_util_HashMap` and
+    `java_util_LinkedList` to `java_util_Set`, `Map` and `List`, but its only user,
+    `CTypeAdapter`, looks it up by the simple name (`HashSet`), which is never a key, so the
+    mapping has no effect. Should the keys or the lookup change, or is the mapping no longer
+    wanted (`java_util_HashSet` now has its own precompiled module)?
 27. **Passes that find nothing to do** (`jml/loop/LSBlockVisitor`, `WhileBlockVisitor`):
     `ASTSimplifierManager` runs them after `ForRemoverVisitor` and `WhileRemoverSimplifier` have
     already removed the `for` and `while` loops they handle, so in the current pipeline both
@@ -175,3 +185,29 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     override does what the inherited one does), and `ResultVariableNamesCollectorVisitor` and
     `VariableNameCollectorVisitor` (used only by two private methods of `JmlExpressionVisitor`,
     one never called and one called only from commented-out code). Can they go?
+41. **Two `java_lang_Integer` modules** (`simplejml/builtin/JInteger.java`):
+    `engine.PrecompiledModules` adds the module this class builds and, under the same key,
+    `java_lang_Integer.djals` (or `java_lang_Integer_JavaPrimitiveIntegerValue.djals`), which
+    declares a module of the same name. The analysis uses the parsed one: it is added later, and
+    jDynAlloy's `DynAlloyLinker` keeps the later of two modules with the same id (checked by
+    running TACO, 2026-10-20; docs/FIXES-FOR-MASTER.md, F8). Is the Java-built one still needed?
+42. **`System.currentTimeMillis()`** (`simplejml/builtin/JSystem.java`): does a static call bind to
+    this program? TACO names the call `java_lang_System_currentTimeMillis`; the program's first
+    parameter is `thiz`, and `JBindingKey` keys such programs by their bare name.
+43. **The `Class` module's names** (`simplejml/builtin/JClass.java`): the module is
+    `java_lang_Class` and the signature `Class`, but jDynAlloy's docs/LANGUAGE.md says the two must
+    match. `JSignatureFactory.buildClassSingleton` extends `java_lang_Class` with the qualified
+    name, which TACO always uses, while the exception builders hard-code `Class`. Which name is
+    intended? (It matters only with `useClassSingletons`, false in every configuration.)
+44. **`JObjectArray`** (`simplejml/builtin/JObjectArray.java`): nothing references it; the
+    object-array module comes from `java_lang_ObjectArray.djals` or
+    `java_lang_AlloyIntObjectArray.djals`. Can it go?
+45. **Divisions that only call markers** (`simplejml/builtin/JMLAuxiliaryConstantsFactory.java`,
+    lines 843, 1095, 1127): in JML contracts, the `long`, `char`/`int` and `char`/`long` divisions
+    call marker predicates with empty bodies, while the `int` division and the `%` builders call
+    the real predicates. Is anything else meant to constrain those quotients?
+46. **The `contains` field of the JML collection models**
+    (`simplejml/builtin/models/JJMLObjectSequence.java:100` vs 173, 202, 235;
+    `models/JJMLObjectSet.java:110` vs 123, 152, 184): the field is declared only when
+    `JMLObjectSequenceToAlloySequence` / `JMLObjectSetToAlloySet` is on, but the programs use it
+    only when the option is off (when it is on they use `thiz` itself). Is the condition inverted?

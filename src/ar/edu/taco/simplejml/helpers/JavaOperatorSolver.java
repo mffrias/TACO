@@ -1173,6 +1173,37 @@ public class JavaOperatorSolver {
 		}
 	}
 
+	/**
+	 * Translates a binary operator applied to two translated operands:
+	 * <ul>
+	 * <li>{@code + - * / %}, shifts and {@code < <= > >=}: by the solver for the operands'
+	 *     types. With {@code useJavaArithmetic} there is one per pair of JavaPrimitive*Value
+	 *     types (int, long, float and char with themselves; char-int, int-char, long-char,
+	 *     long-int and int-long), which gives the Java-arithmetic functions
+	 *     ({@code fun_java_primitive_...}) and predicates ({@code pred_java_primitive_...});
+	 *     without it, Alloy's integer arithmetic.</li>
+	 * <li>{@code |} and {@code &}: {@code boolean_or} and {@code boolean_and}.</li>
+	 * <li>{@code ==}: with {@code useJavaArithmetic} and two primitive operands, the solver for
+	 *     their types (booleans included; {@code pred_java_primitive_float_value_eq} for floats);
+	 *     otherwise Alloy equality.</li>
+	 * <li>{@code !=}: Alloy inequality, or {@code pred_java_primitive_float_value_neq} for
+	 *     floats. The right operand's type is read from {@code expression_types[0]}, like the
+	 *     left one's, so only the left type is tested, and the replacement of an int literal
+	 *     compared with a char by the char literal never happens.</li>
+	 * <li>{@code ==>} and {@code <==}: implications between the operands lifted to
+	 *     formulas.</li>
+	 * </ul>
+	 *
+	 * @param expression_types the operands' JDynAlloy types
+	 * @param alloyExpression the two operands
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return an {@code AlloyExpression} (arithmetic) or an {@code AlloyFormula} (comparisons);
+	 *         the boolean solver returns null for everything but {@code ==}
+	 * @throws TacoException if no solver exists for the pair of types (with Java arithmetic)
+	 * @throws TacoNotImplementedYetException for {@code ^}, {@code ~}, {@code !}, {@code &&},
+	 *         {@code ||} and other operators; some solvers throw for operators they lack, such
+	 *         as {@code <<} on ints
+	 */
 	public static Object getAlloyBinaryExpression(JType[] expression_types,
 			AlloyExpression[] alloyExpression, int operator) {
 		switch (operator) {
@@ -1308,6 +1339,16 @@ public class JavaOperatorSolver {
 		
 	}
 
+	/**
+	 * Translates a unary operator applied to an expression: minus is integer negation
+	 * ({@code fun_java_primitive_integer_value_negate} with {@code useJavaArithmetic}, whatever
+	 * the operand's type; Alloy's otherwise), and {@code !} is {@code JExpressionFactory.not}.
+	 *
+	 * @param alloyExpression the operand
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return the expression
+	 * @throws TacoNotImplementedYetException for other operators
+	 */
 	public static Object getAlloyUnaryExpression(
 			AlloyExpression alloyExpression, int operator) {
 		switch (operator) {
@@ -1328,6 +1369,16 @@ public class JavaOperatorSolver {
 		}
 	}
 
+	/**
+	 * Combines two formulas: {@code ==>} is an implication, {@code <==} the reverse one, and
+	 * {@code <==>} the conjunction of both.
+	 *
+	 * @param leftSide the left formula
+	 * @param rightSide the right formula
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return the formula
+	 * @throws TacoNotImplementedYetException for other operators
+	 */
 	public static AlloyFormula getAlloyBinaryFormula(AlloyFormula leftSide,
 			AlloyFormula rightSide, int operator) {
 		switch (operator) {
@@ -1352,6 +1403,14 @@ public class JavaOperatorSolver {
 		}
 	}
 
+	/**
+	 * Negates a formula for {@code !}.
+	 *
+	 * @param af the formula
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return the negated formula
+	 * @throws TacoNotImplementedYetException for other operators
+	 */
 	public static AlloyFormula getAlloyUnaryFormula(AlloyFormula af, int operator){
 		switch (operator){
 		case Constants.OPE_LNOT:
@@ -1362,6 +1421,16 @@ public class JavaOperatorSolver {
 		}
 	}
 
+	/**
+	 * Translates {@code <:} (subtype) into {@code instanceOf[left, right]}, with the right operand
+	 * printed as a signature name.
+	 *
+	 * @param leftExpression the object
+	 * @param righExpression the type
+	 * @param operator the operator, a JML {@code Constants.OPE_...} value
+	 * @return the formula
+	 * @throws TacoNotImplementedYetException for other operators
+	 */
 	public static AlloyFormula getAlloyBinaryFormula(
 			AlloyExpression leftExpression, AlloyExpression righExpression,
 			int operator) {

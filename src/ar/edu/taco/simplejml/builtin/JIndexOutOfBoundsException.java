@@ -51,10 +51,35 @@ import ar.edu.taco.simplejml.helpers.ArgEncoder;
 import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Builds the built-in module {@code java_lang_IndexOutOfBoundsException}, TACO's model of
+ * {@code java.lang.IndexOutOfBoundsException}, like {@link JThrowable}: a {@code one} signature
+ * extending {@code java_lang_RuntimeException}, abstract with {@code newExceptionsAreLiterals},
+ * which also adds the literal signature {@code java_lang_IndexOutOfBoundsExceptionLit}; with
+ * {@code useClassSingletons}, the class singleton {@code java_lang_IndexOutOfBoundsExceptionClass}
+ * (extending {@code Class}, see {@link JClass}); no fields; and a {@code Constructor} with only
+ * {@code thiz} and {@code throw} and the body {@code skip}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JIndexOutOfBoundsException}).
+ *
+ * <p>The precompiled array and list modules ({@code java_lang_IntArray.djals},
+ * {@code java_lang_ObjectArray.djals}, {@code java_util_List_int.djals}, ...) set
+ * {@code throw} to the literal, so they need {@code newExceptionsAreLiterals}.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} and {@code useClassSingletons} only then.
+ */
 public class JIndexOutOfBoundsException implements IBuiltInModule {
 
 	private static JIndexOutOfBoundsException instance;
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}, {@code useClassSingletons}).
+	 *
+	 * @return the singleton
+	 * @throws java.util.NoSuchElementException on the first call, if {@code useClassSingletons} is
+	 *         not set (TACO's configuration has no default for it)
+	 */
 	public static JIndexOutOfBoundsException getInstance() {
 		if (instance == null)
 			instance = new JIndexOutOfBoundsException();

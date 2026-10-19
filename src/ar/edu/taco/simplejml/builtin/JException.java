@@ -53,6 +53,17 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
 
 
+/**
+ * Builds the built-in module {@code java_lang_Exception}, TACO's model of
+ * {@code java.lang.Exception}, like {@link JThrowable}: a signature extending
+ * {@code java_lang_Throwable}, abstract with {@code newExceptionsAreLiterals}, which also adds
+ * the literal signature {@code java_lang_ExceptionLit}; no fields; and a {@code Constructor}
+ * with only {@code thiz} and {@code throw} and the body {@code skip}. Added by
+ * {@code engine.PrecompiledModules} (key {@code JException}).
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset; it
+ * reads {@code newExceptionsAreLiterals} only then.
+ */
 public class JException implements IBuiltInModule {
 
 	private static JException instance;
@@ -127,6 +138,12 @@ public class JException implements IBuiltInModule {
 	//		return bindings;
 	//	}
 
+	/**
+	 * Returns the singleton, building its module on the first call with the configuration then in
+	 * effect ({@code newExceptionsAreLiterals}).
+	 *
+	 * @return the singleton
+	 */
 	public static JException getInstance() {
 		if (instance == null)
 			instance = new JException();

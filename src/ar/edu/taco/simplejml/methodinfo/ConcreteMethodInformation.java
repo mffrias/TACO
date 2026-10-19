@@ -116,6 +116,12 @@ public class ConcreteMethodInformation implements MethodInformation {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.pipeline.javatodynjalloy.methodinfo.MethodInformation#hasReturnType()
 	 */
+	/**
+	 * Returns whether a return type is set and is not {@code void} (its verbose name compared with
+	 * {@code "void"}, ignoring case).
+	 *
+	 * @return true if the method returns a value
+	 */
 	@Override
 	public boolean hasReturnType() {
 		return (this.returnType != null && !this.returnType.toVerboseString().equalsIgnoreCase("void"));

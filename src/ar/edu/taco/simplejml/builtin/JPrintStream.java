@@ -69,6 +69,21 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the built-in module {@code java_io_PrintStream}, the model of the
+ * {@code java.io.PrintStream} behind {@code System.out} (the static field that {@link JSystem}
+ * declares): a signature extending {@code java_lang_Object}, no fields, and two programs,
+ * {@code println(theString)} and {@code print(theString)}, each with one
+ * {@code java_lang_String} parameter, no specification, and a body that only sets
+ * {@code throw} to null, so printing changes nothing in the model. There are no other
+ * overloads. The programs keep their bare names, and so do the instance calls to them: a call
+ * into a built-in module gets the class prefix only if it is static (docs/METHOD-NAMING.md;
+ * docs/FIXES-FOR-MASTER.md, N3b). Added by {@code engine.PrecompiledModules} (key
+ * {@code java_io_PrintStream}). Counterexamples can hold {@code PrintStream} objects; see
+ * docs/KNOWN-LIMITATIONS.md.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset.
+ */
 public class JPrintStream implements IBuiltInModule {
 
 	private final JDynAlloyModule module;
@@ -158,6 +173,11 @@ public class JPrintStream implements IBuiltInModule {
 
 	private static JPrintStream instance = null;
 
+	/**
+	 * Returns the singleton, building its module on the first call.
+	 *
+	 * @return the singleton
+	 */
 	public static JPrintStream getInstance() {
 		if (instance == null)
 			instance = new JPrintStream();

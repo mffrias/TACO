@@ -37,6 +37,23 @@ import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
 
+/**
+ * Builds the built-in module {@code java_lang_Class}, TACO's model of {@code java.lang.Class}
+ * for {@code useClassSingletons}: an abstract signature named {@code Class}, with no parent, no
+ * fields and no programs. The class singletons that {@link JIllegalArgumentException},
+ * {@link JClassCastException}, {@link JIndexOutOfBoundsException} and
+ * {@link JNoSuchElementException} build with that key extend {@code Class}.
+ * {@code engine.PrecompiledModules} adds it only with {@code useClassSingletons} (twice, see
+ * its {@code execute()}), which every configuration in {@code config/} sets to false.
+ *
+ * <p>Unclear: the module is named {@code java_lang_Class} and its signature {@code Class},
+ * while jDynAlloy's docs/LANGUAGE.md says the two must be equal in the text syntax, and
+ * jDynAlloy's {@code JSignatureFactory.buildClassSingleton} makes class singletons extend
+ * {@code java_lang_Class} when qualified names are on, as they always are in TACO; which name
+ * is intended is an open question.
+ *
+ * <p>Static state: a singleton, built on the first {@link #getInstance()} and never reset.
+ */
 public class JClass implements IBuiltInModule {
 
 	private static JClass instance;
@@ -73,6 +90,11 @@ public class JClass implements IBuiltInModule {
 						new ArrayList<AlloyFormula>(), false);
 	}
 
+	/**
+	 * Returns the singleton, building its module on the first call.
+	 *
+	 * @return the singleton
+	 */
 	public static JClass getInstance() {
 		if (instance == null)
 			instance = new JClass();

@@ -32,6 +32,15 @@ public class MI_JavaLangString implements MethodInformationSupplier {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.pipeline.javatodynjalloy.methodinfo.MethodInformationSupplier#getInformationForMethod(java.lang.String)
 	 */
+	/**
+	 * Returns the information for {@code String.valueOf} and {@code String.buildInstance} (the
+	 * latter is TACO's, not the JDK's): static, not a constructor, result typed
+	 * {@code java.lang.String} ({@code CStdType.String}), receiver type {@code java_lang_String}.
+	 *
+	 * @param methodName the method's simple name
+	 * @return the information
+	 * @throws TacoException for any other name
+	 */
 	@Override
 	public ConcreteMethodInformation getInformationForMethod(String methodName) {
 		ConcreteMethodInformation concreteMethodInformation = new ConcreteMethodInformation();

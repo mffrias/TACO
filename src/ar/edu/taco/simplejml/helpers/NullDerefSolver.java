@@ -29,22 +29,60 @@ import ar.edu.jdynalloy.ast.JStatement;
 import ar.edu.jdynalloy.binding.JBindingKey;
 import ar.edu.taco.simplejml.NullDerefVisitor;
 
+/**
+ * Builds the null-dereference check of a program body, which {@code JDynAlloyASTVisitor} adds
+ * to every method and constructor when {@code checkNullDereference} is on. Each statement that
+ * dereferences an expression (the left side of a field access, or the receiver of a
+ * non-static call) becomes
+ * {@code if (one of them is null or empty) throw := java_lang_NullPointerExceptionLit else
+ * statement} ({@code NullDerefVisitor}). The header and the tail are {@code skip}
+ * placeholders. No state.
+ */
 public class NullDerefSolver {
+	/**
+	 * Returns a copy of the body with each statement guarded against null dereferences. The
+	 * literal comes from {@code JNullPointerException}'s literal singleton, which exists only with
+	 * {@code newExceptionsAreLiterals}; without it a statement that needs a guard throws a
+	 * {@code NullPointerException}.
+	 *
+	 * @param program the body
+	 * @param callBindings the bindings of the body's calls, by identity; updated in place so that
+	 *        the copied calls keep their bindings
+	 * @return the guarded body
+	 */
 	public static JStatement buildNullDerefBody(JStatement program,
 			IdentityHashMap<JProgramCall, JBindingKey> callBindings) {
 		return (JStatement) program.accept(new NullDerefVisitor(callBindings));
 	}
 
+	/**
+	 * Same as {@link #buildNullDerefBody(JStatement, IdentityHashMap)}, with an empty binding
+	 * map.
+	 *
+	 * @param program the body
+	 * @return the guarded body
+	 */
 	public static JStatement buildNullDerefBody(JStatement program) {
 		return buildNullDerefBody(program,
 				new IdentityHashMap<JProgramCall, JBindingKey>());
 	}
 
+	/**
+	 * Returns {@code skip}, which {@code JDynAlloyASTVisitor} puts after the guarded body.
+	 *
+	 * @return a new {@code skip}
+	 */
 	public static JStatement buildNullDerefTail() {
 
 		return new JSkip();
 	}
 
+	/**
+	 * Returns a one-element list with {@code skip}, which {@code JDynAlloyASTVisitor} puts before
+	 * the guarded body.
+	 *
+	 * @return a fixed-size list
+	 */
 	public static List<JStatement> buildNullDerefHeader() {
 		JStatement stmt;
 			stmt = new JSkip();

@@ -26,6 +26,76 @@ import ar.edu.taco.simplejml.builtin.JavaPrimitiveLongValue;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.FormulaVisitor;
 
+/**
+ * TACO's scope inference (configuration key {@code inferScope}): before the Alloy analysis, it
+ * computes how many atoms each signature gets (the type scopes) and the Alloy bitwidth. It runs
+ * inside dynalloy4's DynAlloy-to-Alloy translation ({@code engine.DynalloyStage}), in the
+ * DynAlloy AST plugin {@code dynalloy.DynAlloyScopeInferencePlugin}, which
+ * {@code DynalloyToAlloyManager} adds after {@code DynAlloyProgramScopeInferencePlugin} when
+ * {@code inferScope} is on; each run creates a new instance. See docs/ARCHITECTURE.md
+ * (section 1).
+ *
+ * <p><b>Input.</b> Set through the three setters before {@link #inferScope()}, which throws
+ * {@code IllegalStateException} if one is missing: the JDynAlloy modules of the analysis, as
+ * jDynAlloy left them ({@code JDynAlloyStage.getPrunedModules()}), and what
+ * {@code DynAlloyProgramScopeInferencePlugin} counted in the method under analysis, with its
+ * loops unrolled and its calls inlined: the allocations per signature
+ * ({@code ObjectCreationCounter}) and the arithmetic operations ({@code ArithmeticOpCounter},
+ * which also counts those of the specification given to that plugin; see
+ * docs/FIXES-FOR-MASTER.md, "N8"). The fields are public: {@code DynAlloyScopeInferencePlugin}
+ * reads {@link #object_alloc_counter} directly.
+ *
+ * <p><b>What it computes</b> ({@link #inferScope()}):
+ * <ol>
+ * <li>Input scope: for each signature of the class graph
+ *     ({@link ClassGraphBuilder#buildClassGraph}), the number of simple paths to it from
+ *     {@code "$Root$"} (the method's parameters, the receiver included, and the static fields),
+ *     or infinity if one of them goes through a cycle ({@link GraphPathCounter}). With
+ *     {@code useJavaArithmetic}, {@code java_lang_IntArray} and {@code java_lang_ObjectArray},
+ *     if their count is finite, add 2 each to {@code JavaPrimitiveIntegerValue} unless that one
+ *     is infinite.</li>
+ * <li>Bounded input scope: infinity becomes {@code objectScope}. If the method is an instance
+ *     method, {@code classToCheck} gets at least 1.</li>
+ * <li>Program scope: the allocations; and for each of {@code JavaPrimitiveIntegerValue},
+ *     {@code JavaPrimitiveLongValue}, {@code JavaPrimitiveFloatValue} and
+ *     {@code JavaPrimitiveCharValue}: its literals (the {@code one sig}s that extend it, in all
+ *     modules), the results of its arithmetic operations (1 per operation, 2 per integer
+ *     division or remainder, 5 per long one, 1 per {@code size_of}), the method's parameters
+ *     of that type, and the predicates that encode arithmetic in {@code classToCheck}'s
+ *     invariants and in the method's contract.</li>
+ * <li>Final scope: per signature, the bounded input scope plus the program scope, or its
+ *     {@code type_scopes} entry if larger; then each signature also gets the final scopes of
+ *     its subsignatures ({@link ClassGraphBuilder#buildExtensionTree}). Signatures that cannot
+ *     be reached from {@code "$Root$"} in that tree are dropped; {@code "$Root$"} gets the
+ *     total.</li>
+ * <li>Bitwidth: with {@code useJavaArithmetic}, ceil(log2(n)) + 1, where n is the final scope
+ *     of {@code java_lang_Object} (its subsignatures included; for n = 0 the result is a large
+ *     negative number); otherwise {@link #DEFAULT_ALLOY_BITWDITH}.</li>
+ * </ol>
+ * A {@code type_scopes} entry is matched by turning every underscore of the signature id into
+ * a dot, so only entries for classes apply, and not for a class with an underscore in its name.
+ * Unclear: the entries for {@code int}, {@code long}, {@code char} and {@code float} never
+ * match here, while {@code UBoundPlugin}, when it runs, applies them to the final scope;
+ * whether they should count here too is an open question.
+ *
+ * <p><b>How the method is found.</b> The class graph takes the parameters of every program of
+ * {@code classToCheck} whose id is a prefix of {@code methodToCheck}. The other steps (the
+ * receiver, the primitive parameters, the contract's predicates) take the program whose id
+ * followed by its parameter types equals {@code methodToCheck}, with the types written as
+ * {@code int}, {@code long}, {@code float} or {@code char} for the primitive value signatures
+ * and as nothing for any other type. So they find the method only if it has no parameters or,
+ * with {@code useJavaArithmetic}, only parameters declared {@code int}, {@code long},
+ * {@code float} or {@code char}; otherwise they count nothing. See docs/METHOD-NAMING.md.
+ * The module of {@code classToCheck} must be among the modules (otherwise a
+ * {@code NullPointerException}).
+ *
+ * <p><b>Output and static state.</b> {@link #inferScope()} returns an {@link InferredScope}
+ * and also makes it the static singleton {@link InferredScope#getInstance()}, which the rest of
+ * the translation reads and which survives until the next inference in the JVM. This class
+ * has no static state of its own. Configuration read: {@code classToCheck},
+ * {@code methodToCheck}, {@code objectScope}, {@code useJavaArithmetic} and
+ * {@code type_scopes} ({@code TacoConfigurator.getTacoCustomScope()}).
+ */
 public class ScopeInference {
 
     public static final int DEFAULT_ALLOY_BITWDITH = 1;

@@ -8,12 +8,33 @@ import java.util.Stack;
 
 import ar.edu.taco.infer.Graph.LabeledNode;
 
+/**
+ * Counts, for each node of a class graph ({@link ClassGraphBuilder#buildClassGraph}), the simple
+ * paths to it from {@code "$Root$"}: the input scope of {@link ScopeInference}. A path through
+ * a node that lies on a cycle counts as {@link IntegerOrInfinity#INFINITY}. The graph and the
+ * cyclic nodes are kept in fields during {@link #count_all_paths}, so an instance must not be
+ * shared between threads. Every simple path is enumerated, once per node, so the cost can grow
+ * exponentially with the size of the graph.
+ */
 public class GraphPathCounter {
 
 	private Graph class_graph;
 
 	private Set<String> cyclic_nodes;
 
+	/**
+	 * Returns the number of simple paths from {@code "$Root$"} to each node: 0 for a node that
+	 * cannot be reached, 1 for {@code "$Root$"} itself, and {@link IntegerOrInfinity#INFINITY} if
+	 * one of the paths goes through a cyclic node. A node is cyclic if a depth-first search from
+	 * {@code "$Root$"} towards some node, which stops when it reaches that node, finds it on a
+	 * cycle. So a cycle is missed when every node outside it, {@code "$Root$"} apart, lies on
+	 * every path from {@code "$Root$"} to it (e.g. a graph with only {@code $Root$ -> C} and
+	 * {@code C -> C}): its nodes get finite counts.
+	 *
+	 * @param class_graph the graph; it must contain {@code "$Root$"} if it has any other node
+	 *        (otherwise a {@code NullPointerException})
+	 * @return the count of every node of the graph
+	 */
 	public Map<String, IntegerOrInfinity> count_all_paths(Graph class_graph) {
 		this.class_graph = class_graph;
 

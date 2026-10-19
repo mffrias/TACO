@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A scope as the scope inference builds it: a number of atoms per Alloy signature id, each an
+ * {@link IntegerOrInfinity}. A signature without an entry reads as 0. {@link ScopeInference}
+ * builds the four scopes of {@link InferredScope} with it; {@code UBoundPlugin} also changes
+ * the final one.
+ */
 public class Scope {
 	private Map<String, IntegerOrInfinity> scope = new HashMap<String, IntegerOrInfinity>();
 
@@ -15,12 +21,26 @@ public class Scope {
 		this.scope.put(type_str, IntegerOrInfinity.INFINITY);
 	}
 
+	/**
+	 * Does not change the scope, despite its name: it only checks that the signature has a finite
+	 * entry, and ignores {@code i}. Nothing in TACO calls it.
+	 *
+	 * @param type_str a signature id
+	 * @param i ignored
+	 * @throws IllegalStateException if the signature has no entry or an infinite one
+	 */
 	public void incInputScopeInteger(String type_str, int i) {
 		IntegerOrInfinity value = this.scope.get(type_str);
 		if ((value == null) || (value.equals(IntegerOrInfinity.INFINITY)))
 			throw new IllegalStateException();
 	}
 
+	/**
+	 * Returns the entry of a signature.
+	 *
+	 * @param signature_id a signature id
+	 * @return the entry, or a new 0 if the signature has none; never {@code null}
+	 */
 	public IntegerOrInfinity getInferredScopeOf(String signature_id) {
 		if (scope.get(signature_id)!=null) {
 			return scope.get(signature_id);
@@ -29,6 +49,13 @@ public class Scope {
 		}
 	}
 
+	/**
+	 * Returns a new scope with the same entries, every infinite one replaced by
+	 * {@code object_limit}. This scope is not changed.
+	 *
+	 * @param object_limit the number of atoms for an infinite entry ({@code objectScope})
+	 * @return the bounded scope, with finite entries only
+	 */
 	public Scope bound(int object_limit) {
 		Scope bounded_scope = new Scope();
 

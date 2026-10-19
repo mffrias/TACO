@@ -7,6 +7,12 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExpressionVisitor;
 import ar.uba.dc.rfm.alloy.ast.formulas.JFormulaVisitor;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Collects the ids of the predicates applied in the formulas it visits
+ * ({@link #getCollectedPredicates()}), and visits their expressions with the
+ * {@code ExpressionVisitor} it is given (a {@link FunPredExprCollector}, in
+ * {@link JDynAlloyFunPredCollector}).
+ */
 class FunPredFormCollector extends JFormulaVisitor {
 
 	public FunPredFormCollector(ExpressionVisitor visitor) {

@@ -135,3 +135,11 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     this package's `ObjectCreationCollector` and `ObjectCreationCounter` are used only by it (the
     live `DynAlloyProgramScopeInferencePlugin` uses jDynAlloy's copies). Is it kept on purpose,
     or can the three go?
+33. **Scopes of primitive types** (`infer/ScopeInference.java`, `consolidate_scope`): should
+    the `type_scopes` entries for `int`, `long`, `char` and `float` count in the inferred scope,
+    as the classes' entries do? It looks each entry up by turning every underscore of the
+    signature id into a dot, so `JavaPrimitiveIntegerValue` never matches `int`; `UBoundPlugin`,
+    when it runs, does apply them.
+34. **`JDynAlloyFunPredCollector`** (`infer/`): `infer_alloy_bitwidth` runs it on every module,
+    but the test that used its result is commented out (the code now tests
+    `useJavaArithmetic`), so the result is ignored. Is it still needed?

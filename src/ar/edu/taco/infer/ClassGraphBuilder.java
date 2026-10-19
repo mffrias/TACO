@@ -15,8 +15,26 @@ import ar.edu.taco.simplejml.builtin.JavaPrimitiveFloatValue;
 import ar.edu.taco.simplejml.builtin.JavaPrimitiveIntegerValue;
 import ar.edu.taco.simplejml.builtin.JavaPrimitiveLongValue;
 
+/**
+ * Builds the two graphs of {@link ScopeInference} from the JDynAlloy modules of the analysis:
+ * the class graph, whose paths from {@code "$Root$"} give the input scopes
+ * ({@link GraphPathCounter}), and the extension tree, along which the final scope of a signature
+ * adds up those of its subsignatures. Static methods only; {@link #buildClassGraph} reads
+ * {@code classToCheck} and {@code methodToCheck} from {@code TacoConfigurator}.
+ */
 abstract class ClassGraphBuilder {
 
+	/**
+	 * Returns the extension tree: an unlabeled edge from each module's parent signature (the one it
+	 * extends, or {@code "$Root$"} if none) to its signature. Skipped: the literals of the four
+	 * primitive value signatures (modules whose signature extends
+	 * {@code JavaPrimitiveIntegerValue}, {@code JavaPrimitiveCharValue},
+	 * {@code JavaPrimitiveLongValue} or {@code JavaPrimitiveFloatValue}), modules with a literal
+	 * singleton, and {@code java_lang_Throwable}'s.
+	 *
+	 * @param src_jdynalloy_modules the modules of the analysis
+	 * @return the tree, rooted at {@code "$Root$"}
+	 */
 	public static Graph buildExtensionTree(List<JDynAlloyModule> src_jdynalloy_modules) {
 		Graph tree = new Graph();
 		for (JDynAlloyModule jdynalloy_module : src_jdynalloy_modules) {
@@ -54,6 +72,35 @@ abstract class ClassGraphBuilder {
 		return tree;
 	}
 
+	/**
+	 * Returns the class graph: its nodes are signature ids, and its edges, labeled with a field or
+	 * parameter name, say from where an input can reach objects of a signature.
+	 * <ul>
+	 * <li>For each field that is a binary relation: an edge from the module's signature
+	 *     ({@code "$Root$"} for {@code ClassFields}, the static fields) to each signature of the
+	 *     field's range, except {@code null} and {@code boolean}.</li>
+	 * <li>For a ternary field: edges only if its type is that of the contents of
+	 *     {@code java_lang_ObjectArray}, {@code java_lang_IntArray}, {@code java_lang_CharArray}
+	 *     or {@code java_lang_LongArray}, or of the entries of {@code java_util_Map}. The array
+	 *     modules, which declare the first four, are skipped (see below).</li>
+	 * <li>For each program of {@code classToCheck}'s module whose id is a prefix of
+	 *     {@code methodToCheck}: an edge from {@code "$Root$"} to each signature of each
+	 *     parameter's type, {@code thiz} included ({@code throw}, {@code return}, {@code null} and
+	 *     {@code boolean} excluded). Being a prefix test, it also takes the parameters of the other
+	 *     overloads, and of any method whose name is a prefix of the method's name (e.g.
+	 *     {@code add}'s when checking {@code addAll}).</li>
+	 * </ul>
+	 * Skipped modules: the array modules, {@code java_util_List},
+	 * {@code org_jmlspecs_models_JMLObjectSequence} and {@code org_jmlspecs_models_JMLObjectSet}
+	 * (no inference for them); the integer, long and float literals; modules with a literal
+	 * singleton, and {@code java_lang_Throwable}'s.
+	 *
+	 * @param src_jdynalloy_modules the modules of the analysis
+	 * @return the class graph; it has a {@code "$Root$"} node only if a parameter or a static
+	 *         field gives it an edge
+	 * @throws IllegalStateException if a field is a binary relation to a sequence
+	 *         ({@code isBinRelWithSeq()})
+	 */
 	public static Graph buildClassGraph(List<JDynAlloyModule> src_jdynalloy_modules) {
 		Graph graph = new Graph();
 

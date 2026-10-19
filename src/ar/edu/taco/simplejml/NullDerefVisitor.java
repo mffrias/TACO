@@ -51,6 +51,21 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.JFormulaVisitor;
 import ar.uba.dc.rfm.alloy.ast.formulas.OrFormula;
 
+/**
+ * Guards the statements of a program body against null dereferences, for
+ * {@code checkNullDereference}: {@code helpers.NullDerefSolver.buildNullDerefBody} runs it on the
+ * body of every method and constructor that {@link JDynAlloyASTVisitor} translates. It copies the
+ * body ({@link JDynAlloyMutator}) and replaces each assertion, assumption, assignment, {@code if},
+ * {@code while} and program call that dereferences something by
+ * {@code if (isEmptyOrNull[e1] or ...) { throw := java_lang_NullPointerExceptionLit } else { s }}.
+ * The expressions tested are the left side of every join ({@code e.f}) in the statement's
+ * condition, sides or arguments, and the receiver of a call (see {@link #visit(JProgramCall)}).
+ * For {@code if} and {@code while} only the condition is tested there; their branches and body are
+ * guarded statement by statement. Variable declarations, object creations and {@code havoc} are
+ * not guarded. An expression with a set comprehension or a sum throws
+ * {@link UnsupportedOperationException}. The literal comes from the {@code JNullPointerException}
+ * singleton (see {@code helpers.NullDerefSolver}); this class has no static state.
+ */
 public class NullDerefVisitor extends JDynAlloyMutator {
 
 	private static class NullDerefSafetyVisitor extends ExpressionVisitor {
@@ -94,6 +109,13 @@ public class NullDerefVisitor extends JDynAlloyMutator {
 
 	private final IdentityHashMap<JProgramCall, JBindingKey> callBindings;
 
+	/**
+	 * Creates the visitor, with Java arithmetic as {@code useJavaArithmetic} says (read from
+	 * {@link TacoConfigurator}).
+	 *
+	 * @param callBindings the bindings of the body's calls, by identity; updated in place, so that
+	 *     each copied call keeps the binding of the call it copies
+	 */
 	public NullDerefVisitor(
 			IdentityHashMap<JProgramCall, JBindingKey> callBindings) {
 		super(TacoConfigurator.getInstance().getUseJavaArithmetic());
@@ -164,6 +186,18 @@ public class NullDerefVisitor extends JDynAlloyMutator {
 		return visitStatement(freshIfThenElse, freshIfThenElse.getCondition());
 	}
 
+	/**
+	 * Copies a call, moves its entry in the bindings from the old call to the copy, and guards it
+	 * on its arguments' joins and, if {@code JProgramCall.isStatic()} is false, its receiver (the
+	 * first argument). TACO gives every call a receiver, a static one too: the class (a constant
+	 * naming its signature) or, without a prefix, {@code thiz} (see
+	 * {@code ExpressionVisitor.visitMethodCallExpression}). So {@code isStatic()}, which looks for
+	 * {@code throw} in the first position, is false for every call TACO translates, and static
+	 * calls are guarded on that receiver too.
+	 *
+	 * @param oldProgramCall the call
+	 * @return the guarded copy
+	 */
 	@Override
 	public Object visit(JProgramCall oldProgramCall) {
 		JProgramCall freshProgramCall = (JProgramCall) super
@@ -185,6 +219,14 @@ public class NullDerefVisitor extends JDynAlloyMutator {
 			return false;
 	}
 
+	/**
+	 * Guards a loop: its body is guarded statement by statement, and the dereferences of its
+	 * condition are tested once, by an {@code if} around the whole loop, not before each
+	 * iteration.
+	 *
+	 * @param n the loop
+	 * @return the guarded loop
+	 */
 	@Override
 	public Object visit(JWhile n) {
 		JWhile freshWhile = (JWhile) super.visit(n);

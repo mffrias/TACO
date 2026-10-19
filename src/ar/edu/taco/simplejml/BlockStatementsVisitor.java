@@ -119,6 +119,36 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AndFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
 
+/**
+ * Translates the statements of a method or constructor body of the simplified AST into one
+ * JDynAlloy statement, built in the inherited program buffer and returned by
+ * {@link #getJAlloyProgram()}. {@link JDynAlloyASTVisitor} uses a new instance per body, and this
+ * class a new one for each {@code try}, {@code catch} and {@code finally} block. Java expressions
+ * are translated by {@link ExpressionVisitor}, JML ones (assertions, assumptions, loop
+ * invariants, ghost initializers) by {@link JmlExpressionVisitor}.
+ *
+ * <p>How control flow is encoded:
+ * <ul>
+ * <li>Exceptions and returns: almost every statement is guarded by
+ *     {@code throw = null and exit_stmt_reached = false}
+ *     ({@code helpers.BlockStatementSolver.getTryCatchSurrounderCondition}), as the inherited
+ *     flag {@code isTryCatchBlock} is always true. A {@code return} sets {@code return} and
+ *     {@code exit_stmt_reached := true}, a {@code throw} sets {@code throw}, and the statements
+ *     after them are skipped. Java {@code assert} and {@code throw} statements and variable
+ *     declarations are not guarded.</li>
+ * <li>Loops: {@code while} and {@code do} loops become JDynAlloy loops, annotated with the
+ *     conjunction of the pending loop invariants. A loop whose body has a {@code break} gets a
+ *     variable {@code break_reached_<n>}, which its condition and the assignments inside it test
+ *     ({@code break} statements are normally replaced earlier, by the simplification pass
+ *     {@code jml.loop.BreakRemoverSimplifier}).</li>
+ * <li>Arithmetic, with {@code useJavaArithmetic}: an operation on the right of an assignment or
+ *     initializer becomes the statements of {@code builtin.AuxiliaryConstantsFactory}, which
+ *     compute the result into a fresh variable, appended before the assignment.</li>
+ * </ul>
+ *
+ * <p>Static state: the counter that names the variables of {@code decreasing} clauses
+ * ({@code variant_<n>}) is never reset, so the names keep growing between runs in one JVM.
+ */
 public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	private Stack<AlloyExpression> expressions = new Stack<AlloyExpression>();
@@ -138,6 +168,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	private static int variantFunctionIndex = 0;
 
+    /** Creates a translator with an empty program buffer, for one body or block. */
     public BlockStatementsVisitor() {
     }
 
@@ -173,6 +204,32 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates an assignment {@code l = r}, guarded by
+	 * {@code throw = null and exit_stmt_reached = false}. When the innermost loop has a
+	 * {@code break}, the guard also requires the break variable at the bottom of the stack (that
+	 * of the first loop this visitor translated) to be false. The right side becomes:
+	 * <ul>
+	 * <li>for {@code +}, {@code -}, {@code *}, {@code /} and {@code %}: the result of the
+	 *     matching {@code visit...Expression} of this class (with Java arithmetic, its statements
+	 *     come first);</li>
+	 * <li>for a call, an object creation or an array creation: the program that
+	 *     {@link ExpressionVisitor} builds, with {@code l} as its target;</li>
+	 * <li>for an array element on either side: an array read or write statement
+	 *     ({@code JavaPrimitiveIntValueArrayFactory} with {@code useJavaArithmetic},
+	 *     {@code AlloyIntArrayFactory} otherwise);</li>
+	 * <li>for a formula: {@code if F then l := true else l := false};</li>
+	 * <li>otherwise {@code l := r}, with a conversion
+	 *     ({@code helpers.ExpressionSolver.getCastingExpression}) when the declared types
+	 *     differ.</li>
+	 * </ul>
+	 * An assignment to a field of {@code thiz} is also added to the inherited list
+	 * {@code instanceModifiedVariables}, which nothing reads.
+	 *
+	 * @param jAssignmentExpression the assignment
+	 * @throws RuntimeException ("Illegal condition") if the right side translates to something
+	 *     else
+	 */
 	@Override
 	public void visitAssignmentExpression(JAssignmentExpression jAssignmentExpression) {
 		jAssignmentExpression.accept(prettyPrint);
@@ -317,6 +374,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates a {@code catch (E e)} clause into
+	 * {@code if (throw instanceOf E) { var e: E; e := throw; throw := null; <body> }}, the body
+	 * translated by a new {@link BlockStatementsVisitor}. Called by
+	 * {@link #visitTryCatchStatement}, inside its test that an exception was thrown.
+	 *
+	 * @param jCatchClause the clause
+	 */
 	@Override
 	public void visitCatchClause(JCatchClause jCatchClause) {
 		AlloyExpression throwAlloyExpression = JExpressionFactory.THROW_EXPRESSION;
@@ -354,6 +419,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 
 
+	/**
+	 * Translates a compound assignment {@code l op= r} into {@code l := l op r}
+	 * ({@code helpers.JavaOperatorSolver.getAlloyBinaryExpression}), guarded by
+	 * {@code throw = null and exit_stmt_reached = false}. {@link ShortcutRemoverVisitor}, a
+	 * simplification pass, has already rewritten {@code +=}, {@code -=}, {@code *=} and
+	 * {@code /=}.
+	 *
+	 * @param jCompoundAssignmentExpression the compound assignment
+	 */
 	@Override
 	public void visitCompoundAssignmentExpression(JCompoundAssignmentExpression jCompoundAssignmentExpression) {
 		jCompoundAssignmentExpression.accept(prettyPrint);
@@ -395,6 +469,12 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 
 
+	/**
+	 * Translates a Java {@code assert c} into {@code assert C}. Unlike the other statements, it
+	 * is not guarded by {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param self the statement
+	 */
 	@Override
 	public void visitAssertStatement(JAssertStatement self){
 		self.accept(prettyPrint);
@@ -408,6 +488,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 	}
 
 
+	/**
+	 * Translates an {@code if} statement into a JDynAlloy {@code if}, the condition translated by
+	 * {@code helpers.ExpressionSolver.getConditionAsAlloyFormula}, a missing {@code else} as
+	 * {@code skip}, all guarded by {@code throw = null and exit_stmt_reached = false}. The
+	 * predicates that encode arithmetic in the condition are added to this visitor's list.
+	 *
+	 * @param jIfStatement the statement
+	 */
 	@Override
 	public void visitIfStatement(JIfStatement jIfStatement) {
 		jIfStatement.accept(prettyPrint);
@@ -451,6 +539,12 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates a JML {@code assert} into {@code assert F} ({@link JmlExpressionVisitor},
+	 * pre-state), guarded by {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param jmlAssertStatement the statement
+	 */
 	@Override
 	public void visitJmlAssertStatement(JmlAssertStatement jmlAssertStatement) {
 		jmlAssertStatement.accept(prettyPrint);
@@ -469,6 +563,11 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	}
 
+	/**
+	 * Translates the assignment the statement wraps; see {@link #visitAssignmentExpression}.
+	 *
+	 * @param jmlAssignamentStatement the statement
+	 */
 	@Override
 	public void visitJmlAssignmentStatement(JmlAssignmentStatement jmlAssignamentStatement) {
 		jmlAssignamentStatement.accept(prettyPrint);
@@ -484,6 +583,12 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 
 
+	/**
+	 * Translates a JML {@code assume} into {@code assume F} ({@link JmlExpressionVisitor},
+	 * pre-state), guarded by {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param jmlAssumeStatement the statement
+	 */
 	@Override
 	public void visitJmlAssumeStatement(JmlAssumeStatement jmlAssumeStatement) {
 		jmlAssumeStatement.accept(prettyPrint);
@@ -501,6 +606,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		programBuffer.appendProgram(jStatement);
 	}
 
+	/**
+	 * Translates a loop with JML annotations. Its loop invariants are pushed onto the inherited
+	 * stack, where the translation of the loop takes them. With a {@code decreasing} clause of
+	 * variant {@code v}, the body first declares {@code variant_<n> = v} and throws a
+	 * {@code RuntimeException} if {@code v < 0}, and, after the original body, throws one if
+	 * {@code v >= variant_<n>}: the variant must be non-negative and decrease at each iteration.
+	 * Then the loop is translated ({@link #visitWhileStatement}).
+	 *
+	 * @param jmlLoopStatement the annotated loop, whose loop must be a {@code while}
+	 * @throws ClassCastException if the loop is not a {@code while}
+	 */
 	public void visitJmlLoopStatement(JmlLoopStatement jmlLoopStatement) {
 		jmlLoopStatement.accept(prettyPrint);
 		log.debug("Visiting: " + jmlLoopStatement.getClass().getName());
@@ -565,11 +681,24 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates a JML {@code set} statement like an assignment; see
+	 * {@link #visitAssignmentExpression}.
+	 *
+	 * @param jmlSetStatement the statement
+	 */
 	@Override
 	public void visitJmlSetStatement(JmlSetStatement jmlSetStatement) {
 		jmlSetStatement.assignmentExpression().accept(this);
 	}
 
+	/**
+	 * Translates a call used as a statement (its result, if any, is not assigned) into the
+	 * program call that {@link ExpressionVisitor} builds, guarded by
+	 * {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param jMethodCallExpression the call
+	 */
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression jMethodCallExpression) {
 		jMethodCallExpression.accept(prettyPrint);
@@ -590,6 +719,13 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}	
 	}
 
+	/**
+	 * Translates {@code x++} and {@code x--} into {@code x := x + 1} and {@code x := x - 1}
+	 * (Java-arithmetic integer functions with {@code useJavaArithmetic}, Alloy's otherwise),
+	 * guarded by {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param jPostfixExpression the expression statement
+	 */
 	@Override
 	public void visitPostfixExpression(JPostfixExpression jPostfixExpression) {
 		jPostfixExpression.accept(prettyPrint);
@@ -634,6 +770,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		programBuffer.appendProgram(jStatement);
 	}
 
+	/**
+	 * Translates {@code return e} into {@code return := E; exit_stmt_reached := true}, and
+	 * {@code return} into {@code exit_stmt_reached := true}, guarded by
+	 * {@code throw = null and exit_stmt_reached = false}. A formula is returned as
+	 * {@code (F) => true else false}; with primitive types that differ ({@code char},
+	 * {@code int}, {@code long}), the value is converted with the Java-arithmetic conversion
+	 * functions.
+	 *
+	 * @param returnStatement the statement; its expression must translate to an expression or a
+	 *     formula
+	 */
 	@Override
 	public void visitReturnStatement(JReturnStatement returnStatement) {
 		returnStatement.accept(prettyPrint);
@@ -682,6 +829,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		// this.isReturnPresent.push(true);
 	}
 
+	/**
+	 * Translates a {@code switch} statement by translating every group, in order, guarded by
+	 * {@code throw = null and exit_stmt_reached = false}. The selector is translated (and its
+	 * arithmetic predicates kept) but the result is not used, and the case labels are ignored:
+	 * every group runs.
+	 *
+	 * <p>Unclear: whether {@code switch} is meant to be supported; as written, the translation
+	 * does not select a case.
+	 *
+	 * @param switchStatement the statement
+	 */
 	@Override
 	public void visitSwitchStatement(JSwitchStatement switchStatement) {
 		switchStatement.accept(prettyPrint);
@@ -728,6 +886,12 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates the statements of a {@code switch} group, in order, guarded by
+	 * {@code throw = null and exit_stmt_reached = false}. Its labels are ignored.
+	 *
+	 * @param switchGroup the group
+	 */
 	@Override
 	public void visitSwitchGroup(JSwitchGroup switchGroup) {
 		switchGroup.accept(prettyPrint);
@@ -775,6 +939,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	}
 
+	/**
+	 * Translates {@code throw e}: for an expression,
+	 * {@code throw := E; exit_stmt_reached := true}; for {@code throw new E(...)}, the object
+	 * creation of {@link ExpressionVisitor} with {@code throw} as its target (with
+	 * {@code newExceptionsAreLiterals}, {@code throw := ELit}). Not guarded by
+	 * {@code throw = null and exit_stmt_reached = false}.
+	 *
+	 * @param jThrowStatement the statement
+	 */
 	@Override
 	public void visitThrowStatement(JThrowStatement jThrowStatement) {
 		jThrowStatement.accept(prettyPrint);
@@ -800,6 +973,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates {@code try ... catch}: the try block with a new {@link BlockStatementsVisitor},
+	 * then {@code if (not throw = null) { <catch clauses> }}, each clause as
+	 * {@link #visitCatchClause} does; the first that matches sets {@code throw} back to
+	 * {@code null}.
+	 *
+	 * @param jTryCatchStatement the statement
+	 */
 	@Override
 	public void visitTryCatchStatement(JTryCatchStatement jTryCatchStatement) {
 		jTryCatchStatement.accept(prettyPrint);
@@ -827,6 +1008,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	}
 
+	/**
+	 * Translates {@code try ... finally}: the try block with this visitor, then the finally block
+	 * with a new {@link BlockStatementsVisitor}. The finally block's statements get the usual
+	 * guard {@code throw = null and exit_stmt_reached = false}, so they do not run after an
+	 * exception or a {@code return}.
+	 *
+	 * @param jTryFinallyStatement the statement
+	 */
 	@Override
 	public void visitTryFinallyStatement(JTryFinallyStatement jTryFinallyStatement) {
 		jTryFinallyStatement.accept(prettyPrint);
@@ -842,6 +1031,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		}
 	}
 
+	/**
+	 * Translates a local variable declaration into {@code var x: T} and, if it has an
+	 * initializer, an assignment guarded by {@code throw = null and exit_stmt_reached = false}:
+	 * arithmetic as in {@link #visitAssignmentExpression}; a JML expression (a ghost variable)
+	 * with a {@link JmlExpressionVisitor}, whose arithmetic encodings are added to this
+	 * visitor's; a call, an object or array creation or a string literal as the program
+	 * {@link ExpressionVisitor} builds with {@code x} as its target; any other expression as
+	 * {@code x := E}, converted when the types differ.
+	 *
+	 * @param jVariableDefinition the declaration
+	 */
 	@Override
 	public void visitVariableDefinition(JVariableDefinition jVariableDefinition) {
 		jVariableDefinition.accept(prettyPrint);
@@ -1006,6 +1206,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 
 
+	/**
+	 * Translates a {@code do} loop into a JDynAlloy loop (its body, then a {@code while} with the
+	 * same body, built by the program buffer), annotated with the conjunction of the pending loop
+	 * invariants. The condition is conjoined with
+	 * {@code throw = null and exit_stmt_reached = false} and, as in {@link #visitWhileStatement},
+	 * with the break variables. The loop's entry on the stack of break variables is never popped.
+	 *
+	 * @param self the loop
+	 */
 	public void visitDoStatement(JDoStatement self){
 		self.accept(prettyPrint);
 		log.debug("Visiting: " + JDoStatement.class);
@@ -1126,6 +1335,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 
 
+	/**
+	 * Translates {@code break} into setting the break variable of the innermost loop to
+	 * {@code true}, guarded by {@code throw = null and exit_stmt_reached = false}. The
+	 * simplification pass {@code jml.loop.BreakRemoverSimplifier} replaces {@code break}
+	 * statements by assignments before this stage, so this may not be reached.
+	 *
+	 * @param self the statement, inside a loop translated by this visitor
+	 */
 	@Override
 	public void visitBreakStatement(JBreakStatement self){
 		JStatement setBreakReachedTrue = new JAssignment(this.whileIndices.peek(), JExpressionFactory.TRUE_EXPRESSION);
@@ -1134,6 +1351,17 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 	}
 
 
+	/**
+	 * Translates a division on the right of an assignment or initializer and pushes the result on
+	 * this visitor's private stack of expressions, where {@link #visitAssignmentExpression} and
+	 * {@link #visitVariableDefinition} take it. With {@code useJavaArithmetic} and two
+	 * {@code int}, {@code long} or {@code float} operands, the statements of
+	 * {@code builtin.AuxiliaryConstantsFactory} are appended and their result variable is pushed
+	 * (for {@code int}, twice); otherwise the translation of {@link ExpressionVisitor} is pushed.
+	 *
+	 * @param divExpression the division
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitDivideExpression(JDivideExpression divExpression) {
 
@@ -1201,6 +1429,14 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		this.expressions.push(rvalue);
 	}
 
+	/**
+	 * Translates a remainder like {@link #visitDivideExpression} does a division: with
+	 * {@code useJavaArithmetic} and two {@code int} or {@code long} operands, the division's
+	 * statements are appended and their remainder variable is pushed.
+	 *
+	 * @param moduloExpression the remainder
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitModuloExpression(JModuloExpression moduloExpression) {
 
@@ -1261,6 +1497,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	}
 
+	/**
+	 * Translates a multiplication like {@link #visitDivideExpression} does a division: with
+	 * {@code useJavaArithmetic} and two {@code int}, {@code long} or {@code float} operands, the
+	 * statements of {@code builtin.AuxiliaryConstantsFactory} are appended and their result
+	 * variable is pushed.
+	 *
+	 * @param multExpression the multiplication
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitMultExpression(JMultExpression multExpression) {
 
@@ -1329,6 +1574,13 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	}
 
+	/**
+	 * Returns a shallow copy ({@code Object.clone}), as {@link JDynAlloyASTVisitor} does. Nothing
+	 * calls it.
+	 *
+	 * @return the copy
+	 * @throws CloneNotSupportedException never, as the class is {@code Cloneable}
+	 */
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
@@ -1345,6 +1597,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 	//			return theExpre.getType();
 	//	}
 
+	/**
+	 * Translates an addition like {@link #visitDivideExpression} does a division: with
+	 * {@code useJavaArithmetic} and two {@code int} or two {@code float} operands, the statements
+	 * of {@code builtin.AuxiliaryConstantsFactory} are appended and their result variable is
+	 * pushed; otherwise ({@code long} included) the translation of {@link ExpressionVisitor} is
+	 * pushed.
+	 *
+	 * @param addExpression the addition
+	 */
 	@Override
 	public void visitAddExpression(JAddExpression addExpression) {
 
@@ -1407,6 +1668,15 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 	}
 
 
+	/**
+	 * Translates a subtraction like {@link #visitDivideExpression} does a division: with
+	 * {@code useJavaArithmetic} and two {@code float} operands, the statements of
+	 * {@code builtin.AuxiliaryConstantsFactory} are appended and their result variable is pushed;
+	 * otherwise ({@code int} and {@code long} included) the translation of
+	 * {@link ExpressionVisitor} is pushed.
+	 *
+	 * @param minusExpression the subtraction
+	 */
 	@Override
 	public void visitMinusExpression(JMinusExpression minusExpression) {
 

@@ -33,6 +33,14 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
  *
  */
 public class BaseExpressionVisitor extends BlockStatementsVisitor {	
+	/**
+	 * The stack on which the expression translators ({@link ExpressionVisitor},
+	 * {@link JmlExpressionVisitor}) leave their results: Alloy expressions, Alloy formulas and
+	 * JDynAlloy statements (for calls and object creation), each pushed as a one-element array. A
+	 * {@code visit...} method pushes one result; the caller takes it with
+	 * {@link BaseExpressionVisitor#getAlloyExpression()}, {@code getAlloyFormula()} or
+	 * {@code getAlloyProgram()}.
+	 */
 	final static class ArrayStack {
 		private final Stack<Object[]> arrayStack = new Stack<Object[]>();
 
@@ -87,10 +95,28 @@ public class BaseExpressionVisitor extends BlockStatementsVisitor {
 		return leftAssignmentExpression;
 	}
 
+	/**
+	 * Sets the target of the expression about to be translated: the variable or location that the
+	 * program built for a call, an object creation, an array creation or a string literal assigns
+	 * (its {@code return} argument, or the new object). {@link BlockStatementsVisitor} sets it
+	 * before translating the right side of an assignment, an initializer or a {@code throw}. It
+	 * is not reset afterwards.
+	 *
+	 * @param leftAssignmentExpression the translated left side, an {@code ExprVariable} for
+	 *     object and array creation
+	 */
 	public void setLeftAssignmentExpression(AlloyExpression leftAssignmentExpression) {
 		this.leftAssignmentExpression = leftAssignmentExpression;
 	}
 
+	/**
+	 * Pops the last result as an expression; a formula {@code F} becomes
+	 * {@code (F) => true else false}.
+	 *
+	 * @return the expression
+	 * @throws java.util.EmptyStackException if nothing was pushed
+	 * @throws ClassCastException if the result is a statement
+	 */
 	public AlloyExpression getAlloyExpression() {
 		Object o = this.stack.popSingleton();
 		if (o instanceof AlloyFormula) {
@@ -101,6 +127,14 @@ public class BaseExpressionVisitor extends BlockStatementsVisitor {
 		}
 	}
 	
+	/**
+	 * Pops the last result as a formula; an expression {@code e} becomes
+	 * {@code liftExpression[e]}, which the prelude defines as {@code e = true}.
+	 *
+	 * @return the formula
+	 * @throws java.util.EmptyStackException if nothing was pushed
+	 * @throws ClassCastException if the result is a statement
+	 */
 	public AlloyFormula getAlloyFormula() {
 		Object o = this.stack.popSingleton();
 		if (o instanceof AlloyExpression) {
@@ -110,16 +144,36 @@ public class BaseExpressionVisitor extends BlockStatementsVisitor {
 		}			
 	}
 	
+	/**
+	 * Pops the last result as a JDynAlloy statement: the program built for a call, an object or
+	 * array creation, a string literal or a formal parameter.
+	 *
+	 * @return the statement
+	 * @throws java.util.EmptyStackException if nothing was pushed
+	 * @throws ClassCastException if the result is an expression or a formula
+	 */
 	public JStatement getAlloyProgram() {
 		return (JStatement) this.stack.popSingleton();
 	}
 	
+	/**
+	 * Returns whether the last result is an expression, leaving it on the stack.
+	 *
+	 * @return {@code true} for an Alloy expression
+	 * @throws java.util.EmptyStackException if nothing was pushed
+	 */
 	public boolean isAlloyExpression() {
 		Object o = this.stack.popSingleton();
 		this.stack.push(o);
 		return AlloyExpression.class.isAssignableFrom(o.getClass());
 	}
 	
+	/**
+	 * Returns whether the last result is a formula, leaving it on the stack.
+	 *
+	 * @return {@code true} for an Alloy formula
+	 * @throws java.util.EmptyStackException if nothing was pushed
+	 */
 	public boolean isAlloyFormula() {
 		Object o = this.stack.popSingleton();
 		this.stack.push(o);

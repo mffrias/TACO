@@ -30,16 +30,52 @@ import ar.edu.jdynalloy.ast.JBlock;
 import ar.edu.jdynalloy.ast.JVariableDeclaration;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Moves the right side of a JML {@code assume} equality into a new local variable, so that the
+ * statement translation handles it as Java code: {@code //@ assume l == e;}, where {@code l} is a
+ * local variable or a field access, becomes the block
+ * {@code { T rightHandSideFormerAssume_<n> = e; //@ assume l == rightHandSideFormerAssume_<n>; }},
+ * with {@code T} the apparent type of {@code e}. {@code BlockStatementsVisitor} then translates
+ * {@code e} as an initializer (a call becomes a program call, an arithmetic operation the
+ * statements of Java arithmetic) and the {@code assume} with {@link JmlExpressionVisitor}. Other
+ * {@code assume} statements are kept as they are, and the rest of the AST is copied
+ * ({@link JmlAstClonerStatementVisitor}).
+ *
+ * <p>Although it sits in this package, it is a JML simplification pass:
+ * {@code jml.ASTSimplifierManager} runs it after {@code ActualParameterNormalizerVisitor} and
+ * before {@code ReturnStatementWrapperVisitor}, during {@code engine.JmlStage}
+ * (docs/ARCHITECTURE.md).
+ *
+ * <p>Static state: {@link #assumeSimplifierVarIndex}, the counter that numbers the new variables,
+ * is never reset, so the names keep growing between runs in one JVM. The field
+ * {@code newParameters} is never filled or read (only commented-out code uses it).
+ */
 public class AssumeSimplifierVisitor extends JmlAstClonerStatementVisitor{
 
 	public static int assumeSimplifierVarIndex = 0;
 	public HashSet<JmlFormalParameter> newParameters = new HashSet<JmlFormalParameter>(); 
 	
+	/**
+	 * Returns a new variable name, {@code rightHandSideFormerAssume_<n>}, after incrementing the
+	 * static counter {@link #assumeSimplifierVarIndex} (never reset).
+	 *
+	 * @return the name
+	 */
 	public String getNewVarName(){
 		assumeSimplifierVarIndex++;
 		return "rightHandSideFormerAssume_" + assumeSimplifierVarIndex;
 	}
 	
+	/**
+	 * Rewrites an {@code assume} whose predicate is an equality with a local variable or a field
+	 * access on its left, and pushes the new block; pushes any other {@code assume} itself. Both
+	 * {@code ==} and {@code !=} are equalities ({@code JEqualityExpression}), and the new
+	 * {@code assume} always uses {@code ==}, so {@code assume l != e} becomes
+	 * {@code assume l == rightHandSideFormerAssume_<n>}. The block keeps the statement's comments;
+	 * the left side and {@code e} are reused, not copied.
+	 *
+	 * @param self the {@code assume} statement
+	 */
 	@Override
 	public void visitJmlAssumeStatement(JmlAssumeStatement self){
 		boolean isEquality = self.predicate().specExpression().expression() instanceof JEqualityExpression;

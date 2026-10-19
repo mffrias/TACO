@@ -172,11 +172,23 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		this.isContractTranslation = isContractTranslation;
 	}
 
+	/**
+	 * Creates a translator that starts in the pre-state; see
+	 * {@link #JmlExpressionVisitor(Instant)}.
+	 */
 	public JmlExpressionVisitor() {
 		this(Instant.PRE_INSTANT);
 	}
 
 
+	/**
+	 * Creates a translator that starts in the pre-state and passes the compilation units on to the
+	 * visitors it creates for {@code ensures} clauses (nothing else in this class reads them); see
+	 * {@link #JmlExpressionVisitor(Instant)}. {@code helpers.MethodDeclarationSolver} uses it for
+	 * a method's specification.
+	 *
+	 * @param compilationUnits the simplified compilation units of the run
+	 */
 	public JmlExpressionVisitor(List<JCompilationUnitType> compilationUnits) {
 		this(Instant.PRE_INSTANT);
 		this.compilationUnits = compilationUnits;
@@ -190,6 +202,33 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		this.instant = aInstant;
 	}
 
+	/**
+	 * Creates a translator of JML expressions and specifications into Alloy, starting in the given
+	 * state. It is the JML counterpart of this package's {@code ExpressionVisitor}: each
+	 * expression it visits, and each {@code requires}, {@code ensures} and {@code signals} clause,
+	 * leaves one result on the inherited stack, an expression or a formula
+	 * ({@code getAlloyExpression()}, {@code getAlloyFormula()}), while the parts of a
+	 * specification are collected: spec cases and {@code assignable} locations in
+	 * {@link #getJmlMethodDeclarationResult()}, read by {@code helpers.MethodDeclarationSolver};
+	 * invariants, constraints and {@code represents} clauses in
+	 * {@link #getJmlClassDeclarationResult()}, read by {@link JDynAlloyASTVisitor}.
+	 * {@link BlockStatementsVisitor} uses it for JML {@code assert} and {@code assume} statements,
+	 * loop invariants and ghost initializers.
+	 *
+	 * <p>The state decides how names are translated: in the pre-state ({@code PRE_INSTANT}) local
+	 * variables, fields, {@code \result} and {@code this} are unprimed; in the post-state
+	 * ({@code POST_INSTANT}, used for {@code ensures}) they are primed ({@code x'}, {@code f'},
+	 * {@code return'}, {@code thiz'}), except the variables of an enclosing quantifier. With
+	 * {@code useJavaArithmetic}, arithmetic operations become fresh variables defined by
+	 * predicates (see {@link #visitAddExpression}).
+	 *
+	 * <p>This class adds no static state, but it registers literals in the singletons of
+	 * {@code builtin} ({@code JavaPrimitiveIntegerValue} and the like) and numbers fresh variables
+	 * with the counters of {@code builtin.JMLAuxiliaryConstantsFactory}, all kept between runs in
+	 * one JVM.
+	 *
+	 * @param instant the state to start in
+	 */
 	public JmlExpressionVisitor(Instant instant) {
 		this.instant = instant;
 	}
@@ -273,6 +312,16 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 
+	/**
+	 * Translates an equality ({@code ==} or {@code !=}) as {@code ExpressionVisitor} does, but
+	 * entirely in the pre-state when one side is {@code \old(m(...))}, a call inside {@code \old};
+	 * the state is restored afterwards. The sides it picks out are not used: the whole equality is
+	 * translated.
+	 *
+	 * @param jEqualityExpression the equality
+	 * @throws ClassCastException when the left side is {@code \old(m(...))} and the right side is
+	 *     not an {@code \old} (the code casts the right side where it means the left)
+	 */
 	@Override
 	public void visitEqualityExpression(JEqualityExpression jEqualityExpression) {
 		JExpression left = jEqualityExpression.left();
@@ -320,6 +369,25 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 	//mfrias 23/07/2013
+	/**
+	 * Translates {@code a + b} and pushes the result. With {@code useJavaArithmetic}, when no
+	 * operand mentions a variable of an enclosing quantifier, the sum is a fresh variable
+	 * ({@code SK_jml_<predicate>_ARG_result_<n>}, from
+	 * {@code builtin.JMLAuxiliaryConstantsFactory}) defined by a predicate over the operands, the
+	 * result and an overflow variable. The predicate and the two variables go to the
+	 * requires/ensures lists
+	 * ({@code getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()} and
+	 * {@code getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()}, the variables
+	 * marked as coming from the contract) when {@link #isContractTranslation()}, and to the
+	 * math-operations lists ({@link #getPredsFromMathOperations()},
+	 * {@link #getVarsAndTheirTypeFromMathOperations()}) otherwise. The operands may be both
+	 * {@code int}, {@code long}, {@code float} or {@code char}, or {@code int} and {@code char} in
+	 * either order. With a quantified variable, or without {@code useJavaArithmetic}, the sum is a
+	 * function application ({@code helpers.ExpressionSolver.getBinaryExpression}).
+	 *
+	 * @param jAddExpression the sum
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitAddExpression(JAddExpression jAddExpression) {
 
@@ -512,6 +580,13 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 
+	/**
+	 * Translates {@code a - b} as {@link #visitAddExpression} translates a sum, for the same
+	 * operand types.
+	 *
+	 * @param jMinusExpression the difference
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitMinusExpression(JMinusExpression jMinusExpression) {
 
@@ -701,6 +776,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 	//mfrias 23/07/2013
+	/**
+	 * Translates {@code a * b} as {@link #visitAddExpression} translates a sum. The operands may
+	 * be both {@code int}, {@code long} or {@code float}, or {@code char} on the left and
+	 * {@code int} or {@code long} on the right.
+	 *
+	 * @param jMultExpression the product
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitMultExpression(JMultExpression jMultExpression) {
 
@@ -861,6 +944,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 	//mfrias 31/07/2013
+	/**
+	 * Translates {@code a / b} as {@link #visitAddExpression} translates a sum, with a quotient
+	 * variable (the result) and a remainder variable instead of a result and an overflow variable,
+	 * for the operand types of {@link #visitMultExpression}.
+	 *
+	 * @param jDivideExpression the quotient
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types
+	 */
 	@Override
 	public void visitDivideExpression(JDivideExpression jDivideExpression) {
 
@@ -1016,6 +1107,18 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 	//mfrias 31/07/2013
+	/**
+	 * Translates {@code a % b} like {@link #visitDivideExpression}, with the remainder variable as
+	 * the result, for operands both {@code int} or both {@code long}, or {@code char} on the left
+	 * and {@code int} or {@code long} on the right. Unlike the other operations, it does not test
+	 * for quantified variables. For {@code int % int} both variables are typed
+	 * {@code JavaPrimitiveLongValue}, and in a contract translation no predicate is added for
+	 * them, so the remainder is unconstrained there.
+	 *
+	 * @param jModuloExpression the remainder
+	 * @throws TacoException with {@code useJavaArithmetic}, for other operand types, {@code float}
+	 *     included
+	 */
 	@Override
 	public void visitModuloExpression(JModuloExpression jModuloExpression) {
 
@@ -1151,6 +1254,15 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 
+	/**
+	 * Translates a field access {@code e.f} into {@code E.f}, with {@code f'} in the post-state. A
+	 * static field becomes {@code ClassFields.<E>_<f>} (primed in the post-state), {@code <E>}
+	 * being the translated prefix as text: the class's name for a type name such as {@code pkg.C}.
+	 * If the prefix translated to a formula (a quantified formula, for a call), the formula is
+	 * pushed back and its first quantified variable is used as the prefix.
+	 *
+	 * @param jClassFieldExpression the field access
+	 */
 	@Override
 	public void visitFieldExpression(JClassFieldExpression jClassFieldExpression) {
 		jClassFieldExpression.prefix().accept(this);
@@ -1202,6 +1314,23 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		jmlAssertStatement.predicate().accept(this);
 	}
 
+	/**
+	 * Adds the locations of an {@code assignable} clause to the list of
+	 * {@link #getJmlMethodDeclarationResult()}, which the spec cases translated later also get
+	 * (see {@code JmlBaseExpressionVisitor.JmlMethodDeclarationResult}). {@code \nothing} clears
+	 * the list and {@code \everything} adds "modifies everything". {@code objectState} gives
+	 * {@code thiz.g} for each field {@code g} in the module's {@code objectState} data group,
+	 * {@code e.objectState} the {@code objectState} fields of the class of {@code e}
+	 * ({@code getModulesObjectState()}), and {@code e.*} the non-static fields of its class
+	 * ({@code getModulesNoStaticFields()}); any other location is translated by
+	 * {@link #visitJmlStoreRefExpression}, in the pre-state.
+	 *
+	 * @param jmlAssignableClause the clause
+	 * @throws TacoException if the class of {@code e} in {@code e.objectState} or {@code e.*} has
+	 *     not been translated before (it must be a relevant class)
+	 * @throws TacoNotImplementedYetException for {@code \not_specified}
+	 * @throws UnsupportedOperationException for another kind of location
+	 */
 	@Override
 	public void visitJmlAssignableClause(JmlAssignableClause jmlAssignableClause) {
 		hasAssignableClause = true;
@@ -1368,6 +1497,17 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		jmlAssumeStatement.predicate().accept(this);
 	}
 
+	/**
+	 * Translates a {@code constraint} into a formula of {@link #getJmlClassDeclarationResult()}
+	 * (static or not), in the visitor's current state: the pre-state, as
+	 * {@link JDynAlloyASTVisitor} creates the visitor, unless an earlier {@code \old} left it in
+	 * the post-state ({@link #visitJmlOldExpression}). The call {@code this.setInstant(instant)}
+	 * sets the state to itself. Unclear: a constraint relates two states, but here its operands
+	 * before the first {@code \old} are translated in the pre-state and those after it in the
+	 * post-state; whether that is intended is an open question.
+	 *
+	 * @param jmlConstraint the constraint
+	 */
 	@Override
 	public void visitJmlConstraint(JmlConstraint jmlConstraint) {
 		JmlPredicate jmlPredicate = jmlConstraint.predicate();
@@ -1385,6 +1525,17 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		}
 	}
 
+	/**
+	 * Translates an {@code ensures} clause, with a new visitor in the post-state, into
+	 * {@code throw' = null => E}, or {@code throw' != null => E} while the normal-behavior flag is
+	 * cleared ({@link #isNormalBehavior()}, see {@link #visitJmlExceptionalBehaviorSpec}), and
+	 * pushes it. The arithmetic variables and predicates of {@code E} are added to this visitor's
+	 * lists. An {@code ensures_redundantly} clause pushes {@code true = true} instead, and its
+	 * formula goes to a list that nothing reads.
+	 *
+	 * @param jmlEnsuresClause the clause
+	 * @throws IllegalArgumentException for {@code ensures \not_specified}
+	 */
 	@Override
 	public void visitJmlEnsuresClause(JmlEnsuresClause jmlEnsuresClause) {
 		if (jmlEnsuresClause.isNotSpecified()) {
@@ -1447,6 +1598,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	}
 
+	/**
+	 * Translates an {@code exceptional_behavior} spec case after clearing the normal-behavior flag
+	 * ({@link #isNormalBehavior()}). Only {@code normal_behavior} sets it again, so a later
+	 * lightweight spec case of the same specification is translated as exceptional too
+	 * ({@link #visitJmlEnsuresClause}, {@link #visitJmlSignalsOnlyClause}).
+	 *
+	 * @param jmlExceptionalBehaviorSpec the spec case
+	 */
 	@Override
 	public void visitJmlExceptionalBehaviorSpec(
 			JmlExceptionalBehaviorSpec jmlExceptionalBehaviorSpec) {
@@ -1465,6 +1624,16 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		}
 	}
 
+	/**
+	 * Translates the spec case of an {@code exceptional_behavior}: its {@code requires} clauses
+	 * and the formulas its body leaves on the stack ({@code ensures}, {@code signals},
+	 * {@code signals_only}) become a {@code JSpecCase} of
+	 * {@link #getJmlMethodDeclarationResult()}. Unlike the other spec cases, it gets no
+	 * {@code modifies} at all (its {@code assignable} clauses are still collected, for the spec
+	 * cases translated later) and never the input to fix.
+	 *
+	 * @param jmlExceptionalSpecCase the spec case
+	 */
 	public void visitJmlExceptionalSpecCase(
 			JmlExceptionalSpecCase jmlExceptionalSpecCase) {
 		List<JPrecondition> requires = new ArrayList<JPrecondition>();
@@ -1495,6 +1664,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		this.jmlMethodDeclarationResult.jSpecCases.add(specCase);
 	}
 
+	/**
+	 * Records a {@code model} field, with its translated type, as a model field (static or not) of
+	 * {@link #getJmlClassDeclarationResult()}; other fields are ignored. Unclear:
+	 * {@link JDynAlloyASTVisitor} visits model fields with itself, not with this visitor, so
+	 * nothing seems to reach this override; whether it is still needed is an open question.
+	 *
+	 * @param jmlFieldDeclaration the field declaration
+	 */
 	@Override
 	public void visitJmlFieldDeclaration(JmlFieldDeclaration jmlFieldDeclaration) {
 		if (jmlFieldDeclaration.isModel()) {
@@ -1525,6 +1702,34 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		}
 	}
 
+	/**
+	 * Translates a lightweight spec case (heavyweight {@code behavior} spec cases are not
+	 * supported: {@code JmlBaseVisitor.visitJmlBehaviorSpec} throws) into a {@code JSpecCase} of
+	 * {@link #getJmlMethodDeclarationResult()}: its {@code requires} clauses; the formulas its
+	 * body leaves on the stack, or {@code throw' = null} if it has no body; and as
+	 * {@code modifies} every location collected so far, after adding "modifies everything" to them
+	 * if this spec case has no {@code assignable} clause (so the spec cases translated later get
+	 * it too).
+	 *
+	 * <p>With an input to fix ({@link #setInputToFix}) and at least one {@code requires}, the
+	 * input becomes one more {@code requires}, built by reflection: a parameter {@code x} whose
+	 * value is a number gets {@code x = <literal>} (with {@code useJavaArithmetic}, the literal of
+	 * an {@code int}, {@code long} or {@code float}, registered in its singleton; otherwise an
+	 * Alloy integer, for an {@code int} only); the fields of an object are named
+	 * {@code x.<pkg_Class>_<f>} ({@code getDeclaredFields()}: static fields included, inherited
+	 * ones not), and each value found in them, a number or {@code null}, is fixed once, at the
+	 * first location found with it. A number already found elsewhere gives
+	 * {@code <that location> = x} for a parameter and nothing for a field; so locations that share
+	 * a value (by {@code equals}), aliasing between objects (parameters included), a {@code null}
+	 * parameter, and fields of the other primitive types are not constrained. jDynAlloy, given the
+	 * same input, drops every {@code requires} and applies the input itself (docs/SPEC-OUTPUT.md,
+	 * "inputToFix"; docs/OPEN-QUESTIONS.md, item 12). Unclear: spec cases without
+	 * {@code requires}, and {@code normal_behavior} and {@code exceptional_behavior} ones, never
+	 * get the input; whether that is intended is an open question, if this {@code requires} is
+	 * still needed.
+	 *
+	 * @param jmlGenericSpecCase the spec case
+	 */
 	@Override
 	public void visitJmlGenericSpecCase(JmlGenericSpecCase jmlGenericSpecCase) {
 		this.hasAssignableClause = false;
@@ -1576,6 +1781,11 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		this.jmlMethodDeclarationResult.jSpecCases.add(specCase);
 	}
 
+	/**
+	 * Translates an informal description {@code (* ... *)} as {@code true = true}.
+	 *
+	 * @param jmlInformalExpression the description
+	 */
 	@Override
 	public void visitJmlInformalExpression(
 			JmlInformalExpression jmlInformalExpression) {
@@ -1584,6 +1794,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 						JExpressionFactory.TRUE_EXPRESSION));
 	}
 
+	/**
+	 * Translates an {@code invariant} into a formula of {@link #getJmlClassDeclarationResult()}
+	 * (static or not), with {@link #isContractTranslation()} false, so that its arithmetic goes to
+	 * the math-operations lists ({@link #getVarsAndTheirTypeFromMathOperations()}), from which
+	 * {@link JDynAlloyASTVisitor} makes fields of the class. The flag stays false afterwards.
+	 *
+	 * @param jmlInvariant the invariant
+	 */
 	@Override
 	public void visitJmlInvariant(JmlInvariant jmlInvariant) {
 		JmlPredicate jmlPredicate = jmlInvariant.predicate();
@@ -1626,6 +1844,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		}
 	}
 
+	/**
+	 * Translates the spec case of a {@code normal_behavior} like a lightweight one
+	 * ({@link #visitJmlGenericSpecCase}), except that a spec case without {@code assignable} adds
+	 * no "modifies everything" (its {@code modifies} are the locations collected so far, possibly
+	 * none) and that the input to fix is never added.
+	 *
+	 * @param jmlNormalSpecCase the spec case
+	 */
 	public void visitJmlNormalSpecCase(JmlNormalSpecCase jmlNormalSpecCase) {
 		List<JPrecondition> requires = new ArrayList<JPrecondition>();
 		List<JPostcondition> ensures = new ArrayList<JPostcondition>();
@@ -1698,6 +1924,13 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		this.jmlMethodDeclarationResult.jSpecCases.add(specCase);
 	}
 
+	/**
+	 * Translates {@code \old(e)} as {@code e} in the pre-state. Afterwards the visitor is in the
+	 * post-state, whatever state it was in before, so in a formula translated in the pre-state the
+	 * operands after an {@code \old} are translated in the post-state.
+	 *
+	 * @param jmlOldExpression the expression
+	 */
 	@Override
 	public void visitJmlOldExpression(JmlOldExpression jmlOldExpression) {
 		this.setInstant(Instant.PRE_INSTANT);
@@ -1717,6 +1950,13 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		jmlPredicate.specExpression().accept(this);
 	}
 
+	/**
+	 * Translates {@code \reach(e, T, f, ...)} into {@code fun_reach[E, T, f + ...]}, with the
+	 * fields primed in the post-state, or into its {@code JMLObjectSet} form
+	 * ({@code JExpressionFactory.reach_JMLObjectSet}) when {@code JMLObjectSetToAlloySet} is off.
+	 *
+	 * @param jmlReachExpression the expression
+	 */
 	@Override
 	public void visitJmlReachExpression(JmlReachExpression jmlReachExpression) {
 		JmlSpecExpression specExpression = jmlReachExpression.specExpression();
@@ -1758,6 +1998,15 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
+	/**
+	 * Records a {@code represents} clause in the relation form ({@code \such_that}) in
+	 * {@link #getJmlClassDeclarationResult()}: the translated location, its type, and the formula
+	 * of the predicate. The function form is not supported.
+	 *
+	 * @param jmlRepresentsDecl the clause
+	 * @throws IllegalArgumentException if the location was not type-checked
+	 * @throws RuntimeException for the function form
+	 */
 	@Override
 	public void visitJmlRepresentsDecl(JmlRepresentsDecl jmlRepresentsDecl) {
 		if (jmlRepresentsDecl.usesAbstractionRelation()) {
@@ -1792,6 +2041,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	}
 
+	/**
+	 * Translates a {@code requires} clause, with a new visitor in the pre-state (an expression
+	 * {@code e} becomes {@code e = true}), adds its arithmetic variables and predicates to this
+	 * visitor's lists, and pushes the formula.
+	 *
+	 * @param jmlRequiresClause the clause
+	 * @throws IllegalArgumentException for {@code requires \not_specified}
+	 */
 	@Override
 	public void visitJmlRequiresClause(JmlRequiresClause jmlRequiresClause) {
 		if (jmlRequiresClause.isNotSpecified()) {
@@ -2236,6 +2493,11 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
+	/**
+	 * Pushes {@code \result} as {@code return}, or {@code return'} in the post-state.
+	 *
+	 * @param jmlResultExpression the expression
+	 */
 	@Override
 	public void visitJmlResultExpression(JmlResultExpression jmlResultExpression) {
 		String returnVarId = JExpressionFactory.RETURN_VARIABLE.toString();
@@ -2245,6 +2507,15 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		super.getStack().push(returnExpr);
 	}
 
+	/**
+	 * Translates {@code signals (E e) P} into {@code instanceOf[throw', E] => P}, with {@code E}
+	 * the exception class's signature, and pushes it ({@code \not_specified} gives the left side
+	 * alone). {@code P} is translated in the visitor's current state, which for a method's
+	 * specification is the pre-state unless an {@code \old} left it in the post-state, and the
+	 * variable {@code e} is not bound.
+	 *
+	 * @param jmlSignalsClause the clause
+	 */
 	@Override
 	public void visitJmlSignalsClause(JmlSignalsClause jmlSignalsClause) {
 		AlloyExpression throwExpression = JExpressionFactory.PRIMED_THROW_EXPRESSION;
@@ -2269,6 +2540,16 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	}
 
+	/**
+	 * Translates {@code signals_only E1, ...} into
+	 * {@code throw' = null and (instanceOf[throw', E1Lit] or ...)} while the normal-behavior flag
+	 * is set ({@link #isNormalBehavior()}: by default, and in {@code normal_behavior} spec cases)
+	 * and into {@code throw' != null and (...)} otherwise, and pushes it. Each {@code EiLit} is
+	 * the literal signature of the exception class, not the class's signature as in
+	 * {@link #visitJmlSignalsClause}. Pushes nothing if the clause lists no exceptions.
+	 *
+	 * @param jmlSignalsOnlyClause the clause
+	 */
 	@Override
 	public void visitJmlSignalsOnlyClause(
 			JmlSignalsOnlyClause jmlSignalsOnlyClause) {
@@ -2322,6 +2603,29 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		jmlSpecExpression.expression().accept(this);
 	}
 
+	/**
+	 * Translates a JML quantifier: {@code \forall T x; R; B} into {@code all x: T | R => B},
+	 * {@code \exists} into {@code some x: T | R and B}, and {@code \sum} into an Alloy sum
+	 * ({@code ExprSum}) of the body, without the range. The bound is {@code T} without
+	 * {@code null}, unless {@code quantifierIncludesNull} is set. While the range and body are
+	 * translated, the quantified names are in {@code notAllowsPrimedState}, so they stay unprimed
+	 * and arithmetic on them is a function application, not a fresh variable.
+	 *
+	 * <p>With {@code useJavaArithmetic}, in a {@code \forall} or {@code \exists}, the fresh
+	 * variables that {@code R} and {@code B} add to the requires/ensures lists (in a contract
+	 * translation) are quantified inside it, {@code all v... | preds and bounds => F}, and do not
+	 * stay in the lists: those are set aside before and restored after. For {@code \sum} they are
+	 * cleared before and not restored, so what the clause had collected before the sum is lost.
+	 * Each bound limits a result variable to {@code numericRangeLower..numericRangeUpper}
+	 * ({@link TacoConfigurator#getLowerBound()}, {@link TacoConfigurator#getUpperBound()}), and
+	 * for a quantifier over an {@code int} or {@code long} variable the literals of that interval
+	 * are registered in the {@code JavaPrimitiveIntegerValue} or {@code JavaPrimitiveLongValue}
+	 * singleton (static state).
+	 *
+	 * @param jmlSpecQuantifiedExpression the quantified expression
+	 * @throws TacoNotImplementedYetException for other quantifiers ({@code \min}, {@code \max},
+	 *     {@code \product}, {@code \num_of})
+	 */
 	@Override
 	public void visitJmlSpecQuantifiedExpression(
 			JmlSpecQuantifiedExpression jmlSpecQuantifiedExpression) {
@@ -2576,6 +2880,12 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
+	/**
+	 * Translates the expression of a store reference (an {@code assignable} location) with a new
+	 * visitor in the pre-state, and pushes it.
+	 *
+	 * @param jmlStoreRefExpression the store reference
+	 */
 	@Override
 	public void visitJmlStoreRefExpression(
 			JmlStoreRefExpression jmlStoreRefExpression) {
@@ -2587,6 +2897,11 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		super.getStack().push(alloyExpression);
 	}
 
+	/**
+	 * Pushes {@code \type(T)} as the constant naming {@code T}'s signature, without {@code null}.
+	 *
+	 * @param jmlTypeExpression the expression
+	 */
 	@Override
 	public void visitJmlTypeExpression(JmlTypeExpression jmlTypeExpression) {
 		// type-expression ::= \type ( type )
@@ -2623,6 +2938,26 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
+	/**
+	 * Translates a call inside a JML expression into an Alloy function application, not a program
+	 * call, and pushes it. Some calls have fixed translations: {@code isEmpty} and
+	 * {@code int_size} on {@code JMLObjectSet} and {@code JMLObjectSequence}; {@code has} and
+	 * {@code get}, whatever the receiver's type; {@code contains} and {@code size} on
+	 * {@code java.util.Set} or {@code HashSet} (over the primed set contents in the post-state);
+	 * and {@code Float.isNaN}, only with {@code useJavaArithmetic}. Any other call becomes
+	 * {@code m[receiver, args...]}, named by the bare method name. The receiver is the translated
+	 * prefix, {@code none} for a call without one; a {@code this} prefix goes through
+	 * {@link #visitThisExpression}, not through {@code helpers.ExpressionSolver.getLeftExpression}
+	 * as in {@code ExpressionVisitor.visitMethodCallExpression} (see docs/OPEN-QUESTIONS.md, item
+	 * 25). {@code int_size} registers the literals 0 to 2^(b-1) - 1, {@code b} the configured bit
+	 * width, in the {@code JavaPrimitiveIntegerValue} singleton (static state), even without Java
+	 * arithmetic.
+	 *
+	 * @param jMethodCall the call
+	 * @throws TacoException for {@code isEmpty}, {@code int_size}, {@code contains}, {@code size}
+	 *     or {@code isNaN} on another receiver type, and for {@code isNaN} without
+	 *     {@code useJavaArithmetic}
+	 */
 	@Override
 	public void visitMethodCallExpression(
 			JMethodCallExpression jMethodCall) {
@@ -2751,6 +3086,12 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 	}
 
+	/**
+	 * Translates a local variable or parameter: unprimed in the pre-state and for the variables of
+	 * an enclosing quantifier, primed ({@code x'}, marked as coming from the contract) otherwise.
+	 *
+	 * @param jLocalVariableExpression the variable
+	 */
 	@Override
 	public void visitLocalVariableExpression(
 			JLocalVariableExpression jLocalVariableExpression) {
@@ -2773,6 +3114,14 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 		}
 	}
 
+	/**
+	 * Pushes the receiver: {@code thiz} in the pre-state (as {@code ExpressionVisitor} does),
+	 * {@code thiz'} in the post-state. For the receiver of a call translated with this visitor in
+	 * the pre-state, {@code helpers.ExpressionSolver.getLeftExpression} gives the opposite; see
+	 * docs/OPEN-QUESTIONS.md, item 25.
+	 *
+	 * @param jThisExpression the expression
+	 */
 	@Override
 	public void visitThisExpression(JThisExpression jThisExpression) {
 		if (this.instant == Instant.PRE_INSTANT) {
@@ -2786,10 +3135,27 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 
+	/**
+	 * Returns the typing of the fresh variables of the arithmetic operations translated while
+	 * {@link #isContractTranslation()} was false (invariants; JML expressions in method bodies);
+	 * in a contract translation they go to
+	 * {@code getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()} instead. The field
+	 * is inherited from {@link JDynAlloyASTVisitor}, which replaces it before each invariant
+	 * ({@code setVarsAndTheirTypeFromMathOperations}) and makes fields of the class from its
+	 * variables; {@link BlockStatementsVisitor} reads it only for ghost initializers.
+	 *
+	 * @return the typing (not a copy)
+	 */
 	public AlloyTyping getVarsAndTheirTypeFromMathOperations(){
 		return this.varsAndTheirTypeFromMathOperations;
 	}
 
+	/**
+	 * Returns the predicates that define the variables of
+	 * {@link #getVarsAndTheirTypeFromMathOperations()}.
+	 *
+	 * @return the list (not a copy)
+	 */
 	public List<AlloyFormula> getPredsFromMathOperations(){
 		return predsFromMathOperations;
 	}
@@ -2807,6 +3173,19 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 
 
 
+	/**
+	 * Pushes an integer literal: an {@code int} or {@code long} value, with
+	 * {@code useJavaArithmetic}, as the literal registered in the
+	 * {@code JavaPrimitiveIntegerValue} or {@code JavaPrimitiveLongValue} singleton (static state,
+	 * kept between runs in one JVM); otherwise as an Alloy integer ({@code negate} for a negative
+	 * one). Boolean and string ordinal literals are translated as such. Unlike
+	 * {@code ExpressionVisitor}'s, it has no case for {@code char} values.
+	 *
+	 * @param jOrdinalLiteral the literal
+	 * @throws TacoException for another literal type ({@code char} with {@code useJavaArithmetic}
+	 *     included)
+	 * @throws TacoNotImplementedYetException for an ordinal literal of another kind
+	 */
 	@Override
 	public void visitOrdinalLiteral(JOrdinalLiteral jOrdinalLiteral) {
 
@@ -2865,6 +3244,16 @@ public class JmlExpressionVisitor extends JmlBaseExpressionVisitor {
 	}
 
 
+	/**
+	 * Sets the input to fix, which {@link #visitJmlGenericSpecCase} adds as a {@code requires} to
+	 * each lightweight spec case that has one. {@code helpers.MethodDeclarationSolver} sets it,
+	 * for the method under analysis only, in the second run of {@code checkAndRunSpecIfFaulty}
+	 * ({@code TacoMain.isCheckAndRunSpecAssertionSupport}); the visitors that this one creates for
+	 * single clauses do not get it. See docs/SPEC-OUTPUT.md.
+	 *
+	 * @param inputToFix a {@code HashMap<String, Object>} with the receiver under {@code "thiz"}
+	 *     and one entry per parameter, or {@code null}
+	 */
 	public void setInputToFix(Object inputToFix) {
 		this.inputToFix = inputToFix;
 	}

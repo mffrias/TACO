@@ -20,6 +20,13 @@ import ar.edu.taco.simplejml.helpers.CTypeAdapter;
 import ar.edu.taco.simplejml.helpers.MethodDeclarationSolver;
 import ar.edu.taco.simplejml.helpers.NullDerefSolver;
 
+/**
+ * An empty class: its only member is a constructor that ignores its argument, and its imports
+ * (program declarations, null-dereference checks, ...) are unused. Nothing in the three
+ * repositories uses it (2026-10-19). No state.
+ *
+ * <p>Unclear: nothing uses it; whether it is still needed is an open question.
+ */
 public class JDynAlloyPureMethodVisitor  {
 
 	

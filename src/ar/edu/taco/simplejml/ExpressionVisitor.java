@@ -256,6 +256,17 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Translates a cast. With {@code useJavaArithmetic}, the narrowing conversions {@code int} to
+     * {@code char}, {@code long} to {@code char} and {@code long} to {@code int} apply the
+     * matching conversion function, other casts between different primitive types throw, and any
+     * other cast (reference types included) pushes the value unchanged. Without it, the result is
+     * {@code T & e}, the value intersected with the target type's signature.
+     *
+     * @param jCastExpression the cast
+     * @throws RuntimeException with {@code useJavaArithmetic}, for an unsupported primitive
+     *     conversion
+     */
     @Override
     public void visitCastExpression(JCastExpression jCastExpression) {
         jCastExpression.expr().accept(this);
@@ -287,6 +298,14 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Pushes the {@code JavaPrimitiveCharValue} literal of a character, with or without
+     * {@code useJavaArithmetic}. The literal is registered in the {@code JavaPrimitiveCharValue}
+     * singleton (static state, kept between runs in one JVM), whose literal modules
+     * {@code engine.SimpleJmlStage} adds with Java arithmetic.
+     *
+     * @param jCharLiteral the literal
+     */
     @Override
     public void visitCharLiteral(JCharLiteral jCharLiteral) {
         jCharLiteral.accept(prettyPrint);
@@ -385,6 +404,16 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Translates a field access {@code e.f} into {@code E.f}. A static field named through its
+     * class becomes {@code ClassFields.<pkg_Class>_<f>} (the static fields module, see
+     * jDynAlloy's docs/LANGUAGE.md); a static field accessed through an expression becomes
+     * {@code E.(univ -> ClassFields.<T>_<f>)}, where {@code T} is the field's own type. If the
+     * prefix translated to a formula (a quantified formula, for a call), the formula is pushed
+     * back and its first quantified variable is used as the prefix.
+     *
+     * @param jClassFieldExpression the field access
+     */
     @Override
     public void visitFieldExpression(JClassFieldExpression jClassFieldExpression) {
         jClassFieldExpression.prefix().accept(this);
@@ -451,6 +480,13 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Pushes the declaration {@code var x: T} of a parameter, as a statement; used for the
+     * exception variable of a {@code catch} clause
+     * ({@link BlockStatementsVisitor#visitCatchClause}).
+     *
+     * @param jmlFormalParameter the parameter
+     */
     @Override
     public void visitJmlFormalParameter(JmlFormalParameter jmlFormalParameter) {
         jmlFormalParameter.accept(prettyPrint);
@@ -509,6 +545,23 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Translates a call into a JDynAlloy program call and pushes it. Its arguments are, in the
+     * order of {@code helpers.ArgEncoder}: the receiver (the translated prefix; {@code thiz} for
+     * a static call without one, as every program TACO translates has a {@code thiz} parameter),
+     * {@code throw}, the target of the result if the method returns one
+     * ({@link #getLeftAssignmentExpression()}), and the translated arguments. The program is
+     * named {@code <receiver type>_<method>} when the method is static or its receiver type is
+     * one of the classes TACO translates ({@code classToCheck}, and the configuration's
+     * {@code classes}, or {@code relevantClasses} if there is no {@code classes} key), and by the
+     * bare method name otherwise, which is how the built-in modules name their programs. See
+     * docs/METHOD-NAMING.md. Reads {@link TacoConfigurator}.
+     *
+     * @param jMethodCallExpression the call; an instance call must have an explicit prefix
+     * @throws UnsupportedOperationException if an argument is an object creation
+     * @throws IllegalArgumentException (from {@code ArgEncoder}) if an instance call has no
+     *     prefix, or a call that returns a value has no target
+     */
     @Override
     public void visitMethodCallExpression(JMethodCallExpression jMethodCallExpression) {
         jMethodCallExpression.accept(prettyPrint);
@@ -627,6 +680,17 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Translates {@code new T[n]} into {@code createObject<A>[x]; call Constructor[x, throw, N]},
+     * where {@code A} is the array signature and {@code x} the target
+     * ({@link #getLeftAssignmentExpression()}). Without {@code useJavaArithmetic}, an array of a
+     * numeric type also gets {@code assume} that its elements are all 0. Only {@code int[]},
+     * {@code long[]}, {@code char[]}, {@code Object[]} and {@code int[][]} are supported, and
+     * only the first dimension is used. Pushes the block.
+     *
+     * @param jNewArrayExpression the array creation; the target must be a variable
+     * @throws RuntimeException ("unsupported array type") for other array types
+     */
     @Override
     public void visitNewArrayExpression(JNewArrayExpression jNewArrayExpression) {
         jNewArrayExpression.accept(prettyPrint);
@@ -702,6 +766,16 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Translates {@code new C(args)} into
+     * {@code createObject<C>[x]; call Constructor[x, throw, args]}, where {@code x} is the target
+     * ({@link #getLeftAssignmentExpression()}); jDynAlloy binds the call to {@code C}'s
+     * constructor by the name {@code Constructor} and the argument types. With
+     * {@code newExceptionsAreLiterals} and an exception class, it is {@code x := CLit} instead.
+     * Pushes the statement.
+     *
+     * @param jNewObjectExpression the object creation; the target must be a variable
+     */
     @Override
     public void visitNewObjectExpression(
             JNewObjectExpression jNewObjectExpression) {
@@ -775,6 +849,18 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Pushes an integer literal: with {@code useJavaArithmetic}, the literal signature of an
+     * {@code int}, {@code long} or {@code char} value, registered in the
+     * {@code JavaPrimitiveIntegerValue}, {@code JavaPrimitiveLongValue} or
+     * {@code JavaPrimitiveCharValue} singleton (static state, kept between runs in one JVM; their
+     * literal modules are added by {@code engine.SimpleJmlStage}); without it, an Alloy integer
+     * ({@code negate} for a negative one). Boolean and string ordinal literals are translated as
+     * such.
+     *
+     * @param jOrdinalLiteral the literal
+     * @throws TacoException for another literal type
+     */
     @Override
     public void visitOrdinalLiteral(JOrdinalLiteral jOrdinalLiteral) {
         jOrdinalLiteral.accept(prettyPrint);
@@ -866,6 +952,14 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         super.getStack().push(binaryExpression);
     }
 
+    /**
+     * Translates a string literal into a new string object,
+     * {@code createObject<java_lang_String>[x]; call Constructor[x, throw]}, with {@code x} the
+     * target ({@link #getLeftAssignmentExpression()}). The literal's value is not used: two
+     * literals are two unrelated strings. Pushes the statement.
+     *
+     * @param jStringLiteral the literal; the target must be a variable
+     */
     @Override
     public void visitStringLiteral(JStringLiteral jStringLiteral) {
         jStringLiteral.accept(prettyPrint);
@@ -987,6 +1081,12 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
         jUnaryPromote.expr().accept(this);
     }
 
+    /**
+     * Pushes the {@code JavaPrimitiveFloatValue} literal of a floating-point literal, registered
+     * in that singleton (static state, kept between runs in one JVM).
+     *
+     * @param jRealLiteral the literal
+     */
     @Override
     public void visitRealLiteral(JRealLiteral jRealLiteral) {
         jRealLiteral.accept(prettyPrint);
@@ -1008,6 +1108,13 @@ public class ExpressionVisitor extends BaseExpressionVisitor {
     }
 
 
+    /**
+     * Pushes the JML expression itself, untranslated; {@link JmlExpressionVisitor} overrides this
+     * to translate it. {@link BlockStatementsVisitor} translates the JML initializers of ghost
+     * variables with a {@link JmlExpressionVisitor} instead of calling this.
+     *
+     * @param arg0 the JML expression
+     */
     @Override
     public void visitJmlSpecExpression(JmlSpecExpression arg0) {
         super.getStack().push(arg0);

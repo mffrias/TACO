@@ -119,6 +119,21 @@ import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
 
 
+/**
+ * Root of TACO's visitors over the JML2 and MultiJava AST. It implements every method of JML2's
+ * {@code JmlVisitor} (which extends MultiJava's {@code MjcVisitor}) by throwing
+ * {@link TacoNotImplementedYetException}, so that a subclass handles only the constructs it
+ * overrides, and any other construct stops the run instead of being skipped. Its subclasses are
+ * the cloners that the JML simplification passes ({@code engine.JmlStage}) build on
+ * ({@code utils.jml.JmlAstClonerStatementVisitor} and {@code JmlAstClonerExpressionVisitor}), a
+ * few other visitors of {@code jml/} and {@code utils/jml/}, and, through
+ * {@code utils.jml.JmlAstTransverseStatementVisitor}, the translators of this package
+ * ({@link JDynAlloyASTVisitor}, {@link BlockStatementsVisitor}, {@link ExpressionVisitor},
+ * {@link JmlExpressionVisitor}).
+ *
+ * <p>Static state: the public field {@code variableNameIndex} would survive between runs in one
+ * JVM, but nothing reads or writes it.
+ */
 public class JmlBaseVisitor extends JmlAbstractVisitor implements JmlVisitor {
 
 	public static int variableNameIndex;
@@ -1963,6 +1978,14 @@ public class JmlBaseVisitor extends JmlAbstractVisitor implements JmlVisitor {
 	}
 	
 
+	/**
+	 * Returns the field {@code newStatements}, which nothing in this class assigns, so always
+	 * {@code null}. The visitors that collect new statements
+	 * ({@code jml.expression.ESBlockVisitor} and {@code ESExpressionVisitor}) override this
+	 * method.
+	 *
+	 * @return {@code null}
+	 */
 	public List<JStatement> getNewStatements() {
 		return newStatements;
 	}

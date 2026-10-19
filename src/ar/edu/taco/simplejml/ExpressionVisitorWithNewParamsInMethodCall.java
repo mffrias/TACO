@@ -21,6 +21,15 @@ import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.IProgramCall;
 
+/**
+ * A variant of {@link ExpressionVisitor} whose only change is the translation of calls
+ * ({@link #visitMethodCallExpression}), an older copy of {@code ExpressionVisitor}'s. The typing
+ * given to the constructor is kept in a field that only commented-out code reads (it added the
+ * typing's variables as extra arguments of each call). Nothing in the three repositories creates
+ * this class (2026-10-19). No static state.
+ *
+ * <p>Unclear: nothing uses it; whether it is still needed is an open question.
+ */
 public class ExpressionVisitorWithNewParamsInMethodCall extends ExpressionVisitor {
 
 	AlloyTyping varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures;
@@ -31,6 +40,18 @@ public class ExpressionVisitorWithNewParamsInMethodCall extends ExpressionVisito
 
 
 
+	/**
+	 * Translates a call like {@link ExpressionVisitor#visitMethodCallExpression}, with the earlier
+	 * rules: only a static call's name gets the prefix ({@code <receiver type>_<method>}; an
+	 * instance call keeps the bare method name), and a static call gets no receiver. Since
+	 * {@code helpers.ArgEncoder} always reserves the receiver position, {@code ArgEncoder.encode}
+	 * throws for every static call.
+	 *
+	 * @param jMethodCallExpression the call
+	 * @throws UnsupportedOperationException if an argument is an object creation
+	 * @throws IllegalArgumentException (from {@code ArgEncoder}) for a static call, an instance
+	 *     call without prefix, or a call that returns a value and has no target
+	 */
 	public void visitMethodCallExpression(JMethodCallExpression jMethodCallExpression) {
 		//		jMethodCallExpression.accept(prettyPrint);
 		//		log.debug("Visiting: " + jMethodCallExpression.getClass().getName());

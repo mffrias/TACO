@@ -81,6 +81,34 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
 
+/**
+ * Translates a simplified compilation unit into JDynAlloy modules, one per class or interface:
+ * the core of {@code engine.SimpleJmlStage}, driven by
+ * {@link JavaToJDynAlloyManager#processCompilationUnit}. For each type declaration it fills a new
+ * {@code DynJMLAlloyModuleBuffer} with
+ * <ul>
+ * <li>the signature: its name ({@code helpers.JavaClassNameNormalizer}, dots as underscores), its
+ *     parent ({@code java_lang_Object} if none) and interfaces, abstract or not;</li>
+ * <li>the fields, static ones apart, and an invariant {@code thiz.f != null} for each non-static,
+ *     non-model field declared {@code non_null};</li>
+ * <li>the class's invariants, constraints, model fields and {@code represents} clauses,
+ *     translated by a {@link JmlExpressionVisitor};</li>
+ * <li>one program per method and constructor: its contract from
+ *     {@code helpers.MethodDeclarationSolver} (named as docs/METHOD-NAMING.md says), and its body
+ *     from a {@link BlockStatementsVisitor}, after
+ *     {@code throw := null; var exit_stmt_reached; exit_stmt_reached := false}.</li>
+ * </ul>
+ * Inner classes are translated before the class around them. What the modules mean is in
+ * jDynAlloy's docs/LANGUAGE.md.
+ *
+ * <p>The statement and expression translators ({@link BlockStatementsVisitor},
+ * {@link ExpressionVisitor}, {@link JmlExpressionVisitor}) extend this class only to share its
+ * fields; they are created with the constructor without arguments.
+ *
+ * <p>Static state: {@link #getCurrentModuleName()} and the types of the current module's fields
+ * are static, shared by every visitor, and keep the last class translated between runs in one
+ * JVM.
+ */
 public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 	private static Logger log = Logger.getLogger(JDynAlloyASTVisitor.class);
@@ -109,28 +137,77 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 	private static String currentModuleName;
 
 
+	/**
+	 * Creates a visitor with no context, no maps of fields and no compilation units. The
+	 * statement and expression translators that extend this class use it; such a visitor cannot
+	 * translate a type declaration (it fails on the missing maps).
+	 */
 	public JDynAlloyASTVisitor(){
 		this.simpleJmlToJDynAlloyContext = null;
 	}
 
 
+	/**
+	 * Sets the input to fix that every later method and constructor translation hands to
+	 * {@code helpers.MethodDeclarationSolver}, which keeps it only for the method under analysis
+	 * ({@code methodToCheck} contains the method's name) and passes it to
+	 * {@link JmlExpressionVisitor}, where it becomes a {@code requires}. See docs/SPEC-OUTPUT.md.
+	 *
+	 * @param inputToFix a {@code HashMap<String, Object>} (receiver under {@code "thiz"}, one
+	 *     entry per parameter), or {@code null}
+	 */
 	public void setInputToFix(Object inputToFix){
 		this.inputToFix = inputToFix;
 	}
 
 
+	/**
+	 * Returns the typing of the fresh variables that stand for the results of arithmetic
+	 * operations in JML expressions translated with {@code useJavaArithmetic}:
+	 * {@link JmlExpressionVisitor} replaces each operation by such a variable and adds a
+	 * predicate that defines it
+	 * ({@link #getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()}). Here they are
+	 * those of {@code requires} and {@code ensures} clauses; the statement translators collect
+	 * those of JML expressions in method bodies. After {@link #visitJmlMethodDeclaration} the
+	 * field refers to the typing of the program just translated.
+	 *
+	 * @return the typing (not a copy)
+	 */
 	public AlloyTyping getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures(){
 		return this.varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures;
 	}
 
+	/**
+	 * Returns the predicates that define the variables of
+	 * {@link #getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()}. After
+	 * {@link #visitJmlMethodDeclaration} the field refers to the list of the program just
+	 * translated.
+	 *
+	 * @return the list (not a copy)
+	 */
 	public List<AlloyFormula> getPredsEncodingValueOfArithmeticOperationsInRequiresAndEnsures(){
 		return this.predsEncodingValueOfArithmeticOperationsInRequiresAndEnsures;
 	}
 
+	/**
+	 * Returns the typing of the variables that encode arithmetic operations in the object
+	 * invariants of the last class or interface translated: for each fresh variable {@code v} of
+	 * an invariant, {@code v_0} (pre-state) and {@code v_1} (post-state), which are also added as
+	 * fields of the class. Replaced by a new typing for each type declaration.
+	 *
+	 * @return the typing (not a copy)
+	 */
 	public AlloyTyping getVarsEncodingValueOfArithmeticOperationsInObjectInvariants(){
 		return this.varsEncodingValueOfArithmeticOperationsInObjectInvariants;
 	}
 
+	/**
+	 * Returns the predicates that define the variables of
+	 * {@link #getVarsEncodingValueOfArithmeticOperationsInObjectInvariants()}, for the last class
+	 * or interface translated.
+	 *
+	 * @return the list (not a copy)
+	 */
 	public List<AlloyFormula> getPredsEncodingValueOfArithmeticOperationsInObjectInvariants(){
 		return this.predsEncodingValueOfArithmeticOperationsInObjectInvariants;
 	}
@@ -196,6 +273,28 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 	private static FieldTypes currentModuleFieldsTypes;
 
 
+	/**
+	 * Creates the visitor of one compilation unit ({@link JavaToJDynAlloyManager}).
+	 *
+	 * @param modulesObjectState for each class translated so far (normalized name), its fields in
+	 *     the data group {@code objectState}; this visitor adds an entry per type declaration,
+	 *     and {@link JmlExpressionVisitor} reads it for {@code assignable} clauses
+	 * @param modulesNoStaticFields for each class translated so far, its non-static fields; read
+	 *     for {@code assignable x.*} and for the {@code modifies} of constructors
+	 * @param simpleJmlToJDynAlloyContext where each declaration and its module or program are
+	 *     recorded
+	 * @param varsEncodingValueOfArithmeticOperationsInRequiresAndEnsures the typing that the
+	 *     first method translated adds to; see
+	 *     {@link #getVarsEncodingValueOfArithmeticOperationsInRequiresAndEnsures()}
+	 * @param predsEncodingValueOfArithmeticOperationsInRequiresAndEnsures the list that the first
+	 *     method translated adds to
+	 * @param varsEncodingValueOfArithmeticOperationsInObjectInvariants ignored: the visitor keeps
+	 *     its own typing
+	 * @param predsEncodingValueOfArithmeticOperationsInObjectInvariants ignored: the visitor
+	 *     keeps its own list
+	 * @param compilationUnits every simplified compilation unit of the run, passed on to
+	 *     {@code helpers.MethodDeclarationSolver}
+	 */
 	public JDynAlloyASTVisitor(Map<String, List<String>> modulesObjectState, 
 			Map<String, List<String>> modulesNoStaticFields,
 			SimpleJmlToJDynAlloyContext simpleJmlToJDynAlloyContext, 
@@ -213,14 +312,37 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		this.compilationUnits = compilationUnits;
 	}
 
+	/**
+	 * Returns the modules translated so far, one per class or interface, an inner class before
+	 * the class around it.
+	 *
+	 * @return the visitor's own list (not a copy)
+	 */
 	public List<JDynAlloyModule> getModules() {
 		return this.modules;
 	}
 
+	/**
+	 * Returns the normalized name ({@code pkg_Class}) of the class or interface being translated,
+	 * set when its translation starts, after its inner classes. Static: shared by all visitors
+	 * and kept between runs in one JVM. {@code helpers.MethodDeclarationSolver} reads it to build
+	 * the {@code modifies} of a constructor.
+	 *
+	 * @return the name, or {@code null} if no type declaration was translated yet in this JVM
+	 */
 	public static String getCurrentModuleName() {
 		return currentModuleName;
 	}
 
+	/**
+	 * Returns the recorded type of a field of the class being translated. The field types are
+	 * static, like {@link #getCurrentModuleName()}. As written it always returns {@code null}:
+	 * the private map only replaces the types of names it already has, and nothing adds names.
+	 * Nothing calls it.
+	 *
+	 * @param varName the field's name
+	 * @return {@code null}
+	 */
 	public static JType getVariableTypeOnCurrentModule(String varName) {
 		return currentModuleFieldsTypes.get(varName);
 	}
@@ -270,6 +392,21 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		this.modulesNoStaticFields = modulesNoStaticFields;
 	}
 
+	/**
+	 * Translates a constructor into a program of the current module: its contract from
+	 * {@code MethodDeclarationSolver.getConstructorDeclaration} (with the input to fix, see
+	 * {@link #setInputToFix}), its body from a new {@link BlockStatementsVisitor}, after
+	 * {@code throw := null; var exit_stmt_reached; exit_stmt_reached := false}. With
+	 * {@code checkNullDereference} the body goes through {@code helpers.NullDerefSolver}
+	 * ({@link NullDerefVisitor}). The program is marked as a constructor and added to the buffer;
+	 * the declaration and the program are recorded in the context.
+	 *
+	 * <p>Unlike {@link #visitJmlMethodDeclaration}, the body's translator does not get the
+	 * {@code useJavaArithmetic} setting (its program buffer uses it only for {@code do} loops),
+	 * and the arithmetic encodings of JML expressions in the body are not collected.
+	 *
+	 * @param jmlConstructorDeclaration the constructor, with a body
+	 */
 	@Override
 	public void visitJmlConstructorDeclaration(JmlConstructorDeclaration jmlConstructorDeclaration) {
 		jmlConstructorDeclaration.accept(prettyPrint);
@@ -334,6 +471,14 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		this.simpleJmlToJDynAlloyContext.record_simpleJml_to_JDynAlloy_mapping(jmlConstructorDeclaration, programDeclaration);
 	}
 
+	/**
+	 * Translates a class into a module: its inner classes first, each into its own module, then
+	 * its signature, fields, class-level JML and methods (see the class comment). The variables
+	 * that encode arithmetic in its programs' contracts are added as fields of the class. Adds
+	 * the module to {@link #getModules()} and records it in the context.
+	 *
+	 * @param jmlClassDeclaration the class
+	 */
 	@Override
 	public void visitJmlClassDeclaration(
 			/* @non_null */JmlClassDeclaration jmlClassDeclaration) {
@@ -356,6 +501,13 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 
 
+	/**
+	 * Adds a field to the current module's buffer, as a static field or a field, with its type
+	 * translated by {@code helpers.CTypeAdapter}, and to the data groups its {@code in} clauses
+	 * name. Also called for model fields.
+	 *
+	 * @param jmlFieldDeclaration the field
+	 */
 	@Override
 	public void visitJmlFieldDeclaration(JmlFieldDeclaration jmlFieldDeclaration) {
 		jmlFieldDeclaration.accept(prettyPrint);
@@ -396,6 +548,13 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 
 
+	/**
+	 * Translates an interface into a module, as {@link #visitJmlClassDeclaration} does a class
+	 * (its programs are those of the methods it declares, without bodies), adds it to
+	 * {@link #getModules()} and records it in the context.
+	 *
+	 * @param jmlInterfaceDeclaration the interface
+	 */
 	@Override
 	public void visitJmlInterfaceDeclaration(JmlInterfaceDeclaration jmlInterfaceDeclaration) {
 		jmlInterfaceDeclaration.accept(prettyPrint);
@@ -412,6 +571,23 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 
 
 
+	/**
+	 * Translates a method into a program of the current module: its contract from
+	 * {@code MethodDeclarationSolver.getMethodDeclaration} (with the input to fix, see
+	 * {@link #setInputToFix}), named {@code <declaring class>_<method>} (docs/METHOD-NAMING.md);
+	 * its body, if it has one ({@code skip} otherwise), from a new
+	 * {@link BlockStatementsVisitor}, after
+	 * {@code throw := null; var exit_stmt_reached; exit_stmt_reached := false}. With
+	 * {@code checkNullDereference} the body goes through {@code helpers.NullDerefSolver}. The
+	 * program is added to the buffer, and the declaration and the program are recorded in the
+	 * context.
+	 *
+	 * <p>Side effect on the arithmetic encodings: the body's are added to the typing and list
+	 * this visitor holds, and then those fields are replaced by the new program's own (so the
+	 * next method's body encodings are added to this program's).
+	 *
+	 * @param jmlMethodDeclaration the method
+	 */
 	@Override
 	public void visitJmlMethodDeclaration(
 			/* @non_null */JmlMethodDeclaration jmlMethodDeclaration) {
@@ -699,17 +875,38 @@ public class JDynAlloyASTVisitor extends JmlAstTransverseStatementVisitor {
 		}
 	}
 
+	/**
+	 * Translates every type declaration of a MultiJava compilation unit; see
+	 * {@link #visitJmlCompilationUnit}.
+	 *
+	 * @param n the compilation unit
+	 */
 	@Override
 	public void visitCompilationUnit(JCompilationUnit n) {
 		visitCompilationUnitType(n);
 	}
 
+	/**
+	 * Returns a shallow copy ({@code Object.clone}; MultiJava's {@code Utils} is
+	 * {@code Cloneable}), which shares the buffer, the modules and the maps. Nothing calls it.
+	 *
+	 * @return the copy
+	 * @throws CloneNotSupportedException never, as the class is {@code Cloneable}
+	 */
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
 		return super.clone();
 	}
 
+	/**
+	 * Translates every type declaration of the unit into modules. After each one, the module with
+	 * the same index in {@link #getModules()} gets the encodings of arithmetic in object
+	 * invariants of the last class translated. Modules and type declarations are paired by index,
+	 * which holds only for a unit without inner classes, whose modules come first.
+	 *
+	 * @param n the compilation unit
+	 */
 	@Override
 	public void visitJmlCompilationUnit(JmlCompilationUnit n) {
 		visitCompilationUnitType(n);

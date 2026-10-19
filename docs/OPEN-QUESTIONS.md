@@ -109,6 +109,9 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     own values only, not of the fields of the objects in it, for which jDynAlloy's
     `processInputToFix` creates literals later, during the translation. Do those literals reach
     the model? (Not checked.)
+24. **`switch`** (`simplejml/BlockStatementsVisitor`, `visitSwitchStatement`): every group is
+    translated and runs, in order; the selector is translated but not used, and the case labels
+    are ignored. Is `switch` meant to be supported?
 27. **Passes that find nothing to do** (`jml/loop/LSBlockVisitor`, `WhileBlockVisitor`):
     `ASTSimplifierManager` runs them after `ForRemoverVisitor` and `WhileRemoverSimplifier` have
     already removed the `for` and `while` loops they handle, so in the current pipeline both
@@ -153,3 +156,22 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     is cut before it, so the argument's name is no longer a `QF` field and the fact built from
     it would name a missing field. Why is it cut, and do such prefixes occur (the models seen
     have `l0`, `l2`, ...)?
+37. **Constraints across two states** (`simplejml/JmlExpressionVisitor.java`,
+    `visitJmlConstraint`): a constraint is translated in one state that flips to the post-state
+    at the first `\old`, so `\old(x) <= x` gives `x <= x'` but `x >= \old(x)` gives `x >= x`
+    (`setInstant(instant)` sets the state to itself, and `visitJmlOldExpression` sets the
+    post-state instead of restoring the previous one). Intended?
+38. **The fixed input in heavyweight spec cases** (`JmlExpressionVisitor`,
+    `visitJmlGenericSpecCase`): the input to fix is added only to lightweight spec cases that
+    have a `requires`; `normal_behavior` and `exceptional_behavior` spec cases, and spec cases
+    without `requires`, never get it. Intended? (It matters only if the TACO-side `requires` of
+    item 12 is still needed.)
+39. **Model fields** (`JmlExpressionVisitor.visitJmlFieldDeclaration`): `JDynAlloyASTVisitor`
+    visits model fields with itself, so this override and the model-field lists of
+    `JmlClassDeclarationResult` seem never reached. Can they go?
+40. **Unused classes in simplejml/**: nothing uses `ExpressionVisitorWithNewParamsInMethodCall`
+    (an older call translation that gives static calls no receiver, which `ArgEncoder` now
+    rejects), `JDynAlloyPureMethodVisitor` (empty), `MethodCallExpressionVisitor` (its only
+    override does what the inherited one does), and `ResultVariableNamesCollectorVisitor` and
+    `VariableNameCollectorVisitor` (used only by two private methods of `JmlExpressionVisitor`,
+    one never called and one called only from commented-out code). Can they go?

@@ -39,6 +39,11 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
  */
 public class JmlBaseExpressionVisitor extends ExpressionVisitor {
 	
+	/**
+	 * One {@code represents} clause of a class, as {@link JmlExpressionVisitor} translates it:
+	 * the abstract field (as an expression), its type, and the formula that defines it.
+	 * {@link JDynAlloyASTVisitor} turns each into a {@code Represents} of the module's buffer.
+	 */
 	public static class JmlRepresentsData {
 
 		public final AlloyExpression expression;
@@ -95,6 +100,12 @@ public class JmlBaseExpressionVisitor extends ExpressionVisitor {
 		}
 	}
 
+	/**
+	 * What {@link JmlExpressionVisitor} collects from the class-level JML of one class or
+	 * interface: model fields (static or not), invariants, constraints (static or not) and
+	 * {@code represents} clauses. {@link JDynAlloyASTVisitor} copies them into the module's
+	 * buffer.
+	 */
 	public static class JmlClassDeclarationResult {
 
 		final JDynAlloyTyping modelFields = new JDynAlloyTyping();
@@ -135,6 +146,13 @@ public class JmlBaseExpressionVisitor extends ExpressionVisitor {
 
 	}
 
+	/**
+	 * What {@link JmlExpressionVisitor} collects from a method's specification: one
+	 * {@code JSpecCase} per spec case, and the locations of the {@code assignable} clauses.
+	 * {@code helpers.MethodDeclarationSolver} reads the spec cases. The locations are not reset
+	 * between spec cases: each spec case's {@code modifies} also gets those of the spec cases
+	 * translated before it, except after {@code assignable \nothing}, which clears them.
+	 */
 	public static class JmlMethodDeclarationResult {
 		final Vector<JModifies> modifiables = new Vector<JModifies>();
 		final Vector<JSpecCase> jSpecCases = new Vector<JSpecCase>();
@@ -159,6 +177,11 @@ public class JmlBaseExpressionVisitor extends ExpressionVisitor {
 //		}
 	}
 	
+	/**
+	 * The state a JML expression is translated in: {@code PRE_INSTANT} for the pre-state
+	 * (unprimed variables), {@code POST_INSTANT} for the post-state (primed variables, as in
+	 * {@code ensures}).
+	 */
 	public enum Instant {
 		PRE_INSTANT, POST_INSTANT
 	}

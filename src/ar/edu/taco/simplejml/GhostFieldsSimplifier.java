@@ -60,6 +60,16 @@ public class GhostFieldsSimplifier extends JmlAstClonerStatementVisitor {
 
 
 
+	/**
+	 * Turns a ghost field into an ordinary field, so that it is translated like a Java field:
+	 * pushes the declaration itself (not a copy) and clears its {@code ghost} modifier
+	 * (0x00200000, JML's {@code ACC_GHOST}) in place, so the input AST changes too. Other field
+	 * declarations are pushed unchanged. This pass runs during {@code engine.JmlStage}, after
+	 * {@code ShortcutRemoverVisitor} and before {@code DefaultConstructorSimplifier}
+	 * ({@code jml.ASTSimplifierManager}), although the class sits in this package.
+	 *
+	 * @param self the field declaration
+	 */
 	@Override
 	public void visitJmlFieldDeclaration(JmlFieldDeclaration self) {
 
@@ -73,11 +83,23 @@ public class GhostFieldsSimplifier extends JmlAstClonerStatementVisitor {
 	} 	
 	
 	
+	/**
+	 * Pushes the assignment itself, without copying or visiting its sides.
+	 *
+	 * @param self the assignment
+	 */
 	@Override
 	public void visitAssignmentExpression(JAssignmentExpression self){
 		getStack().push(self);
 	}
 	
+	/**
+	 * Turns {@code //@ set x = e;} into the Java assignment statement {@code x = e;} (a
+	 * {@code JmlAssignmentStatement}, with no comments), which is then translated like any other
+	 * assignment. The assignment expression is reused, not copied.
+	 *
+	 * @param self the {@code set} statement
+	 */
 	@Override
 	public void visitJmlSetStatement(JmlSetStatement self){
 		self.assignmentExpression().accept(this);

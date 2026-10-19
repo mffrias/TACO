@@ -7,6 +7,14 @@ import org.multijava.mjc.JMethodCallExpressionExtension;
 
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
 
+/**
+ * A copy visitor ({@link JmlAstClonerExpressionVisitor}) whose only override,
+ * {@code visitMethodCallExpression}, does what the inherited one does: it copies the prefix and
+ * the arguments and wraps the call in a {@code JMethodCallExpressionExtension}. Nothing in the
+ * three repositories uses it (2026-10-19). No state.
+ *
+ * <p>Unclear: nothing uses it; whether it is still needed is an open question.
+ */
 public class MethodCallExpressionVisitor extends JmlAstClonerExpressionVisitor {
 
 	public MethodCallExpressionVisitor() {

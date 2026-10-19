@@ -23,6 +23,17 @@ import org.jmlspecs.checker.JmlPredicate;
 
 import ar.edu.taco.jml.utils.SpecSimplifierClassBaseVisitor;
 
+/**
+ * Casts the array accesses of the specifications to their element types, with
+ * {@link CastSExpressionVisitor} ({@code a[i]} becomes {@code ((T) a[i])}). It rewrites the
+ * predicates that {@link SpecSimplifierClassBaseVisitor} hands over: class invariants,
+ * represents clauses, constraints, and the {@code requires}, {@code ensures} and
+ * {@code signals} clauses of method specifications. Method bodies, with their assertions,
+ * assumptions and loop invariants, are copied without change.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code FNBlockVisitor} and before
+ * {@code LiteralBlockVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ */
 public class CastSClassVisitor extends SpecSimplifierClassBaseVisitor {
     
 //	@Override

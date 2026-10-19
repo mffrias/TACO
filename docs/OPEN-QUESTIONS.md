@@ -109,4 +109,20 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     own values only, not of the fields of the objects in it, for which jDynAlloy's
     `processInputToFix` creates literals later, during the translation. Do those literals reach
     the model? (Not checked.)
-
+27. **Passes that find nothing to do** (`jml/loop/LSBlockVisitor`, `WhileBlockVisitor`):
+    `ASTSimplifierManager` runs them after `ForRemoverVisitor` and `WhileRemoverSimplifier` have
+    already removed the `for` and `while` loops they handle, so in the current pipeline both
+    only copy the AST. Are they still needed, in that order?
+28. **More iterations than the loop bound** (`jml/loop/WhileRemoverSimplifier`): a `while` loop
+    is unrolled `loopUnroll` times and followed by `assert !c`, so an input that needs more
+    iterations fails that `assert`, which jDynAlloy turns into `java_lang_AssertionErrorLit`: a
+    counterexample, unless the specification allows an `AssertionError`. Is that intended, or
+    should such inputs be left outside the bounds (as an `assume` would)?
+29. **A pass that changes nothing** (`jml/literal/LiteralBlockVisitor`): its expression visitor,
+    `LiteralExpressionVisitor`, overrides nothing, so the pass changes no literal and only
+    copies the AST (dropping `x;` statements); the commented-out code turned string and char
+    literals into `String.buildInstance(...)` and `Character.buildInstance(...)` calls. Is it
+    still needed?
+30. **`FieldParameterExpressionVisitor`** (`jml/FieldParameter/`): nothing in the three
+    repositories refers to it, its `visitMethodCallExpression` pushes no result for the call,
+    and its two branches do the same thing. What was it for, and can it go?

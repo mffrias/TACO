@@ -60,6 +60,25 @@ import ar.edu.taco.jml.JmlToSimpleJmlContext;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.jml.utils.SpecSimplifierClassBaseVisitor;
 
+/**
+ * Renames instance fields to {@code <class>_<field>} ({@link FieldRenameUtil}) everywhere: in
+ * their declarations, in method bodies, and in specifications (invariants, represents clauses,
+ * constraints, {@code requires}, {@code ensures}, {@code signals} and {@code assignable} clauses,
+ * variant functions). Static fields keep their names. Expressions are rewritten with
+ * {@link FNExpressionVisitor}.
+ *
+ * <p>Each field declaration is registered, old name to new name, in the
+ * {@link JmlToSimpleJmlContext} given to the constructor, which {@code ASTSimplifierManager} owns
+ * and {@code JmlStage} hands on; {@code JfslStage} reads it to rename the fields in JFSL
+ * annotations. The context is keyed by the bare field name, so two classes with a field of the
+ * same name share one entry (the last one registered).
+ *
+ * <p>Loop invariants are not rewritten. Each block also drops the expression statements made of a
+ * local variable alone ({@code x;}).
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code VNBlockVisitor} and before
+ * {@code CastSClassVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ */
 public class FNBlockVisitor extends SpecSimplifierClassBaseVisitor {
 
 	private static Logger log = Logger.getLogger(FNBlockVisitor.class);
@@ -68,6 +87,11 @@ public class FNBlockVisitor extends SpecSimplifierClassBaseVisitor {
 	
 	private final JmlToSimpleJmlContext jmlToSimpleJmlContext;
 	
+	/**
+	 * Creates the pass.
+	 *
+	 * @param jmlToSimpleJmlContext where the field renamings are registered
+	 */
 	public FNBlockVisitor(JmlToSimpleJmlContext jmlToSimpleJmlContext) {
 	    this.jmlToSimpleJmlContext = jmlToSimpleJmlContext;
 	}
@@ -83,12 +107,26 @@ public class FNBlockVisitor extends SpecSimplifierClassBaseVisitor {
 		super.visitMethodDeclaration(arg0);
 	}
 	
+	/**
+	 * Sets the current class, the prefix for {@code this.f}, and visits the class. A nested class
+	 * sets it in turn and does not restore it, so the members visited after the nested classes
+	 * (the constraints) get the nested class's name.
+	 *
+	 * @param self the class
+	 */
 	@Override
 	public void visitJmlClassDeclaration(JmlClassDeclaration self) {
 	    currentClassName = FieldRenameUtil.extractClassNameForFieldRenameSupport(self.getCClass());
 	    super.visitJmlClassDeclaration(self);
 	}
 	
+	/**
+	 * Renames an instance field's declaration to {@code <declaring class>_<field>} (a
+	 * {@code JmlFieldDeclarationExtension}); a static field keeps its name. Registers old name to
+	 * new name in the context, for static fields too.
+	 *
+	 * @param self the field declaration
+	 */
 	@Override
 	public void visitJmlFieldDeclaration(JmlFieldDeclaration self) {
 	    String className = FieldRenameUtil
@@ -330,6 +368,13 @@ public class FNBlockVisitor extends SpecSimplifierClassBaseVisitor {
 	    this.getStack().push(newSelf);
 	}
 	
+	/**
+	 * Renames the fields of each store-reference expression of an {@code assignable} clause, all
+	 * with the current class as prefix, whatever class declares them (the three-argument
+	 * {@code FieldRenameUtil.convertJmlStoreRefExpression}); other store references are kept.
+	 *
+	 * @param self the assignable clause
+	 */
 	@Override
 	public void visitJmlAssignableClause(JmlAssignableClause self) {
 	    JmlStoreRef[] storeRefs = new JmlStoreRef[self.storeRefs().length];

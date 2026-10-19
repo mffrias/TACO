@@ -37,6 +37,14 @@ public class VNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 
 	private Map<String, String> variableMapping;
 
+	/**
+	 * Creates a visitor that renames local variables by the given mapping, for
+	 * {@link VNBlockVisitor}. {@code visitLocalVariableExpression} sets the new name on the
+	 * variable object of the reference, which the original AST shares. The result of each visit
+	 * is on top of {@code getArrayStack()}.
+	 *
+	 * @param variableMapping original name to new name; read, not copied
+	 */
 	public VNExpressionVisitor(Map<String, String> variableMapping) {
 		this.variableMapping = variableMapping;
 	}
@@ -50,6 +58,12 @@ public class VNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		this.getArrayStack().push(newSelf);
 	}
 
+	/**
+	 * Pushes a {@code JNameExpression} with the mapped name, or with the same name if it is not
+	 * mapped. The new expression has no prefix: the prefix of a qualified name is dropped.
+	 *
+	 * @param self the name expression
+	 */
 	public void visitNameExpression(JNameExpression self) {
 		JNameExpression newSelf = (JNameExpression) self.clone();
 		String newIden = newSelf.getName();

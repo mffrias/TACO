@@ -5,9 +5,29 @@ import org.jmlspecs.checker.JmlLoopStatement;
 import org.multijava.mjc.*;
 import org.multijava.util.compiler.TokenReference;
 
+/**
+ * The first JML simplification pass: turns every {@code for} loop it reaches into a {@code while}
+ * loop. {@code for (init; cond; incr) body} becomes the block
+ * {@code { init; while (cond) { body; incr; } }}, each expression of {@code incr} as a statement
+ * of its own. Other statements are copied by {@link JmlAstClonerStatementVisitor}, which does not
+ * enter labeled statements, so a labeled loop is left as it is.
+ *
+ * <p>{@code ASTSimplifierManager} runs it first, during {@code JmlStage} (see
+ * docs/ARCHITECTURE.md); {@link BreakRemoverSimplifier} and {@link WhileRemoverSimplifier} come
+ * next, and the latter unrolls only {@code while} loops.
+ */
 public class ForRemoverVisitor extends JmlAstClonerStatementVisitor {
 
 
+    /**
+     * Rewrites the loop of a {@code JmlLoopStatement} (a loop with its JML loop invariants and
+     * variant functions) and keeps the annotations on the result. For a {@code for} loop the
+     * result is the block of {@link #visitForStatement}, whose second statement, the
+     * {@code while} loop, is wrapped in a new {@code JmlLoopStatement}; any other loop is
+     * rewritten and wrapped in a new one.
+     *
+     * @param self the annotated loop; its rewritten copy is pushed on the stack
+     */
     public void visitJmlLoopStatement(JmlLoopStatement self) {
         (self.loopStmt()).accept(this);
         JStatement resultingInnerLoop = (JStatement)this.getStack().pop();
@@ -28,6 +48,17 @@ public class ForRemoverVisitor extends JmlAstClonerStatementVisitor {
     }
 
 
+    /**
+     * Replaces a {@code for} loop by {@code { init; while (cond) { body; incr; } }}, rewriting
+     * the body first, so that nested loops are converted too. The initialization and the
+     * condition are taken as they are; each expression of the increment becomes an expression
+     * statement at the end of the new body. Pushes the new block.
+     *
+     * <p>Assumes an initialization and a condition: for {@code for (; c; i++)} the block gets a
+     * null first statement, and for {@code for (int i = 0; ; i++)} the loop a null condition.
+     *
+     * @param self the loop to replace
+     */
     @Override
     public void visitForStatement(JForStatement self) {
         self.body().accept(this);

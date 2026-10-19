@@ -50,32 +50,79 @@ import org.multijava.util.compiler.UnpositionedError;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Evaluates the condition of each {@code while} loop into a fresh variable: {@code while (c) B}
+ * becomes {@code boolean ws_<n>; ws_<n> = c; while (ws_<n>) { B; ws_<n> = c; }}, the declaration
+ * and the first assignment placed before the loop in the enclosing block. The last assignment is
+ * left out when {@code B} ends with {@code break} ({@link LastStatementCollector}).
+ *
+ * <p>For an annotated loop with variant functions ({@code decreasing}), it also checks the first
+ * one: each iteration starts by storing its value in {@code variant_<n>} and throws a
+ * {@code RuntimeException} if that value is negative, or if at the end of the iteration the
+ * variant is not smaller than {@code variant_<n>}. The variant functions are then removed from
+ * the loop.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@link LSBlockVisitor}.
+ * {@link WhileRemoverSimplifier} runs earlier and unrolls every {@code while} loop it reaches,
+ * dropping its variant functions, so in the current pipeline this pass finds no {@code while}
+ * loop and only copies the AST. Unclear: whether it is still needed in that order.
+ *
+ * <p>Static state: the counters in {@code ws_<n>} and {@code variant_<n>} are static fields,
+ * never reset, so the names keep growing over all the analyses run in one JVM (Stryker runs
+ * many).
+ */
 public class WhileBlockVisitor extends JmlAstClonerStatementVisitor {
 
 	private static int variantFunctionIndex = 0;
 
 	private static int variableNameIndex = 0;
 
+	/**
+	 * Returns the statements that the loops rewritten by this instance need before them (the
+	 * declaration and first assignment of each {@code ws_<n>}); the enclosing block's
+	 * {@link #visitBlockStatement} inserts them.
+	 *
+	 * @return the list itself, not a copy
+	 */
 	public List<JStatement> getNewWhileStatements() {
 		return newStatements;
 	}
 
+	/**
+	 * Replaces the list of statements to insert before the loop.
+	 *
+	 * @param newStatements the new list
+	 */
 	public void setNewWhileStatements(List<JStatement> newStatements) {
 		this.newStatements = newStatements;
 	}
 
 	private List<JStatement> newStatements;
 
+	/** Creates the pass with an empty list of statements to insert. */
 	public WhileBlockVisitor() {
 		newStatements = new ArrayList<JStatement>();
 	}
 
+	/**
+	 * Returns a fresh name {@code ws_<n>}, incrementing the static counter (see the class
+	 * comment).
+	 *
+	 * @return the new name
+	 */
 	public String createNewWhileVariableName() {
 		WhileBlockVisitor.variableNameIndex++;
 		String s = "ws_" + variableNameIndex;
 		return s;
 	}	
 
+	/**
+	 * Rewrites each statement of the block with a new instance and inserts, before it, the
+	 * statements that instance collected ({@link #getNewWhileStatements()}). Resets this
+	 * instance's own list after each statement.
+	 *
+	 * @param self the block
+	 */
 	@Override
 	public void visitBlockStatement(JBlock self) {
 		List<JStatement> declarationList = new ArrayList<JStatement>();
@@ -111,6 +158,14 @@ public class WhileBlockVisitor extends JmlAstClonerStatementVisitor {
 		this.getStack().push(newSelf);
 	}
 
+	/**
+	 * Rewrites the body, then pushes {@code while (ws_<n>) { body; ws_<n> = cond; }} and adds the
+	 * declaration of {@code ws_<n>} and the assignment {@code ws_<n> = cond;} to
+	 * {@link #getNewWhileStatements()}. The assignment is left out of the body when the body ends
+	 * with {@code break}. The same assignment object is used before the loop and in the body.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitWhileStatement(JWhileStatement self) {
 		self.body().accept(this);
@@ -135,6 +190,17 @@ public class WhileBlockVisitor extends JmlAstClonerStatementVisitor {
 		this.getStack().push(whileStatement);
 	}
 
+	/**
+	 * Rewrites an annotated {@code while} loop. With variant functions, first adds the checks of
+	 * the first one to the body (see the class comment). Pushes
+	 * {@code { <ws_n declaration> <ws_n assignment> <annotated loop> }}, the loop rewritten by
+	 * {@link #visitWhileStatement} and annotated with the original loop invariants and no variant
+	 * functions, and clears the list of statements to insert.
+	 *
+	 * @param self the annotated loop. Its loop must be a {@code while} loop
+	 *     ({@code ClassCastException} otherwise), and its first variant function, if any, of a
+	 *     numeric type.
+	 */
 	@Override
 	public void visitJmlLoopStatement(JmlLoopStatement self) {
 

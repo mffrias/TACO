@@ -33,10 +33,32 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Renames, in one unrolled copy of a loop body, the local variables declared in the body:
+ * {@code x} becomes {@code x_<whileIndex>_<copy>}.
+ * {@link ar.edu.taco.jml.loop.WhileRemoverSimplifier} uses a new instance for each copy; the
+ * renamed copy is left on the stack. Declarations, conditions, expression statements, returns,
+ * throws, Java and JML assertions, assumptions and loop annotations are rewritten with
+ * {@link VNWhileExpressionVisitor}; other statements are copied by
+ * {@link JmlAstClonerStatementVisitor} without renaming (for example the condition of a do-while
+ * loop, or a labeled statement, which is not entered).
+ *
+ * <p>The renaming goes by name only: a variable whose name is in {@link #variableMapping} is
+ * renamed wherever it was declared.
+ */
 public class VNWhileBlockVisitor extends JmlAstClonerStatementVisitor {
 
 	public HashMap<String, String> variableMapping = new HashMap<String, String>();
 
+	/**
+	 * Maps the name of every variable declared in {@code varsToReplace} to
+	 * {@code <name>_<whileIndex>_<loopUnroll>}.
+	 *
+	 * @param varsToReplace the declarations found in the loop body
+	 *     ({@code WhileBodyLocalVariableCollectorVisitor})
+	 * @param whileIndex the loop index
+	 * @param loopUnroll the number of the copy: N for the outermost copy, 1 for the innermost
+	 */
 	public VNWhileBlockVisitor(ArrayList<JVariableDeclarationStatement> varsToReplace, int whileIndex, int loopUnroll) {
 		for (JVariableDeclarationStatement var : varsToReplace) {
 			JVariableDefinition[] vars = var.getVars();
@@ -226,6 +248,13 @@ public class VNWhileBlockVisitor extends JmlAstClonerStatementVisitor {
 		getStack().push(newExpressionStatement);
 	}
 
+	/**
+	 * Renames in both sides of an assignment and pushes the new assignment on the statement
+	 * stack. Not a visitor method: {@code accept} calls {@code visitAssignmentExpression}, and
+	 * nothing calls this one.
+	 *
+	 * @param self the assignment
+	 */
 	public void visitJAssignmentExpression(JAssignmentExpression self){
 		VNWhileExpressionVisitor visitor = new VNWhileExpressionVisitor(variableMapping);
 

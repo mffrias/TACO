@@ -59,10 +59,36 @@ import org.multijava.util.compiler.UnpositionedError;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Gives every local variable of the method bodies a name of its own: {@code x} becomes
+ * {@code var_<n>_x}, with one counter for all instances. The renaming follows Java's scopes: a
+ * declaration maps its name for the rest of its block, and each block starts from a copy of the
+ * enclosing mapping. Formal parameters, fields and JML variable definitions keep their names.
+ * Declarations, conditions, expression statements, returns, throws, Java and JML assertions,
+ * assumptions and loop annotations are rewritten with {@link VNExpressionVisitor}; other
+ * statements are copied by {@link JmlAstClonerStatementVisitor} without renaming. Each block also
+ * drops the expression statements made of a local variable alone ({@code x;}).
+ *
+ * <p>{@link VNExpressionVisitor} renames a reference by changing the name of the variable object
+ * it points to, which is shared with the AST this pass is given: that AST changes too.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code SpecMethodCallRemoverVisitor} and before
+ * {@code FNBlockVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ *
+ * <p>Static state: the counter in {@code var_<n>_x} is a static field, never reset, so the names
+ * change from one analysis to the next in one JVM (Stryker runs many).
+ */
 public class VNBlockVisitor extends JmlAstClonerStatementVisitor {
     private static Logger log = Logger.getLogger(VNBlockVisitor.class);
     private static int variableNameIndex = 0;
 
+    /**
+     * Returns {@code var_<n>_<originalName>}, incrementing the static counter (see the class
+     * comment).
+     *
+     * @param originalName the variable's name in the source
+     * @return the new name
+     */
     public String createNewName(String originalName) {
         variableNameIndex++;
         String s = "var_" + variableNameIndex + "_" + originalName;
@@ -71,20 +97,41 @@ public class VNBlockVisitor extends JmlAstClonerStatementVisitor {
 
     private Map<String, String> variableMapping;
 
+    /** Creates the pass with an empty mapping. */
     public VNBlockVisitor() {
         variableMapping = new HashMap<String, String>();
     }
 
+    /**
+     * Creates a visitor that reads and extends the given mapping (not a copy); used for the
+     * statements of a block.
+     *
+     * @param variableMapping original name to new name in the current scope
+     */
     public VNBlockVisitor(Map<String, String> variableMapping) {
         this.variableMapping = variableMapping;
     }
 
+    /**
+     * Copies a plain method declaration, then starts a new, empty mapping. The JML parser gives
+     * {@code JmlMethodDeclaration}s, which go to the inherited {@code visitJmlMethodDeclaration}
+     * instead.
+     *
+     * @param arg0 the method declaration
+     */
     @Override
     public void visitMethodDeclaration(JMethodDeclaration arg0) {
         super.visitMethodDeclaration(arg0);
         variableMapping = new HashMap<String, String>();
     }
 
+    /**
+     * Rewrites each statement of the block with a new visitor that shares a copy of the current
+     * mapping, drops the statements of the form {@code x;}, and restores the mapping afterwards.
+     * Logs the new block at debug level.
+     *
+     * @param self the block
+     */
     @Override
     public void visitBlockStatement(JBlock self) {
         Map<String, String> variableMappingOld = this.variableMapping;
@@ -256,6 +303,12 @@ public class VNBlockVisitor extends JmlAstClonerStatementVisitor {
 
     }
 
+    /**
+     * Gives the variable a new name ({@link #createNewName}), maps the old name to it for the
+     * rest of the scope, and renames in its initializer, if any.
+     *
+     * @param self the definition
+     */
     @Override
     public void visitVariableDefinition(JVariableDefinition self) {
 

@@ -59,6 +59,16 @@ public class ReplaceDivByShiftExprVisitor extends JmlAstClonerExpressionVisitor 
 		return false;
 	}
 
+	/**
+	 * Rewrites {@code e / 2} as {@code e >> 1} when {@code e} has type {@code int} and the
+	 * divisor is an integer literal ({@code JOrdinalLiteral}) whose value is 2, after rewriting
+	 * {@code e}; any other division is copied
+	 * ({@link JmlAstClonerExpressionVisitor#visitDivideExpression}). The two differ when
+	 * {@code e} is negative and odd: in Java {@code -3 / 2} is {@code -1}, {@code -3 >> 1} is
+	 * {@code -2}. Nothing uses this class (see {@link ReplaceDivByShiftStmtVisitor}).
+	 *
+	 * @param self the division
+	 */
 	@Override
 	public void visitDivideExpression(JDivideExpression self) {
 

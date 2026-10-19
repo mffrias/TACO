@@ -60,14 +60,36 @@ import org.multijava.mjc.JWhileStatement;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Tells whether a statement contains a {@code break}: after {@code accept}, {@link #hasBreak} is
+ * true if one was found. {@code simplejml.BlockStatementsVisitor} uses it on the body of each
+ * {@code while} and do-while loop it translates, to decide whether the loop needs a
+ * {@code break_reached} variable; by then {@link BreakRemoverSimplifier} has removed the breaks
+ * of the {@code while} loops it reaches.
+ *
+ * <p>It searches nested statements (blocks, {@code if}, {@code try}, {@code switch}, labeled
+ * statements, {@code for} and do-while loops) without copying them: its overrides push nothing on
+ * the stack, unlike those of {@link JmlAstClonerStatementVisitor}. A {@code break} of a nested
+ * loop or {@code switch} counts too, and labels are not looked at. Statements it does not
+ * override go to the cloner: an annotated loop ({@code JmlLoopStatement}) is not entered, and a
+ * nested {@code while} loop goes to the cloner's {@code visitWhileStatement}, which pops a copy
+ * of the body that this visitor does not push for a block.
+ */
 public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
+	/** Whether a {@code break} was found. Set by {@link #visitBreakStatement}, never reset. */
 	public boolean hasBreak = false;
 
+	/** Creates a visitor with {@link #hasBreak} false. */
 	public HasBreakStatementVisitor() {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Visits each statement of the block. Pushes nothing.
+	 *
+	 * @param self the block
+	 */
 	@Override
 	public void visitBlockStatement(JBlock self){
 		for (int idx = 0; idx < self.body().length; idx++){
@@ -81,6 +103,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitTryCatchStatement(org.multijava.mjc.JTryCatchStatement)
+	 */
+	/**
+	 * Visits the try block and the body of each catch clause. Pushes nothing.
+	 *
+	 * @param self the statement
 	 */
 	@Override
 	public void visitTryCatchStatement(JTryCatchStatement self) {
@@ -97,6 +124,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitTryFinallyStatement(org.multijava.mjc.JTryFinallyStatement)
 	 */
+	/**
+	 * Visits the try block and the finally block. Pushes nothing.
+	 *
+	 * @param self the statement
+	 */
 	@Override
 	public void visitTryFinallyStatement(JTryFinallyStatement self) {
 		if (self.tryClause() != null){
@@ -110,6 +142,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitSwitchStatement(org.multijava.mjc.JSwitchStatement)
 	 */
+	/**
+	 * Visits the statements of every switch group. Pushes nothing.
+	 *
+	 * @param self the switch statement
+	 */
 	@Override
 	public void visitSwitchStatement(JSwitchStatement self) {
 		for (int idx = 0; idx < self.groups().length; idx++)
@@ -121,6 +158,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitIfStatement(org.multijava.mjc.JIfStatement)
+	 */
+	/**
+	 * Visits both branches. Pushes nothing.
+	 *
+	 * @param self the if statement
 	 */
 	@Override
 	public void visitIfStatement(JIfStatement self) {
@@ -135,6 +177,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitForStatement(org.multijava.mjc.JForStatement)
 	 */
+	/**
+	 * Visits the loop body, not its initialization or increment. Pushes nothing.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitForStatement(JForStatement self) {
 		if (self.body() != null){
@@ -144,6 +191,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCompoundStatement(org.multijava.mjc.JCompoundStatement)
+	 */
+	/**
+	 * Visits each statement. Pushes nothing.
+	 *
+	 * @param self the compound statement
 	 */
 	@Override
 	public void visitCompoundStatement(JCompoundStatement self) {
@@ -157,6 +209,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCompoundStatement(org.multijava.mjc.JStatement[])
 	 */
+	/**
+	 * Visits each statement of the array. Pushes nothing.
+	 *
+	 * @param body the statements
+	 */
 	@Override
 	public void visitCompoundStatement(JStatement[] body) {
 		for (int idx = 0; idx < body.length; idx++){
@@ -169,6 +226,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitDoStatement(org.multijava.mjc.JDoStatement)
 	 */
+	/**
+	 * Visits the loop body. Pushes nothing.
+	 *
+	 * @param self the do-while loop
+	 */
 	@Override
 	public void visitDoStatement(JDoStatement self) {
 		if (self.body() != null){
@@ -178,6 +240,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitConstructorBlock(org.multijava.mjc.JConstructorBlock)
+	 */
+	/**
+	 * Visits each statement of the constructor body. Pushes nothing.
+	 *
+	 * @param self the constructor body
 	 */
 	@Override
 	public void visitConstructorBlock(JConstructorBlock self) {
@@ -191,6 +258,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCatchClause(org.multijava.mjc.JCatchClause)
 	 */
+	/**
+	 * Visits the body of the catch clause. Pushes nothing.
+	 *
+	 * @param self the catch clause
+	 */
 	@Override
 	public void visitCatchClause(JCatchClause self) {
 		if (self.body() != null){
@@ -203,6 +275,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitLabeledStatement(org.multijava.mjc.JLabeledStatement)
 	 */
+	/**
+	 * Visits the statement that carries the label. Pushes nothing.
+	 *
+	 * @param self the labeled statement
+	 */
 	@Override
 	public void visitLabeledStatement(JLabeledStatement self) {
 		if (self.stmt() != null){
@@ -213,6 +290,11 @@ public class HasBreakStatementVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitBreakStatement(org.multijava.mjc.JBreakStatement)
+	 */
+	/**
+	 * Sets {@link #hasBreak}. Pushes nothing.
+	 *
+	 * @param self the break statement
 	 */
 	@Override
 	public void visitBreakStatement(JBreakStatement self) {

@@ -31,6 +31,18 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Turns {@code for} loops into {@code while} loops, as {@link ForRemoverVisitor} does:
+ * {@code for (init; cond; incr) body} becomes {@code { init; while (cond) { body; incr } }}.
+ * {@code ASTSimplifierManager} runs it after {@code FieldInitializerSimplifier}, when
+ * {@link ForRemoverVisitor} and {@link WhileRemoverSimplifier} have already removed the
+ * {@code for} loops it could reach, so in the current pipeline it only copies the AST. Unclear:
+ * whether it is still needed in that order.
+ *
+ * <p>Each statement of a block is visited by a new instance; that instance's
+ * {@link #getNewStatements()} are inserted before the statement, but nothing in this class adds
+ * to them.
+ */
 public class LSBlockVisitor extends JmlAstClonerStatementVisitor {
 
 	//	private List<JStatement> declarationStatements;
@@ -43,21 +55,39 @@ public class LSBlockVisitor extends JmlAstClonerStatementVisitor {
 	//		this.declarationStatements = declarationStatements;
 	//	}
 
+	/**
+	 * Returns the statements to insert before the statement this instance visited; nothing in
+	 * this class adds to them.
+	 *
+	 * @return the list itself, not a copy
+	 */
 	public List<JStatement> getNewStatements() {
 		return newStatements;
 	}
 
+	/**
+	 * Replaces the list of statements to insert.
+	 *
+	 * @param newStatements the new list
+	 */
 	public void setNewStatements(List<JStatement> newStatements) {
 		this.newStatements = newStatements;
 	}
 
 	private List<JStatement> newStatements;
 
+	/** Creates the pass with an empty list of statements to insert. */
 	public LSBlockVisitor() {
 		//		declarationStatements = new ArrayList<JStatement>();
 		newStatements = new ArrayList<JStatement>();
 	}
 
+	/**
+	 * Rewrites each statement of the block with a new instance and inserts, before it, the
+	 * statements that instance collected.
+	 *
+	 * @param self the block
+	 */
 	@Override
 	public void visitBlockStatement(JBlock self) {
 		List<JStatement> declarationList = new ArrayList<JStatement>();
@@ -106,6 +136,15 @@ public class LSBlockVisitor extends JmlAstClonerStatementVisitor {
 
 	// BEGIN - LSStatementVisitor
 
+	/**
+	 * For an annotated {@code for} loop, rewrites it ({@link #visitForStatement}) and pushes the
+	 * block {@code { init; <annotated while loop> }}, the {@code while} loop wrapped in a new
+	 * {@code JmlLoopStatement} with the same annotations. Pushes any other annotated loop
+	 * unchanged.
+	 *
+	 * @param self the annotated loop. A {@code for} loop must have an initialization: the
+	 *     {@code while} loop is taken as the second statement of the block.
+	 */
 	@Override
 	public void visitJmlLoopStatement(JmlLoopStatement self) {
 		if (self.stmt() instanceof JForStatement) {
@@ -128,6 +167,12 @@ public class LSBlockVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	/**
+	 * Replaces a {@code for} loop by {@code { init; while (cond) { body; incr } }}, with the
+	 * initialization, the increment and the body rewritten first, and pushes the new block.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitForStatement(JForStatement self) {
 		JStatement newInit = null;

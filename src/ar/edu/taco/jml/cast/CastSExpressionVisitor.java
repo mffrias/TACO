@@ -27,6 +27,14 @@ import org.multijava.mjc.JParenthesedExpression;
 
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
 
+/**
+ * Copies an expression and wraps every array access in a cast to its element type:
+ * {@code a[i]} becomes {@code ((T) a[i])}, where {@code T} is the type of the access or, if the
+ * access has none, the element type of the array's type. Accesses nested in the array or the
+ * index are cast too. Everything else is copied by {@link JmlAstClonerExpressionVisitor}; the
+ * result is on top of {@code getArrayStack()}. {@link CastSClassVisitor} applies it to the
+ * predicates of the specifications.
+ */
 public class CastSExpressionVisitor extends JmlAstClonerExpressionVisitor {
 	/** Visits the given array access expression. */
 	public void visitArrayAccessExpression(/* @non_null */JArrayAccessExpression self) {

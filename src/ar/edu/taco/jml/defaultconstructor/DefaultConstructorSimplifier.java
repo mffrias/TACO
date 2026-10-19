@@ -44,8 +44,32 @@ import ar.edu.taco.jml.ASTSimplifierManager;
 import ar.edu.taco.stryker.api.impl.NullOutputStream;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Gives each class a constructor without parameters when it has no public one: after copying a
+ * class, it adds a constructor with an empty body and no specification (see
+ * {@link #visitJmlClassDeclaration}). Nested classes are handled the same way; interfaces are
+ * copied as they are ({@link JmlAstClonerStatementVisitor}).
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code GhostFieldsSimplifier} and right before
+ * {@code FieldInitializerSimplifier}, which puts the field initializations at the start of
+ * every constructor, this one included, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ */
 public class DefaultConstructorSimplifier extends JmlAstClonerStatementVisitor {
 
+	/**
+	 * Copies the class and, if none of its constructors is public and without parameters, adds
+	 * one to the copy's methods. The new constructor has the class's name, position, modifiers
+	 * and Javadoc comment, no parameters, no exceptions, an empty body and no specification.
+	 * With the class's modifiers, it is public only in a public class, and a {@code final},
+	 * {@code abstract} or {@code static} class gives a constructor with that modifier. It is
+	 * added also when the class has a constructor without parameters that is not public.
+	 *
+	 * <p>Side effect: the new constructor is also set as the default constructor
+	 * ({@code setDefaultConstructor}), which {@code JmlClassDeclarationExtension} forwards to
+	 * the class it wraps, so the input AST's class declaration changes too.
+	 *
+	 * @param self the class declaration
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitJmlClassDeclaration(JmlClassDeclaration self) {

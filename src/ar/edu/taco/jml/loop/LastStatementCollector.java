@@ -60,14 +60,36 @@ import org.multijava.mjc.JWhileStatement;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Finds what kind of statement a statement ends with: after {@code accept},
+ * {@link #lastStatementClass} is the class of the last statement, found by descending into the
+ * last statement of blocks, compound statements, constructor bodies, catch clauses and labeled
+ * statements. {@link WhileBlockVisitor} and {@link DoWhileBlockVisitor} use it to leave out the
+ * re-evaluation of the loop condition after a body that ends with {@code break}.
+ *
+ * <p>Its overrides push nothing on the stack. Statements it does not override (expression
+ * statements other than JML assignments, empty statements, JML assertions, assumptions and
+ * annotated loops, ...) go to {@link JmlAstClonerStatementVisitor}, which pushes a copy that
+ * nobody reads, and leave {@link #lastStatementClass} null.
+ */
 public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
+	/**
+	 * The class of the last statement found, or null if the statement is empty or of a kind this
+	 * visitor does not record.
+	 */
 	Class<?> lastStatementClass = null;
 	
+	/** Creates a collector with no class found yet. */
 	public LastStatementCollector() {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Visits the last statement of the block, if there is one. Pushes nothing.
+	 *
+	 * @param self the block
+	 */
 	@Override
 	public void visitBlockStatement(JBlock self){
 		if (self.body().length > 0)
@@ -77,6 +99,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitJmlAssignmentStatement(org.jmlspecs.checker.JmlAssignmentStatement)
+	 */
+	/**
+	 * Records {@code JmlAssignmentStatement}. Pushes nothing.
+	 *
+	 * @param self the assignment
 	 */
 	@Override
 	public void visitJmlAssignmentStatement(JmlAssignmentStatement self) {
@@ -88,6 +115,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitWhileStatement(org.multijava.mjc.JWhileStatement)
 	 */
+	/**
+	 * Records {@code JWhileStatement}. Pushes nothing.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitWhileStatement(JWhileStatement self) {
 		this.lastStatementClass = JWhileStatement.class;
@@ -95,6 +127,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitTryCatchStatement(org.multijava.mjc.JTryCatchStatement)
+	 */
+	/**
+	 * Records {@code JTryCatchStatement}. Pushes nothing.
+	 *
+	 * @param self the statement
 	 */
 	@Override
 	public void visitTryCatchStatement(JTryCatchStatement self) {
@@ -104,6 +141,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitTryFinallyStatement(org.multijava.mjc.JTryFinallyStatement)
 	 */
+	/**
+	 * Records {@code JTryFinallyStatement}. Pushes nothing.
+	 *
+	 * @param self the statement
+	 */
 	@Override
 	public void visitTryFinallyStatement(JTryFinallyStatement self) {
 		this.lastStatementClass = JTryFinallyStatement.class;
@@ -111,6 +153,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitSynchronizedStatement(org.multijava.mjc.JSynchronizedStatement)
+	 */
+	/**
+	 * Records {@code JSynchronizedStatement}. Pushes nothing.
+	 *
+	 * @param self the statement
 	 */
 	@Override
 	public void visitSynchronizedStatement(JSynchronizedStatement self) {
@@ -120,6 +167,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitSwitchStatement(org.multijava.mjc.JSwitchStatement)
 	 */
+	/**
+	 * Records {@code JSwitchStatement}. Pushes nothing.
+	 *
+	 * @param self the switch statement
+	 */
 	@Override
 	public void visitSwitchStatement(JSwitchStatement self) {
 		this.lastStatementClass = JSwitchStatement.class;
@@ -127,6 +179,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitIfStatement(org.multijava.mjc.JIfStatement)
+	 */
+	/**
+	 * Records {@code JIfStatement}. Pushes nothing.
+	 *
+	 * @param self the if statement
 	 */
 	@Override
 	public void visitIfStatement(JIfStatement self) {
@@ -136,6 +193,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitForStatement(org.multijava.mjc.JForStatement)
 	 */
+	/**
+	 * Records {@code JForStatement}. Pushes nothing.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitForStatement(JForStatement self) {
 		this.lastStatementClass = JForStatement.class;
@@ -143,6 +205,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCompoundStatement(org.multijava.mjc.JCompoundStatement)
+	 */
+	/**
+	 * Visits the last statement, if there is one. Pushes nothing.
+	 *
+	 * @param self the compound statement
 	 */
 	@Override
 	public void visitCompoundStatement(JCompoundStatement self) {
@@ -153,6 +220,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCompoundStatement(org.multijava.mjc.JStatement[])
 	 */
+	/**
+	 * Visits the last statement of the array, if there is one. Pushes nothing.
+	 *
+	 * @param body the statements
+	 */
 	@Override
 	public void visitCompoundStatement(JStatement[] body) {
 		if (body.length > 0)
@@ -162,6 +234,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitDoStatement(org.multijava.mjc.JDoStatement)
 	 */
+	/**
+	 * Records {@code JDoStatement}. Pushes nothing.
+	 *
+	 * @param self the do-while loop
+	 */
 	@Override
 	public void visitDoStatement(JDoStatement self) {
 		this.lastStatementClass = JDoStatement.class;
@@ -169,6 +246,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitConstructorBlock(org.multijava.mjc.JConstructorBlock)
+	 */
+	/**
+	 * Visits the last statement of the constructor body, if there is one. Pushes nothing.
+	 *
+	 * @param self the constructor body
 	 */
 	@Override
 	public void visitConstructorBlock(JConstructorBlock self) {
@@ -180,6 +262,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitCatchClause(org.multijava.mjc.JCatchClause)
 	 */
+	/**
+	 * Visits the body of the catch clause. Pushes nothing.
+	 *
+	 * @param self the catch clause
+	 */
 	@Override
 	public void visitCatchClause(JCatchClause self) {
 		self.body().accept(this);
@@ -190,6 +277,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitVariableDeclarationStatement(org.multijava.mjc.JVariableDeclarationStatement)
 	 */
+	/**
+	 * Records {@code JVariableDeclarationStatement}. Pushes nothing.
+	 *
+	 * @param self the declaration
+	 */
 	@Override
 	public void visitVariableDeclarationStatement(JVariableDeclarationStatement self) {
 		this.lastStatementClass = JVariableDeclarationStatement.class;
@@ -197,6 +289,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitVariableDefinition(org.multijava.mjc.JVariableDefinition)
+	 */
+	/**
+	 * Records {@code JVariableDefinition}. Pushes nothing.
+	 *
+	 * @param self the variable definition
 	 */
 	@Override
 	public void visitVariableDefinition(JVariableDefinition self) {
@@ -206,6 +303,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitAssertStatement(org.multijava.mjc.JAssertStatement)
 	 */
+	/**
+	 * Records {@code JAssertStatement}. Pushes nothing.
+	 *
+	 * @param self the assert statement
+	 */
 	@Override
 	public void visitAssertStatement(JAssertStatement self) {
 		this.lastStatementClass = JAssertStatement.class;
@@ -214,6 +316,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitReturnStatement(org.multijava.mjc.JReturnStatement)
 	 */
+	/**
+	 * Records {@code JReturnStatement}. Pushes nothing.
+	 *
+	 * @param self the return statement
+	 */
 	@Override
 	public void visitReturnStatement(JReturnStatement self) {
 		this.lastStatementClass = JReturnStatement.class;
@@ -221,6 +328,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitLabeledStatement(org.multijava.mjc.JLabeledStatement)
+	 */
+	/**
+	 * Visits the statement that carries the label. Pushes nothing.
+	 *
+	 * @param self the labeled statement
 	 */
 	@Override
 	public void visitLabeledStatement(JLabeledStatement self) {
@@ -231,6 +343,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitThrowStatement(org.multijava.mjc.JThrowStatement)
 	 */
+	/**
+	 * Records {@code JThrowStatement}. Pushes nothing.
+	 *
+	 * @param self the throw statement
+	 */
 	@Override
 	public void visitThrowStatement(JThrowStatement self) {
 		this.lastStatementClass = JThrowStatement.class;
@@ -239,6 +356,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitContinueStatement(org.multijava.mjc.JContinueStatement)
 	 */
+	/**
+	 * Records {@code JContinueStatement}. Pushes nothing.
+	 *
+	 * @param self the continue statement
+	 */
 	@Override
 	public void visitContinueStatement(JContinueStatement self) {
 		this.lastStatementClass = JContinueStatement.class;
@@ -246,6 +368,11 @@ public class LastStatementCollector extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor#visitBreakStatement(org.multijava.mjc.JBreakStatement)
+	 */
+	/**
+	 * Records {@code JBreakStatement}. Pushes nothing.
+	 *
+	 * @param self the break statement
 	 */
 	@Override
 	public void visitBreakStatement(JBreakStatement self) {

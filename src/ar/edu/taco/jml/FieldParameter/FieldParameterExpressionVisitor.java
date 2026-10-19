@@ -29,6 +29,16 @@ import org.multijava.mjc.JMethodCallExpression;
 import ar.edu.taco.jml.fieldnames.FNExpressionVisitor;
 
 
+/**
+ * A {@link FNExpressionVisitor} (field renaming) whose {@link #visitMethodCallExpression} visits
+ * the receiver and the arguments of a call but pushes nothing for the call itself, so the stack
+ * ends up holding the copies of the receiver and of the arguments instead of a copy of the call.
+ * Nothing uses it: {@code ASTSimplifierManager} does not run it, and nothing in TACO, jDynAlloy
+ * or dynalloy4 refers to it.
+ *
+ * <p>Unclear: what it was meant for, and whether it can go; the two branches of its
+ * {@code visitMethodCallExpression} (argument a field access or not) do the same thing.
+ */
 public class FieldParameterExpressionVisitor extends FNExpressionVisitor {
 
 	public FieldParameterExpressionVisitor(String currentClassName) {
@@ -36,6 +46,13 @@ public class FieldParameterExpressionVisitor extends FNExpressionVisitor {
 	}
 	
 	
+	/**
+	 * Visits the receiver and then each argument with this visitor, which leaves their copies
+	 * on {@code getArrayStack()}, and pushes nothing for the call (see the class comment). Fails
+	 * with a {@code NullPointerException} for a call without an explicit receiver.
+	 *
+	 * @param self the call
+	 */
 	public void visitMethodCallExpression(/* @non_null */ JMethodCallExpression self){
 		self.prefix().accept(this);
 		for (JExpression expression : self.args()) {

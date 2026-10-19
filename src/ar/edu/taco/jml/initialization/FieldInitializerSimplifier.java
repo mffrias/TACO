@@ -54,6 +54,19 @@ public class FieldInitializerSimplifier extends JmlAstClonerStatementVisitor {
 
 	private List<JmlAssignmentStatement> initializationStatements;
 
+	/**
+	 * Moves the initialization of the class's instance fields into its constructors: starts a
+	 * new, empty list of initializations, then copies the class.
+	 * {@link JmlAstClonerStatementVisitor} visits the fields ({@link #visitJmlFieldDeclaration},
+	 * which fills the list) before the methods ({@link #visitJmlConstructorDeclaration}, which
+	 * uses it), and the nested classes, which start their own list, last.
+	 *
+	 * <p>{@code ASTSimplifierManager} runs this pass right after
+	 * {@code DefaultConstructorSimplifier}, so every class has a constructor to receive the
+	 * initializations, during {@code JmlStage} (docs/ARCHITECTURE.md).
+	 *
+	 * @param self the class declaration
+	 */
 	@Override
 	public void visitJmlClassDeclaration(JmlClassDeclaration self) {
 		initializationStatements = new ArrayList<JmlAssignmentStatement>();
@@ -65,6 +78,22 @@ public class FieldInitializerSimplifier extends JmlAstClonerStatementVisitor {
 	
 	
 	
+	/**
+	 * Keeps the field declaration (the same object, not a copy) and, for an instance field,
+	 * records the assignment {@code f = <value>} for the constructors and removes the
+	 * declaration's initializer. The value is the initializer, if there is one; otherwise
+	 * {@code false} for {@code boolean}, {@code 0} for {@code int}, {@code long}, {@code short},
+	 * {@code byte}, {@code float} and {@code double}, and {@code null} (promoted to the field's
+	 * type) for a class type whose field is not declared non-null
+	 * ({@code isDeclaredNonNull()}). Fields of other types ({@code char}, arrays), non-null
+	 * class fields without an initializer, and model fields get no assignment. Static fields
+	 * are left as they are.
+	 *
+	 * <p>Side effect: the initializer is removed from the declaration of the input AST, since
+	 * the declaration is not copied.
+	 *
+	 * @param self the field declaration
+	 */
 	@Override
 	public void visitJmlFieldDeclaration(JmlFieldDeclaration self) {
 
@@ -124,6 +153,15 @@ public class FieldInitializerSimplifier extends JmlAstClonerStatementVisitor {
 //		self.setInitializer(null);
 	}
 
+	/**
+	 * Copies the constructor and puts the recorded field initializations (see
+	 * {@link #visitJmlFieldDeclaration}) at the start of its body, in the order of the field
+	 * declarations, before the original statements. Every constructor of the class gets the same
+	 * statement objects. The copy has no Javadoc comment and no comments; its specification is
+	 * that of the copy made by {@code super}.
+	 *
+	 * @param self the constructor declaration
+	 */
 	@Override
 	public void visitJmlConstructorDeclaration(JmlConstructorDeclaration self) {
 		super.visitJmlConstructorDeclaration(self);

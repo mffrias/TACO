@@ -44,6 +44,19 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.jml.utils.SpecSimplifierClassBaseVisitor;
 
+/**
+ * Writes the receiver of static calls with its fully qualified name: {@code C.m(a)} becomes
+ * {@code pkg.C.m(a)} ({@link QualifyStaticCallsExprVisitor}). It rewrites the expressions of
+ * {@code if} and {@code while} conditions, local variable initializers, expression statements,
+ * {@code return} and {@code throw} statements, JML assertions and assumptions, and the
+ * predicates that {@link SpecSimplifierClassBaseVisitor} hands over (invariants, represents
+ * clauses, constraints, {@code requires}, {@code ensures}, {@code signals}). Annotated loops
+ * keep their loop invariants and variant functions as they are. Each block also drops the
+ * expression statements made of a local variable alone ({@code x;}).
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code ESBlockVisitor} and before
+ * {@code ActualParameterNormalizerVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ */
 public class QualifyStaticCallsVisitor extends SpecSimplifierClassBaseVisitor {
 
     @Override

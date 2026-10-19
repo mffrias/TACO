@@ -35,10 +35,28 @@ import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
  */
 public class FNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 	String currentClassName;
+	/**
+	 * Creates a visitor that renames the instance fields of expressions (see
+	 * {@link FieldRenameUtil}); the result of each visit is on top of {@code getArrayStack()}.
+	 *
+	 * @param currentClassName the class being visited, in JDynAlloy form
+	 *     ({@code FieldRenameUtil.extractClassNameForFieldRenameSupport}): the prefix of the
+	 *     fields accessed through {@code this}
+	 */
 	public FNExpressionVisitor(String currentClassName) {
 		this.currentClassName = currentClassName;
 	}
 	
+	/**
+	 * Renames an instance field access: {@code this.f} to {@code <currentClassName>_f}, and
+	 * {@code e.f} for any other {@code e} to {@code <declaring class>_f}; static fields keep
+	 * their names. The new access keeps the type and the field of the original. For
+	 * {@code this.f} the current class is used even when {@code f} is inherited, while the
+	 * declaration of {@code f} gets the declaring class's prefix
+	 * ({@link FNBlockVisitor#visitJmlFieldDeclaration}).
+	 *
+	 * @param self the field access
+	 */
 	@Override
 	public void visitFieldExpression(JClassFieldExpression self) {
 		super.visitFieldExpression(self);
@@ -62,6 +80,13 @@ public class FNExpressionVisitor extends JmlAstClonerExpressionVisitor {
 	
 	
 	
+	/**
+	 * Copies a {@code \reach} expression and renames the fields of its store references with the
+	 * reach's reference type as prefix (the three-argument
+	 * {@code FieldRenameUtil.convertJmlStoreRefExpression}).
+	 *
+	 * @param self the reach expression
+	 */
 	@Override
 	public void visitJmlReachExpression(JmlReachExpression self) {		
 		super.visitJmlReachExpression(self);

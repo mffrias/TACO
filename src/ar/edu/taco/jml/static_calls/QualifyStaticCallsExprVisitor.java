@@ -39,6 +39,18 @@ import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
  */
 public class QualifyStaticCallsExprVisitor extends JmlAstClonerExpressionVisitor {
 
+	/**
+	 * For a call whose receiver is a type written with its simple name ({@code C.m(a)}),
+	 * replaces the receiver with a type name of the same type spelled with the type's qualified
+	 * name ({@code pkg.C}, from {@code JTypeNameExpression.qualifiedName()} split at
+	 * {@code /}), and rewrites the arguments. The new call keeps the original's resolved method
+	 * ({@code JMethodCallExpressionExtension}). Calls without a receiver ({@code m(a)}), through
+	 * an expression, or already qualified go to
+	 * {@link JmlAstClonerExpressionVisitor#visitMethodCallExpression}. The result is on top of
+	 * {@code getArrayStack()}.
+	 *
+	 * @param self the call
+	 */
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
 		JExpression prefix = self.prefix();

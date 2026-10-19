@@ -57,25 +57,64 @@ import ar.edu.taco.jml.varnames.VNWhileBlockVisitor;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 //import javafe.ast.ThisExpr;
 
+/**
+ * Unrolls every {@code while} loop it reaches into nested {@code if} statements. With N the value
+ * of {@code dynalloy.toAlloy.loopUnroll}
+ * ({@link TacoConfigurator#getDynAlloyToAlloyLoopUnroll()}, 3 by default), {@code while (c) B}
+ * becomes {@code { if (c) { B_N; if (c) { B_N-1; ... if (c) B_1 } } assert !c; }}, where each
+ * copy {@code B_i} has the variables declared in the loop body renamed to
+ * {@code <name>_<loop index>_<i>} ({@link VNWhileBlockVisitor}). An execution that needs more
+ * than N iterations fails that Java {@code assert}; jDynAlloy translates a failed {@code assert}
+ * by setting {@code throw} to {@code java_lang_AssertionErrorLit}
+ * ({@code JDynAlloyXlatorVisitor}, {@code visit(JAssert)}).
+ *
+ * <p>The loop invariants and variant functions of annotated loops are dropped. Do-while loops are
+ * not unrolled here (see {@link DoWhileBlockVisitor}), and loops inside labeled statements are
+ * not reached.
+ *
+ * <p>{@code ASTSimplifierManager} runs it third, after {@link ForRemoverVisitor} (so there are no
+ * {@code for} loops left) and {@link BreakRemoverSimplifier} (no {@code break} statements in the
+ * loops), during {@code JmlStage} (docs/ARCHITECTURE.md). The loop index is per instance; the
+ * manager uses one instance for every compilation unit of a run.
+ *
+ * <p>Unclear: whether an input that needs more iterations than the bound is meant to be a
+ * counterexample (as the final {@code assert} makes it, unless the specification allows an
+ * {@code AssertionError}) or to be left outside the bounds.
+ */
 public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 
 
 	private int whileIndex = 0;
 
 
+	/** Increments the loop index, which numbers the loops in the new variable names. */
 	public void increaseWhileIndex() {
 		this.whileIndex++;
 	}
 
 
+	/**
+	 * Returns the loop index: the number of {@code while} loops this instance has visited so far.
+	 *
+	 * @return the current loop index
+	 */
 	public int getWhileIndex() {
 		return this.whileIndex;
 	}
 
 
+	/** Creates the pass with loop index 0. */
 	public WhileRemoverSimplifier() {}
 
 
+	/**
+	 * Unrolls the loop of an annotated loop ({@code JmlLoopStatement}) and drops its loop
+	 * invariants and variant functions: pushes only the result of {@link #visitWhileStatement}.
+	 *
+	 * @param self an annotated loop. Its loop must be a {@code while} loop, as
+	 *     {@link ForRemoverVisitor} and {@link BreakRemoverSimplifier} leave them; for an
+	 *     annotated do-while loop the cast fails ({@code ClassCastException}).
+	 */
 	@Override
 	public void visitJmlLoopStatement(JmlLoopStatement self) {
 		JWhileStatement theWhileStatement = (JWhileStatement)self.loopStmt();
@@ -86,6 +125,18 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 
 
 
+	/**
+	 * Unrolls a {@code while} loop (see the class comment). Increments the loop index, collects
+	 * the declarations of the body ({@link WhileBodyLocalVariableCollectorVisitor}), unrolls the
+	 * loops nested in the body first, then pushes the block
+	 * {@code { <unrolled loop> assert !cond; }}. Reads {@code dynalloy.toAlloy.loopUnroll} from
+	 * {@link TacoConfigurator}.
+	 *
+	 * <p>The renaming uses the loop index as it is after the body was visited, so a loop that
+	 * contains loops shares the index of the last loop nested in it.
+	 *
+	 * @param self the loop
+	 */
 	@Override
 	public void visitWhileStatement(JWhileStatement self) {
 		this.increaseWhileIndex();
@@ -105,6 +156,22 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 	}
 
 
+	/**
+	 * Builds the nested {@code if} statements of an unrolled loop:
+	 * {@code if (cond) { body_n; <unrollWhileLoop(n - 1)> }}, and {@code if (cond) body_1} for
+	 * {@code n == 1}. Each copy of the body has the variables of {@code renameVars} renamed to
+	 * {@code <name>_<whileIndex>_<copy>} by {@link VNWhileBlockVisitor}.
+	 *
+	 * <p>Assumes {@code numIterations >= 1}: with 0 or less the recursion does not end (a
+	 * {@code StackOverflowError}).
+	 *
+	 * @param cond the loop condition, used as it is in every {@code if}
+	 * @param body the loop body, with its nested loops already unrolled
+	 * @param whileIndex the loop index used in the new names
+	 * @param numIterations how many copies of the body to make
+	 * @param renameVars the declarations whose variables are renamed in each copy
+	 * @return the outermost {@code if}
+	 */
 	public JStatement unrollWhileLoop(JExpression cond, JStatement body, int whileIndex, int numIterations, ArrayList<JVariableDeclarationStatement> renameVars) {
 		JStatement newIf = null;
 		if (numIterations == 1) {

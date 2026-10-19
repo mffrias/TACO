@@ -44,6 +44,26 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.jml.utils.SpecSimplifierClassBaseVisitor;
 
+/**
+ * Rewrites the expressions of method bodies and specifications with
+ * {@link LiteralExpressionVisitor}: {@code if} and {@code while} conditions, local variable
+ * initializers, expression statements, {@code return} and {@code throw} statements, JML
+ * assertions and assumptions, and the predicates that {@link SpecSimplifierClassBaseVisitor}
+ * hands over (invariants, represents clauses, constraints, {@code requires}, {@code ensures},
+ * {@code signals}). Annotated loops keep their loop invariants and variant functions as they
+ * are. Each block also drops the expression statements made of a local variable alone
+ * ({@code x;}).
+ *
+ * <p>{@link LiteralExpressionVisitor} overrides nothing, so the expressions are only copied (by
+ * {@code JmlAstClonerExpressionVisitor}) and this pass changes no literal. Its commented-out
+ * code turned string and character literals into {@code String.buildInstance(...)} and
+ * {@code Character.buildInstance(...)} calls.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code CastSClassVisitor} and before
+ * {@code ESBlockVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md).
+ *
+ * <p>Unclear: whether the pass is still needed, now that it changes no literal.
+ */
 public class LiteralBlockVisitor extends SpecSimplifierClassBaseVisitor {
 	// private static Logger log = Logger.getLogger(LiteralBlockVisitor.class);
 	// // BEGIN - ESStatementVisitor

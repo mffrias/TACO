@@ -13,6 +13,14 @@ import org.multijava.mjc.JVariableDefinition;
 import ar.edu.taco.TacoException;
 import ar.edu.taco.utils.jml.JmlAstClonerExpressionVisitor;
 
+/**
+ * Renames local variables in an expression, for {@link VNWhileBlockVisitor}: a
+ * {@code JLocalVariableExpression} whose name is in the mapping gets a new variable object with
+ * the new name, and its initializer, if any, is renamed too. Formal parameters are kept as they
+ * are; other kinds of local variable make it throw a {@code TacoException}. Each reference gets a
+ * variable object of its own, not shared with the declaration. The result is on top of
+ * {@code getArrayStack()}.
+ */
 public class VNWhileExpressionVisitor extends JmlAstClonerExpressionVisitor {
 
 	private Map<String, String> variableMapping;

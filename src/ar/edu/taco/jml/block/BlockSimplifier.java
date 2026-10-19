@@ -121,6 +121,13 @@ public class BlockSimplifier extends JmlAstClonerStatementVisitor {
 
 
 
+    /**
+     * Copies a constructor body and nests all its statements in one block:
+     * {@code C() { s1; s2; }} becomes {@code C() { { s1; s2; } }}.
+     * {@code FieldInitializerSimplifier} later puts the field initializations before that block.
+     *
+     * @param self the constructor body
+     */
     @Override
     public void visitConstructorBlock(JConstructorBlock self) {	    
         super.visitConstructorBlock(self);
@@ -131,6 +138,13 @@ public class BlockSimplifier extends JmlAstClonerStatementVisitor {
 
     }
 
+    /**
+     * Copies a Java {@code assert} statement without its message and its comments:
+     * {@code assert c : m;} becomes {@code assert c;}. simplejml translates only the condition
+     * ({@code BlockStatementsVisitor.visitAssertStatement}).
+     *
+     * @param self the statement
+     */
     @Override
     public void visitAssertStatement(JAssertStatement self){
         JAssertStatement newSelf = new JAssertStatement(self.getTokenReference(), self.predicate(), null);

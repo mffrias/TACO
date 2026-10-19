@@ -35,30 +35,71 @@ import org.multijava.util.compiler.JavaStyleComment;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Evaluates the condition of each do-while loop into a fresh variable: {@code do B while (c);}
+ * becomes {@code boolean dws_<n>; do { B; dws_<n> = c; } while (dws_<n>);}, the declaration
+ * placed before the loop in the enclosing block. The assignment is left out when {@code B} ends
+ * with {@code break} ({@link LastStatementCollector}). Annotated loops keep their loop invariants
+ * and variant functions.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@link WhileBlockVisitor}.
+ * {@link WhileRemoverSimplifier} does not unroll do-while loops, so this pass does see them;
+ * simplejml then translates them into JDynAlloy loops
+ * ({@code BlockStatementsVisitor.visitDoStatement}).
+ *
+ * <p>Static state: the counter in {@code dws_<n>} is a static field, never reset, so the names
+ * keep growing over all the analyses run in one JVM (Stryker runs many).
+ */
 public class DoWhileBlockVisitor extends JmlAstClonerStatementVisitor {
 
     private static int variableNameIndex = 0;
 
+    /**
+     * Returns the statements that the loops rewritten by this instance need before them (the
+     * declaration of each {@code dws_<n>}); the enclosing block's {@link #visitBlockStatement}
+     * inserts them.
+     *
+     * @return the list itself, not a copy
+     */
     public List<JStatement> getNewDoWhileStatements() {
         return newStatements;
     }
 
+    /**
+     * Replaces the list of statements to insert before the loop.
+     *
+     * @param newStatements the new list
+     */
     public void setNewDoWhileStatements(List<JStatement> newStatements) {
         this.newStatements = newStatements;
     }
 
     private List<JStatement> newStatements;
 
+    /** Creates the pass with an empty list of statements to insert. */
     public DoWhileBlockVisitor() {
         newStatements = new ArrayList<JStatement>();
     }
 
+    /**
+     * Returns a fresh name {@code dws_<n>}, incrementing the static counter (see the class
+     * comment).
+     *
+     * @return the new name
+     */
     public String createNewDoWhileVariableName() {
         DoWhileBlockVisitor.variableNameIndex++;
         String s = "dws_" + variableNameIndex;
         return s;
     }	
 
+    /**
+     * Rewrites each statement of the block with a new instance and inserts, before it, the
+     * statements that instance collected ({@link #getNewDoWhileStatements()}). Resets this
+     * instance's own list after each statement.
+     *
+     * @param self the block
+     */
     @Override
     public void visitBlockStatement(JBlock self) {
         List<JStatement> declarationList = new ArrayList<JStatement>();
@@ -93,6 +134,12 @@ public class DoWhileBlockVisitor extends JmlAstClonerStatementVisitor {
         this.getStack().push(newSelf);
     }
 
+    /**
+     * Rewrites the loop of an annotated loop and wraps it in a new {@code JmlLoopStatement} with
+     * the same loop invariants and variant functions.
+     *
+     * @param self the annotated loop
+     */
     @Override
     public void visitJmlLoopStatement(JmlLoopStatement self) {
         self.stmt().accept(this);
@@ -101,6 +148,14 @@ public class DoWhileBlockVisitor extends JmlAstClonerStatementVisitor {
         this.getStack().push(newLoop);
     }
 
+    /**
+     * Rewrites the body, then pushes {@code do { body; dws_<n> = cond; } while (dws_<n>);} and
+     * adds the declaration of {@code dws_<n>}, without a value, to
+     * {@link #getNewDoWhileStatements()}. The assignment is left out of the body when the body
+     * ends with {@code break}.
+     *
+     * @param self the do-while loop
+     */
     @Override
     public void visitDoStatement(JDoStatement self) {
         self.body().accept(this);

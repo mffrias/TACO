@@ -43,6 +43,21 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.jml.utils.SpecSimplifierClassBaseVisitor;
 
+/**
+ * Rewrites {@code e / 2} as {@code e >> 1}, for {@code e} of type {@code int}, in method bodies
+ * and specifications, with {@link ReplaceDivByShiftExprVisitor}: in {@code if} and
+ * {@code while} conditions, local variable initializers, expression statements, {@code return}
+ * and {@code throw} statements, JML assertions and assumptions, and the predicates that
+ * {@link SpecSimplifierClassBaseVisitor} hands over (invariants, represents clauses,
+ * constraints, {@code requires}, {@code ensures}, {@code signals}). Annotated loops
+ * ({@code JmlLoopStatement}) are copied as they are. Each block also drops the expression
+ * statements made of a local variable alone ({@code x;}).
+ *
+ * <p>Not used: {@code ASTSimplifierManager} does not run it, and nothing in TACO, jDynAlloy or
+ * dynalloy4 refers to this class or to {@link ReplaceDivByShiftExprVisitor}. As written, the
+ * rewriting would change the result for negative odd dividends (see
+ * {@link ReplaceDivByShiftExprVisitor#visitDivideExpression}).
+ */
 public class ReplaceDivByShiftStmtVisitor extends SpecSimplifierClassBaseVisitor {
 
 	@Override

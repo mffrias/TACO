@@ -8,6 +8,33 @@ import ar.uba.dc.rfm.alloy.ast.formulas.FormulaVisitor;
 import ar.uba.dc.rfm.dynalloy.ast.programs.InvokeAction;
 import ar.uba.dc.rfm.dynalloy.util.DfsProgramVisitor;
 
+/**
+ * Counts the Java-arithmetic operations in DynAlloy programs and formulas, for TACO's scope
+ * inference: {@link DynAlloyProgramScopeInferencePlugin} runs it over the method under
+ * analysis, with its loops unrolled and its calls inlined, and over the formulas of its
+ * specification. The counts go to an {@link ArithmeticOpCounter}, from which
+ * {@code ar.edu.taco.infer.ScopeInference} sizes the primitive-value signatures
+ * ({@code JavaPrimitiveIntegerValue}, ...).
+ *
+ * <p>Operations are recognized by name only, so these names are a contract with the code that
+ * produces them:
+ * <ul>
+ * <li>calls of the Java-arithmetic Alloy functions, wherever they appear in a formula or an
+ *     expression: {@code int} and {@code long} additions and subtractions (the
+ *     {@code fun_java_primitive_char_value_add...} and {@code sub...} functions included,
+ *     counted by their result type), {@code int} shifts ({@code sshr}) and {@code size_of},
+ *     the casts to {@code int} and to {@code long}, and the narrowing casts to {@code char},
+ *     the only {@code char} operations counted;</li>
+ * <li>{@code int} and {@code long} multiplications, divisions and remainders, and the four
+ *     {@code float} operations, which are not functions: each {@code havocVariable} of a
+ *     variable whose name contains {@code pred_java_primitive_<type>_value_<op>_ARG_result_}
+ *     (the result variable that {@code ar.edu.taco.simplejml.builtin.AuxiliaryConstantsFactory}
+ *     declares) counts one.</li>
+ * </ul>
+ *
+ * <p>The counts accumulate over every visit and are never reset, so a collector serves one
+ * translation. The visitor's results are not used. Holds no static state.
+ */
 class ArithmeticOpCollector extends DfsProgramVisitor {
 
     // arithmetic op counter
@@ -77,12 +104,26 @@ class ArithmeticOpCollector extends DfsProgramVisitor {
 
     private ArithmeticOpExprCollector arithmeticOpExprCollector;
 
+    /**
+     * Creates a collector with empty counts. The function calls are counted by its formula
+     * visitor ({@code getDfsFormulaVisitor()}), so that visitor can be run on a formula alone,
+     * as {@link DynAlloyProgramScopeInferencePlugin} does for the specification; on a formula,
+     * only the function calls are counted.
+     */
     public ArithmeticOpCollector() {
         super(new FormulaVisitor());
         arithmeticOpExprCollector = new ArithmeticOpExprCollector();
         this.getDfsFormulaVisitor().setExpressionVisitor(arithmeticOpExprCollector);
     }
 
+    /**
+     * Counts one multiplication, division, remainder or {@code float} operation if the call is
+     * {@code havocVariable} of one variable whose name marks it as the result of such an
+     * operation (see the class comment), then visits the call as usual.
+     *
+     * @param u the action call
+     * @return the result of the default traversal
+     */
     @Override
     public Object visit(InvokeAction u) {
         if (u.getActionId().equals("havocVariable")) {

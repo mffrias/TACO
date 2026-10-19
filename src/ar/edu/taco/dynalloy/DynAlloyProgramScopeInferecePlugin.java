@@ -14,6 +14,16 @@ import ar.uba.dc.rfm.dynalloy.plugin.DynAlloyASTPlugin;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyMutator;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyVisitor;
 
+/**
+ * An unused variant of {@link DynAlloyProgramScopeInferencePlugin}: nothing in TACO creates it
+ * (both are in the repository since its first commit, 1076463e). It differs in three ways: it
+ * looks the method under analysis up by the whole {@code methodToCheck}, parameter types
+ * included, which no program id matches under the current naming (so
+ * {@link #transform(DynalloyModule)} would throw a {@link NullPointerException}); it counts
+ * allocations with this package's {@code ObjectCreationCollector} instead of jDynAlloy's; and
+ * it does not count the arithmetic of the method's specification. Unclear: whether it is kept
+ * on purpose or can be removed.
+ */
 public class DynAlloyProgramScopeInferecePlugin implements DynAlloyASTPlugin {
 
 	private ArithmeticOpCollector arithmetic_op_collector = new ArithmeticOpCollector();

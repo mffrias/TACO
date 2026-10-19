@@ -1,5 +1,13 @@
 package ar.edu.taco.dynalloy;
 
+/**
+ * Counts of the {@code long} operations of the method under analysis, part of an
+ * {@link ArithmeticOpCounter}: additions and subtractions (those of a {@code char} and a
+ * {@code long} included), multiplications, divisions and remainders (counted together), and
+ * casts from {@code char} and from {@code int}. {@code ScopeInference} adds one
+ * {@code JavaPrimitiveLongValue} per operation to the program scope, five per division or
+ * remainder.
+ */
 public class LongOpCounter {
 
 	private int java_primitive_long_value_add = 0;

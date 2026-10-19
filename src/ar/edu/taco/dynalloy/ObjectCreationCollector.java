@@ -7,6 +7,15 @@ import ar.uba.dc.rfm.dynalloy.ast.programs.InvokeAction;
 import ar.uba.dc.rfm.dynalloy.ast.programs.TestPredicate;
 import ar.uba.dc.rfm.dynalloy.util.DfsProgramVisitor;
 
+/**
+ * Counts the objects a DynAlloy program allocates, by type: the first {@code instanceOf} test
+ * after each call of the {@code getUnusedObject} action (in traversal order) counts one
+ * allocation of the type it names (its second argument, as printed). A copy of jDynAlloy's
+ * {@code ar.edu.jdynalloy.xlator.ObjectCreationCollector}, which is the one the scope
+ * inference uses ({@link DynAlloyProgramScopeInferencePlugin}); this one is used only by the
+ * unused {@link DynAlloyProgramScopeInferecePlugin}. The counts accumulate in its
+ * {@link ObjectCreationCounter} and are never reset. Holds no static state.
+ */
 class ObjectCreationCollector extends DfsProgramVisitor {
 
 	private static final String GET_UNUSED_OBJECT = "getUnusedObject";

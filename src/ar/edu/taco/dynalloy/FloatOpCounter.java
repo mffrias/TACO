@@ -1,5 +1,11 @@
 package ar.edu.taco.dynalloy;
 
+/**
+ * Counts of the {@code float} additions, subtractions, multiplications and divisions of the
+ * method under analysis, part of an {@link ArithmeticOpCounter}. {@code ArithmeticOpCollector}
+ * counts each one at the {@code havocVariable} of its result variable; {@code ScopeInference}
+ * adds one {@code JavaPrimitiveFloatValue} per operation to the program scope.
+ */
 public class FloatOpCounter {
 
 	// float counters

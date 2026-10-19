@@ -17,16 +17,68 @@ import ar.uba.dc.rfm.dynalloy.util.DfsProgramVisitor;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyMutator;
 import ar.uba.dc.rfm.dynalloy.util.DynalloyVisitor;
 
+/**
+ * The first half of TACO's scope inference (with {@code inferScope}): a DynAlloy-AST plugin
+ * that counts the object allocations and the Java-arithmetic operations of the method under
+ * analysis, which {@link DynAlloyScopeInferencePlugin}, registered right after it, turns into
+ * scopes. {@link DynalloyToAlloyManager} creates one per translation and registers it with
+ * dynalloy4's {@code DynAlloyCompiler}, which applies it to the parsed {@code output.dals},
+ * before the translation to Alloy. It does not change the model.
+ *
+ * <p>The counters ({@link #getObjectCreationCounter()}, of jDynAlloy's
+ * {@code ObjectCreationCollector}, and {@link #getArithmeticOpCounter()}, of
+ * {@code ArithmeticOpCollector}) are created with the plugin and filled by
+ * {@link #transform(DynalloyModule)}; {@link DynAlloyScopeInferencePlugin} takes them when it
+ * is set up and reads them after this plugin has run. They are never reset, so an instance
+ * serves one translation. Holds no static state. Not to be confused with the unused
+ * {@link DynAlloyProgramScopeInferecePlugin}.
+ */
 public class DynAlloyProgramScopeInferencePlugin implements DynAlloyASTPlugin {
 
 	private ArithmeticOpCollector arithmetic_op_collector = new ArithmeticOpCollector();
 	private ObjectCreationCollector object_creation_collector = new ObjectCreationCollector();
 	private Set<AlloyFormula> programSpecs = new HashSet();
 
+	/**
+	 * Creates the plugin, with empty counters.
+	 *
+	 * @param theprogramSpecs formulas whose arithmetic is counted too:
+	 *        {@link DynalloyToAlloyManager} passes the object invariants of the module under
+	 *        analysis and the {@code requires} and {@code ensures} of the method (see
+	 *        docs/FIXES-FOR-MASTER.md, N8). Only their function calls are counted (see
+	 *        {@code ArithmeticOpCollector}).
+	 */
 	public DynAlloyProgramScopeInferencePlugin(Set<AlloyFormula> theprogramSpecs) {
 		programSpecs = theprogramSpecs;
 	}
 
+	/**
+	 * Counts the allocations and the arithmetic operations of the method under analysis:
+	 * <ol>
+	 * <li>unrolls the loops of a copy of the module as the translation will
+	 *     ({@code dynalloy.toAlloy.loopUnroll} times, with {@code removeExitWhileGuard}; always
+	 *     with skips, which does not change the counts);</li>
+	 * <li>takes the program whose id is {@code methodToCheck} up to its {@code '('}, that is
+	 *     {@code <package>_<Class>_<method>} (see docs/METHOD-NAMING.md), and inlines every call
+	 *     in its body ({@code ProgramInliner});</li>
+	 * <li>counts, in a module whose only program is the inlined one, the allocations (jDynAlloy's
+	 *     {@code ObjectCreationCollector}: a {@code getUnusedObject} call and the
+	 *     {@code instanceOf} test after it) and the arithmetic operations; then the arithmetic of
+	 *     the formulas given to the constructor.</li>
+	 * </ol>
+	 * Every unrolled iteration, every inlined call and both branches of every choice count, so
+	 * the counts bound those of any one execution. The program is the first one with that id: if
+	 * the model also has an overload of the method (overloads share their program id), that one
+	 * may be counted instead. Reads {@code TacoConfigurator}; adds to the counters.
+	 *
+	 * <p>Assumes that {@code methodToCheck} has a {@code '('} and that a program has that id
+	 * (otherwise a {@link StringIndexOutOfBoundsException} or a {@link NullPointerException}),
+	 * and that recursion has been unfolded (jDynAlloy's {@code RecursionUnfolderVisitor}),
+	 * otherwise the inlining does not end.
+	 *
+	 * @param input the parsed DynAlloy module
+	 * @return {@code input}, unchanged
+	 */
 	@Override
 	public DynalloyModule transform(DynalloyModule input) {
 

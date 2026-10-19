@@ -126,3 +126,12 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 30. **`FieldParameterExpressionVisitor`** (`jml/FieldParameter/`): nothing in the three
     repositories refers to it, its `visitMethodCallExpression` pushes no result for the call,
     and its two branches do the same thing. What was it for, and can it go?
+31. **Allocation counts overwritten** (`dynalloy/DynAlloyScopeInferencePlugin.java:20-27`,
+    `transform`): after `inferScope()`, every allocation count in the program plugin's
+    `ObjectCreationCounter` is overwritten with the inferred scope of its type (77f36e19), but
+    nothing in TACO or jDynAlloy reads that counter afterwards, and the local map
+    `inferredAllocsPerType` is never used. Is it meant to feed something, or can it go?
+32. **`DynAlloyProgramScopeInferecePlugin`** (misspelled, `dynalloy/`): nothing creates it, and
+    this package's `ObjectCreationCollector` and `ObjectCreationCounter` are used only by it (the
+    live `DynAlloyProgramScopeInferencePlugin` uses jDynAlloy's copies). Is it kept on purpose,
+    or can the three go?

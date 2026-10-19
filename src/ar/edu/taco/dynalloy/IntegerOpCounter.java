@@ -1,5 +1,14 @@
 package ar.edu.taco.dynalloy;
 
+/**
+ * Counts of the {@code int} operations of the method under analysis, part of an
+ * {@link ArithmeticOpCounter}: additions and subtractions (those of {@code char}s with an
+ * {@code int} result included), signed right shifts, multiplications, divisions and
+ * remainders (counted together), casts from {@code char}, narrowing casts from {@code long},
+ * and {@code size_of} applications. {@code ScopeInference} adds one
+ * {@code JavaPrimitiveIntegerValue} per operation to the program scope, two per division or
+ * remainder.
+ */
 public class IntegerOpCounter {
 
 	// integer counters

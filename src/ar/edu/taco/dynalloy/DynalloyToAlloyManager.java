@@ -49,18 +49,86 @@ import ar.uba.dc.rfm.dynalloy.DynAlloyOptions;
 import ar.uba.dc.rfm.dynalloy.parser.AssertionNotFound;
 import ar.uba.dc.rfm.dynalloy.xlator.SpecContext;
 
+/**
+ * TACO's bridge to dynalloy4's translation. {@link ar.edu.taco.engine.DynalloyStage} creates
+ * one per translation and calls {@link #process_dynalloy_module}, which sets up a
+ * {@code DynAlloyCompiler} with TACO's options and plugins and translates
+ * {@code output/output.dals} into {@code output/output.als}. The plugins, in the order
+ * dynalloy4 applies them:
+ * <ul>
+ * <li>on the DynAlloy AST, with {@code inferScope}: {@link DynAlloyProgramScopeInferencePlugin}
+ *     (the counts) and {@link DynAlloyScopeInferencePlugin} (the scopes);</li>
+ * <li>on the DynAlloy AST, always: {@code DynAlloyAppendCommandPlugin} (the {@code check}
+ *     command and its scope);</li>
+ * <li>on the Alloy AST, with {@code useJavaSBP}: {@code SymmBreakPredPlugin}, and with
+ *     {@code useTightUpperBounds} too, {@code UBoundPlugin};</li>
+ * <li>on the Alloy text, with {@code useJavaArithmetic}: {@code SkolemizejavaArithPlugin} and
+ *     {@code CardinalSizeOfPlugin}.</li>
+ * </ul>
+ * See docs/ARCHITECTURE.md, and dynalloy4's docs/ARCHITECTURE.md ("Translation").
+ *
+ * <p>Static state: {@link #isCheckAndAfterRunSpec}.
+ */
 public class DynalloyToAlloyManager {
 
 	private DynAlloyCompiler compiler;
 
 	private boolean translatingForStryker = false;
 
+	/**
+	 * Static: whether this translation computes the specified output for a fixed input
+	 * ({@code checkAndRunSpecIfFaulty}). {@code DynalloyStage.execute()} sets it before each
+	 * translation, and {@link #process_dynalloy_module} copies it into dynalloy4's static
+	 * {@code DynAlloyCompiler.isCheckAndAfterRunSpec}, which makes the assertion
+	 * {@code pre => not post}, without the program. See docs/SPEC-OUTPUT.md.
+	 */
 	public static boolean isCheckAndAfterRunSpec = false;
 
+	/**
+	 * Creates a manager for one translation.
+	 *
+	 * @param forStryker whether to translate for Stryker's feedback checks, for which dynalloy4
+	 *        negates the post ({@code (pre and program) => not post}); {@code DynalloyStage} sets
+	 *        it when there is an input to fix and {@link #isCheckAndAfterRunSpec} is off. See
+	 *        docs/SPEC-OUTPUT.md ("inputToFix").
+	 */
 	public DynalloyToAlloyManager(boolean forStryker){
 		this.translatingForStryker = forStryker;
 	}
 
+	/**
+	 * Translates a DynAlloy file into an Alloy file with dynalloy4, with TACO's options and
+	 * plugins (see the class comment). Reads the configuration:
+	 * {@code dynalloy.toAlloy.loopUnroll}, {@code dynalloy.toAlloy.strictUnrolling},
+	 * {@code dynalloy.toAlloy.removeQuantifiers}, {@code removeExitWhileGuard} and the switches
+	 * of the plugins. The module under analysis is
+	 * the first source module. The formulas given to the scope inference
+	 * ({@code DynAlloyOptions.setProgramSpecs}) are its object invariants and the {@code requires}
+	 * and {@code ensures} of every spec case of its programs whose id is {@code assertionId}
+	 * without {@code check_}: those of every overload of the method, since overloads share their
+	 * id (see docs/FIXES-FOR-MASTER.md, N8). Copies {@link #isCheckAndAfterRunSpec} into
+	 * {@code DynAlloyCompiler.isCheckAndAfterRunSpec}, writes {@code outputFilename}, and
+	 * replaces the compiler that {@link #getCompiler()} returns.
+	 *
+	 * <p>Assumes that {@link #setSourceJDynAlloyModules(List)} was called, with the module under
+	 * analysis first, and that {@code assertionId} starts with {@code check_}.
+	 *
+	 * @param inputFilename the DynAlloy file ({@code output/output.dals})
+	 * @param outputFilename the Alloy file to write ({@code output/output.als})
+	 * @param assertionId the assertion to translate, {@code check_<package>_<Class>_<method>}
+	 * @param varsFromInvPerMod per module id, the variables that come from arithmetic
+	 *        constraints in object invariants
+	 * @param predsFromInvPerMod per module id, the predicates on those variables
+	 * @param varsFromContractsPerProg per program id, the variables that come from arithmetic
+	 *        constraints in its contract
+	 * @param predsFromContractsPerProg per program id, the predicates on those variables
+	 * @param inputToFix passed on to dynalloy4, which only tests it for {@code null}; see
+	 *        dynalloy4's docs/ARCHITECTURE.md ("What TACO passes in")
+	 * @return dynalloy4's {@code SpecContext} of the translation, which knows every action and
+	 *         program
+	 * @throws TacoException if dynalloy4 cannot read, parse or write the files, or does not find
+	 *         the assertion; the message is kept, the cause is not
+	 */
 	public SpecContext process_dynalloy_module(String inputFilename, String outputFilename, String assertionId,
 			HashMap<String, AlloyTyping> varsFromInvPerMod, 
 			HashMap<String, List<AlloyFormula>> predsFromInvPerMod,
@@ -184,10 +252,25 @@ public class DynalloyToAlloyManager {
 
 	private List<JDynAlloyModule> src_jdynalloy_modules;
 
+	/**
+	 * Sets the JDynAlloy modules that the DynAlloy model came from
+	 * ({@code DynalloyStage.setSourceJDynAlloy}), which the scope inference and the
+	 * symmetry-breaking and tight-bounds plugins read. The first one is taken as the module under
+	 * analysis. Call before {@link #process_dynalloy_module}.
+	 *
+	 * @param src_jdynalloy_modules the source modules, the module under analysis first
+	 */
 	public void setSourceJDynAlloyModules(List<JDynAlloyModule> src_jdynalloy_modules) {
 		this.src_jdynalloy_modules = src_jdynalloy_modules;
 	}
 
+	/**
+	 * Returns the compiler of the last {@link #process_dynalloy_module} call, whose
+	 * {@code SpecContext} {@code JavaTraceStage} needs
+	 * ({@code DynalloyStage.getDynAlloyCompiler()}).
+	 *
+	 * @return the compiler, or {@code null} before the first call
+	 */
 	public DynAlloyCompiler getCompiler() {
 		return compiler;
 	}

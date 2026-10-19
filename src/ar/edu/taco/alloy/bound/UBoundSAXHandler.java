@@ -14,6 +14,15 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprJoin;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprProduct;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprUnion;
 
+/**
+ * Reads a bounds file of {@code xml/} for {@link UBoundRepository}: an {@code <upperbound>}
+ * element with {@code <field label="..." arity="n">} elements, each with {@code <tuple>}
+ * elements of {@code <atom label="..."/>}. Each field becomes a {@link UBound} on
+ * {@code QF.<label>}, bounded by the union of its tuples, sorted and without duplicates
+ * ({@link TupleComparator}), or by {@code none} products for a field without tuples.
+ * {@link #getUpperBounds()}, once the document is parsed, returns them sorted by label, one per
+ * label ({@link UBoundComparator}). One handler per file.
+ */
 class UBoundSAXHandler extends DefaultHandler {
 
 	private ExprJoin current_field = null;

@@ -18,6 +18,17 @@ import ar.edu.taco.TacoException;
 import ar.edu.taco.alloy.AlloyScope;
 import ar.edu.taco.jdynalloy.JDynAlloyClassDiagram;
 
+/**
+ * Finds and reads the tight upper bounds of {@code xml/} for {@link UBoundPlugin}. A file
+ * {@code xml/<classToCheck>-<NN>.xml} holds the bounds for an analysis of a ROOPS class with one
+ * object of it and NN (two digits) of its node class. The classes, all in
+ * {@code roops.core.objects}, and their node classes: {@code AvlTree} ({@code AvlNode}),
+ * {@code BinomialHeap} ({@code BinomialHeapNode}), {@code BinTree} ({@code BinTreeNode}),
+ * {@code FibHeap} ({@code FibHeapNode}), {@code LinkedList} and {@code NodeCachingLinkedList}
+ * ({@code LinkedListNode}), {@code SinglyLinkedList} ({@code SinglyLinkedListNode}) and
+ * {@code TreeSet} ({@code TreeSetEntry}). The path is relative to the working directory.
+ * A singleton ({@link #getInstance()}), created once per JVM, with no other state.
+ */
 class UBoundRepository {
 
 	private static class UpperBoundXML implements Serializable {
@@ -82,6 +93,17 @@ class UBoundRepository {
 		return xml_doc;
 	}
 
+	/**
+	 * Returns the bounds of the file for {@code classToCheck} (from the configuration) and the
+	 * scope: if it is one of the ROOPS classes of the class comment, its scope is 1 and the file
+	 * {@code xml/<classToCheck>-<NN>.xml} exists, NN being the scope of its node class, the
+	 * bounds of that file ({@link UBoundSAXHandler}).
+	 *
+	 * @param class_diagram not used
+	 * @param alloy_scope the scope of the analysis ({@link AlloyScope#getScopeOf(String)})
+	 * @return the bounds, sorted by field, or {@code null} if there is no such file
+	 * @throws TacoException if the file cannot be parsed
+	 */
 	public List<UBound> getUpperBound(JDynAlloyClassDiagram class_diagram, AlloyScope alloy_scope) {
 
 		UpperBoundXML upperBoundXML = findUpperBoundXML(class_diagram, alloy_scope);

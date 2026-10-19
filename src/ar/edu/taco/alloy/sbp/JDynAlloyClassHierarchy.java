@@ -32,6 +32,31 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * What symmetry breaking ({@link SymmBreakPredPlugin}) needs to know about the model, taken
+ * from the source JDynAlloy modules and then narrowed down to the fields of {@code QF}
+ * ({@link #matchWithQF}):
+ * <ul>
+ * <li>the fields, except those of a JML type, arrays, spec fields (the fields that a
+ *     {@code represents} defines) and static ones ({@code ClassFields}), split into the
+ *     recursive ones ({@code T -> T} or {@code T -> T + null}) and the others;</li>
+ * <li>the Java types ({@code javaTypes()}): the domains and ranges of the fields (arrays and
+ *     spec fields excluded, static fields included), in the order found, without {@code null},
+ *     {@code ClassFields}, {@code Int}, {@code boolean} and the primitive value signatures;</li>
+ * <li>the root nodes ({@code rootNodes()}): the parameters, except {@code return} and
+ *     {@code throw}, of every program of {@code classToCheck}'s signature whose program id
+ *     equals {@code methodToCheck} without its parameter types, so those of every overload,
+ *     which share their id (docs/METHOD-NAMING.md). Until TACO stryker 779cf0bc it compared
+ *     {@code <signature>_<program id>} instead, whose class prefix is doubled, so nothing
+ *     matched, there were no root nodes and no symmetry breaking (docs/FIXES-FOR-MASTER.md,
+ *     N7).</li>
+ * </ul>
+ * Fields whose name starts with {@code SK_jml_pred_java_primitive} (JML arithmetic) are left
+ * out of the Java types and of most predicates. {@code rootNodes()}, {@code javaTypes()},
+ * {@code getRecursiveFields()}, {@code getNonRecursiveObjectFields()} and {@link #toString()}
+ * require {@link #matchWithQF} first ({@code IllegalArgumentException} otherwise). Built by
+ * {@link #buildFromModules}; one per {@code SymmBreakPredPlugin}, no static state.
+ */
 public class JDynAlloyClassHierarchy {
 
 	private List<JField> recursiveFields = Lists.newArrayList();
@@ -87,6 +112,14 @@ public class JDynAlloyClassHierarchy {
 		return recursiveFields;
 	}
 
+	/**
+	 * Returns the non-recursive fields that {@code FReach} follows, meant without those of a
+	 * primitive value or {@code boolean} type. The test compares the whole field type, a
+	 * relation such as {@code (T)->one(Int)}, with those signatures, which a field type never
+	 * equals, so no field is left out: {@code FReach} follows the integer fields too.
+	 *
+	 * @return a new list of the fields
+	 */
 	List<JField> getNonRecursiveObjectFields() {
 		Preconditions.checkArgument(matchedWithQF,
 				"Must call mathWithQF before accesing this object");
@@ -194,6 +227,15 @@ public class JDynAlloyClassHierarchy {
 		return ret;
 	}
 
+	/**
+	 * Builds the hierarchy of the given modules (see the class comment), reading
+	 * {@code classToCheck} and {@code methodToCheck} from the configuration.
+	 *
+	 * @param src_jdynalloy_modules the source JDynAlloy modules of the translation
+	 * @return the hierarchy, to be narrowed with {@link #matchWithQF} before use
+	 * @throws IllegalArgumentException if a {@code represents} expression is not of the form
+	 *         {@code (x).(y)}
+	 */
 	static JDynAlloyClassHierarchy buildFromModules(List<JDynAlloyModule> src_jdynalloy_modules) {
 		return new JDynAlloyClassHierarchy(src_jdynalloy_modules);
 	}

@@ -1,5 +1,17 @@
 package ar.edu.taco.alloy.sk;
 
+/**
+ * One skolem variable of a Java arithmetic operation, as a field of {@code QF} names it:
+ * {@code <prefix>_SK_<predicate>_ARG_<argument>_<n>_<index>}. Here
+ * {@code SK_<predicate>_ARG_<argument>_<n>} is the variable that
+ * {@code ar.edu.taco.simplejml.builtin.AuxiliaryConstantsFactory} declared for its operation
+ * number {@code n} ({@code <argument>} is {@code left}, {@code right}, {@code result},
+ * {@code overflow} or {@code remainder}), {@code <prefix>} the prefix DynAlloy gives the local
+ * variables of a call ({@code l0}, {@code l1}, ...) and {@code <index>} the DynAlloy index, e.g.
+ * {@code l2_SK_pred_java_primitive_integer_value_add_ARG_left_0_1}. The code calls {@code n}
+ * the index and the DynAlloy index the instant. {@link #toString()} rebuilds the name.
+ * Immutable; equality is identity.
+ */
 class SkPredArgument {
 
 	private SkPredArgument(String localVariablePrefix, String skolemizedPredicateId, String argumentName, int varIndex, int varInstant) {
@@ -55,6 +67,17 @@ class SkPredArgument {
 		return true;
 	}
 
+	/**
+	 * Parses a field name of the format of the class comment. A prefix that contains
+	 * {@code _var_} is cut before it, so that {@link #toString()} then gives another name than
+	 * the one parsed, and the fact built from it names no field of {@code QF}. Unclear: why the
+	 * prefix is cut, and whether such prefixes occur (those seen are {@code l0}, {@code l2}, ...).
+	 *
+	 * @param skolemized_predicate_argument_str a field name of {@code QF}
+	 * @return the parsed variable
+	 * @throws IllegalArgumentException if the name does not have the format
+	 *         ({@link #is_skolemized_predicate_argument_str(String)})
+	 */
 	public static SkPredArgument parse_skolemized_predicate_argument_str(String skolemized_predicate_argument_str) {
 		/**
 		 * expected Format: <<STRING>>_SK_<<STRING>>_ARG_<<STRING>>_<<INTEGER>>

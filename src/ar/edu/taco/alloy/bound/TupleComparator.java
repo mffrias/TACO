@@ -6,6 +6,12 @@ import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprConstant;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprProduct;
 
+/**
+ * Orders the tuples of a bound for {@link UBoundSAXHandler}, which keeps them in a sorted set
+ * (so duplicates are dropped): atom constants by label, products component by component.
+ * Throws {@code ClassCastException} when a constant meets a product, i.e. for tuples of
+ * different arity.
+ */
 class TupleComparator implements Comparator<AlloyExpression> {
 
 	@Override

@@ -5,6 +5,11 @@ import java.util.Comparator;
 import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprConstant;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprJoin;
+/**
+ * Orders {@link UBound}s by field label, so that {@link UBoundSAXHandler} returns the bounds
+ * sorted and one per label. Throws {@code ClassCastException} for a field whose right-hand side
+ * is not a constant, which the handler never builds.
+ */
 class UBoundComparator implements Comparator<UBound> {
 
 	@Override

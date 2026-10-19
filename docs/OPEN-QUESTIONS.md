@@ -143,3 +143,13 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 34. **`JDynAlloyFunPredCollector`** (`infer/`): `infer_alloy_bitwidth` runs it on every module,
     but the test that used its result is commented out (the code now tests
     `useJavaArithmetic`), so the result is ignored. Is it still needed?
+35. **Two scopes for one analysis** (`alloy/bound/UBoundPlugin.java:36-47`, `transform`): with
+    `inferScope`, it sets each `type_scopes` signature's scope to its `type_scopes` value, after
+    `DynAlloyAppendCommandPlugin` has written the `check` command with the inferred scope (the
+    larger of that value and the input plus program scope), and it changes the `InferredScope`
+    singleton in place. Should the command get the `type_scopes` values too, or the bounds the
+    inferred scope?
+36. **`_var_` prefixes** (`alloy/sk/SkPredArgument.java:67-70`): a prefix that contains `_var_`
+    is cut before it, so the argument's name is no longer a `QF` field and the fact built from
+    it would name a missing field. Why is it cut, and do such prefixes occur (the models seen
+    have `l0`, `l2`, ...)?

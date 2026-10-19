@@ -12,6 +12,12 @@ import ar.uba.dc.rfm.alloy.util.ExpressionMutator;
 
 import com.google.common.collect.Maps;
 
+/**
+ * Rewrites the expressions of the model's formulas for
+ * {@link SBPInstrumentAlloyProcedureMutator}: each reference to the pre-state copy of a
+ * recursive field, recognised by its name {@code <field>_0}, becomes the union of its backward
+ * and forward fields. Returns the rewritten expression.
+ */
 class SBPExpressionMutator extends ExpressionMutator {
 
 	private Map<String, JField> recursiveFields = Maps.newHashMap();
@@ -22,6 +28,13 @@ class SBPExpressionMutator extends ExpressionMutator {
 		}
 	}
 
+	/**
+	 * Replaces {@code QF.r_0}, for a recursive field r, with {@code QF.br_0 + QF.fr_0}; other
+	 * joins are traversed as usual.
+	 *
+	 * @param n the join
+	 * @return the rewritten expression
+	 */
 	@Override
 	public Object visit(ExprJoin n) {
 		if (n.getLeft().toString().equals("QF") &&
@@ -34,6 +47,15 @@ class SBPExpressionMutator extends ExpressionMutator {
 		return super.visit(n);
 	}
 
+	/**
+	 * Replaces a bare {@code r_0}, for a recursive field r, with a variable named
+	 * {@code (br_0fr_0)}: the two names are joined without a {@code +}, so the result names no
+	 * declared field. The references of the form {@code QF.r_0} are replaced by
+	 * {@link #visit(ExprJoin)} before they reach this method.
+	 *
+	 * @param n the variable
+	 * @return the rewritten expression
+	 */
 	@Override
 	public Object visit(ExprVariable n) {
 		String variable = n.getVariable().toString();

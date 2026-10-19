@@ -156,6 +156,14 @@ class SBPUtils {
 			return to.iterator().next();
 	}
 
+	/**
+	 * Writes the module, printed, to a file, and prints the stack trace of an
+	 * {@code IOException}. Only commented-out debugging lines of {@code SymmBreakPredPlugin}
+	 * call it.
+	 *
+	 * @param fileName the file, relative to the working directory
+	 * @param alloyModule the module to print
+	 */
 	static void debugPrint(String fileName, AlloyModule alloyModule) {
 		try {
 			FileWriter fw = new FileWriter(new File(fileName));
@@ -171,6 +179,19 @@ class SBPUtils {
 	}
 
 	/* javaType comes with underscores as separators */
+	/**
+	 * Returns how many atoms symmetry breaking names for a Java type T ({@code T_0} to
+	 * {@code T_<k-1>}), from the configuration and the static {@code InferredScope} singleton.
+	 * With {@code inferScope}: the {@code type_scopes} value if T has one, otherwise the bounded
+	 * input scope plus the program scope ({@code AlloyScope.getConcreteScopeOf}). Without it: the
+	 * {@code type_scopes} value, or {@code objectScope}. With {@code inferScope}, either can be
+	 * less than the scope that the {@code check} command gives T.
+	 *
+	 * @param javaType an Alloy signature id, e.g. {@code pkg_Node}; with {@code inferScope}, its
+	 *        underscores become dots to look it up in {@code type_scopes}, so a name with an
+	 *        underscore of its own is not found there
+	 * @return the number of atoms
+	 */
 	static int getScope(String javaType) {
 
 		AlloyScope alloy_scope;

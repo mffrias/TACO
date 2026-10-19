@@ -10,6 +10,31 @@ import ar.edu.jdynalloy.ast.JField;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+/**
+ * Writes the symmetry-breaking predicates of {@link SymmBreakPredPlugin} as Alloy text, from a
+ * {@link JDynAlloyClassHierarchy} already narrowed to the fields of {@code QF}. Each private
+ * method implements one procedure of the algorithm of the TACO papers (README, "References /
+ * how to cite"), named in its comment and in an Alloy comment
+ * {@code //-----SMB: <procedure>()-----//} before its output:
+ * <ul>
+ * <li>{@code local_ordering}: for each Java type T, {@code next_T} ({@code T_0} to
+ *     {@code T_1} to ...), {@code min_T} and {@code prevs_T};</li>
+ * <li>{@code global_ordering}: {@code globalNext}, which chains the types in the order of
+ *     {@code javaTypes()}, and {@code globalMin};</li>
+ * <li>{@code define_min_parent}: {@code minP_T[o]}, the least object with a non-recursive or
+ *     forward field pointing at {@code o}, and none for a root node;</li>
+ * <li>{@code define_freach}: {@code FReach}, the objects reachable from the root nodes through
+ *     the non-recursive and forward fields;</li>
+ * <li>{@code order_root_nodes}, {@code root_is_minimum}, {@code order_same_min_parent},
+ *     {@code order_same_min_parent_type}, {@code order_diff_min_parent_types} and
+ *     {@code avoid_holes}: facts that order the reachable objects of each type by their root
+ *     node or least parent, and put the reachable ones first.</li>
+ * </ul>
+ * The text uses the atoms {@code T_i} and the forward fields that
+ * {@link SBPInstrumentAlloyProcedureMutator} declares. The procedures that need
+ * {@code minP_T} skip the types for which it was not defined, and {@code avoid_holes} writes
+ * nothing without {@code FReach}.
+ */
 class SBPProcedures {
 
 	/**
@@ -39,6 +64,13 @@ class SBPProcedures {
 		this.sbpNames = new SBPNames();
 	}
 
+	/**
+	 * Appends the output of every procedure, in the order of the class comment. Call once: a
+	 * second call would define every function again.
+	 *
+	 * @param alloyStrModified the Alloy text of the model, which
+	 *        {@link SBPInstrumentAlloyProcedureMutator} has already extended
+	 */
 	void executeAll(StringBuilder alloyStrModified) {
 		localOrderingProcedure(alloyStrModified);
 		globalOrderingProcedure(alloyStrModified);

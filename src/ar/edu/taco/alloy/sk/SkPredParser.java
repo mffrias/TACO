@@ -5,6 +5,14 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * Reads the skolem variables of the Java arithmetic operations from the Alloy text, for
+ * {@link SkPredFactBuilder}: the fields of {@code one sig QF} whose names have the format of
+ * {@link SkPredArgument}. It reads the text line by line, from the line after the one that
+ * contains {@code one sig QF} to the next line that contains a closing brace, and takes the
+ * text before the first colon of each line as a field name; so it assumes that the printer
+ * writes one field per line. {@link #parse(String)} replaces the arguments read before.
+ */
 class SkPredParser {
 
 	private Set<SkPredArgument> sk_pred_arguments = new HashSet<SkPredArgument>();

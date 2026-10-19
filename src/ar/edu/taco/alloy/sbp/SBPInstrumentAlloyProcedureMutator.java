@@ -13,6 +13,18 @@ import ar.uba.dc.rfm.alloy.ast.AlloySig;
 import ar.uba.dc.rfm.alloy.util.AlloyMutator;
 import ar.uba.dc.rfm.alloy.util.FormulaMutator;
 
+/**
+ * The first part of {@link SymmBreakPredPlugin}'s work, the {@code instrument_Alloy()}
+ * procedure (its comments cite a "fig 6.2"), as a mutator of the Alloy module. It splits each
+ * recursive field {@code r: T -> T + null} of the pre-state ({@code QF.r_0}) into a forward
+ * field {@code fr_0: T -> lone (T + null)} and a backward field {@code br_0: T -> lone T},
+ * replaces {@code QF.r_0} with {@code QF.br_0 + QF.fr_0} in the facts and the assertion
+ * ({@link SBPExpressionMutator}), and appends to the given text the atoms
+ * {@code one sig T_0, ..., T_<k-1> extends T} of each Java type T (k from
+ * {@code SBPUtils.getScope}) and, for each recursive field, a fact that puts every atom of its
+ * domain in the domain of exactly one of {@code fr_0} and {@code br_0}. The module's own text
+ * ({@code getAlloyStr()}) is not rewritten. Returns the new module.
+ */
 class SBPInstrumentAlloyProcedureMutator extends AlloyMutator {
 
 	private JDynAlloyClassHierarchy sbpInfo;
@@ -26,6 +38,16 @@ class SBPInstrumentAlloyProcedureMutator extends AlloyMutator {
 		this.alloyStrModified = alloyStrModified;
 	}
 	
+	/**
+	 * Replaces the recursive fields of {@code QF} with their forward and backward fields,
+	 * keeping the other fields, and appends to the text the atoms {@code T_i} and the facts of
+	 * the split fields (see the class comment). For a type whose k is 0 it still declares one
+	 * atom, {@code T_0}.
+	 *
+	 * @param n the global signature {@code QF}
+	 * @return the new {@code QF}
+	 * @throws RuntimeException if a recursive field has more than one domain
+	 */
 	@Override
 	public Object visit(AlloySig n) {
 		/*

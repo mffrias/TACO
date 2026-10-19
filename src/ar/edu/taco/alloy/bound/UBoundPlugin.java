@@ -19,10 +19,48 @@ import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
 import ar.uba.dc.rfm.alloy.ast.expressions.ExprConstant;
 import ar.uba.dc.rfm.dynalloy.plugin.AlloyASTPlugin;
 
+/**
+ * The Alloy-AST plugin of the tight upper bounds ({@code useTightUpperBounds}), which
+ * {@code DynalloyToAlloyManager} registers only with {@code useJavaSBP} as well, after
+ * {@code sbp.SymmBreakPredPlugin}. For the ROOPS classes, {@code xml/} holds precomputed upper
+ * bounds of pre-state fields of {@code QF}, mostly the forward and backward fields of symmetry
+ * breaking, over its atoms {@code T_i} ({@link UBoundRepository}); this plugin adds them to the
+ * model as a fact {@code QF.<field> in <tuples>}. For any other class, or a scope without a
+ * file, it adds nothing. See docs/RUNNING.md ("Configuration keys").
+ *
+ * <p>Static state: with {@code inferScope}, {@link #transform} changes the final scope held by
+ * the {@code InferredScope} singleton, and the change outlives the translation (see there).
+ */
 public class UBoundPlugin implements AlloyASTPlugin {
 
 	private List<JDynAlloyModule> src_jdynalloy_modules;
 
+	/**
+	 * Adds the upper bounds of {@code xml/} for {@code classToCheck} and the scope, if there is
+	 * a file for them ({@link UBoundRepository#getUpperBound}), as one fact at the end of the
+	 * text, keeping only the bounds of fields that {@code QF} has, and declares the integer
+	 * literal signatures that they use and the text lacks ({@link UBoundMutator}).
+	 *
+	 * <p>The scope: without {@code inferScope}, the configuration's ({@code type_scopes}, else
+	 * {@code objectScope}). With {@code inferScope}, the final scope of the {@code InferredScope}
+	 * singleton, after this method has set the entry of each signature that has a
+	 * {@code type_scopes} value to that value. It does so in place, on the singleton's own
+	 * {@code Scope}; the {@code initialize_inferred_scope} call that follows only wraps the same
+	 * {@code Scope} objects in a new instance. By then {@code DynAlloyAppendCommandPlugin} has
+	 * written the {@code check} command with the scope as the inference left it, in which such a
+	 * signature has the larger of its {@code type_scopes} value and its bounded input plus
+	 * program scope ({@code ScopeInference}), while symmetry breaking has declared as many atoms
+	 * of it as its {@code type_scopes} value ({@code SBPUtils.getScope}). So when the inferred
+	 * scope is the larger, the command has more atoms of that signature than symmetry breaking
+	 * names and than the bounds file is for. The changed scope stays in the singleton after
+	 * the translation. Unclear: whether the command was meant to get the {@code type_scopes}
+	 * values as well, or the bounds the inferred scope.
+	 *
+	 * @param alloyModule the module, after symmetry breaking
+	 * @return a new module with the bounds (an empty fact if no field matched), or
+	 *         {@code alloyModule} if there is no bounds file
+	 * @throws ar.edu.taco.TacoException if the bounds file cannot be parsed
+	 */
 	@Override
 	public AlloyModule transform(AlloyModule alloyModule) {
 
@@ -129,6 +167,13 @@ public class UBoundPlugin implements AlloyASTPlugin {
 		return buff.toString();
 	}
 
+	/**
+	 * Sets the source JDynAlloy modules ({@code DynalloyToAlloyManager.setSourceJDynAlloyModules}),
+	 * from which {@link #transform} builds a class diagram for
+	 * {@link UBoundRepository#getUpperBound}, which does not use it. Call before the translation.
+	 *
+	 * @param src_jdynalloy_modules the source modules
+	 */
 	public void setSourceJDynAlloyModules(List<JDynAlloyModule> src_jdynalloy_modules) {
 		this.src_jdynalloy_modules = src_jdynalloy_modules;
 	}

@@ -5,6 +5,14 @@ import java.util.Set;
 import ar.uba.dc.rfm.alloy.ast.AlloyModule;
 import ar.uba.dc.rfm.alloy.util.AlloyMutator;
 
+/**
+ * Appends the tight upper bounds to the module's text for {@link UBoundPlugin}: first the
+ * declarations of the integer literal signatures that the bounds use
+ * ({@code JavaPrimitiveIntegerLiteral<n>}, {@code JavaPrimitiveIntegerLiteralMinus<n>}) and the
+ * text does not declare, then the bounds' fact. Visiting a module returns a new one with that
+ * text and the same {@code QF}, facts and assertion, which are not visited. Call
+ * {@link #setUpperBoundStr(String)} before visiting.
+ */
 class UBoundMutator extends AlloyMutator {
 
 	private String upper_bound_str;

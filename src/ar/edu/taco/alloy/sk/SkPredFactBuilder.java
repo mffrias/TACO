@@ -17,8 +17,30 @@ import ar.uba.dc.rfm.alloy.ast.expressions.ExprVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.alloy.ast.formulas.PredicateFormula;
 
+/**
+ * Builds the facts of {@link SkolemizejavaArithPlugin} from the Alloy text. It groups the
+ * skolem variables among the fields of {@code QF} ({@link SkPredParser}) by predicate, prefix,
+ * DynAlloy index and operation number, and turns each group into one call of the predicate on
+ * {@code QF.<variable>}, the arguments in the predicate's order: {@code left}, {@code right},
+ * {@code result}, then {@code overflow} (multiplications, additions, subtractions) or
+ * {@code remainder} (divisions). The predicates handled ({@code JPredicateFactory}'s ids) are
+ * the {@code int}, {@code long} and {@code float} multiplications, the {@code int} and
+ * {@code long} {@code div_rem}, the {@code float} division, the {@code int} and {@code float}
+ * additions and the {@code float} subtraction; the variables of any other predicate (for
+ * example the {@code char} and {@code int} additions and subtractions of
+ * {@code AuxiliaryConstantsFactory}) get no fact. One instance per translation; no static
+ * state.
+ */
 class SkPredFactBuilder {
 
+	/**
+	 * Returns the facts: one predicate call per group, the multiplications first, then the
+	 * divisions, the {@code int} additions, the {@code float} additions and the {@code float}
+	 * subtractions. An {@code int} addition group with a missing argument, which the constructor
+	 * does not check, makes this throw a {@code NullPointerException}.
+	 *
+	 * @return a new list of the facts, empty if the text has no skolem variables
+	 */
 	public List<AlloyFormula> build_axioms() {
 
 		List<AlloyFormula> new_axioms = new LinkedList<AlloyFormula>();
@@ -228,6 +250,14 @@ class SkPredFactBuilder {
 
 	private Map<String, Map<String, Map<Integer, Map<Integer, Map<String, SkPredArgument>>>>> sk_pred_map = new HashMap<String, Map<String, Map<Integer, Map<Integer, Map<String, SkPredArgument>>>>>();
 
+	/**
+	 * Reads the skolem variables of the text and checks that every group of the multiplications,
+	 * divisions, {@code float} additions and {@code float} subtractions has exactly the expected
+	 * arguments (the {@code int} additions are not checked).
+	 *
+	 * @param alloyStr the Alloy text of the model
+	 * @throws TacoException if a checked group has a missing or an unexpected argument
+	 */
 	public SkPredFactBuilder(String alloyStr) {
 		fill_sk_pred_set(alloyStr);
 		fill_sk_pred_map();

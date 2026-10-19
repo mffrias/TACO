@@ -55,18 +55,43 @@ public class JDynAlloyStage implements ITacoStage {
 	private boolean javaArithmetic;
 	private Object inputToFix = null;
 
+	/**
+	 * Returns the value given to {@link #setRemoveQuantifiers(boolean)}.
+	 *
+	 * @return the stored flag, {@code false} by default
+	 */
 	public boolean getRemoveQuantifiers(){
 		return this.removeQuantifiers;
 	}
 
+	/**
+	 * Stores a remove-quantifiers flag that {@link #execute()} does not read; jDynAlloy and
+	 * DynAlloy take {@code dynalloy.toAlloy.removeQuantifiers} from the configuration.
+	 * {@code TacoMain} sets it from {@code TacoConfigurator.getRemoveQuantifiers()}.
+	 *
+	 * @param rq the flag
+	 */
 	public void setRemoveQuantifiers(boolean rq){
 		this.removeQuantifiers = rq;
 	}
 
+	/**
+	 * Returns the value given to {@link #setJavaArithmetic(boolean)}.
+	 *
+	 * @return the stored flag, {@code false} by default
+	 */
 	public boolean getJavaArithmetic(){
 		return this.javaArithmetic;
 	}
 
+	/**
+	 * Sets whether the bindings ({@code BindingManager}) are built for Java arithmetic.
+	 * Only the bindings use it: the relevancy analysis and the modifies solver read
+	 * {@code useJavaArithmetic} from the configuration. {@code TacoMain} sets it from that
+	 * key too; call before {@link #execute()}.
+	 *
+	 * @param b whether integers are modelled with Java arithmetic
+	 */
 	public void setJavaArithmetic(boolean b){
 		this.javaArithmetic = b;
 	}
@@ -77,11 +102,33 @@ public class JDynAlloyStage implements ITacoStage {
 	private String classToCheck;
 	private String methodToCheck;
 
+	/**
+	 * Returns the DynAlloy modules produced by the translation. {@code TacoMain} reads from
+	 * them, per module and per program, the variables and predicates that come from
+	 * arithmetic constraints in invariants and contracts, for {@link DynalloyStage}.
+	 *
+	 * @return the modules of the last {@link #execute()}, or {@code null} before it
+	 */
 	public Vector<DynalloyModule> getGeneratedModules(){
 		return generatedModules;
 	}
 
 
+	/**
+	 * Creates the jDynAlloy stage.
+	 *
+	 * @param modules every JDynAlloy module of the analysis: those translated from Java, the
+	 *        built-in, static-fields and parsed ones
+	 * @param classToCheck the class under analysis as the driver gives it, with dots
+	 *        ({@code classToCheck} of the overriding properties)
+	 * @param methodToCheck {@code methodToCheck} without its parameter types, e.g.
+	 *        {@code pkg_Class_contains}; with {@code classToCheck}, it is passed to
+	 *        jDynAlloy's {@code JDynAlloyTranslator} (call graph for the recursion unfolding,
+	 *        and the translation visitor)
+	 * @param inputToFix the input to fix, or {@code null}; with one, jDynAlloy translates no
+	 *        {@code requires} (the callees' included) and gives the method under analysis the
+	 *        input as its precondition. See docs/SPEC-OUTPUT.md ("inputToFix")
+	 */
 	public JDynAlloyStage(List<JDynAlloyModule> modules, String classToCheck, String methodToCheck, Object inputToFix) {
 		this.modules = modules;
 		this.inputToFix = inputToFix;
@@ -89,16 +136,49 @@ public class JDynAlloyStage implements ITacoStage {
 		this.methodToCheck = methodToCheck;
 	}
 
+	/**
+	 * Returns the DynAlloy files for {@link DynalloyStage}.
+	 *
+	 * @return one path, {@code <output_dir>/output.dals}; {@code null} before
+	 *         {@link #execute()}
+	 */
 	public List<String> getOutputFileNames() {
 		return outputFileNames;
 	}
 
+	/**
+	 * Returns the JDynAlloy modules as {@link #execute()} left them: sliced to the relevant
+	 * classes (with {@code relevancyAnalisys}) and with their modifies clauses resolved.
+	 * {@code TacoMain} gives them to {@link DynalloyStage#setSourceJDynAlloy(List)}.
+	 *
+	 * @return the modules; before {@link #execute()}, the list given to the constructor
+	 */
 	public List<JDynAlloyModule> getPrunedModules() {
 		return modules;
 	}
 
 
 
+	/**
+	 * Translates the JDynAlloy modules into DynAlloy, with jDynAlloy:
+	 * <ol>
+	 * <li>builds the bindings ({@code BindingManager}), with the recursion unfolding bound
+	 *     {@code dynalloy.toAlloy.loopUnroll};</li>
+	 * <li>with {@code relevancyAnalisys}: computes the relevant classes
+	 *     ({@code RelevancyAnalysisManager}), stores them in the configuration's
+	 *     {@code relevantClasses}, replacing the configured ones, and slices away the modules,
+	 *     fields and programs of the others ({@code SceneSlicerManager});</li>
+	 * <li>resolves the modifies clauses ({@code ModifiesSolverManager}); with the log level of
+	 *     this class at DEBUG or TRACE, writes the result as
+	 *     {@code <output_dir>/<module path>.without.modifies.djals};</li>
+	 * <li>builds the bindings again and translates ({@code JDynAlloyToDynAlloyManager}),
+	 *     which also unfolds recursion and applies the input to fix;</li>
+	 * <li>writes each DynAlloy module to {@code <output_dir>/<module id with every _ as />.dals}
+	 *     and all of them, the {@code prelude} first, to {@code <output_dir>/output.dals}, the
+	 *     file the next stage reads.</li>
+	 * </ol>
+	 * I/O errors when writing are printed, not thrown.
+	 */
 	@Override
 	public void execute() {
 

@@ -25,5 +25,11 @@ package ar.edu.taco.engine;
  *
  */
 public interface ITacoStage {
+	/**
+	 * Runs the stage. Each implementation takes its input through its constructor and
+	 * setters, and offers its output through getters, to be called after this method;
+	 * {@code ar.edu.taco.TacoMain#run} calls the stages in pipeline order. See
+	 * docs/ARCHITECTURE.md ("The TACO pipeline").
+	 */
 	public void execute();
 }

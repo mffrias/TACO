@@ -41,6 +41,21 @@ public class JUnitStage implements ITacoStage {
 	/* (non-Javadoc)
 	 * @see ar.edu.taco.engine.ITacoStage#execute()
 	 */
+	/**
+	 * Writes the counterexample read by {@link SnapshotStage} as a JUnit test, with
+	 * {@code UnitTestBuilder}: class {@code ar.edu.generated.junit.<Class>_<method>_<suffix>}
+	 * in {@code generated/ar/edu/generated/junit/}, where {@code <method>} is
+	 * {@code methodToCheck} without its parameter types and {@code <suffix>} the
+	 * information's file name suffix ({@code StrykerStage.fileSuffix}, which
+	 * {@code UnitTestBuilder} then increments: static state shared by every run in the JVM).
+	 * An existing file of that name is deleted first. The test rebuilds the input (receiver,
+	 * static fields, parameters) and calls the method by reflection; Stryker rewrites it with
+	 * {@code TacoMain.editTestFileToCompile}. Nothing is written if {@code noVerify} is set or
+	 * the information is invalid (no SAT {@code Check}, or the class to check was not among
+	 * the compilation units).
+	 *
+	 * @throws TacoException wrapping any exception of the test builder (also printed)
+	 */
 	@Override
 	public void execute() throws TacoException {
 		try {
@@ -89,6 +104,11 @@ public class JUnitStage implements ITacoStage {
 		
 	}
 
+	/**
+	 * Returns the absolute path of the test written by the last {@link #execute()}.
+	 *
+	 * @return the path, or {@code null} if no test was written
+	 */
 	public String getJunitFileName() {
 		return junitFile;
 	}

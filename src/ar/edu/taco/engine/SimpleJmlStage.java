@@ -47,6 +47,7 @@ import ar.uba.dc.rfm.alloy.ast.formulas.EqualsFormula;
  */
 public class SimpleJmlStage implements ITacoStage {
 
+	/** Extension of the JDynAlloy files that {@link JDynAlloyPrinterStage} writes. */
 	public static final String OUTPUT_JDYNALLOY_EXTENSION = ".djals";
 
 	private List<JCompilationUnitType> compilation_units;
@@ -57,14 +58,33 @@ public class SimpleJmlStage implements ITacoStage {
 	private Object inputToFix = null;
 
 
+	/**
+	 * Returns a field that nothing fills: the variables from arithmetic constraints in
+	 * invariants are kept per module ({@code JDynAlloyModule}) instead. No caller.
+	 *
+	 * @return an empty typing
+	 */
 	public AlloyTyping getVarsEncodingValueOfArithmeticOperationsInInvariants(){
 		return varsEncodingValueOfArithmeticOperationsInInvariants;
 	}
 	
+	/**
+	 * Returns a field that nothing fills, like
+	 * {@link #getVarsEncodingValueOfArithmeticOperationsInInvariants()}. No caller.
+	 *
+	 * @return an empty list
+	 */
 	public List<AlloyFormula> getPredsEncodingValueOfArithmeticOperationsInInvariants(){
 		return predsEncodingValueOfArithmeticOperationsInInvariants;
 	}
 	
+	/**
+	 * Creates the stage that translates simplified Java + JML into JDynAlloy, the second
+	 * after parsing in {@code TacoMain.run}.
+	 *
+	 * @param compilation_units the simplified units
+	 *        ({@link JmlStage#get_simplified_compilation_units()})
+	 */
 	public SimpleJmlStage(List<JCompilationUnitType> compilation_units) {
 		this.compilation_units = compilation_units;
 		this.modules = new ArrayList<JDynAlloyModule>();
@@ -74,6 +94,23 @@ public class SimpleJmlStage implements ITacoStage {
 	 * (non-Javadoc)
 	 * 
 	 * @see ar.edu.taco.pipeline.DynJML4AlloyPipeline#execute()
+	 */
+	/**
+	 * Translates the compilation units into JDynAlloy modules ({@link #getModules()}):
+	 * <ol>
+	 * <li>each unit with {@code JavaToJDynAlloyManager.processCompilationUnit}
+	 *     ({@code JDynAlloyASTVisitor}), with the input to fix, if any: the modules of its
+	 *     classes, with their fields, invariants and programs (named as in
+	 *     docs/METHOD-NAMING.md);</li>
+	 * <li>for each interface implemented by one of these modules, a module whose signature
+	 *     has the fact {@code Interface = Impl1 + Impl2 + ...} over the implementing modules;</li>
+	 * <li>with {@code useJavaArithmetic}, every integer, long, float and char literal module
+	 *     that the {@code JavaPrimitive*Value} singletons (in {@code lib/jdynalloy.jar}) hold.
+	 *     Those singletons
+	 *     are never reset, so the list also holds the literals of earlier runs in the same
+	 *     JVM.</li>
+	 * </ol>
+	 * Also keeps the translation's {@link SimpleJmlToJDynAlloyContext}.
 	 */
 	@Override
 	public void execute() {
@@ -147,14 +184,35 @@ public class SimpleJmlStage implements ITacoStage {
 
 	}
 
+	/**
+	 * Returns the modules built by {@link #execute()}; {@code TacoMain} passes this list to
+	 * the JFSL stage, which may add literal modules to it, then prints and translates it.
+	 *
+	 * @return the modules, in the order described in {@link #execute()}; empty before it
+	 */
 	public List<JDynAlloyModule> getModules() {
 		return this.modules;
 	}
 
+	/**
+	 * Returns the context of the translation, which {@code TacoMain} passes to the JFSL stage.
+	 *
+	 * @return the context of the last {@link #execute()}, or {@code null} before it
+	 */
 	public SimpleJmlToJDynAlloyContext getSimpleJmlToJDynAlloyContext() {
 		return this.simpleJmlToJDynAlloyContext;
 	}
 
+	/**
+	 * Sets the input to fix, passed to the translation ({@code JDynAlloyASTVisitor},
+	 * {@code JmlExpressionVisitor}), which adds it as a precondition, to the spec cases that
+	 * have a {@code requires}. {@code TacoMain.run} sets it only when computing the specified
+	 * output ({@code isCheckAndRunSpecAssertionSupport}); Stryker's fixed inputs are applied by
+	 * jDynAlloy instead. See docs/SPEC-OUTPUT.md ("inputToFix").
+	 *
+	 * @param inputToFix a {@code HashMap<String, Object>} from {@code "thiz"} and the
+	 *        parameter names to their values, or {@code null}; call before {@link #execute()}
+	 */
 	public void setInputToFix(Object inputToFix) {
 		this.inputToFix = inputToFix;
 	}

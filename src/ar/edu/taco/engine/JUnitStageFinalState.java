@@ -42,6 +42,21 @@ public class JUnitStageFinalState implements ITacoStage {
     /* (non-Javadoc)
      * @see ar.edu.taco.engine.ITacoStage#execute()
      */
+    /**
+     * Writes the final state of a computed specified output as a JUnit class, with
+     * {@code UnitTestBuilderFinalState}: class
+     * {@code ar.edu.generated.junit.<Class>Test_<method>_<suffix>} in
+     * {@code generated/ar/edu/generated/junit/}, named like {@link JUnitStage}'s tests but
+     * with {@code Test} after the class name; it declares the final receiver, parameters and
+     * {@code result}, calls the method, and asserts nothing. {@code TacoMain.run} runs it, after
+     * {@link JUnitStage}, when the analysis had an input to fix, on a
+     * {@link SnapshotStage} that read the post-state. Increments the static
+     * {@code StrykerStage.fileSuffix}, deletes an existing file of the same name first, and
+     * writes nothing if {@code noVerify} is set or the information is invalid. See
+     * docs/SPEC-OUTPUT.md ("checkAndRunSpecIfFaulty", step 3).
+     *
+     * @throws TacoException wrapping any exception of the test builder (also printed)
+     */
     @Override
     public void  execute() throws TacoException {
         try {
@@ -95,6 +110,11 @@ public class JUnitStageFinalState implements ITacoStage {
 
     }
 
+    /**
+     * Returns the absolute path of the class written by the last {@link #execute()}.
+     *
+     * @return the path, or {@code null} if nothing was written
+     */
     public String getJunitFileName() {
         return junitFile;
     }

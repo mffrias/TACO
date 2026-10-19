@@ -37,6 +37,19 @@ import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 import ar.uba.dc.rfm.dynalloy.DynAlloyCompiler;
 import ar.uba.dc.rfm.dynalloy.xlator.SpecContext;
 
+/**
+ * Translates the DynAlloy model that {@link JDynAlloyStage} wrote
+ * ({@code <output_dir>/output.dals}) into Alloy ({@code <output_dir>/output.als}), with
+ * dynalloy4 and TACO's plugins ({@code DynalloyToAlloyManager}: scope inference, the
+ * {@code check} command and its scopes, symmetry breaking, tight bounds, Java arithmetic).
+ * The assertion checked is {@code check_<methodToCheck without parameter types>}. Next comes
+ * {@link AlloyStage}.
+ *
+ * <p>A fixed input changes the translation in two ways, told apart by the static
+ * {@link #isCheckAndAfterRunSpec}: for Stryker's feedback the post is negated and the input
+ * is not passed to DynAlloy; for the specified output, the assertion has no program and the
+ * input is passed on. See docs/SPEC-OUTPUT.md ("inputToFix").
+ */
 public class DynalloyStage implements ITacoStage {
 
 	static final private String OUTPUT_ALLOY_EXTENSION = ".als";
@@ -51,8 +64,18 @@ public class DynalloyStage implements ITacoStage {
 
 	private boolean translatingForStryker = false;
 
+	/**
+	 * Static: whether TACO computes the specified output for a fixed input
+	 * ({@code checkAndRunSpecIfFaulty}). {@link #execute()} copies it into
+	 * {@code DynalloyToAlloyManager.isCheckAndAfterRunSpec}, and from there into dynalloy4's
+	 * {@code DynAlloyCompiler.isCheckAndAfterRunSpec}, which builds the assertion
+	 * {@code pre => not post} without the program. {@code TacoMain.run} sets it before each
+	 * translation from {@code TacoMain.isCheckAndRunSpecAssertionSupport}, which is never
+	 * reset.
+	 */
 	public static boolean  isCheckAndAfterRunSpec = false;
 
+	/** The input to fix given to the constructor, or {@code null}. */
 	public Object inputToFix = null;
 
 
@@ -76,6 +99,19 @@ public class DynalloyStage implements ITacoStage {
 	HashMap<String, List<AlloyFormula>> predsComingFromArithmeticConstraintsInObjectInvariantsByModule = new HashMap<String, List<AlloyFormula>> ();
 
 
+	/**
+	 * Creates the stage.
+	 *
+	 * @param inputDynalloyModulesFileNames ignored: {@link #execute()} always reads
+	 *        {@code <output_dir>/output.dals}
+	 * @param varsFromInvPerMod per DynAlloy module id, the variables that come from
+	 *        arithmetic constraints in object invariants
+	 * @param predsFromInvPerMod per module id, the predicates on those variables
+	 * @param varsFromContractsPerProg per program id, the variables that come from arithmetic
+	 *        constraints in its contract
+	 * @param predsFromContractsPerProg per program id, the predicates on those variables
+	 * @param inputToFix the input to fix, or {@code null}
+	 */
 	public DynalloyStage(List<String> inputDynalloyModulesFileNames,
 						 HashMap<String, AlloyTyping> varsFromInvPerMod,
 						 HashMap<String, List<AlloyFormula>> predsFromInvPerMod,
@@ -97,6 +133,23 @@ public class DynalloyStage implements ITacoStage {
 		// isCheckAndAfterRunSpec has been set.
 	}
 
+	/**
+	 * Translates {@code <output_dir>/output.dals} into {@code <output_dir>/output.als}
+	 * ({@link #get_alloy_filename()}), checking the assertion
+	 * {@code check_<methodToCheck before its '('>}, as read from the configuration's
+	 * {@code methodToCheck} property. The translation is for Stryker
+	 * ({@code (pre and program) => not post}, so that SAT means that some value of the
+	 * variabilized parts makes the input satisfy the contract) when there is an input to fix
+	 * and {@link #isCheckAndAfterRunSpec} is off; the input itself is passed to DynAlloy only
+	 * when not translating for Stryker. Sets the static
+	 * {@code DynalloyToAlloyManager.isCheckAndAfterRunSpec}. Assumes
+	 * {@link #setSourceJDynAlloy(List)} was called: {@code DynalloyToAlloyManager} takes the
+	 * first of those modules as the module under analysis, and gives its invariants and the
+	 * pre- and postconditions of its program named like the assertion to the scope inference.
+	 *
+	 * @throws ar.edu.taco.TacoException if dynalloy4 fails to parse or translate the model, or the
+	 *         assertion is not found
+	 */
 	@Override
 	public void execute() {
 		// A fixed input comes either from Stryker's feedback (variabilization), which
@@ -129,6 +182,11 @@ public class DynalloyStage implements ITacoStage {
 				predsComingFromArithmeticConstraintsInContractsByProgram, inputToFixForDynalloy);
 	}
 
+	/**
+	 * Returns the Alloy file written by the last {@link #execute()}.
+	 *
+	 * @return {@code <output_dir>/output.als}, or {@code null} before {@link #execute()}
+	 */
 	public String get_alloy_filename() {
 		return alloy_filename;
 	}
@@ -136,10 +194,25 @@ public class DynalloyStage implements ITacoStage {
 
 	private List<JDynAlloyModule> src_jdynalloy_modules;
 
+	/**
+	 * Sets the JDynAlloy modules that the DynAlloy model came from
+	 * ({@link JDynAlloyStage#getPrunedModules()}), which the scope inference and the
+	 * symmetry-breaking and tight-bounds plugins read. The first module is taken as the module
+	 * under analysis. Call before {@link #execute()}.
+	 *
+	 * @param jdynalloy_modules the source modules
+	 */
 	public void setSourceJDynAlloy(List<JDynAlloyModule> jdynalloy_modules) {
 		src_jdynalloy_modules = jdynalloy_modules;
 	}
 
+	/**
+	 * Returns the DynAlloy compiler of the last {@link #execute()}, whose spec context
+	 * {@link JavaTraceStage} needs.
+	 *
+	 * @return the compiler; call only after {@link #execute()} (before it, this throws a
+	 *         {@link NullPointerException})
+	 */
 	public DynAlloyCompiler getDynAlloyCompiler() {
 		return dynalloyToAlloyManager.getCompiler();
 	}

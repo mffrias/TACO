@@ -104,4 +104,9 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     but stores it as `thiz_1`, and the static fields in the final state; for a method, the
     static fields in the initial state; and its `catch` (lines 405-408) retries a parameter with
     the same expression. Which state should each come from?
+23. **Literals of a fixed input** (`engine/PrecompiledModules.java`, the
+    `PrecompiledModules(inputToFix)` constructor): it adds the literal modules of the input map's
+    own values only, not of the fields of the objects in it, for which jDynAlloy's
+    `processInputToFix` creates literals later, during the translation. Do those literals reach
+    the model? (Not checked.)
 

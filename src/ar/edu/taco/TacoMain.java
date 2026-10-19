@@ -134,17 +134,36 @@ public class TacoMain {
     private static final String CMD = "Taco";
     private static final String HEADER = "Taco static analysis tool.";
     private static final String FOOTER = "For questions and comments please write to jgaleotti AT dc DOT uba DOT ar";
+    /** The platform's path separator ({@code path.separator}); unused in TACO. */
     public static final String PATH_SEP = System.getProperty("path.separator");
+    /** The platform's file separator ({@code file.separator}). */
     public static final String FILE_SEP = System.getProperty("file.separator");
 
+    /** Extension of simplified Java files; unused (stages keep their own copies). */
     public static final String OUTPUT_SIMPLIFIED_JAVA_EXTENSION = ".java";
 
     private Object inputToFix;
 
+    /**
+     * Absolute path of the last JUnit test written by {@link #run(String, Properties)}: the
+     * counterexample test, or, with an input to fix, the final-state test. Empty until one is
+     * written; not cleared at the start of a run. {@code RegresionTestBase} reads it to find
+     * the counterexample's input for {@code checkAndRunSpecIfFaulty}.
+     */
     public String outputJunitFile = "";
 
     private List<JCompilationUnitType> compilationUnits = new ArrayList<JCompilationUnitType>();
 
+    /**
+     * Static: when set, {@link #run(String, Properties)} computes the output the
+     * specification allows for the input to fix, instead of checking the method: method
+     * bodies are stubbed ({@link JmlStage#isCheckAndAfterRunSpec}), the input is added as a
+     * precondition on the TACO side too, DynAlloy builds {@code pre => not post} without the
+     * program ({@link DynalloyStage#isCheckAndAfterRunSpec}), and the JUnit step also writes
+     * the final state. {@code RegresionTestBase.checkAndRunSpecIfFaulty} sets it before its
+     * second run, and nothing resets it, so every later run in the same JVM runs in this
+     * mode. See docs/SPEC-OUTPUT.md and docs/OPEN-QUESTIONS.md (question 8).
+     */
     public static boolean isCheckAndRunSpecAssertionSupport = false;
 
     /**
@@ -348,6 +367,16 @@ public class TacoMain {
         }
     }
 
+    /**
+     * Creates a TACO run.
+     *
+     * @param inputToFix {@code null} for a normal analysis; otherwise the input to fix, a map
+     *        from {@code "thiz"} (the receiver) and the parameter names to their values, as in
+     *        the public field {@code theData} of a counterexample test. Stryker's
+     *        {@code DarwinistController} passes one for its feedback, and
+     *        {@code checkAndRunSpecIfFaulty} for the specified output. See
+     *        docs/SPEC-OUTPUT.md ("inputToFix")
+     */
     public TacoMain(HashMap<String, Object> inputToFix){
         this.inputToFix = inputToFix;
     }
@@ -363,6 +392,15 @@ public class TacoMain {
     }
 
 
+    /**
+     * Runs {@link #run(String, Properties)} with no overriding properties and discards the
+     * result. As the code stands it cannot complete: {@code run} reads {@code methodToCheck}
+     * from the overriding properties only, so it throws a {@link NullPointerException} before
+     * the jDynAlloy translation. No caller in TACO.
+     *
+     * @param configFile path of the TACO configuration file
+     * @throws IllegalArgumentException if {@code configFile} is {@code null}
+     */
     public void run(String configFile) throws IllegalArgumentException {
         this.run(configFile, new Properties());
     }
@@ -1157,8 +1195,18 @@ public class TacoMain {
 
     }
 
+    /** What {@link String#lastIndexOf(String)} returns when there is no match. */
     public static final int NOT_PRESENT = -1;
 
+    /**
+     * Returns a file's base name without its extension: the text between the last {@code /}
+     * and the last {@code .} (e.g. {@code X} for {@code generated/ar/edu/generated/junit/X.java}),
+     * which for a generated test is its class name. Only {@code /} separates directories; a
+     * path without an extension whose directories contain a dot is not handled.
+     *
+     * @param fileName a path or file name
+     * @return the base name without extension
+     */
     public static String obtainClassNameFromFileName(String fileName) {
         int lastBackslash = fileName.lastIndexOf("/");
         int lastDot = fileName.lastIndexOf(".");

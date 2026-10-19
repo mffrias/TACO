@@ -40,29 +40,76 @@ import ar.uba.dc.rfm.alloy.AlloyTyping;
 import ar.uba.dc.rfm.alloy.AlloyVariable;
 import ar.uba.dc.rfm.alloy.ast.formulas.AlloyFormula;
 
+/**
+ * Parses JDynAlloy source files ({@code .djals}) into modules, to be added to those that
+ * TACO translated from Java. It reads the files of the key {@code jdynalloy.parser.inputFiles}
+ * and the class-path resources of {@code jdynalloy.parser.inputResources} plus those that
+ * {@link PrecompiledModules#execute()} registered just before
+ * ({@code TacoConfigurator.getJDynAlloyParserInputResources()}): the built-in modules kept as
+ * {@code .djals} under {@code src/ar/edu/taco/engine/precompiledmodules/} ({@code java.util}
+ * collections, integer and object arrays, ...). {@code TacoMain.run} runs it when
+ * {@code jdynalloy.parser.enabled} is on (the default, and on in
+ * {@code config/genericTest.properties}); with it off, those built-in modules are missing
+ * from the analysis. Holds no static state.
+ */
 public class JDynAlloyParsingStage implements ITacoStage {
 	private List<JDynAlloyModule> parsedModules;
 	private List<JDynAlloyModule> givenModules;
 	private boolean javaArithmetic;
 	
+	/**
+	 * Returns the value given to {@link #setJavaArithmetic(boolean)}; the stage does not use
+	 * it.
+	 *
+	 * @return the stored flag, {@code false} by default
+	 */
 	public boolean getJavaArithmetic(){
 		return javaArithmetic;
 	}
 	
+	/**
+	 * Stores a Java-arithmetic flag that nothing reads: {@link #execute()} takes
+	 * {@code useJavaArithmetic} from the configuration, and no caller sets it.
+	 *
+	 * @param b the flag
+	 */
 	public void setJavaArithmetic(boolean b){
 		this.javaArithmetic = b;
 	}
 	
 
+	/**
+	 * Returns the modules parsed by the second pass of {@link #execute()}.
+	 *
+	 * @return the parsed modules; empty before {@link #execute()}
+	 */
 	public List<JDynAlloyModule> getParsedModules() {
 		return parsedModules;
 	}
 
+	/**
+	 * Creates the stage.
+	 *
+	 * @param givenModules the modules built so far (translated from Java, built-in and
+	 *        static-fields modules); their fields are known to the parser of the second pass.
+	 *        They are not changed, and not part of {@link #getParsedModules()}
+	 */
 	public JDynAlloyParsingStage(List<JDynAlloyModule> givenModules) {
 		this.givenModules = givenModules;
 		this.parsedModules = new ArrayList<JDynAlloyModule>();
 	}
 
+	/**
+	 * Parses the configured files and resources twice. The first pass parses them without a
+	 * context, only to collect, with the given modules, every field
+	 * ({@code FieldCollectorVisitor}, with {@code useJavaArithmetic} from the configuration).
+	 * The second pass parses them again with a context that knows those fields, and its
+	 * modules are the result. For files (not resources), the first module of each file gets
+	 * empty lists of arithmetic-constraint variables and predicates.
+	 *
+	 * @throws TacoException if a file is not found; a {@code JDynAlloyParsingException}
+	 *         (unchecked) from the parser propagates
+	 */
 	@Override
 	public void execute() {
 

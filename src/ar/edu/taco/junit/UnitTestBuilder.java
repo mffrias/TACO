@@ -24,6 +24,61 @@ import ar.edu.taco.junit.RecoveredInformation.StaticFieldInformation;
 import ar.edu.taco.snapshot.SnapshotBuilder;
 
 
+/**
+ * Writes the JUnit test that reproduces a counterexample: it rebuilds the input in Java, from
+ * the objects of {@link RecoveredInformation#getSnapshot()}, and calls the method under
+ * analysis on it. {@code JUnitStage} runs it after {@code SnapshotStage}, in a TACO run with
+ * {@code generateUnitTestCase} or {@code attemptToCorrectBug} and in Stryker's
+ * {@code DarwinistController}. See docs/ARCHITECTURE.md, section 1.
+ *
+ * <p><b>Output.</b> {@code generated/ar/edu/generated/junit/<Class>_<methodToCheck>_<n>.java},
+ * relative to the working directory, in package {@code ar.edu.generated.junit}, where
+ * {@code <Class>} is the simple name of the class under analysis, {@code <methodToCheck>} the
+ * qualified name ({@code pkg_Class_method}) and {@code n} the
+ * {@link RecoveredInformation#getFileNameSuffix() file name suffix}.
+ * {@link #getOutputClassName()} must give the same name, since {@code JUnitStage} and
+ * {@code TacoMain} find the file through it (docs/FIXES-FOR-MASTER.md, N1). After writing,
+ * {@link #createUnitTest()} increments the static {@link StrykerStage#fileSuffix}, which is
+ * never reset, so the numbers grow across all the analyses of one JVM.
+ * {@link JUnitPrettyPrinter} writes the file; Stryker and {@code checkAndRunSpecIfFaulty} then
+ * rewrite it with {@code TacoMain.editTestFileToCompile} (docs/FIXES-FOR-MASTER.md, S11;
+ * docs/KNOWN-LIMITATIONS.md, "Running", for the fixed names it uses).
+ *
+ * <p><b>What {@link #createUnitTest()} writes.</b>
+ * <ul>
+ * <li>The method is looked up by the part of {@code methodToCheck} after its last underscore,
+ *     with the parameter types of the last declared method whose {@code <class>_<name>} equals
+ *     {@code methodToCheck}: overloads are not told apart, and a method whose name has an
+ *     underscore is not found. If that part is the class's simple name, the method is a
+ *     constructor, taken to be the first public one.</li>
+ * <li>The receiver: {@code <Class> instance = new <Class>(...)}, with default arguments for
+ *     the first public constructor (or the first declared one), then an {@code updateValue}
+ *     call for each field declared by its class, with the values of the snapshot's
+ *     {@code thiz_0} (or of an object with default field values, when Alloy pruned
+ *     {@code thiz}). The objects it reaches are declared and filled the same way, under
+ *     {@code _<Type>_<i>} names; lists,
+ *     sets and maps become an {@code ArrayList}, kodkod's {@code IdentityHashSet} and an
+ *     {@code IdentityHashMap}, and a {@code PrintStream} is {@code System.out}
+ *     (docs/FIXES-FOR-MASTER.md, S15). For a static method or a constructor, {@code instance}
+ *     is null.</li>
+ * <li>Each parameter, declared under its own name with its declared type, with the snapshot's
+ *     {@code <name>_0}, or a default value when Alloy pruned it. A parameter whose object was
+ *     already declared reuses that variable without a cast, which may not compile
+ *     (docs/KNOWN-LIMITATIONS.md, "Running"). Every null has identity hash code 0, so the
+ *     same happens to a null object parameter of a static method or a constructor (whose
+ *     {@code instance} is null) and to the second of two null object parameters.</li>
+ * <li>The call: the method is looked up by its Java name with {@code getAccessibleMethod} and
+ *     run with {@code method.invoke}; its exceptions are printed (docs/FIXES-FOR-MASTER.md,
+ *     N2). For a constructor no call is written. Unclear: whether the test of a constructor
+ *     should call it.</li>
+ * </ul>
+ * Building the statements runs code too: the first public constructor of the class of each
+ * object reached is called with default arguments, and a failure throws
+ * {@code RuntimeException}. The setters ({@code setLoader}, {@code setOutputPath},
+ * {@code setStaticFieldNameFilter}) and {@code increaseSuffix} are not called in TACO: the
+ * class is loaded with the thread's context class loader, and the output path is relative to
+ * the working directory.
+ */
 public class UnitTestBuilder {
 
 
@@ -48,6 +103,11 @@ public class UnitTestBuilder {
     private Map<Object, Integer> instancesIndex = new HashMap<Object, Integer>();
     // private List<String> parameterInstanceNames = new ArrayList<String>();
 
+    /**
+     * Creates a builder for one counterexample.
+     *
+     * @param recoveredInformation the names and the snapshot that {@code SnapshotStage} recovered
+     */
     public UnitTestBuilder(RecoveredInformation recoveredInformation/*, TacoAnalysisResult tacoAnalysisResult*/) {
         this.recoveredInformation = recoveredInformation;
     }

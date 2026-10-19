@@ -24,6 +24,30 @@ import ar.edu.taco.junit.RecoveredInformation.StaticFieldInformation;
 import ar.edu.taco.snapshot.SnapshotBuilder;
 
 
+/**
+ * Writes the final-state test of the second run of {@code checkAndRunSpecIfFaulty}, in which
+ * TACO checks the specification alone for a fixed input. {@code JUnitStageFinalState} runs it
+ * after {@code SnapshotStage} with that input, from the objects of
+ * {@link SnapshotBuilder#createSnapshotFinalState()}: the receiver after the call
+ * ({@code thiz_1}, or {@code thiz_0} when the snapshot has no {@code thiz_1}), the parameters
+ * ({@code <name>_0}) and the result ({@code return_1}), which the specification allows for
+ * that input. See docs/SPEC-OUTPUT.md ("checkAndRunSpecIfFaulty", step 3).
+ *
+ * <p>A copy of {@link UnitTestBuilder} with these differences: the class is named
+ * {@code <Class>Test_<methodToCheck>_<n>}; the receiver is the final one; a {@code result}
+ * variable is declared from {@code return_1}, for a {@code float}, {@code double},
+ * {@code int}, {@code long} or {@code boolean} value or an object (built like the receiver),
+ * while for a {@code char} (compared with {@code "Char"}), {@code short} or {@code byte} the
+ * statement is empty; and the method is then called on the final receiver, with the initial
+ * parameters, as in the initial-state test, with no assertion. It also increments
+ * {@link StrykerStage#fileSuffix}. Unclear: whether the final-state test should call the
+ * method (docs/OPEN-QUESTIONS.md, item 11).
+ *
+ * <p>It finds the method under analysis as {@link UnitTestBuilder} does, by the qualified
+ * {@code methodToCheck} ({@code <package>_<Class>_<method>}, docs/METHOD-NAMING.md) and the
+ * Java name after its last {@code '_'}, and the test calls it by that Java name
+ * (docs/FIXES-FOR-MASTER.md, N10). Its setters are not called in TACO.
+ */
 public class UnitTestBuilderFinalState {
 
 
@@ -50,6 +74,12 @@ public class UnitTestBuilderFinalState {
     private Map<Object, Integer> instancesIndex = new HashMap<Object, Integer>();
     // private List<String> parameterInstanceNames = new ArrayList<String>();
 
+    /**
+     * Creates a builder for one final-state snapshot.
+     *
+     * @param recoveredInformation the names and the final-state snapshot that
+     *        {@code SnapshotStage} recovered
+     */
     public UnitTestBuilderFinalState(RecoveredInformation recoveredInformation/*, TacoAnalysisResult tacoAnalysisResult*/) {
         this.recoveredInformation = recoveredInformation;
     }

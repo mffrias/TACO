@@ -5,6 +5,12 @@ import java.lang.reflect.Field;
 import ar.edu.taco.TacoException;
 import junit.framework.TestCase;
 
+/**
+ * A JUnit 3 {@code TestCase} with {@code updateValue}, the reflective field setter that every
+ * generated counterexample test also contains. Unused: nothing extends or calls it; the tests
+ * that {@link JUnitPrettyPrinter} writes are plain classes with their own private copy of
+ * {@code updateValue}.
+ */
 public class BaseGeneratedJUnitTest extends TestCase {
 	
 	public void updateValue(Object instance, String fieldName, Object value) {

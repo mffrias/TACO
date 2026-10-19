@@ -6,6 +6,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * What the counterexample-to-test path knows about one counterexample. {@code SnapshotStage}
+ * fills it and {@code JUnitStage} or {@code JUnitStageFinalState} reads it, in
+ * {@code TacoMain.run} and in Stryker's {@code DarwinistController.generateJunitFile}:
+ * <ul>
+ * <li>the class and the method under analysis: {@code classToCheck} as the driver gives it
+ *     ({@code pkg.Class}), and {@code methodToCheck} qualified and without its parameter types
+ *     ({@code pkg_Class_method}; see docs/METHOD-NAMING.md);</li>
+ * <li>the names that {@link InformationRecoveryManager} recovers from the JML AST: fields and
+ *     static fields by class, and the method's parameters; it also marks the information valid
+ *     ({@code SnapshotStage} marks it invalid again when there is no counterexample);</li>
+ * <li>the snapshot, the Java objects that {@code SnapshotBuilder} builds from the Alloy
+ *     instance, keyed by variable and state: {@code thiz_0} and {@code <param>_0} (the input),
+ *     and, for the final state, {@code thiz_1} and {@code return_1}; and the values of static
+ *     fields, which no test builder reads;</li>
+ * <li>{@code fileNameSuffix}, the {@code n} of the test class
+ *     {@code <Class>_<method>_<n>}.</li>
+ * </ul>
+ * Plain mutable data, with no static state.
+ */
 public class RecoveredInformation {
 	private boolean validInformation = false;
 	
@@ -191,6 +211,13 @@ public class RecoveredInformation {
 	}
 	
 	
+	/**
+	 * Sets the number that ends the generated test's class name. {@code TacoMain.run} and
+	 * {@code DarwinistController.generateJunitFile} pass {@code StrykerStage.fileSuffix}, the
+	 * static counter that the test builders increment after each test.
+	 *
+	 * @param i the suffix
+	 */
 	public void setFileNameSuffix (int i){
 		this.fileNameSuffix = i;
 	}

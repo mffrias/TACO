@@ -52,6 +52,52 @@ import edu.mit.csail.sdg.alloy4compiler.translator.A4Solution;
 import edu.mit.csail.sdg.alloy4compiler.translator.A4Tuple;
 import edu.mit.csail.sdg.alloy4compiler.translator.A4TupleSet;
 
+/**
+ * Turns the Alloy instance of a SAT TACO result, a counterexample, back into Java objects and
+ * values: the receiver and the parameters of the method under analysis and, for the final
+ * state, the receiver after the call and the result. It stores them in
+ * {@link RecoveredInformation#getSnapshot()} under {@code thiz_0}, {@code <param>_0},
+ * {@code thiz_1} and {@code return_1}, from which {@code UnitTestBuilder} and
+ * {@code UnitTestBuilderFinalState} write the tests. {@code SnapshotStage} calls
+ * {@link #createSnapshot()}, or {@link #createSnapshotFinalState()} when it has an input to
+ * fix (the second run of {@code checkAndRunSpecIfFaulty}); the test builders use only
+ * {@link #createNewInstance}. See docs/ARCHITECTURE.md, section 1, and docs/SPEC-OUTPUT.md.
+ *
+ * <p><b>How.</b> A Java variable {@code v} is the Alloy variable {@code v_0} in the initial
+ * state and {@code v_1} in the final one, joined to {@code QF} with {@code removeQuantifiers},
+ * and is evaluated in the solution. A value's atom, {@code <signature>$<i>}, gives its class:
+ * first among the class under analysis and the classes TACO translated, then by turning the
+ * signature's underscores into dots (docs/FIXES-FOR-MASTER.md, S14). An object is built with
+ * the first public constructor of its class (or the first declared one) and default
+ * arguments, which runs its code; if that throws, the value is null, as for a
+ * {@code PrintStream} (docs/KNOWN-LIMITATIONS.md, "Running"). Then each non-static field,
+ * inherited ones included, gets the value of its Alloy field ({@code <class>_<field>}, or the
+ * fields {@code b...} and {@code f...} that symmetry breaking splits it into); a field the
+ * model does not have keeps the constructor's value. Atoms are cached, so objects shared in
+ * the instance are shared in Java. In the final state, objects are made with
+ * {@link #createNewInstance} instead, and their fields read in the final state. Arrays come
+ * from the {@code java_lang_*Array} signatures (a length below 0 or above 10000 becomes 100);
+ * sets and maps become an {@code IdentityHashSet} and an {@code IdentityHashMap}; list
+ * contents are not supported. With {@code useJavaArithmetic}, ints, longs, chars and floats
+ * are decoded from their bit vectors; without it, a {@code char} or {@code Character} is the
+ * first letter of its atom's label. The atoms {@code null$0} (null), {@code Q$0} (a new
+ * {@code Object}), {@code true$0} and {@code char$0} to {@code char$15} ({@code 'a'} to
+ * {@code 'p'}) are preloaded, and so is {@code false$0}, as {@code true}; this cache is only
+ * consulted for values whose declared type is neither primitive nor a wrapper.
+ *
+ * <p><b>Side effects and state.</b> It adds every atom of the solution to the result's world
+ * (so that expressions naming atoms parse); writes {@code output/counterexample-instances.xml}
+ * when this class's logger has its level set to DEBUG or TRACE; and sets the static fields
+ * that {@code InformationRecoveryManager} found to their values in the instance, through
+ * reflection, also recording them in {@link RecoveredInformation#getStaticFieldsValues()}:
+ * those values stay in the JVM. It reads the {@link TacoConfigurator} singleton
+ * ({@code methodToCheck}, {@code classToCheck}, {@code classes}, {@code useJavaArithmetic},
+ * {@code removeQuantifiers}), so it must run while the configuration of the run that produced
+ * the result is loaded. Classes are loaded through the class loader of
+ * {@code setLoader}, by default the thread's context class loader when the builder was
+ * created ({@code SnapshotStage} passes its own, which is that too). The static map
+ * {@code createdDefaultObjects} is used only by commented-out code and stays empty.
+ */
 public class SnapshotBuilder {
 
     //	private static final ExprConstant UNIV = ExprConstant.buildExprConstant("univ");
@@ -85,6 +131,14 @@ public class SnapshotBuilder {
         this.loader = loader;
     }
 
+    /**
+     * Creates a builder for one TACO result.
+     *
+     * @param recoveredInformation the names that {@code InformationRecoveryManager} recovered; the
+     *        snapshot is stored in it
+     * @param tacoAnalysisResult a SAT result with an Alloy solution; null when only
+     *        {@link #createNewInstance} is used, as the test builders do
+     */
     public SnapshotBuilder(RecoveredInformation recoveredInformation, TacoAnalysisResult tacoAnalysisResult) {
         super();
         this.tacoAnalysisResult = tacoAnalysisResult;
@@ -92,6 +146,14 @@ public class SnapshotBuilder {
     }
 
 
+    /**
+     * Creates a builder for one TACO result, with an input to fix.
+     *
+     * @param recoveredInformation as in the other constructor
+     * @param tacoAnalysisResult as in the other constructor
+     * @param inputToFix stored, and never read by this class: {@code SnapshotStage} uses it to
+     *        choose between {@link #createSnapshot()} and {@link #createSnapshotFinalState()}
+     */
     public SnapshotBuilder(RecoveredInformation recoveredInformation, TacoAnalysisResult tacoAnalysisResult, Object inputToFix) {
         super();
         this.tacoAnalysisResult = tacoAnalysisResult;
@@ -100,6 +162,16 @@ public class SnapshotBuilder {
     }
 
 
+    /**
+     * Returns whether the method under analysis is a constructor: whether
+     * {@code TacoConfigurator.getClassToCheck()} ({@code pkg_Class}) ends with the part of
+     * {@code TacoConfigurator.getMethodToCheck()} after the last underscore of its name. This is a
+     * suffix test, so a method named like the end of the class's name ({@code Tree} in
+     * {@code BinTree}) counts as a constructor too.
+     *
+     * @param clazz not used
+     * @return true for a constructor
+     */
     public boolean methodToCheckIsConstructor(Class<?> clazz) {
         boolean result = false;
         String methodToCheck = TacoConfigurator.getInstance().getMethodToCheck();
@@ -113,6 +185,22 @@ public class SnapshotBuilder {
         return result;
     }
 
+    /**
+     * Puts the input of the counterexample, in the initial state, into the snapshot: the receiver
+     * under {@code thiz_0} (not for a static method, nor when Alloy pruned {@code thiz}), each
+     * parameter that Alloy did not prune under {@code <name>_0}, and the static fields (see the
+     * class comment). Does nothing if the recovered information is not valid.
+     *
+     * <p>The method is the one whose {@code <declaring class>_<name>} equals {@code methodToCheck}
+     * without its types (with overloads, any of them); a constructor is any public one of the
+     * class (the parameters are not compared). Parameter names come from
+     * {@link RecoveredInformation#getMethodParametersNames()}, in declaration order; for a
+     * constructor that list is empty (see {@code InformationRecoveryVisitor}), so a constructor
+     * with parameters throws {@code IndexOutOfBoundsException}.
+     *
+     * @throws TacoException if the class, the method or the class of a static field is not found,
+     *         or an expression cannot be evaluated
+     */
     public void createSnapshot() {
         if (!this.recoveredInformation.isValidInformation()) {
             return;
@@ -257,6 +345,26 @@ public class SnapshotBuilder {
     }
 
 
+    /**
+     * Puts the snapshot of the second run of {@code checkAndRunSpecIfFaulty}, whose instance pairs
+     * the fixed input with an output that the specification allows (docs/SPEC-OUTPUT.md), into the
+     * recovered information: the receiver after the call under {@code thiz_1} (read from
+     * {@code thiz_1}, or from {@code thiz_0} when the model has no {@code thiz_1}), with its
+     * fields read again in the final state; the parameters in the initial state, under
+     * {@code <name>_0} (Java passes them by value); and the result, from {@code return_1} (or
+     * {@code return_0}), under {@code return_1} if it can be evaluated (not for a void method).
+     * Does nothing if the recovered information is not valid.
+     *
+     * <p>For a constructor, the receiver is read in the initial state (but stored under
+     * {@code thiz_1}) and the static fields in the final state; for a method, the static fields in
+     * the initial state. A parameter whose evaluation throws is evaluated again, the same way. An
+     * object result not built before gets its fields from the initial state, like an input. If
+     * {@code thiz} is pruned, the receiver is null and this method throws
+     * {@code NullPointerException}. Unclear: which state the static fields, a constructor's
+     * receiver and the retried parameters were meant to come from.
+     *
+     * @throws TacoException as {@link #createSnapshot()} does
+     */
     public void createSnapshotFinalState() {
         if (!this.recoveredInformation.isValidInformation()) {
             return;
@@ -1435,6 +1543,18 @@ public class SnapshotBuilder {
 
     private static HashMap<Class, Object> createdDefaultObjects = new HashMap<Class, Object>();
 
+    /**
+     * Returns a new instance of the class of that name, loaded through the class loader and made
+     * with Objenesis: no constructor runs, and every field has its default value. For
+     * {@code java.io.PrintStream} it returns {@code System.out}, which TACO's {@code PrintStream}
+     * atoms stand for (docs/FIXES-FOR-MASTER.md, S15). Used for the lists, sets and maps of the
+     * snapshot, for the objects of the final state, and by the test builders for a receiver that
+     * the snapshot lacks.
+     *
+     * @param clazz the class to instantiate
+     * @return the new instance, or {@code System.out}
+     * @throws TacoException if the class cannot be loaded
+     */
     public Object createNewInstance(@SuppressWarnings("rawtypes") Class clazz) {
         // The PrintStream atoms of a TACO model stand for System.out (static field
         // java_lang_System_out), and a counterexample may store one in any field of a compatible
@@ -1996,6 +2116,21 @@ public class SnapshotBuilder {
         return evlResult;
     }
 
+    /**
+     * Sets the field {@code aField} of {@code instance} to {@code value} through reflection,
+     * making it accessible for the call. A primitive field takes the matching wrapper. An array
+     * value whose elements are primitive while the field's are not, or the other way round, is
+     * copied into a new array of the field's type; a {@code Boolean} element throws there
+     * ({@code TacoNotImplementedYetException}), since the element's qualified class name is
+     * compared with {@code "Boolean"}.
+     *
+     * @param instance the object to change, or null for a static field
+     * @param aField the field
+     * @param value the new value
+     * @return {@code value}
+     * @throws TacoException if the value does not fit the field or the field cannot be set (a
+     *         static final one, for example)
+     */
     public Object updateValue(Object instance, Field aField, Object value) {
         try {
             boolean accessibleOld = aField.isAccessible();

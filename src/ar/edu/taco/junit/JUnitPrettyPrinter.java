@@ -13,6 +13,24 @@ import org.multijava.util.compiler.TabbedPrintWriter;
 
 import ar.edu.taco.utils.FileUtils;
 
+/**
+ * Writes one generated JUnit test class to a file, from the statements that
+ * {@link UnitTestBuilder} or {@link UnitTestBuilderFinalState} computed. The class has, in
+ * this order:
+ * <ul>
+ * <li>the field {@code public HashMap<String, Object> theData = getInstance();} and the method
+ *     {@code getInstance()}, which rebuilds the input and returns it as a map: the receiver
+ *     under {@code "thiz"} and one entry per parameter (see {@link #writeToFile}). Stryker's
+ *     feedback and {@code checkAndRunSpecIfFaulty} load the test and read it as the input to
+ *     fix (docs/SPEC-OUTPUT.md, "inputToFix");</li>
+ * <li>private reflection helpers: {@code updateValue} and, when asked,
+ *     {@code getAccessibleConstructor} and {@code getAccessibleMethod};</li>
+ * <li>one {@code @Test} method, {@code test<methodName>_<i>}, made of all the statements.</li>
+ * </ul>
+ * {@code TacoMain.editTestFileToCompile}, and its older copy in {@code RegresionTestBase},
+ * rewrite the file line by line and depend on this layout, the {@code //endGetInstance}
+ * marker included. See docs/ARCHITECTURE.md, section 2.
+ */
 public class JUnitPrettyPrinter {
 	private static final int TAB_SIZE = 4;
 
@@ -24,6 +42,29 @@ public class JUnitPrettyPrinter {
 	private List<String> statements = new ArrayList<String>();
 
 
+	/**
+	 * Writes the test class to {@code filenamePath}. If the file does not exist, writes the
+	 * package, the imports (with {@code java.lang.reflect.Method} and {@code Constructor} when
+	 * {@code generateAccessibility}), {@code theData}, {@code getInstance()}, the helpers and a
+	 * test method numbered 0. If it exists, keeps its content up to its last closing brace and
+	 * appends a test method numbered one more than the last {@code test<methodName>_<i>} in it;
+	 * both callers delete the file first, so this branch is not taken.
+	 *
+	 * <p>{@code getInstance()} holds the statements before {@code "// Method Invocation"}, then
+	 * builds a map with {@code instance} under {@code "thiz"} and, for each declaration
+	 * {@code Type name = ...;} before {@code "// Parameter Initialization"} other than
+	 * {@code instance} and the generated {@code _<Type>_<i>} variables, an entry keyed by the name
+	 * up to its first underscore. So the entries are the parameters declared there: a parameter
+	 * declared after the marker (one that reuses a variable already declared) gets no entry, and a
+	 * parameter whose name has an underscore is stored under the part before it.
+	 *
+	 * @param filenamePath the file to write
+	 * @param generateAccessibility whether to add the reflection helpers that find the method and
+	 *        the constructor; the callers pass {@code true} in practice
+	 *        ({@code !isAccessible()} of a {@code Method} just looked up)
+	 * @throws RuntimeException if the file cannot be written; a read error in the append case is
+	 *         printed
+	 */
 	public void writeToFile(String filenamePath, boolean generateAccessibility) {
 
 		StringWriter stringWriter = new StringWriter();

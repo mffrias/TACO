@@ -82,3 +82,26 @@ those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
     comes from the Mathematics Genealogy Project, not from UBA's library: is it
     right?
 18. Should other DynAlloy or TACO papers be listed in the README's references?
+
+## From the Javadoc pass
+
+Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` branch).
+
+19. **Constructor parameters** (`junit/InformationRecoveryVisitor.java:137`): besides item 6,
+    the constructor branch compares the parameter types without turning underscores into dots
+    (line 150), unlike the method branch (line 122). So no constructor's parameter names are
+    recovered, and `SnapshotBuilder.createSnapshot` would fail (`IndexOutOfBoundsException`,
+    line 200) for a constructor with parameters. Intended?
+20. **Counterexample tests of constructors** (`junit/UnitTestBuilder.java:214-230`): the test
+    declares `instance = null` and the parameters but calls nothing, and the
+    `getAccessibleConstructor` helper that `JUnitPrettyPrinter` writes is never called. Should
+    the test call the constructor?
+21. **The final-state test under the new naming**: answered; it was not written (the lookup
+    by the qualified name), which TACO stryker c6580424 fixes (docs/FIXES-FOR-MASTER.md, N10).
+    Kept so that the numbers of the items below stay the same.
+22. **The final-state snapshot** (`snapshot/SnapshotBuilder.java:313-412`,
+    `createSnapshotFinalState`): for a constructor it reads the receiver in the initial state
+    but stores it as `thiz_1`, and the static fields in the final state; for a method, the
+    static fields in the initial state; and its `catch` (lines 405-408) retries a parameter with
+    the same expression. Which state should each come from?
+

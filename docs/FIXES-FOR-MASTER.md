@@ -871,8 +871,14 @@ one of them, works (the relevancy analysis leaves the other one out).
 `VAlloyVisitor`'s unique program name from `<signature>_<program>_<index>` to
 the program name alone (`xlator/VAlloyVisitor.java:78` and `100-101`); the
 same failure shows before the new naming. N5 does not change it.
+The mechanism is dynalloy4's parser, which keeps one program per name and
+number of parameters and drops the earlier one silently
+(`parser/DynalloyParser.java:201`). When the overloads' parameter types
+overlap (`f(A)` and `f(B)`), the translation goes through and both calls run
+the same overload, so a method whose specification Java violates is reported
+correct (checked on 2026-10-20; comitaco finds the counterexample).
 *Options:* the parameter types in the program names (N5's alternative), or
-the index back.
+the index back; in dynalloy4, refuse a second program with the same key.
 
 ### F2. `assignable` clauses add no frame conditions
 
@@ -908,6 +914,187 @@ comitaco.
   `n + 1`, so `isEven(2)` is false.
 - In the 101-driver sample, 6 Stryker drivers expect a counterexample in the
   original method and TACO finds none (see [Overall](#6-overall)).
+
+The entries below were found by the Javadoc pass (read from the code) and
+checked on 2026-10-20 on the `stryker` branches (Zulu 8u504 arm64, MiniSat)
+and on comitaco (its 2018 jars, JDK 7), not on the masters, each with a
+small class and driver (scratch, not committed); every UNSAT was checked for
+vacuity, and an entry says when one was vacuous. **Old** means comitaco is
+wrong too; **regression**, comitaco is right. Line numbers are the masters'.
+
+### F5. A postfix `++` or `--` outside a comparison loses its update
+
+`return this.n++;` returns `n` but never increments it, and in
+`if (isPos(i++))` the call gets `i` but `i` stays. So `ensures n == \old(n) + 1`
+gets a spurious counterexample, and `ensures n == \old(n)`, which Java
+violates, is reported correct. `int x = this.n++;` is right. **Old.**
+*Cause:* `jml/expression/ESExpressionVisitor.java:1028` puts the update in the
+postfix list, which only `ESBlockVisitor.visitExpressionStatement` reads;
+`visitIfStatement` (154-169), `visitReturnStatement` (288-301) and the visits
+of `assert`, `throw` and JML variable definitions never do. *Options:* append
+the postfix statements in those visits as `visitExpressionStatement` does, or
+write the update right after the temporary copy.
+
+### F6. Both branches of `c ? a : b` run
+
+The statements of both branches come before the `if` that picks the value:
+`b ? bump() : 0` with `b` false still runs `bump()`, and
+`next != null ? next.get() : 0` dereferences a null `next` (a spurious
+`NullPointerException`). A method whose specification Java violates can be
+reported correct. **Old.** *Cause:* `ESExpressionVisitor.java:728` and 731
+visit both branches into the statements that precede the `if` at 737.
+*Options:* collect each branch's statements apart and put them inside its
+branch, or turn the conditional into an `if` statement earlier.
+
+### F7. The right side of an assignment runs before the left
+
+`me().v = g();` calls `g` before `me`, and `a[f()] = g();` calls `g` before
+`f`; Java evaluates the left side first (JLS 15.26.1). `a[k] = k++;` writes
+`a[k + 1]`. Wrong verdicts both ways: spurious counterexamples, and
+specifications that only the wrong order meets reported correct. **Old.**
+*Cause:* `ESExpressionVisitor.java:895` visits the right side before the left
+(900). *Options:* visit the left side's subexpressions first, or copy the
+receiver and the index into temporaries before the right side.
+
+### F8. `Boolean.equals` is inverted
+
+In TACO's built-in model of `java.lang.Boolean`, `equals(obj)` returns false
+when `obj` is a `Boolean` and compares the values otherwise, so `a.equals(a)`
+is false. Wrong verdicts both ways. **Old.** *Cause:*
+`simplejml/builtin/JBoolean.java:168-172`, a type test without the `not` that
+`java_lang_Integer.djals` has. `JInteger.java:177-180` has the same test but
+is never used: `engine/PrecompiledModules` also adds the parsed
+`java_lang_Integer.djals`, later and under the same module id, and jDynAlloy's
+linker keeps the later one; there is no `.djals` for `Boolean`. *Options:*
+negate the test, or add a `java_lang_Boolean.djals` (and drop the built-in
+`JInteger`).
+
+### F9. With `checkNullDereference`, a static call to another class can "throw" a `NullPointerException`
+
+`Util.twice(x)` becomes `if isEmptyOrNull[Util] then throw
+NullPointerException else call ...`: the class's signature stands for the
+receiver, and it is empty when no `Util` object is in the scope (the analysis
+of `Caller` has `exactly 0 Util`). So a correct method gets a spurious
+counterexample, and one whose `ensures` Java violates is reported correct (the
+"exception" skips the `ensures`). **A regression of master's 955795ac**
+(2026-10-16): comitaco writes the call with no receiver and no guard. *Cause:*
+`simplejml/ExpressionVisitor.java:546-558` gives static calls a receiver too
+(the class signature, or `thiz`), so jDynAlloy's `JProgramCall.isStatic()`
+(`ast/JProgramCall.java:109-132`, decided by the shape of the arguments) is
+false for them, and `simplejml/NullDerefVisitor.java:208` guards that receiver.
+*Options:* mark the call static from the method's information, or never guard
+a class-signature receiver.
+
+### F10. `signals_only` in a lightweight specification case
+
+`ensures \result == k; signals_only IllegalArgumentException;` without
+`normal_behavior` becomes `(throw' = null) and instanceOf[throw',
+IllegalArgumentExceptionLit]`, which never holds, so every method with such a
+case gets a counterexample. And a lightweight case written after an
+`exceptional_behavior` case becomes `not (throw' = null) implies ...`, so a
+method whose normal result is wrong is reported correct. **Old.** *Cause:*
+`simplejml/JmlExpressionVisitor.java:2302-2313`, under a flag that is true by
+default (`JmlBaseExpressionVisitor.java:170`), cleared at
+`JmlExpressionVisitor.java:1453` and set again only at 1613. *Options:*
+translate `signals_only` as `throw' != null implies (instanceOf ... or ...)`,
+and reset the flag at every specification case.
+
+### F11. Pure-method calls in specifications
+
+`jml/SpecMethodCallRemoverVisitor` replaces calls to pure methods in
+specifications by new fields and assumptions, in maps that are never cleared,
+and one instance serves every class of a run. So a class visited later gets
+the fields and assumptions of the classes before it: with `A`'s invariant
+calling `okA()`, `B` gets `assume ... == this.okA()`, which does not compile
+(stryker: `NullPointerException`; comitaco: `TacoException`); with an `ok()`
+in both classes, `B2`'s methods are reported correct vacuously. With `B2`
+visited first, the result is right. Also, breaking an invariant that calls a
+pure method is never detected: `c = -1` against `invariant pos()` is reported
+correct, because the final state's assumption reuses the field that holds the
+call's initial value. **Old.** *Cause:* `SpecMethodCallRemoverVisitor.java:139`
+and 538 fill the maps, which are read at 161, 265-291 and 394-422 (410-422 for
+the final state); one instance per run (`ASTSimplifierManager.java:79`,
+`engine/JmlStage.java:68` and 136). *Options:* clear the maps for each class,
+or key the entries by class; a field of its own for the final state's value.
+
+### F12. `normal_behavior` does not forbid exceptions
+
+A method whose `normal_behavior` case Java violates by throwing (a
+`NullPointerException`) is reported correct. **Old.** *Cause:*
+`JmlExpressionVisitor.java:1417-1422`. *Option:* add `throw' = null` to the
+postcondition of a `normal_behavior` case.
+
+### F13. The fixed input matches objects with `equals`
+
+jDynAlloy's formula for an input to fix (Stryker's feedback checks and
+`checkAndRunSpecIfFaulty`) keeps the values it meets in a `HashMap`, so two
+distinct objects of a class that overrides `equals` are stated to be the same
+object (`b = a`): a method returning `a == b ? 1 : 0` with
+`ensures \result == 0` is reported correct for two distinct, equal objects,
+while for a class without `equals` the counterexample is found. **Old.**
+*Cause:* jDynAlloy `ast/JDynAlloyVisitor.java:399`, used at 491 (parameters)
+and 592 (values reached through fields); the `==` test at 520 never holds for
+two keys of one map. *Option:* an `IdentityHashMap`, with primitive and boxed
+values kept out of it.
+
+### F14. Recursion unfolding can lose the recursive program
+
+`RecursionUnfolderVisitor` reassigns `n` in its loop over the programs
+reachable from the recursive one, and then rebuilds "the original" from the
+last one: a recursive `r(n)` that also calls a helper is replaced by a second
+copy of the helper when the `HashSet` yields the helper last, and the analysis
+fails with a `NullPointerException` (in the scope inference, or in dynalloy4).
+**A regression of jDynAlloy cad278a** (2026-10-16); comitaco is right.
+*Cause:* jDynAlloy `xlator/RecursionUnfolderVisitor.java:56-58`, then 88-99.
+*Option:* loop with a variable of its own and rebuild the visited program.
+
+### F15. Negative values in a fixed input
+
+With Java arithmetic, a fixed input with a negative value reached through a
+field (`thiz.f = -5`) gets a literal module whose fact names
+`pred_java_primitive_integer_value_literal_Minus5`, while the literal
+predicates are `..._literal_minus_5`: Alloy stops ("The name ... cannot be
+found"). A negative literal written in a `requires` is not affected (its
+module already exists). **Old.** *Cause:* jDynAlloy
+`xlator/JDynAlloyTranslator.java:209-211` (`int`) and 227-229 (`long`); the
+names are made at `src/ar/edu/taco/simplejml/builtin/JavaPrimitiveIntegerValue.java:214`
+and `JavaPrimitiveLongValue.java:240` there. *Options:* reuse the module made
+for the literal, or name the predicate `minus_<n>`.
+
+### F16. The modifies table keeps one entry per program name
+
+`xlator/ModifiesTableBuilder` keys the table by program name, and each program
+visited starts its entry anew, so of overloads only the last one visited
+counts. With M1, a method that calls `g(0)` and `g()`, of which only `g()`
+breaks the invariant `x >= 0`, is reported correct when `g(int)` comes last:
+the postcondition does not re-check the invariant (7 of 16 variants of names
+and order). **A regression**: comitaco names the overloads apart (`g_0`,
+`g_1`); on master, without M1, no callee is looked at. *Cause:* jDynAlloy
+`ModifiesTableBuilder.java:72-73`. *Options:* key the table by name and
+parameter types, or add to the entry instead of replacing it (which re-checks
+more invariants: sound).
+
+### F17. An overloaded method under analysis
+
+When the method under analysis has an overload of another arity, TACO may
+check the other one, silently: jDynAlloy writes an assertion
+`check_<program>` for each overload, all with the same name, and dynalloy4
+keeps one (`util/DynalloySpecBuffer.java:58`); jDynAlloy's `FormulaWrapper`
+keeps one pre- and postcondition predicate per name
+(`xlator/FormulaWrapper.java:109`); F16's table does the same. With
+`set() { x = -1; set(0); }` and `set(int v) {}`, the analysis of `set()` is
+UNSAT and checks `set(int)`. In 20 such methods, 9 checked the wrong overload
+(6 UNSAT, 3 Alloy errors) and 2 failed. Not checked on comitaco (its drivers
+could not pick that overload). *Option:* the parameter types in the program
+names, as for F1.
+
+### F18. Crashes seen, not looked into
+
+- `modularReasoning`: `NullPointerException` in `JDynAlloyMutator.visit(JHavoc)`,
+  called from `PruneVisitor` (stryker; comitaco for one of three callers).
+- A `do`-`while` with a `loop_invariant`: `ClassCastException`, on stryker in
+  `BreakRemoverSimplifier.visitJmlLoopStatement`, on comitaco in
+  `BlockStatementsVisitor.visitJmlLoopStatement`.
 
 ## 8. What else the branches add
 

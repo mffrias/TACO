@@ -80,18 +80,23 @@ public class UnitTestBuilderFinalState {
             // Gets parameters types
             Class<?>[] parameterTypes = null;
             for (Method aMethod : clazz.getDeclaredMethods()) {
-                if (aMethod.getName().equals(recoveredInformation.getMethodToCheck())) {
+                String methodToCheckInRecovered = recoveredInformation.getMethodToCheck();
+                String typedaMethodName = clazz.getName().replace('.','_') + "_" + aMethod.getName();
+                if (typedaMethodName.equals(methodToCheckInRecovered)) {
                     parameterTypes = aMethod.getParameterTypes();
                 }
             }
 
             int positionlastDot = recoveredInformation.getClassToCheck().lastIndexOf('.');
             String classToCheck = recoveredInformation.getClassToCheck().substring(positionlastDot + 1);
-            if (recoveredInformation.getMethodToCheck().equals(classToCheck)) {
+            String methodToCheckName = recoveredInformation.getMethodToCheck().substring(recoveredInformation.getMethodToCheck().lastIndexOf('_') + 1);
+            if (methodToCheckName.equals(classToCheck)) {
                 //is a constructor;
                 constructorToCheck = clazz.getConstructors()[0];
             } else {
-                methodToCheck = clazz.getDeclaredMethod(recoveredInformation.getMethodToCheck(), parameterTypes);
+                int posLastUnderscore = recoveredInformation.getMethodToCheck().lastIndexOf('_');
+                String methodNameWithoutTyping = recoveredInformation.getMethodToCheck().substring(posLastUnderscore + 1);
+                methodToCheck = clazz.getDeclaredMethod(methodNameWithoutTyping, parameterTypes);
             }
         } catch (SecurityException e) {
             throw new RuntimeException("DYNJALLOY ERROR! " + e.getMessage());
@@ -1048,7 +1053,9 @@ public class UnitTestBuilderFinalState {
             // Gets parameters types
             Class<?>[] parameterTypes = new Class<?>[recoveredInformation.getMethodParametersNames().size()];
             for (Method aMethod : clazz.getDeclaredMethods()) {
-                if (aMethod.getName().equals(recoveredInformation.getMethodToCheck())) {
+                int indexLastUnderscore = recoveredInformation.getMethodToCheck().lastIndexOf('_');
+                String methodNameWithoutClassName = recoveredInformation.getMethodToCheck().substring(indexLastUnderscore + 1);
+                if (aMethod.getName().equals(methodNameWithoutClassName)) {
                     parameterTypes = aMethod.getParameterTypes();
                 }
             }
@@ -1909,7 +1916,7 @@ public class UnitTestBuilderFinalState {
         statements.add("// Method Invocation");
         if (!methodToCheck.isAccessible()) {
             statements.add("Method method = getAccessibleMethod(\"" + recoveredInformation.getClassToCheck() + "\", \""
-                    + recoveredInformation.getMethodToCheck() + "\", true);");
+                    + methodToCheck.getName() + "\", true);");
             statements.add("try {");
             statements.add("    method.invoke(instance, " + ((methodParameters.length() == 0) ? "new Object[]{}" : "new Object[]{" + methodParameters + "}") + ");");
             statements.add("} catch (Exception e) {");

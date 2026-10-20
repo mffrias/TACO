@@ -3,7 +3,7 @@
 Points where the code does not say what was intended, collected for the
 maintainer (Marcelo Frias) instead of being guessed in the other pages.
 dynalloy4's own questions are in its `docs/OPEN-QUESTIONS.md`. Line numbers are
-those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
+those of the `javadoc` branch (the stryker code with its Javadoc), 2026-10-20.
 
 ## Method naming
 
@@ -21,7 +21,7 @@ those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
    (they worked on comitaco, whose jDynAlloy named programs
    `<signature>_<program>_<index>`). Should program names include the
    parameter types instead, or the index again?
-3. **jDynAlloy's remaining prefixes.** `JBindingKey` (line 67) keys static
+3. **jDynAlloy's remaining prefixes.** `JBindingKey` (line 104) keys static
    programs as `<signature>_<program>`, the rule the built-in modules follow.
    Both `ReplaceModifiesModuleVisitor`s test `startsWith(<signature>_<program>_)`,
    which the new names never match; they stopped matching with 3ae43be3
@@ -36,7 +36,7 @@ those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
 5. **`MethodDeclarationSolver` line 86** keeps the input to fix only if
    `methodToCheck.contains(<method name>)`, a substring test. Intended, or an
    exact match?
-6. **`InformationRecoveryVisitor`**: the constructor branch (lines 137-160)
+6. **`InformationRecoveryVisitor`**: the constructor branch (lines 180-203)
    compares the bare constructor name with the qualified `methodToCheck`, which
    can never be equal. Intended?
 7. **The command line** (`TacoMain.main`) appends `_0` to the method name. Should
@@ -58,7 +58,7 @@ those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
     call the method, and should it assert the outputs?
 12. With an input to fix, jDynAlloy drops every `requires`, the callees'
     included, and adds the input instead. Is the TACO-side `requires` with the
-    input (`JmlExpressionVisitor.java:1543-1548`) still needed, and is dropping
+    input (`JmlExpressionVisitor.java:1748-1753`) still needed, and is dropping
     the callees' preconditions intended?
 13. `edu.utep.ds2.AverageTest.test_absMethodTest` checks `calculateAverage`,
     while its commented-out line checks `abs(int)`. A copy-paste slip?
@@ -85,24 +85,24 @@ those of the stryker branch, 2026-10-17 (the method naming ones, 2026-10-18).
 
 ## From the Javadoc pass
 
-Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` branch).
+Points the Javadoc marks "Unclear:" (2026-10-18 to 2026-10-20).
 
-19. **Constructor parameters** (`junit/InformationRecoveryVisitor.java:137`): besides item 6,
+19. **Constructor parameters** (`junit/InformationRecoveryVisitor.java:180`): besides item 6,
     the constructor branch compares the parameter types without turning underscores into dots
-    (line 150), unlike the method branch (line 122). So no constructor's parameter names are
+    (line 193), unlike the method branch (line 155). So no constructor's parameter names are
     recovered, and `SnapshotBuilder.createSnapshot` would fail (`IndexOutOfBoundsException`,
-    line 200) for a constructor with parameters. Intended?
-20. **Counterexample tests of constructors** (`junit/UnitTestBuilder.java:214-230`): the test
+    line 288) for a constructor with parameters. Intended?
+20. **Counterexample tests of constructors** (`junit/UnitTestBuilder.java:274-290`): the test
     declares `instance = null` and the parameters but calls nothing, and the
     `getAccessibleConstructor` helper that `JUnitPrettyPrinter` writes is never called. Should
     the test call the constructor?
 21. **The final-state test under the new naming**: answered; it was not written (the lookup
     by the qualified name), which TACO stryker c6580424 fixes (docs/FIXES-FOR-MASTER.md, N10).
     Kept so that the numbers of the items below stay the same.
-22. **The final-state snapshot** (`snapshot/SnapshotBuilder.java:313-412`,
+22. **The final-state snapshot** (`snapshot/SnapshotBuilder.java:421-520`,
     `createSnapshotFinalState`): for a constructor it reads the receiver in the initial state
     but stores it as `thiz_1`, and the static fields in the final state; for a method, the
-    static fields in the initial state; and its `catch` (lines 405-408) retries a parameter with
+    static fields in the initial state; and its `catch` (lines 513-516) retries a parameter with
     the same expression. Which state should each come from?
 23. **Literals of a fixed input** (`engine/PrecompiledModules.java`, the
     `PrecompiledModules(inputToFix)` constructor): it adds the literal modules of the input map's
@@ -139,7 +139,7 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 30. **`FieldParameterExpressionVisitor`** (`jml/FieldParameter/`): nothing in the three
     repositories refers to it, its `visitMethodCallExpression` pushes no result for the call,
     and its two branches do the same thing. What was it for, and can it go?
-31. **Allocation counts overwritten** (`dynalloy/DynAlloyScopeInferencePlugin.java:20-27`,
+31. **Allocation counts overwritten** (`dynalloy/DynAlloyScopeInferencePlugin.java:46-53`,
     `transform`): after `inferScope()`, every allocation count in the program plugin's
     `ObjectCreationCounter` is overwritten with the inferred scope of its type (77f36e19), but
     nothing in TACO or jDynAlloy reads that counter afterwards, and the local map
@@ -156,13 +156,13 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 34. **`JDynAlloyFunPredCollector`** (`infer/`): `infer_alloy_bitwidth` runs it on every module,
     but the test that used its result is commented out (the code now tests
     `useJavaArithmetic`), so the result is ignored. Is it still needed?
-35. **Two scopes for one analysis** (`alloy/bound/UBoundPlugin.java:36-47`, `transform`): with
+35. **Two scopes for one analysis** (`alloy/bound/UBoundPlugin.java:74-85`, `transform`): with
     `inferScope`, it sets each `type_scopes` signature's scope to its `type_scopes` value, after
     `DynAlloyAppendCommandPlugin` has written the `check` command with the inferred scope (the
     larger of that value and the input plus program scope), and it changes the `InferredScope`
     singleton in place. Should the command get the `type_scopes` values too, or the bounds the
     inferred scope?
-36. **`_var_` prefixes** (`alloy/sk/SkPredArgument.java:67-70`): a prefix that contains `_var_`
+36. **`_var_` prefixes** (`alloy/sk/SkPredArgument.java:90-93`): a prefix that contains `_var_`
     is cut before it, so the argument's name is no longer a `QF` field and the fact built from
     it would name a missing field. Why is it cut, and do such prefixes occur (the models seen
     have `l0`, `l2`, ...)?

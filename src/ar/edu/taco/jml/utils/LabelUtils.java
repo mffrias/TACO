@@ -19,16 +19,39 @@
  */
 package ar.edu.taco.jml.utils;
 
+/**
+ * Names for the branch labels of the JDynAlloy {@code if} statements that TACO's translation
+ * builds ({@code JIfThenElse}'s {@code branchId}, which jDynAlloy turns into the
+ * {@code lblpos}/{@code lblneg} test-predicate labels of DynAlloy). Its callers are
+ * {@code simplejml.BlockStatementsVisitor} (a boolean assigned a formula) and
+ * {@code simplejml.helpers.BlockStatementSolver} (the guard around each statement).
+ *
+ * <p>Static state: the package-private counters {@code ifLabelCount} (1) and
+ * {@code whileLabelCount} (10000), which nothing changes, so every label is {@code if_1}
+ * (and {@code while_10000}). Unclear: whether the labels were meant to be distinct, as the names
+ * {@code next...Label} and the counters suggest; with one label for every branch they cannot
+ * tell branches apart.
+ */
 public class LabelUtils {
 
 	//Labels
 	static int ifLabelCount = 1;  
 	static int whileLabelCount = 10000;
 	
+	/**
+	 * Returns {@code if_<ifLabelCount>}, always {@code if_1} (see the class comment).
+	 *
+	 * @return the label
+	 */
 	public static String nextIfLabel() {
 		return "if_" + ifLabelCount;
 	}
 	
+	/**
+	 * Returns {@code while_<whileLabelCount>}, always {@code while_10000}. No caller in TACO.
+	 *
+	 * @return the label
+	 */
 	public static String nextWhileLabel() {
 		return "while_" + whileLabelCount;
 	}

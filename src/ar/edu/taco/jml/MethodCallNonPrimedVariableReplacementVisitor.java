@@ -44,6 +44,23 @@ import ar.edu.taco.TacoNotImplementedYetException;
 import ar.edu.taco.simplejml.JmlBaseVisitor;
 
 
+/**
+ * Unused: nothing in TACO creates it (its only mention is a commented-out line of
+ * {@code unittest/bug/TimeTest.java}). Its visits are incomplete. {@code visitJmlOldExpression}
+ * records a fresh variable {@code newOldExpressionVarName_<n>} for the expression inside
+ * {@code \old} in its buffer ({@link #getBuffer()}), as {@link OldExpressionReplacerVisitor}
+ * does, but pushes nothing; so do the visits of literals, {@code this}, field and array
+ * accesses, casts, parentheses, bitwise operators, {@code \result} and JML relational
+ * expressions, while the visits of the other operators pop a result for each operand, and local
+ * variables are not handled ({@code TacoNotImplementedYetException}, from
+ * {@code JmlBaseVisitor}). Run on most expressions it would fail; {@code visitJmlReachExpression}
+ * with a list of store references throws a {@code NullPointerException}.
+ *
+ * <p>Unclear: whether it is still needed, and what it was meant to replace (its name speaks of
+ * method calls and non-primed variables; its code only handles {@code \old}).
+ *
+ * <p>Static state: the private counter {@code newVarIndex}, never reset.
+ */
 public class MethodCallNonPrimedVariableReplacementVisitor extends JmlBaseVisitor {
 	
 	private static int newVarIndex = 0;

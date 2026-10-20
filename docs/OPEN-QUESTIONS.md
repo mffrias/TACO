@@ -211,3 +211,21 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
     `models/JJMLObjectSet.java:110` vs 123, 152, 184): the field is declared only when
     `JMLObjectSequenceToAlloySequence` / `JMLObjectSetToAlloySet` is on, but the programs use it
     only when the option is off (when it is on they use `thiz` itself). Is the condition inverted?
+47. **Every pass's result written to `output/`** (`jml/ASTSimplifierManager.java`, `simplify`):
+    the result of each simplification pass is written to `output/<pkg>/<Class>.java`, each write
+    overwriting the last; the list of written files is thrown away, and `JmlStage` writes the
+    final result again. Why are the intermediate writes there?
+48. **`\old` in the arguments of assumed calls** (`jml/SpecMethodCallRemoverVisitor.java`,
+    `visitJmlMethodDeclaration`, lines 381 and 525): for a method call in a postcondition, copies
+    of the arguments with `\old` replaced (`newArgsForMethodCall`) are built and never used; the
+    assumed call is a clone of the original, `\old` included. Should it use the copies?
+49. **The default `return` appended to every non-void body**
+    (`jml/ReturnStatementWrapperVisitor.java`): which later step needs it? A body that compiles
+    already ends in a return or a throw, though earlier passes can change that (an unrolled
+    `while (true)` leaves a reachable end).
+50. **`MethodCallNonPrimedVariableReplacementVisitor`** (`jml/`): nothing creates it, its visits
+    are incomplete, and its name speaks of method calls while its code only handles `\old`. Is it
+    still needed, and what was it meant to replace?
+51. **Branch labels** (`jml/utils/LabelUtils.java`): `ifLabelCount` and `whileLabelCount` are
+    never incremented, so every label is `if_1` (and `while_10000`). Were they meant to be
+    distinct?

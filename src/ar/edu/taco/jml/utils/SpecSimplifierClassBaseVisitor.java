@@ -29,8 +29,31 @@ import org.jmlspecs.checker.JmlSignalsClause;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Base of the simplification passes that rewrite the predicates of the specifications with one
+ * function, {@link #simplifyPredicateSupport}: it copies invariants, {@code represents}
+ * clauses, {@code signals}, {@code ensures} and {@code requires} clauses and history
+ * constraints with their predicate replaced by that function's result; everything else is
+ * copied by {@link JmlAstClonerStatementVisitor}. Its subclasses are four passes of
+ * {@code ASTSimplifierManager} ({@code FNBlockVisitor}, {@code CastSClassVisitor},
+ * {@code LiteralBlockVisitor}, {@code QualifyStaticCallsVisitor}) and the unused
+ * {@code div.ReplaceDivByShiftStmtVisitor}; {@code CastSClassVisitor} and
+ * {@code FNBlockVisitor} override some of these visits again.
+ *
+ * <p>A {@code \not_specified} {@code signals}, {@code ensures} or {@code requires} clause throws
+ * an {@code IllegalArgumentException}. No state of its own.
+ */
 public abstract class SpecSimplifierClassBaseVisitor extends JmlAstClonerStatementVisitor {
 
+	/**
+	 * Returns the rewritten predicate of a specification clause. Called once per clause the base
+	 * visits, with the clause's predicate ({@code predOrNot()} for {@code signals}, {@code ensures}
+	 * and {@code requires}); the result goes into the new clause as it is.
+	 *
+	 * @param predicate the predicate of the clause; never {@code null} for a {@code represents}
+	 *        clause (one without a predicate is copied without calling this)
+	 * @return the predicate for the new clause
+	 */
 	abstract protected JmlPredicate simplifyPredicateSupport(JmlPredicate predicate);
 
 	@Override

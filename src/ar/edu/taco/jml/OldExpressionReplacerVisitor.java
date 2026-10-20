@@ -50,6 +50,27 @@ import ar.edu.taco.simplejml.JmlBaseVisitor;
 
 
 
+/**
+ * Copies an expression with each {@code \old(e)} replaced by a fresh variable
+ * {@code newParameterNameFromOldExpression_<n>} (a {@code JmlFormalParameter} of the type of
+ * {@code e}), and records each pair, variable to {@code e}, in {@link #buffer}; the copy is left
+ * on {@link #getStack()}. The expression inside {@code \old} is not visited.
+ * {@link SpecMethodCallRemoverVisitor} runs one on each argument of each method call it takes
+ * out of a postcondition of the method under analysis: it adds the recorded variables as
+ * parameters of that method and assumes {@code var == e} at the start of its body. It pops the
+ * copy but does not use it (see there).
+ *
+ * <p>Handled: literals, {@code this}, local variables, field and array accesses, array lengths,
+ * casts, parentheses, method calls, unary promotions, the arithmetic, bitwise, equality,
+ * conditional and JML relational ({@code JmlRelationalExpression}) operators; {@code \result}
+ * and {@code \reach} expressions are kept as they are (an {@code \old} inside {@code \reach} is
+ * not replaced). Anything else (Java's {@code <} and the other relational operators, unary
+ * operators, shifts, type names, quantifiers, ...) throws {@code TacoNotImplementedYetException}
+ * ({@code JmlBaseVisitor}).
+ *
+ * <p>Static state: the counter {@link #newParameterFromOldExpressionIndex}, public and never
+ * reset, so the names change from one analysis to the next in one JVM (Stryker runs many).
+ */
 public class OldExpressionReplacerVisitor extends JmlBaseVisitor {
 
 	public HashMap<JmlFormalParameter, JExpression> buffer = new HashMap<JmlFormalParameter, JExpression>();
@@ -62,6 +83,12 @@ public class OldExpressionReplacerVisitor extends JmlBaseVisitor {
 		return theStack;
 	}
 	
+	/**
+	 * Returns {@code newParameterNameFromOldExpression_<n>} and increments the static counter
+	 * (see the class comment).
+	 *
+	 * @return the new name
+	 */
 	public String newParameterNameFromOldExpression(){
 		String s = "newParameterNameFromOldExpression_" + newParameterFromOldExpressionIndex;
 		newParameterFromOldExpressionIndex++;

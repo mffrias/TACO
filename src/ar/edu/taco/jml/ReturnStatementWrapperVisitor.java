@@ -15,6 +15,24 @@ import org.multijava.mjc.JStatement;
 
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Makes every non-void method body end with a {@code return}: wraps each {@code return}
+ * statement in {@code if (true) ...} and appends {@code return <default value>;} to the body
+ * ({@code null} for reference types, {@code 0} for the integral types and {@code char},
+ * {@code 0f} for {@code float} and {@code double}, {@code false} for {@code boolean}). Since an
+ * {@code if} statement can complete normally (JLS 14.21), the appended {@code return} is not
+ * unreachable after a body whose returns were wrapped. Returns are wrapped in constructors and
+ * {@code void} methods too, which get no extra {@code return}.
+ *
+ * <p>Unclear: which later step needs the final {@code return}. A body that compiles ends in a
+ * {@code return} or a {@code throw} on every path, but earlier passes can change that:
+ * {@code WhileRemoverSimplifier} turns {@code while (true) { ... return x; }} into code whose
+ * end is reachable.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code AssumeSimplifierVisitor}, as the last pass
+ * unless {@code methodBodySimplifier} follows, during {@code JmlStage} (docs/ARCHITECTURE.md). No
+ * static state.
+ */
 public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor {
 
 	@Override
@@ -24,6 +42,17 @@ public class ReturnStatementWrapperVisitor extends JmlAstClonerStatementVisitor 
 	}
 
 
+	/**
+	 * Wraps the returns of the body, appends the default {@code return} if the method is not
+	 * {@code void} (see the class comment), and copies the visited specification cases back into
+	 * the method's own specification. Changes the given declaration in place
+	 * ({@code setBody}) and pushes it, not a copy.
+	 *
+	 * <p>A non-void method without a body (abstract or native) gets one: a block with a
+	 * {@code null} statement followed by the default {@code return}.
+	 *
+	 * @param self the method declaration
+	 */
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self) {
 		JBlock newBody;

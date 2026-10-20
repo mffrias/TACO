@@ -52,13 +52,48 @@ import ar.edu.taco.simplejml.ShortcutRemoverVisitor;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 import org.multijava.mjc.JTypeDeclarationType;
 
+/**
+ * Runs the JML simplification passes, the cloning visitors of {@code jml/}'s subpackages and of
+ * this package, on the compilation units that {@code JmlParser} parsed, so that
+ * {@code engine.SimpleJmlStage} gets Java + JML in the subset it translates to JDynAlloy (for
+ * example: no {@code for} or {@code break}, {@code while} loops unrolled, a name of its own for
+ * each local variable, instance fields renamed to {@code <class>_<field>}). {@code engine.JmlStage}
+ * creates one manager per run and calls {@link #simplify} for each unit. See
+ * docs/ARCHITECTURE.md (section 1).
+ *
+ * <p>One instance of each pass serves every unit of the run, so the state a pass keeps in its
+ * fields carries over from one unit to the next (e.g. the loop index of
+ * {@code WhileRemoverSimplifier}, the maps of {@link SpecMethodCallRemoverVisitor}). The manager
+ * owns the {@link JmlToSimpleJmlContext} that {@code FNBlockVisitor} fills.
+ *
+ * <p>Static state: {@link #isCheckAndAfterRunSpec}, read when a manager is created.
+ */
 public class ASTSimplifierManager {
+	/**
+	 * Static: whether the next manager created adds {@code methodBodySimplifier}, which replaces
+	 * every method body with {@code return <default value>}. {@code JmlStage.execute()} copies
+	 * {@code JmlStage.isCheckAndAfterRunSpec} into it before creating the manager; nothing else
+	 * sets it. See docs/SPEC-OUTPUT.md ("checkAndRunSpecIfFaulty").
+	 */
 	public static boolean isCheckAndAfterRunSpec = false;
 	private static Logger log = Logger.getLogger(ASTSimplifierManager.class);
 	private List<JmlAstClonerStatementVisitor> simplifiers;
 
 	private final JmlToSimpleJmlContext jmlToSimpleJmlContext;
 
+	/**
+	 * Creates the passes, in the order they run: {@code ForRemoverVisitor},
+	 * {@code BreakRemoverSimplifier}, {@code WhileRemoverSimplifier}, {@code BlockSimplifier},
+	 * {@code ShortcutRemoverVisitor}, {@code GhostFieldsSimplifier},
+	 * {@code DefaultConstructorSimplifier}, {@code FieldInitializerSimplifier},
+	 * {@code LSBlockVisitor}, {@code WhileBlockVisitor}, {@code DoWhileBlockVisitor},
+	 * {@link SpecMethodCallRemoverVisitor}, {@code VNBlockVisitor}, {@code FNBlockVisitor} (with
+	 * this manager's context), {@code CastSClassVisitor}, {@code LiteralBlockVisitor},
+	 * {@code ESBlockVisitor}, {@code QualifyStaticCallsVisitor},
+	 * {@code ActualParameterNormalizerVisitor}, {@code AssumeSimplifierVisitor},
+	 * {@link ReturnStatementWrapperVisitor}, and last {@code methodBodySimplifier} if
+	 * {@link #isCheckAndAfterRunSpec} is set at this point.
+	 */
 	public ASTSimplifierManager() {
 		this.jmlToSimpleJmlContext = new JmlToSimpleJmlContext();
 		// order of simplifiers
@@ -91,6 +126,12 @@ public class ASTSimplifierManager {
 		}
 	}
 
+	/**
+	 * Returns the context the passes fill (the field renamings of {@code FNBlockVisitor}),
+	 * complete once {@link #simplify} has run on every unit.
+	 *
+	 * @return this manager's context
+	 */
 	public JmlToSimpleJmlContext getJmlToSimpleJmlContext() {
 		return this.jmlToSimpleJmlContext;
 	}
@@ -135,6 +176,24 @@ public class ASTSimplifierManager {
 	}
 
 
+	/**
+	 * Runs every pass, in order, on one compilation unit: each pass visits the result of the
+	 * previous one and leaves its result on its stack, where this method takes it. After each
+	 * pass the result is pretty-printed to {@code <output_dir>/<package path>/<Class>.java},
+	 * overwriting the previous pass's file, so the file is left with the last pass's result
+	 * (which {@code JmlStage} writes again). Some passes also change the unit they are given.
+	 *
+	 * <p>Unclear: why the result of every pass is written; the list of written files is
+	 * discarded, and nothing reads the intermediate files.
+	 *
+	 * <p>Assumes one type declaration per unit (checked by an {@code assert} only; otherwise the
+	 * file is named after the first one).
+	 *
+	 * @param input_compilation_unit a unit parsed by {@code JmlParser}
+	 * @return the simplified unit, alone in an immutable list
+	 * @throws TacoException if the canonical path of the output directory cannot be computed
+	 * @throws RuntimeException if a file cannot be written
+	 */
 	public List<JCompilationUnitType> simplify(JCompilationUnitType input_compilation_unit) {
 		log.debug("Simplifying Compilation Unit: " + input_compilation_unit.fileNameIdent());
 

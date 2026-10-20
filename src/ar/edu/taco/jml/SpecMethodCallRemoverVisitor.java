@@ -89,6 +89,53 @@ import org.multijava.util.compiler.UnpositionedError;
 import ar.edu.taco.TacoConfigurator;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Takes the method calls (calls to pure methods, in JML) out of the specification of the method
+ * under analysis: each call becomes a fresh variable {@code returnVarFromSpecMethodCall_<n>},
+ * and {@code assume} statements in the method's body relate the variable to the call. Only the
+ * method or constructor that {@code methodToCheck} names is changed, and only if it has a
+ * specification; it is recognised by {@code <package>_<Class>_<method>}, the part of
+ * {@code methodToCheck} before {@code (}, so every overload of that name is changed
+ * (docs/METHOD-NAMING.md). The invariants of every class visited are rewritten.
+ * <ul>
+ * <li>A call in a {@code requires} clause: the variable is appended to the method's parameters,
+ * and the body starts with {@code //@ assume var == call;}.</li>
+ * <li>A call in an invariant: the variable becomes a new public field of the class, read as
+ * {@code this.var} in the invariant; the body starts with {@code //@ assume this.var == call;}
+ * (initial state), and the same assumption goes in front of every {@code return} and, for a
+ * {@code void} method or a constructor, at the end of the body (final state;
+ * {@link StatementDistributeAboveReturnVisitor}).</li>
+ * <li>A call in an {@code ensures} clause (or another clause of a spec case's body): the
+ * variable is appended to the parameters, and {@code //@ assume var == call;} goes in front of
+ * every {@code return} and, for a {@code void} method or a constructor, at the end. Each
+ * {@code \old(e)} in the call's arguments also becomes a new parameter {@code p}
+ * ({@link OldExpressionReplacerVisitor}), with {@code //@ assume p == e;} at the start of the
+ * body.</li>
+ * </ul>
+ * Calls named {@code int_size}, {@code has} or {@code isNaN} stay (their prefix and arguments
+ * are visited), and so does anything inside {@code \reach}. A replaced call is not visited, so a
+ * call in its arguments stays in it. Nested classes are copied as they are. A
+ * {@code \not_specified} {@code requires} or {@code ensures} clause in the visited specification
+ * throws an {@code IllegalArgumentException}.
+ *
+ * <p>The added parameters are inputs of the method's translation, constrained only by the
+ * assumptions; they are appended in the iteration order of the {@code IdentityHashMap} fields,
+ * which depends on identity hash codes. The new fields are set up through reflection on private
+ * members of JML2's AST classes; a failure there is printed and ignored.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code DoWhileBlockVisitor} and before
+ * {@code VNBlockVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md). Reads
+ * {@code TacoConfigurator.getMethodToCheck()} for every method and constructor, and assumes it
+ * contains {@code (}.
+ *
+ * <p>State: the variable-to-call maps ({@code preconditionSpecMethodCallData},
+ * {@code posconditionSpecMethodCallData}, {@code invariantSpecMethodCallData}) are public
+ * instance fields that are never cleared, and the manager uses one instance for every unit of a
+ * run, so the invariant calls of every class visited before are added to each later class and
+ * to the assumptions of the method under analysis. Static: the counter
+ * {@link #newReturnParameterIndex}, public and never reset, so the names change from one
+ * analysis to the next in one JVM (Stryker runs many).
+ */
 public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 
 	public static int newReturnParameterIndex = 0;
@@ -126,6 +173,15 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	/**
+	 * Rewrites the class's invariants (calls become fields, see the class comment), visits its
+	 * methods and constructors, and adds a public field for every entry of
+	 * {@code invariantSpecMethodCallData}, this class's and those of the classes visited before.
+	 * The fields are added to the given declaration too ({@code setFields}); the result, a
+	 * {@code JmlClassDeclarationExtension}, keeps the nested classes as they are.
+	 *
+	 * @param self the class declaration
+	 */
 	@Override
 	public void visitJmlClassDeclaration(JmlClassDeclaration self) {
 		this.classBeingCloned = self.getCClass();
@@ -232,6 +288,13 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	};
 
 
+	/**
+	 * Does for the constructor that {@code methodToCheck} names what
+	 * {@link #visitJmlMethodDeclaration} does for a method; any other constructor is pushed as it
+	 * is.
+	 *
+	 * @param self the constructor declaration
+	 */
 	@Override
 	public void visitJmlConstructorDeclaration(JmlConstructorDeclaration self) {
 		String fullyQualifiedConstructorName = this.getClassName() + self.ident();
@@ -361,6 +424,21 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	/**
+	 * For the method that {@code methodToCheck} names, if it has a specification: rewrites the
+	 * specification (filling the precondition and postcondition maps), appends the new
+	 * parameters to the given declaration ({@code setParameters}, in place) and pushes a new
+	 * declaration whose body is the old one with the assumptions of the class comment added.
+	 * Any other method is pushed as it is.
+	 *
+	 * <p>For a call in a postcondition, {@link OldExpressionReplacerVisitor} gives a copy of each
+	 * argument with its {@code \old} expressions replaced, but those copies
+	 * ({@code newArgsForMethodCall}) are not used: the assumption relates the variable to a clone
+	 * of the original call, {@code \old} included. Unclear: whether the copies were meant to
+	 * replace the arguments of the assumed call.
+	 *
+	 * @param self the method declaration
+	 */
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self) {
 		String fullyQualifiedMethodName = this.getClassName() + self.ident();
@@ -790,6 +868,16 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 		this.getStack().push(newSelf);
 	}
 
+	/**
+	 * Replaces a call, unless it is named {@code int_size}, {@code has} or {@code isNaN}, with a
+	 * new variable of the method's return type, and records variable and call in
+	 * {@code entriesBuffer}, which the enclosing clause's visit moves to its map. In an invariant
+	 * ({@code translatingAnInvariant}) the replacement is the field access {@code this.var};
+	 * elsewhere, the variable. The three kept calls have their prefix and arguments visited and
+	 * replaced in place.
+	 *
+	 * @param self the call
+	 */
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
 		if (!self.ident().equals("int_size") && !self.ident().equals("has") && !self.ident().equals("isNaN")){

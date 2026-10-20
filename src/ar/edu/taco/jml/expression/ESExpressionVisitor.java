@@ -71,6 +71,50 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 
 	//	private Map<String, JLocalVariable> variableNamesReplaces = new HashMap<String, JLocalVariable>();
 
+	/**
+	 * Creates a visitor for one expression of the expression simplification pass;
+	 * {@link ESBlockVisitor}, its only user, creates one for each condition, initializer,
+	 * expression statement, {@code return} and {@code throw}. Visiting an expression leaves on top
+	 * of {@code getArrayStack()} an equivalent simple expression, often a temporary
+	 * {@code t_<n>}, and fills three lists, which the caller places in the enclosing block:
+	 * {@link #getDeclarationStatements()}, the declarations of the temporaries (no initializer);
+	 * {@link #getNewStatements()}, the statements that compute them, in evaluation order; and
+	 * {@link #getPostfixNewStatements()}, the updates of postfix {@code ++} and {@code --}, which
+	 * go after those.
+	 *
+	 * <p>What goes into a temporary:
+	 * <ul>
+	 * <li>always: non-void method calls, {@code new} objects and arrays, casts, conditional
+	 *     expressions ({@code c ? a : b} gives {@code if (c) t = a; else t = b;}), {@code &&}
+	 *     and {@code ||}, and prefix {@code ++x} and {@code --x};</li>
+	 * <li>array reads, except in the left side of an assignment;</li>
+	 * <li>the other operators (arithmetic, shift, bitwise, unary, comparisons,
+	 *     {@code instanceof}): always, except in expression-statement mode
+	 *     ({@link #setExpressionStatement}), where the operator at the top of an assignment's
+	 *     right side stays;</li>
+	 * <li>postfix {@code x++} and {@code x--}: {@code t = x} now and {@code x = x + 1} in the
+	 *     postfix list, except for a local variable at the top of the expression
+	 *     ({@code i++;}), which stays.</li>
+	 * </ul>
+	 * Void calls, local variables, field accesses and literals stay where they are (the copy gives
+	 * a field access without prefix the prefix {@code this} or the field's class). The receiver
+	 * and arguments of a call are rewritten first, in that order. {@code a && b} keeps Java's
+	 * short circuit: the statements {@code b} needs are nested in the branch of the {@code if} on
+	 * {@code a} where {@code b} is evaluated ({@code a || b} the same, in the other branch). A
+	 * conditional expression does not: what both branches need is computed before the
+	 * {@code if} (see {@link #visitConditionalExpression}).
+	 *
+	 * <p>An equality or relational comparison moves the postfix updates collected so far to
+	 * {@link #getNewStatements()}, after the comparison, so that {@code if (a == b++)} compares
+	 * the old {@code b} (see the comment on the field {@code postfixNewStatements}). The
+	 * temporaries of arithmetic, shift, bitwise and unary operators take the type of the (left)
+	 * operand, those of comparisons and {@code instanceof} are {@code boolean}, and those of calls
+	 * take the return type that {@code MethodInformationBuilder} gives.
+	 *
+	 * <p>Static state: the counter in {@code t_<n>} ({@link #createNewVariableName()}) is a static
+	 * field, never reset, so the names keep growing over all the analyses run in one JVM (Stryker
+	 * runs many).
+	 */
 	public ESExpressionVisitor() {
 		declarationStatements = new ArrayList<JStatement>();
 		newStatements = new ArrayList<JStatement>();
@@ -85,6 +129,11 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		return postfixNewStatements;
 	}
 	
+	/**
+	 * Replaces the postfix list with a new empty one; a list returned before by
+	 * {@link #getPostfixNewStatements()} is left as it is. {@link ESBlockVisitor} calls it after
+	 * copying the updates.
+	 */
 	public void setNewPostfixNewStatements() {
 		this.postfixNewStatements = new ArrayList<JStatement>();
 	}
@@ -102,6 +151,13 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		this.declarationStatements = declarationStatements;
 	}
 
+	/**
+	 * Returns a fresh temporary name, {@code t_<n>}, incrementing the static counter. The counter
+	 * is shared by all instances and never reset, so it keeps growing over all the analyses run
+	 * in one JVM.
+	 *
+	 * @return the new name
+	 */
 	public static String createNewVariableName() {
 		ESExpressionVisitor.variableNameIndex++;
 		String s = "t_" + variableNameIndex;
@@ -124,6 +180,14 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		return expressionStatement;
 	}
 
+	/**
+	 * Sets expression-statement mode, for the expression of an expression statement; set it
+	 * before visiting. In that mode the operator at the top of an assignment's right side stays
+	 * in place ({@code x = a + b;}), and an assignment at the top stays an assignment. Out of it
+	 * (conditions, initializers, {@code return}), every operator goes into a temporary.
+	 *
+	 * @param expressionStatement whether the visited expression is an expression statement
+	 */
 	public void setExpressionStatement(boolean expressionStatement) {
 		this.expressionStatement = expressionStatement;
 	}	// }
@@ -695,6 +759,16 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		expressionDeep--;
 	}
 
+	/**
+	 * Moves {@code c ? a : b} into a temporary: what {@code c}, {@code a} and {@code b} need, in
+	 * that order, then {@code if (c') t = a'; else t = b';}. What both branches need is computed
+	 * before the {@code if}, whatever the condition, so a call in the branch not taken is still
+	 * made: {@code x != null ? x.m() : 0} calls {@code x.m()} when {@code x} is null. The
+	 * temporary has the expression's type or, when that is the null type, the type of the branch
+	 * that is not {@code null}.
+	 *
+	 * @param self the conditional expression
+	 */
 	@Override
 	public void visitConditionalExpression(JConditionalExpression self) {
 		expressionDeep++;
@@ -791,6 +865,13 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		expressionDeep--;
 	}
 
+	/**
+	 * Copies the call, its receiver and then its arguments rewritten first. A call of type
+	 * {@code void} stays in place; any other call goes into a temporary, declared with the return
+	 * type that {@code MethodInformationBuilder.getMethodInformation} gives for the original call.
+	 *
+	 * @param self the call
+	 */
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
 		expressionDeep++;
@@ -855,6 +936,13 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		expressionDeep--;
 	}
 
+	/**
+	 * Copies the array access, its array and index rewritten first. While the left side of an
+	 * assignment is visited the access stays in place (the location assigned to, or an access
+	 * inside its index); otherwise the element read goes into a temporary.
+	 *
+	 * @param self the array access
+	 */
 	@Override
 	public void visitArrayAccessExpression(JArrayAccessExpression self) {
 		expressionDeep++;
@@ -933,6 +1021,14 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 
 
 
+	/**
+	 * Declares a fresh temporary: adds {@code T t_<n>;} to {@link #getDeclarationStatements()}
+	 * and returns a reference to it.
+	 *
+	 * @param tokenReference the source position for the new nodes
+	 * @param type the type of the temporary
+	 * @return a reference to the new variable
+	 */
 	public JLocalVariableExpression createNewVariable(
 			TokenReference tokenReference, CType type) {
 		String createdVar = createNewVariableName();
@@ -1034,6 +1130,14 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		expressionDeep--;
 	}
 
+	/**
+	 * Replaces {@code ++x} or {@code --x} with a temporary: the new statements are
+	 * {@code x = x + 1;} (or {@code x = x + -1;}) and {@code t = x;}, and the result is
+	 * {@code t}. Unlike the postfix case the update is added at once, even for {@code ++i;}
+	 * alone, which leaves the statement {@code t;} that {@link ESBlockVisitor} drops.
+	 *
+	 * @param self the prefix expression
+	 */
 	public void visitPrefixExpression(/* @non_null */JPrefixExpression self) {
 		expressionDeep++;
 
@@ -1153,6 +1257,16 @@ public class ESExpressionVisitor extends JmlAstClonerExpressionVisitor {
 		expressionDeep--;
 	}
 
+	/**
+	 * Rewrites a JML2 relational expression. JML2's parser builds this node, not a plain
+	 * {@code JRelationalExpression}, for {@code <}, {@code <=}, {@code >} and {@code >=} in the
+	 * code, so this method, not {@code visitRelationalExpression}, handles them. The comparison
+	 * goes into a {@code boolean} temporary under the rule for operators, and also whenever
+	 * postfix updates are pending; then the pending updates move to {@link #getNewStatements()},
+	 * after it.
+	 *
+	 * @param self the relational expression
+	 */
 	@Override
 	public void visitJmlRelationalExpression(JmlRelationalExpression self) {
 

@@ -38,13 +38,51 @@ import ar.uba.dc.rfm.alloy.AlloyVariable;
 import ar.uba.dc.rfm.alloy.ast.expressions.AlloyExpression;
 import ar.uba.dc.rfm.alloy.util.VarSubstitutor;
 
+/**
+ * The parameter normalization pass: copies each parameter of a method into a fresh local
+ * variable at the start of the body, and makes the body use the copy. A method {@code m(T x)}
+ * with body {@code B} gets the body {@code { T param_x_<n>; param_x_<n> = x; { B' } }}, where
+ * {@code B'} is {@code B} with {@code x} renamed to {@code param_x_<n>}
+ * ({@link JVarSubstitutorVisitor}), so the rewritten statements of the body no longer read or
+ * assign the parameter itself (see {@link JVarSubstitutorVisitor} for what is not rewritten).
+ * The specification is kept as it is: it still names {@code x}, which the rewritten statements
+ * no longer assign. The calls in the body are not changed.
+ *
+ * <p>Every method of every class visited is changed, including the parameters that
+ * {@code SpecMethodCallRemoverVisitor} appended; a method without a body (abstract or native)
+ * throws a {@code NullPointerException}. Constructors are not changed (see
+ * {@link #visitConstructorDeclaration}).
+ *
+ * <p>Unclear: which later step needs the copies; no comment, document or commit message says.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code QualifyStaticCallsVisitor} and before
+ * {@code AssumeSimplifierVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md). Renaming by
+ * name is safe there: {@code VNBlockVisitor} has renamed the local variables to
+ * {@code var_<n>_x} and kept the parameters' names.
+ *
+ * <p>Static state: {@link #newParameterIndex}.
+ */
 public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisitor {
 
+	/**
+	 * Static: the counter in {@code param_x_<n>}, shared by all instances and never reset, so the
+	 * names change from one analysis to the next in one JVM (Stryker runs many).
+	 */
 	public static int newParameterIndex = 0;
 
 	public ActualParameterNormalizerVisitor(){}
 
 
+	/**
+	 * Does for a MultiJava constructor what {@link #visitJmlMethodDeclaration} does for a method,
+	 * the new statements first in the constructor body. Not reached in the pipeline: JML2's
+	 * constructors are {@code JmlConstructorDeclaration}s, whose {@code accept} calls
+	 * {@code visitJmlConstructorDeclaration}, inherited from {@link JmlAstClonerStatementVisitor},
+	 * which copies the constructor without this change. Unclear: whether constructors are meant
+	 * to get the copies too, or this method can go.
+	 *
+	 * @param self the constructor
+	 */
 	@Override
 	public void visitConstructorDeclaration(JConstructorDeclaration self) {
 		JFormalParameter[] args = self.parameters();
@@ -89,6 +127,16 @@ public class ActualParameterNormalizerVisitor extends JmlAstClonerStatementVisit
 	}
 	
 	
+	/**
+	 * Pushes a copy of the method whose body is a new block: for each parameter {@code x}, the
+	 * declaration {@code T param_x_<n>;} and the assignment {@code param_x_<n> = x;} (a
+	 * {@code JmlAssignmentStatement}), then the old body, as a nested block, renamed by a
+	 * {@link JVarSubstitutorVisitor}. The copy keeps the method's modifiers, parameters,
+	 * specification and Javadoc comment, and drops its other comments. Increments
+	 * {@link #newParameterIndex} once per parameter.
+	 *
+	 * @param self the method; it must have a body (a {@code NullPointerException} otherwise)
+	 */
 	@Override
 	public void visitJmlMethodDeclaration(JmlMethodDeclaration self){
 		JFormalParameter[] args = self.parameters();

@@ -43,6 +43,39 @@ import org.multijava.mjc.JWhileStatement;
 import ar.edu.taco.jml.utils.ASTUtils;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * The expression simplification pass: rewrites method and constructor bodies so that each
+ * expression is computed one operation at a time, in fresh temporaries, before the statement
+ * that uses it. For example, with {@code f} returning {@code int},
+ * {@code if (a.f(x + 1) > 0) S} becomes
+ * {@code t_1 = x + 1; t_2 = a.f(t_1); t_3 = t_2 > 0; if (t_3) S}, with
+ * {@code int t_1; int t_2; boolean t_3;} at the start of the enclosing block. The expressions
+ * are rewritten by {@link ESExpressionVisitor}, whose constructor's comment says what goes into
+ * a temporary.
+ *
+ * <p>Each statement of a block is visited by a new instance, which collects what that statement
+ * needs; {@link #visitBlockStatement} places it. The rewritten expressions are the conditions of
+ * {@code if} statements and of Java {@code assert}s, the initializers of local variables (Java
+ * and JML ghost ones), expression statements (also inside a {@code JmlAssignmentStatement}),
+ * and the expressions of {@code return} and {@code throw}. The rest is copied by
+ * {@link JmlAstClonerStatementVisitor}: specifications, JML {@code assert} and {@code assume}
+ * statements, and the expression of a {@code switch} and the condition of a do-while loop stay
+ * as they are; labeled statements are not entered. Statements directly in a {@code switch}
+ * group or a {@code catch} clause are visited by the instance of the enclosing {@code switch}
+ * or {@code try}, so what they need is placed before that whole statement.
+ *
+ * <p>It relies on earlier passes: {@code BlockSimplifier} has made both branches of every
+ * {@code if} blocks (what a branch that is not a block needs would go before the {@code if});
+ * {@code WhileRemoverSimplifier} has unrolled the {@code while} loops (see
+ * {@link #visitWhileStatement}), and {@code DoWhileBlockVisitor} has put each do-while
+ * condition in a variable; the method's own local variables are named {@code var_<n>_x} by
+ * then ({@code VNBlockVisitor}), so they do not clash with the temporaries {@code t_<n>}.
+ *
+ * <p>{@code ASTSimplifierManager} runs it after {@code LiteralBlockVisitor} and before
+ * {@code QualifyStaticCallsVisitor}, during {@code JmlStage} (docs/ARCHITECTURE.md). No static
+ * state here; the counter in {@code t_<n>} is a static field of {@link ESExpressionVisitor},
+ * never reset.
+ */
 public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
     private static Logger log = Logger.getLogger(ESBlockVisitor.class);
     // BEGIN - ESStatementVisitor
@@ -75,6 +108,16 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
 
     // END - ESStatementVisitor
 
+    /**
+     * Rewrites each statement of the block with a new instance, and pushes the new block: first
+     * the declarations of all the temporaries of the block, then, for each statement, the
+     * statements that compute what it needs and the rewritten statement. Expression statements
+     * made of a local variable alone ({@code x;}) are dropped; the rewriting leaves one where a
+     * statement's value went into a temporary, as for {@code ++i;}. The new block is also
+     * pretty-printed for the debug log, whatever the log level.
+     *
+     * @param self the block
+     */
     @Override
     public void visitBlockStatement(JBlock self) {
         List<JStatement> declarationList = new ArrayList<JStatement>();
@@ -150,6 +193,16 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
 
     // BEGIN - ESStatementVisitor
 
+    /**
+     * Rewrites the branches with this instance and the condition with an
+     * {@link ESExpressionVisitor}, and pushes the new {@code if}, each branch in a block
+     * ({@code ASTUtils.createIfStatement}). What the condition needs goes to this instance's
+     * lists, and so before the {@code if}; so would what a branch that is not a block needs. The
+     * condition's postfix updates are not taken unless a comparison moved them, so
+     * {@code if (f(i++))} loses the update of {@code i}.
+     *
+     * @param self the statement
+     */
     @Override
     public void visitIfStatement(/* @non_null */JIfStatement self) {
         self.thenClause().accept(this);
@@ -187,6 +240,14 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
         this.getStack().push(newLoop);
     }
 
+    /**
+     * Rewrites the condition and the body, and pushes the new loop. What the condition needs goes
+     * before the loop, so it would be computed once, not at each iteration; in the current
+     * pipeline no {@code while} loop reaches this pass ({@code WhileRemoverSimplifier} unrolls
+     * them).
+     *
+     * @param self the loop
+     */
     @Override
     public void visitWhileStatement(JWhileStatement self) {
         ESExpressionVisitor conditionSimplifierVisitor = new ESExpressionVisitor();
@@ -223,6 +284,13 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
         this.getNewStatements().addAll(conditionSimplifierVisitor.getNewStatements());
     }
 
+    /**
+     * Rewrites the initializer, if any, and pushes the new definition. What the initializer needs,
+     * then its postfix updates, go to this instance's lists, and so before the declaration:
+     * {@code int y = a[i++];} becomes {@code t_1 = i; t_2 = a[t_1]; i = i + 1; int y = t_2;}.
+     *
+     * @param self the variable definition
+     */
     @Override
     public void visitVariableDefinition(JVariableDefinition self) {
         ESExpressionVisitor conditionSimplifierVisitor = new ESExpressionVisitor();
@@ -268,6 +336,15 @@ public class ESBlockVisitor extends JmlAstClonerStatementVisitor {
          */
     }
 
+    /**
+     * Rewrites the expression in expression-statement mode
+     * ({@link ESExpressionVisitor#setExpressionStatement}) and pushes the new statement. What it
+     * needs, then its postfix updates, go to this instance's lists, and so before the statement:
+     * {@code x = y++ + z;} becomes {@code t_1 = y; y = y + 1; x = t_1 + z;}. The updates go before
+     * the statement, not after it, so {@code a[i] = i++;} writes to {@code a[i + 1]}.
+     *
+     * @param self the expression statement
+     */
     @Override
     public void visitExpressionStatement(JExpressionStatement self) {
         ESExpressionVisitor visitor = new ESExpressionVisitor();

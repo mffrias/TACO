@@ -110,9 +110,37 @@ import ar.edu.taco.simplejml.methodinfo.MethodInformation;
 import ar.edu.taco.simplejml.methodinfo.MethodInformationBuilder;
 import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
+/**
+ * Renames variables in a method body by name, for {@link ActualParameterNormalizerVisitor}, its
+ * only user: each local variable reference ({@code JLocalVariableExpression}), name
+ * ({@code JNameExpression}) and local variable declaration whose name is a key of the binding
+ * gets the bound name. It extends the statement cloner but copies expressions too, with itself:
+ * the copy of whatever it visits, statement or expression, is on top of {@code getStack()}.
+ *
+ * <p>Not renamed, because they are copied as they are: the JML statements of the body
+ * ({@code assert}, {@code assume}, {@code set}, annotated loops; inherited from
+ * {@link JmlAstClonerStatementVisitor}), do-while loops ({@link #visitDoStatement}) and the
+ * array of {@code a.length} ({@link #visitArrayLengthExpression}). They keep the parameter's
+ * name, and so read or assign the parameter, not its copy.
+ *
+ * <p>It throws {@code TacoNotImplementedYetException} for empty, labeled, synchronized and
+ * type-declaration statements, expression lists, array initializers (also in
+ * {@code new int[] {1, 2}}), and declarations that do not occur in a body. It expects a prefix
+ * on every field access (the copies that {@code ESExpressionVisitor} made in the earlier
+ * expression pass give one) and an initializer and an increment in a {@code for} loop (no
+ * {@code for} loop is left by then).
+ *
+ * <p>The import of {@code ESExpressionVisitor} is unused. No static state; the binding is the
+ * only state.
+ */
 public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 
 	HashMap<String, String> binding;
+	/**
+	 * Creates a visitor that renames by the given binding.
+	 *
+	 * @param binding old name to new name; read, not copied
+	 */
 	public JVarSubstitutorVisitor(HashMap<String, String> binding) {
 		this.binding = binding;
 	}
@@ -124,6 +152,13 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 
 	}
 
+	/**
+	 * Copies the declaration with each variable's initializer rewritten and its name bound, if
+	 * it is a key of the binding. The definitions are copied here, not through
+	 * {@link #visitVariableDefinition}.
+	 *
+	 * @param self the declaration
+	 */
 	public void visitVariableDeclarationStatement(/* @non_null */JVariableDeclarationStatement self) {
 		JVariableDefinition[] varsAndDefs = self.getVars();
 		JVariableDefinition[] newVarsAndDefs = new JVariableDefinition[varsAndDefs.length];
@@ -147,6 +182,13 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
+	/**
+	 * Pushes the reference itself if its name is not bound; otherwise a new reference to a new
+	 * variable object with the bound name and the old type, not to the declaration of the
+	 * renamed variable.
+	 *
+	 * @param self the reference
+	 */
 	@Override
 	public void visitLocalVariableExpression(JLocalVariableExpression self){
 		JLocalVariableExpression newSelf = self;
@@ -227,6 +269,13 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 		this.getStack().push(newSelf);
 	}
 
+	/**
+	 * Copies the call with {@code clone()} and rewrites its arguments and receiver. The clone is
+	 * shallow and shares the argument array with the original, so the rewritten arguments are
+	 * also written into the call of the AST being visited.
+	 *
+	 * @param self the call
+	 */
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
 
@@ -530,6 +579,11 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitArrayLengthExpression(org.multijava.mjc.JArrayLengthExpression)
 	 */
+	/**
+	 * Pushes {@code a.length} as it is: the array expression is not renamed.
+	 *
+	 * @param arg0 the expression
+	 */
 	@Override
 	public void visitArrayLengthExpression(JArrayLengthExpression arg0) {
 		this.getStack().push(arg0);
@@ -707,6 +761,11 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitDoStatement(org.multijava.mjc.JDoStatement)
+	 */
+	/**
+	 * Pushes the do-while loop as it is: neither its body nor its condition is renamed.
+	 *
+	 * @param self the loop
 	 */
 	@Override
 	public void visitDoStatement(JDoStatement self) {
@@ -1129,6 +1188,13 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 
 	/* (non-Javadoc)
 	 * @see org.multijava.mjc.MjcVisitor#visitVariableDefinition(org.multijava.mjc.JVariableDefinition)
+	 */
+	/**
+	 * Copies a variable definition with its name bound and its initializer rewritten. The
+	 * definition must have an initializer (a {@code NullPointerException} otherwise). Declaration
+	 * statements do not come here ({@link #visitVariableDeclarationStatement}).
+	 *
+	 * @param self the variable definition
 	 */
 	@Override
 	public void visitVariableDefinition(JVariableDefinition self) {

@@ -229,3 +229,13 @@ Points the Javadoc marks "Unclear:" (2026-10-18; line numbers of the `docs` bran
 51. **Branch labels** (`jml/utils/LabelUtils.java`): `ifLabelCount` and `whileLabelCount` are
     never incremented, so every label is `if_1` (and `while_10000`). Were they meant to be
     distinct?
+52. **Parameter copies** (`jml/invoke/ActualParameterNormalizerVisitor.java`): the pass copies
+    each parameter into a local `param_x_<n>` at the start of the body and renames its uses
+    there, while the specification still names the parameters. Which later step needs the
+    copies? No comment, doc or commit message gives the reason.
+53. **Constructors and the parameter copies** (`ActualParameterNormalizerVisitor`,
+    `visitConstructorDeclaration`): never reached, since JML2's constructors are
+    `JmlConstructorDeclaration`s, whose `accept` calls the inherited
+    `visitJmlConstructorDeclaration`; constructors are never given the copies (as
+    `output/roops/core/objects/BinomialHeapNode.java` shows). Should they get them, or can the
+    method go?

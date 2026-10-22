@@ -7,82 +7,9 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map.Entry;
 
-import org.jmlspecs.checker.JFieldDeclarationWrapper;
-import org.jmlspecs.checker.JmlAssumeStatement;
-import org.jmlspecs.checker.JmlClassDeclaration;
-import org.jmlspecs.checker.JmlConstructorDeclaration;
-import org.jmlspecs.checker.JmlDataGroupAccumulator;
-import org.jmlspecs.checker.JmlEnsuresClause;
-import org.jmlspecs.checker.JmlEqualityExpression;
-import org.jmlspecs.checker.JmlFieldDeclaration;
-import org.jmlspecs.checker.JmlFormalParameter;
-import org.jmlspecs.checker.JmlGenericSpecBody;
-import org.jmlspecs.checker.JmlInvariant;
-import org.jmlspecs.checker.JmlMemberAccess;
-import org.jmlspecs.checker.JmlMemberDeclaration;
-import org.jmlspecs.checker.JmlMethodDeclaration;
-import org.jmlspecs.checker.JmlMethodSpecification;
-import org.jmlspecs.checker.JmlOldExpression;
-import org.jmlspecs.checker.JmlPredicate;
-import org.jmlspecs.checker.JmlReachExpression;
-import org.jmlspecs.checker.JmlRelationalExpression;
-import org.jmlspecs.checker.JmlRequiresClause;
-import org.jmlspecs.checker.JmlResultExpression;
-import org.jmlspecs.checker.JmlSourceField;
-import org.jmlspecs.checker.JmlSpecBodyClause;
-import org.jmlspecs.checker.JmlSpecExpression;
-import org.jmlspecs.checker.JmlSpecQuantifiedExpression;
-import org.jmlspecs.checker.JmlVarAssertion;
-import org.jmlspecs.checker.JmlVariableDefinition;
+import org.jmlspecs.checker.*;
 import org.multijava.javadoc.JavadocComment;
-import org.multijava.mjc.CClass;
-import org.multijava.mjc.CMember;
-import org.multijava.mjc.CSpecializedType;
-import org.multijava.mjc.CType;
-import org.multijava.mjc.JAddExpression;
-import org.multijava.mjc.JArrayAccessExpression;
-import org.multijava.mjc.JArrayLengthExpression;
-import org.multijava.mjc.JBitwiseExpression;
-import org.multijava.mjc.JBlock;
-import org.multijava.mjc.JBooleanLiteral;
-import org.multijava.mjc.JCastExpression;
-import org.multijava.mjc.JCharLiteral;
-import org.multijava.mjc.JClassFieldExpression;
-import org.multijava.mjc.JConditionalAndExpression;
-import org.multijava.mjc.JConditionalExpression;
-import org.multijava.mjc.JConditionalOrExpression;
-import org.multijava.mjc.JConstructorBlock;
-import org.multijava.mjc.JDivideExpression;
-import org.multijava.mjc.JEqualityExpression;
-import org.multijava.mjc.JExpression;
-import org.multijava.mjc.JFieldDeclaration;
-import org.multijava.mjc.JFieldDeclarationType;
-import org.multijava.mjc.JFormalParameter;
-import org.multijava.mjc.JInstanceofExpression;
-import org.multijava.mjc.JLocalVariableExpression;
-import org.multijava.mjc.JMemberDeclaration;
-import org.multijava.mjc.JMethodCallExpression;
-import org.multijava.mjc.JMinusExpression;
-import org.multijava.mjc.JModuloExpression;
-import org.multijava.mjc.JMultExpression;
-import org.multijava.mjc.JNameExpression;
-import org.multijava.mjc.JNullLiteral;
-import org.multijava.mjc.JOrdinalLiteral;
-import org.multijava.mjc.JParenthesedExpression;
-import org.multijava.mjc.JPhylum;
-import org.multijava.mjc.JPostfixExpression;
-import org.multijava.mjc.JPrefixExpression;
-import org.multijava.mjc.JRealLiteral;
-import org.multijava.mjc.JRelationalExpression;
-import org.multijava.mjc.JShiftExpression;
-import org.multijava.mjc.JStatement;
-import org.multijava.mjc.JStringLiteral;
-import org.multijava.mjc.JThisExpression;
-import org.multijava.mjc.JTypeNameExpression;
-import org.multijava.mjc.JUnaryExpression;
-import org.multijava.mjc.JUnaryPromote;
-import org.multijava.mjc.JVariableDefinition;
-import org.multijava.mjc.JmlClassDeclarationExtension;
+import org.multijava.mjc.*;
 import org.multijava.util.compiler.JavaStyleComment;
 import org.multijava.util.compiler.UnpositionedError;
 
@@ -96,6 +23,10 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	public boolean translatingAnInvariant = false;
 
 	private CClass classBeingCloned;
+
+	/** True while cloning the specification of the method/constructor under check, whose body
+	 gets the final-state invariant sync (an assignment to each invariant placeholder field). */
+	private boolean addInvariantPlaceholdersToFrame = false;
 
 	public CClass getClassBeingCloned(){
 		return this.classBeingCloned;
@@ -242,8 +173,9 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 			newBody.add(self.body());
 
 			if (self.methodSpecification() != null) {
-
+				this.addInvariantPlaceholdersToFrame = true;
 				self.methodSpecification().accept(this);
+				this.addInvariantPlaceholdersToFrame = false;
 				JmlMethodSpecification theNewSpec = (JmlMethodSpecification)this.getStack().pop();
 
 				//BEGIN treatment of method calls in preconditions
@@ -283,11 +215,14 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 					JmlMemberAccess access = new JmlMemberAccess(((JMethodCallExpression)(var_call_pair.getValue())).prefix().getApparentType().getCClass(), JmlMemberAccess.ACC_PUBLIC);
 					JmlSourceField theInternalField = new JmlSourceField(access, var_call_pair.getKey().ident(), var_call_pair.getValue().getApparentType(), false);
 					theFieldExpre.setField(theInternalField);
-					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue()); 
-					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
-					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
-					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
-					distribute(newAssume, newBody, self.returnType().isVoid());
+//					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue());
+//					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
+//					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
+//					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+					JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), theFieldExpre, var_call_pair.getValue());
+					JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+					JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
+					distribute(theAssignment, newBody, self.returnType().isVoid());
 				}
 
 				//END treatment of method calls in invariant, final state
@@ -307,11 +242,14 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 						for (JmlFormalParameter theVar : oldRepVis.buffer.keySet()){
 							addParameter(self,theVar);
 							JLocalVariableExpression theVarExpre = new JLocalVariableExpression(self.getTokenReference(), theVar);
-							JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theVarExpre, oldRepVis.buffer.get(theVar)); 
-							JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
-							JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
-							JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
-							newBody.add(0, newAssume);
+//							JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theVarExpre, oldRepVis.buffer.get(theVar));
+//							JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
+//							JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
+//							JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+							JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), theVarExpre, var_call_pair.getValue());
+							JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+							JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
+							newBody.add(0, theAssignment);
 						}
 
 						JExpression argPrime = (JExpression)oldRepVis.getStack().pop();
@@ -327,11 +265,14 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 					JMethodCallExpression newMethodCall = (JMethodCallExpression) methodCall.clone();
 					newMethodCall.setType(methodCall.getApparentType());
 					JLocalVariableExpression expreFromParam = new JLocalVariableExpression(self.getTokenReference(), new JVariableDefinition(self.getTokenReference(), 0, var_call_pair.getKey().dynamicType(), var_call_pair.getKey().ident(), null));
-					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, expreFromParam, newMethodCall); 
-					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
-					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
-					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
-					distribute(newAssume, newBody, self.returnType().isVoid());
+//					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, expreFromParam, newMethodCall);
+//					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
+//					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
+//					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+					JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), expreFromParam, var_call_pair.getValue());
+					JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+					JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
+					distribute(theAssignment, newBody, self.returnType().isVoid());
 				}
 
 				JConstructorBlock newConsBody = new JConstructorBlock(self.getTokenReference(), newBody.toArray(new JStatement[newBody.size()]));
@@ -347,15 +288,15 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	}
 
 
-	private void distribute(JmlAssumeStatement newAssume, ArrayList<JStatement> newBody, boolean isVoid) {
-		StatementDistributeAboveReturnVisitor returnVisitor = new StatementDistributeAboveReturnVisitor(newAssume);
+	private void distribute(JmlAssignmentStatement newAssign, ArrayList<JStatement> newBody, boolean isVoid) {
+		StatementDistributeAboveReturnVisitor returnVisitor = new StatementDistributeAboveReturnVisitor(newAssign);
 
 		for (int index = 0; index < newBody.size(); index++){
 			newBody.get(index).accept(returnVisitor);
 			newBody.set(index, (JStatement)returnVisitor.getStack().pop());
 		}
 		if (isVoid){
-			newBody.add(newAssume);
+			newBody.add(newAssign);
 		}
 
 	}
@@ -371,8 +312,9 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 			newBody.add(self.body());
 
 			if (self.methodSpecification() != null) {
-
+				this.addInvariantPlaceholdersToFrame = true;
 				self.methodSpecification().accept(this);
+				this.addInvariantPlaceholdersToFrame = false;
 				JmlMethodSpecification theNewSpec = (JmlMethodSpecification)this.getStack().pop();
 
 				//BEGIN treatment of method calls in preconditions
@@ -396,7 +338,7 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 					JmlMemberAccess access = new JmlMemberAccess(((JMethodCallExpression)(var_call_pair.getValue())).prefix().getApparentType().getCClass(), JmlMemberAccess.ACC_PUBLIC);
 					JmlSourceField theInternalField = new JmlSourceField(access, var_call_pair.getKey().ident(), var_call_pair.getValue().getApparentType(), false);
 					theFieldExpre.setField(theInternalField);
-					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue()); 
+					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue());
 					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
 					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
 					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
@@ -412,11 +354,14 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 					JmlMemberAccess access = new JmlMemberAccess(((JMethodCallExpression)(var_call_pair.getValue())).prefix().getApparentType().getCClass(), JmlMemberAccess.ACC_PUBLIC);
 					JmlSourceField theInternalField = new JmlSourceField(access, var_call_pair.getKey().ident(), var_call_pair.getValue().getApparentType(), false);
 					theFieldExpre.setField(theInternalField);
-					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue()); 
-					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
-					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
-					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
-					distribute(newAssume, newBody, self.returnType().isVoid());
+//					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theFieldExpre, var_call_pair.getValue());
+//					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
+//					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
+//					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+					JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), theFieldExpre, var_call_pair.getValue());
+					JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+					JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
+					distribute(theAssignment, newBody, self.returnType().isVoid());
 				}
 
 				//END treatment of method calls in invariant, final state
@@ -436,10 +381,13 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 						for (JmlFormalParameter theVar : oldRepVis.buffer.keySet()){
 							addParameter(self,theVar);
 							JLocalVariableExpression theVarExpre = new JLocalVariableExpression(self.getTokenReference(), theVar);
-							JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theVarExpre, oldRepVis.buffer.get(theVar)); 
+							JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, theVarExpre, oldRepVis.buffer.get(theVar));
 							JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
 							JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
 							JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+//							JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), theVarExpre, var_call_pair.getValue());
+//							JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+//							JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
 							newBody.add(0, newAssume);
 						}
 
@@ -453,11 +401,14 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 					//					JMethodCallExpression newMethodCall = new JMethodCallExpression(methodCall.getTokenReference(), methodCall.prefix(), newArgsForMethodCall);
 					//					newMethodCall.setType(methodCall.getApparentType());
 					JLocalVariableExpression expreFromParam = new JLocalVariableExpression(self.getTokenReference(), new JVariableDefinition(self.getTokenReference(), 0, var_call_pair.getKey().dynamicType(), var_call_pair.getKey().ident(), null));
-					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, expreFromParam, newMethodCall); 
-					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
-					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
-					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
-					distribute(newAssume, newBody, self.returnType().isVoid());
+//					JmlEqualityExpression theEqualsBetweenVarAndCall = new JmlEqualityExpression(self.getTokenReference(), JmlEqualityExpression.OPE_EQ, expreFromParam, newMethodCall);
+//					JmlSpecExpression theActualRelationBetweenVarAndCall = new JmlSpecExpression(theEqualsBetweenVarAndCall);
+//					JmlPredicate relateVarWithCall = new JmlPredicate(theActualRelationBetweenVarAndCall);
+//					JmlAssumeStatement newAssume = new JmlAssumeStatement(self.getTokenReference(), ENV_DEBUG_MODE, relateVarWithCall, null, null);
+					JAssignmentExpression theExpreAssignment = new JAssignmentExpression(self.getTokenReference(), expreFromParam, var_call_pair.getValue());
+					JExpressionStatement theAssignmentExpStat = new JExpressionStatement(self.getTokenReference(), theExpreAssignment, null);
+					JmlAssignmentStatement theAssignment = new JmlAssignmentStatement(theAssignmentExpStat);
+					distribute(theAssignment, newBody, self.returnType().isVoid());
 				}
 
 				//				JBlock newMethodBody = new JConstructorBlock(self.getTokenReference(), newBody.toArray(new JStatement[newBody.size()]));
@@ -610,6 +561,37 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 		this.getStack().push(self);
 	}
 
+
+
+
+		/** The final-state invariant sync assigns the placeholder fields, so they must be in the
+ 	 *  frame of the method under check, or the JML re-parse of the simplified code rejects the
+ 	 *  assignment (e.g. under assignable \nothing). They are TACO artifacts, not program state;
+ 	 *  ModifiesSolverManager already exempts the same names. */@Override
+	public void visitJmlAssignableClause(JmlAssignableClause self) {
+		  if (!addInvariantPlaceholdersToFrame || invariantSpecMethodCallData.isEmpty()) {
+			  	super.visitJmlAssignableClause(self);
+				return;
+		  }
+		 ArrayList<JmlStoreRef> refs = new ArrayList<JmlStoreRef>();
+		  for (JmlStoreRef ref : self.storeRefs()) {
+			  if (ref instanceof JmlStoreRefKeyword) {
+				  	JmlStoreRefKeyword keyword = (JmlStoreRefKeyword) ref;
+					if (keyword.isEverything() || keyword.isNotSpecified()) {
+						super.visitJmlAssignableClause(self);
+						return;
+					}
+					if (keyword.isNothing()) {
+						continue;
+					}
+			  }
+			  refs.add(ref);
+		  }
+		  for (JmlFormalParameter placeholder : invariantSpecMethodCallData.keySet()) {
+			  refs.add(new JmlStoreRefExpression(self.getTokenReference(), new JmlName[] { new JmlName(self.getTokenReference(), placeholder.ident()) }));
+		  }
+		  this.getStack().push(new JmlAssignableClause(self.getTokenReference(), self.isRedundantly(), refs.toArray(new JmlStoreRef[0])));
+	  }
 
 	@Override
 	public void visitAddExpression(JAddExpression self) {

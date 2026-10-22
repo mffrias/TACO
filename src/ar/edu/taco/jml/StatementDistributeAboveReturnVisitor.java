@@ -1,5 +1,6 @@
 package ar.edu.taco.jml;
 
+import org.jmlspecs.checker.JmlAssignmentStatement;
 import org.jmlspecs.checker.JmlAssumeStatement;
 import org.multijava.mjc.JBlock;
 import org.multijava.mjc.JReturnStatement;
@@ -10,16 +11,16 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 
 public class StatementDistributeAboveReturnVisitor extends JmlAstClonerStatementVisitor {
 
-	JmlAssumeStatement theAssume;
+	JmlAssignmentStatement theAssignment;
 	
-	public StatementDistributeAboveReturnVisitor(JmlAssumeStatement newAssume) {
-		theAssume = newAssume;
+	public StatementDistributeAboveReturnVisitor(JmlAssignmentStatement newAssignment) {
+		theAssignment = newAssignment;
 	}
 	
 	
 	
 	public void visitReturnStatement(/* @non_null */JReturnStatement self) {
-		JBlock newSelf = new JBlock(self.getTokenReference(), new JStatement[]{this.theAssume, self}, self.getComments());
+		JBlock newSelf = new JBlock(self.getTokenReference(), new JStatement[]{this.theAssignment, self}, self.getComments());
 		this.getStack().push(newSelf);
 	}
 

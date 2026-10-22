@@ -340,6 +340,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 		programBuffer.appendProgram(declaredVariable);
 		programBuffer.assign(declaredVariable.getVariable(), throwAlloyExpression);
 		programBuffer.assign(JExpressionFactory.THROW_EXPRESSION, JExpressionFactory.NULL_EXPRESSION);
+		programBuffer.assign(JExpressionFactory.EXIT_REACHED_VARIABLE, JExpressionFactory.FALSE_EXPRESSION);
 
 		BlockStatementsVisitor catchBlockScopeTranslator = new BlockStatementsVisitor();
 		for (org.multijava.mjc.JStatement aStatement : jCatchClause.body().body()) {

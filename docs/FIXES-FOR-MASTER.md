@@ -999,23 +999,31 @@ default (`JmlBaseExpressionVisitor.java:170`), cleared at
 translate `signals_only` as `throw' != null implies (instanceOf ... or ...)`,
 and reset the flag at every specification case.
 
-### F11. Pure-method calls in specifications
+### F11. Pure-method calls in specifications leak from one class to the next
 
 `jml/SpecMethodCallRemoverVisitor` replaces calls to pure methods in
-specifications by new fields and assumptions, in maps that are never cleared,
-and one instance serves every class of a run. So a class visited later gets
-the fields and assumptions of the classes before it: with `A`'s invariant
-calling `okA()`, `B` gets `assume ... == this.okA()`, which does not compile
-(stryker: `NullPointerException`; comitaco: `TacoException`); with an `ok()`
-in both classes, `B2`'s methods are reported correct vacuously. With `B2`
-visited first, the result is right. Also, breaking an invariant that calls a
-pure method is never detected: `c = -1` against `invariant pos()` is reported
-correct, because the final state's assumption reuses the field that holds the
-call's initial value. **Old.** *Cause:* `SpecMethodCallRemoverVisitor.java:139`
-and 538 fill the maps, which are read at 161, 265-291 and 394-422 (410-422 for
-the final state); one instance per run (`ASTSimplifierManager.java:79`,
-`engine/JmlStage.java:68` and 136). *Options:* clear the maps for each class,
-or key the entries by class; a field of its own for the final state's value.
+specifications by new fields, in maps that are never cleared, and one
+instance serves every class of a run. So a class visited later gets the
+fields of the classes before it, and their calls: with `A`'s invariant
+calling `okA()`, `B` gets `this.<field> = this.okA()`, which does not compile
+in `B` ("Cannot find method repb7.B.okA()"), and TACO stops with a
+`NullPointerException` (comitaco: `TacoException`). When the later class has
+a method of that name (`ok()` in both `A2` and `B2`), the call resolves to
+it, but the field is only written and nothing reads it, so the verdict is
+right. **Old.** *Cause* (master 5f62e261): `SpecMethodCallRemoverVisitor.java:70`
+(`visitJmlClassDeclaration`) and 489 add to the maps and nothing clears them;
+they are read for every constructor (197, 213) and method (336, 352); one
+instance per run (`ASTSimplifierManager.java:79`, `engine/JmlStage.java:68`
+and 136). *Options:* clear the maps for each class, or key the entries by
+class.
+
+Before master 5f62e261 (2026-10-21) there was more. The calls were assumed
+(`assume <field> == <call>`), so the leaked assumptions made `B2`'s methods
+correct vacuously, and breaking an invariant that calls a pure method was
+never detected (`c = -1` against `invariant pos()` was reported correct),
+because the final state's assumption reused the field that holds the call's
+initial value. 5f62e261 assigns the field instead (`<field> = <call>`); with
+it both cases are right (checked on `stryker` merged with 5f62e261).
 
 ### F12. `normal_behavior` does not forbid exceptions
 

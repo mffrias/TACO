@@ -133,9 +133,12 @@ import ar.uba.dc.rfm.alloy.ast.formulas.NotFormula;
  *     {@code throw = null and exit_stmt_reached = false}
  *     ({@code helpers.BlockStatementSolver.getTryCatchSurrounderCondition}), as the inherited
  *     flag {@code isTryCatchBlock} is always true. A {@code return} sets {@code return} and
- *     {@code exit_stmt_reached := true}, a {@code throw} sets {@code throw}, and the statements
- *     after them are skipped. Java {@code assert} and {@code throw} statements and variable
- *     declarations are not guarded.</li>
+ *     {@code exit_stmt_reached := true}, a {@code throw} sets {@code throw} (and, for a thrown
+ *     expression, {@code exit_stmt_reached := true}), and the statements after them are skipped;
+ *     a {@code catch} that matches resets both (since master 5f62e261 also
+ *     {@code exit_stmt_reached}; before, its body was skipped after a thrown expression). Java
+ *     {@code assert} and {@code throw} statements and variable declarations are not
+ *     guarded.</li>
  * <li>Loops: {@code while} and {@code do} loops become JDynAlloy loops, annotated with the
  *     conjunction of the pending loop invariants. A loop whose body has a {@code break} gets a
  *     variable {@code break_reached_<n>}, which its condition and the assignments inside it test
@@ -376,8 +379,10 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 
 	/**
 	 * Translates a {@code catch (E e)} clause into
-	 * {@code if (throw instanceOf E) { var e: E; e := throw; throw := null; <body> }}, the body
-	 * translated by a new {@link BlockStatementsVisitor}. Called by
+	 * {@code if (throw instanceOf E) { var e: E; e := throw; throw := null;
+	 * exit_stmt_reached := false; <body> }}, the body translated by a new
+	 * {@link BlockStatementsVisitor}. Resetting {@code exit_stmt_reached} (since master 5f62e261)
+	 * lets the body run after a {@code throw} of an expression, which sets it. Called by
 	 * {@link #visitTryCatchStatement}, inside its test that an exception was thrown.
 	 *
 	 * @param jCatchClause the clause
@@ -978,7 +983,7 @@ public class BlockStatementsVisitor extends JDynAlloyASTVisitor {
 	 * Translates {@code try ... catch}: the try block with a new {@link BlockStatementsVisitor},
 	 * then {@code if (not throw = null) { <catch clauses> }}, each clause as
 	 * {@link #visitCatchClause} does; the first that matches sets {@code throw} back to
-	 * {@code null}.
+	 * {@code null} and {@code exit_stmt_reached} to false.
 	 *
 	 * @param jTryCatchStatement the statement
 	 */

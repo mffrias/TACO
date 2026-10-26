@@ -215,10 +215,15 @@ Points the Javadoc marks "Unclear:" (2026-10-18 to 2026-10-20).
     the result of each simplification pass is written to `output/<pkg>/<Class>.java`, each write
     overwriting the last; the list of written files is thrown away, and `JmlStage` writes the
     final result again. Why are the intermediate writes there?
-48. **`\old` in the arguments of assumed calls** (`jml/SpecMethodCallRemoverVisitor.java`,
-    `visitJmlMethodDeclaration`, lines 381 and 525): for a method call in a postcondition, copies
-    of the arguments with `\old` replaced (`newArgsForMethodCall`) are built and never used; the
-    assumed call is a clone of the original, `\old` included. Should it use the copies?
+48. **`\old` in the arguments of calls in postconditions** (`jml/SpecMethodCallRemoverVisitor.java`,
+    `visitJmlConstructorDeclaration` and `visitJmlMethodDeclaration`, lines 328 and 483): for a
+    method call in a postcondition, copies of the arguments with `\old` replaced
+    (`newArgsForMethodCall`) are built and never used. Since master 5f62e261 the variable is
+    assigned the call (lines 344 and 496) instead of assumed equal to a clone of it, still the
+    original call, `\old` included, and the clone (337, 487) is unused too. And in a
+    constructor, each parameter `p` that stands for an `\old(e)` is now assigned the call
+    (`p = call`, line 321), while a method still assumes `p == e`. Should the call use the
+    copies, and should a constructor's `p` get `e`?
 49. **The default `return` appended to every non-void body**
     (`jml/ReturnStatementWrapperVisitor.java`): which later step needs it? A body that compiles
     already ends in a return or a throw, though earlier passes can change that (an unrolled

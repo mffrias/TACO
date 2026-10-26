@@ -19,7 +19,8 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
 /**
  * Takes the method calls (calls to pure methods, in JML) out of the specification of the method
  * under analysis: each call becomes a fresh variable {@code returnVarFromSpecMethodCall_<n>},
- * and {@code assume} statements in the method's body relate the variable to the call. Only the
+ * and statements in the method's body relate the variable to the call: {@code assume}s for the
+ * initial state and, since master 5f62e261, assignments for the final state. Only the
  * method or constructor that {@code methodToCheck} names is changed, and only if it has a
  * specification; it is recognised by {@code <package>_<Class>_<method>}, the part of
  * {@code methodToCheck} before {@code (}, so every overload of that name is changed
@@ -29,15 +30,18 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
  * and the body starts with {@code //@ assume var == call;}.</li>
  * <li>A call in an invariant: the variable becomes a new public field of the class, read as
  * {@code this.var} in the invariant; the body starts with {@code //@ assume this.var == call;}
- * (initial state), and the same assumption goes in front of every {@code return} and, for a
- * {@code void} method or a constructor, at the end of the body (final state;
- * {@link StatementDistributeAboveReturnVisitor}).</li>
+ * (initial state), and the assignment {@code this.var = call;} goes in front of every
+ * {@code return} and, for a {@code void} method or a constructor, at the end of the body (final
+ * state; {@link StatementDistributeAboveReturnVisitor}). The new fields are also added to the
+ * {@code assignable} clauses of the method under analysis ({@link #visitJmlAssignableClause}),
+ * unless a clause is {@code \everything} or not specified.</li>
  * <li>A call in an {@code ensures} clause (or another clause of a spec case's body): the
- * variable is appended to the parameters, and {@code //@ assume var == call;} goes in front of
- * every {@code return} and, for a {@code void} method or a constructor, at the end. Each
+ * variable is appended to the parameters, and the assignment {@code var = call;} goes in front
+ * of every {@code return} and, for a {@code void} method or a constructor, at the end. Each
  * {@code \old(e)} in the call's arguments also becomes a new parameter {@code p}
- * ({@link OldExpressionReplacerVisitor}), with {@code //@ assume p == e;} at the start of the
- * body.</li>
+ * ({@link OldExpressionReplacerVisitor}): for a method, with {@code //@ assume p == e;} at the
+ * start of the body; for a constructor, with the assignment {@code p = call;} there instead (see
+ * {@link #visitJmlConstructorDeclaration}).</li>
  * </ul>
  * Calls named {@code int_size}, {@code has} or {@code isNaN} stay (their prefix and arguments
  * are visited), and so does anything inside {@code \reach}. A replaced call is not visited, so a
@@ -46,7 +50,7 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
  * throws an {@code IllegalArgumentException}.
  *
  * <p>The added parameters are inputs of the method's translation, constrained only by the
- * assumptions; they are appended in the iteration order of the {@code IdentityHashMap} fields,
+ * statements above; they are appended in the iteration order of the {@code IdentityHashMap} fields,
  * which depends on identity hash codes. The new fields are set up through reflection on private
  * members of JML2's AST classes; a failure there is printed and ignored.
  *
@@ -59,7 +63,8 @@ import ar.edu.taco.utils.jml.JmlAstClonerStatementVisitor;
  * {@code posconditionSpecMethodCallData}, {@code invariantSpecMethodCallData}) are public
  * instance fields that are never cleared, and the manager uses one instance for every unit of a
  * run, so the invariant calls of every class visited before are added to each later class and
- * to the assumptions of the method under analysis. Static: the counter
+ * to the statements of the method under analysis (docs/FIXES-FOR-MASTER.md, F11). Static: the
+ * counter
  * {@link #newReturnParameterIndex}, public and never reset, so the names change from one
  * analysis to the next in one JVM (Stryker runs many).
  */
@@ -221,8 +226,12 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 
 	/**
 	 * Does for the constructor that {@code methodToCheck} names what
-	 * {@link #visitJmlMethodDeclaration} does for a method; any other constructor is pushed as it
-	 * is.
+	 * {@link #visitJmlMethodDeclaration} does for a method, with one difference since master
+	 * 5f62e261: each parameter {@code p} that stands for an {@code \old(e)} in the arguments of a
+	 * call in a postcondition is assigned the call ({@code p = call;}), not assumed equal to
+	 * {@code e}. Nothing reads {@code p} (see {@link #visitJmlMethodDeclaration}). Unclear:
+	 * whether {@code e} was meant (docs/OPEN-QUESTIONS.md, item 48). Any other constructor is
+	 * pushed as it is.
 	 *
 	 * @param self the constructor declaration
 	 */
@@ -369,14 +378,15 @@ public class SpecMethodCallRemoverVisitor extends JmlAstClonerStatementVisitor {
 	 * For the method that {@code methodToCheck} names, if it has a specification: rewrites the
 	 * specification (filling the precondition and postcondition maps), appends the new
 	 * parameters to the given declaration ({@code setParameters}, in place) and pushes a new
-	 * declaration whose body is the old one with the assumptions of the class comment added.
+	 * declaration whose body is the old one with the statements of the class comment added.
 	 * Any other method is pushed as it is.
 	 *
 	 * <p>For a call in a postcondition, {@link OldExpressionReplacerVisitor} gives a copy of each
 	 * argument with its {@code \old} expressions replaced, but those copies
-	 * ({@code newArgsForMethodCall}) are not used: the assumption relates the variable to a clone
-	 * of the original call, {@code \old} included. Unclear: whether the copies were meant to
-	 * replace the arguments of the assumed call.
+	 * ({@code newArgsForMethodCall}) are not used, nor is the clone {@code newMethodCall}: the
+	 * assignment gives the variable the original call, {@code \old} included (before master
+	 * 5f62e261, an assumption related it to the clone). Unclear: whether the copies were meant to
+	 * replace the arguments of the call (docs/OPEN-QUESTIONS.md, item 48).
 	 *
 	 * @param self the method declaration
 	 */

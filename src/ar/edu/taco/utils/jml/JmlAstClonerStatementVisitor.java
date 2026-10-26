@@ -56,7 +56,6 @@ import org.jmlspecs.checker.JmlRequiresClause;
 import org.jmlspecs.checker.JmlSetStatement;
 import org.jmlspecs.checker.JmlSignalsClause;
 import org.jmlspecs.checker.JmlSignalsOnlyClause;
-import org.jmlspecs.checker.JmlSourceMethod;
 import org.jmlspecs.checker.JmlSpecBodyClause;
 import org.jmlspecs.checker.JmlSpecCase;
 import org.jmlspecs.checker.JmlSpecification;

@@ -230,10 +230,11 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 	@Override
 	public void visitMethodCallExpression(JMethodCallExpression self) {
 
-		JMethodCallExpression newSelf = (JMethodCallExpression) self.clone();
+
+//		JMethodCallExpression newSelf = (JMethodCallExpression) self.clone();
 
 		JExpression[] args = self.args();
-		JExpression[] newArgs = newSelf.args();
+		JExpression[] newArgs = self.args();//newSelf.args();
 		for (int idx = 0; idx < args.length; idx++){
 			args[idx].accept(this);
 			newArgs[idx] = (JExpression) this.getStack().pop();
@@ -247,7 +248,8 @@ public class JVarSubstitutorVisitor extends JmlAstClonerStatementVisitor {
 			newPrefix = (JExpression) this.getStack().pop();
 		}
 
-		newSelf.setPrefix(newPrefix);
+		JMethodCallExpression newSelf = new JMethodCallExpressionExtension(self, newPrefix, newArgs);
+
 		this.getStack().push(newSelf);
 	}
 

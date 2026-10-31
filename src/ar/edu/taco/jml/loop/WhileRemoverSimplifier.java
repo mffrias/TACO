@@ -22,10 +22,7 @@ package ar.edu.taco.jml.loop;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jmlspecs.checker.JmlAssignmentStatement;
-import org.jmlspecs.checker.JmlLoopStatement;
-import org.jmlspecs.checker.JmlRelationalExpression;
-import org.jmlspecs.checker.JmlVariantFunction;
+import org.jmlspecs.checker.*;
 import org.multijava.mjc.CClassType;
 import org.multijava.mjc.CNumericType;
 import org.multijava.mjc.CType;
@@ -96,10 +93,14 @@ public class WhileRemoverSimplifier extends JmlAstClonerStatementVisitor {
 		JStatement body = (JStatement) this.getStack().pop();
 		int numLoopUnrolls = TacoConfigurator.getInstance().getDynAlloyToAlloyLoopUnroll();
 		JStatement unrolledWhile = unrollWhileLoop(self.cond(), body, this.getWhileIndex(), numLoopUnrolls, variableCollector.getLocalVars());
-		JAssertStatement finalAssert = new JAssertStatement(body.getTokenReference(), new JUnaryExpression(body.getTokenReference(), 13, self.cond()), null, body.getComments());
+//		JAssertStatement finalAssert = new JAssertStatement(body.getTokenReference(), new JUnaryExpression(body.getTokenReference(), 13, self.cond()), null, body.getComments());
+
+		JmlAssumeStatement finalAssume = new JmlAssumeStatement(body.getTokenReference(), true, new JmlPredicate(new JmlSpecExpression(new JUnaryExpression(body.getTokenReference(), 13, self.cond()))), null, body.getComments());
+
+
 		JStatement[] newBlockBody = new JStatement[2];
 		newBlockBody[0] = unrolledWhile;
-		newBlockBody[1] = finalAssert;
+		newBlockBody[1] = finalAssume;
 		JBlock newBlock = new JBlock(body.getTokenReference(), newBlockBody, body.getComments());
 		this.getStack().push(newBlock);
 	}
